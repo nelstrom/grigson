@@ -41,9 +41,28 @@ const config = {
   transpose: { ... },
   notation:  { ... },
   simile:    { ... },
-  fonts:     { ... },
   layout:    { ... },
 };
+```
+
+### Styling with CSS
+
+Because the output is SVG, fonts and colours are controlled via CSS rather than through renderer configuration. The SVG renderer applies class names to its elements so they can be targeted from a stylesheet:
+
+| Element | Class |
+|---|---|
+| Chord root (e.g. the "C" in "Cm7") | `.grigson-chord-root` |
+| Chord suffix (e.g. "m7" in "Cm7") | `.grigson-chord-suffix` |
+| Section label (e.g. "Verse") | `.grigson-section-label` |
+| Time signature | `.grigson-time-signature` |
+| Volta bracket label (e.g. "1.") | `.grigson-volta-label` |
+
+Example:
+
+```css
+.grigson-chord-root   { font-family: serif; font-size: 18px; font-weight: bold; }
+.grigson-chord-suffix { font-family: serif; font-size: 14px; }
+.grigson-section-label { font-family: sans-serif; font-size: 13px; font-weight: bold; }
 ```
 
 ### `transpose`
@@ -162,51 +181,6 @@ simile: {
   // Minimum number of consecutive identical bars before auto-inserting simile.
   // Only relevant when autoInsert is true.
   minRun: 2,
-}
-```
-
----
-
-### `fonts`
-
-Controls typeface and sizing. All font settings are optional; unset values fall back to the renderer's built-in defaults.
-
-```javascript
-fonts: {
-  // Font for the chord root (e.g. the "C" in "Cm7")
-  chordRoot: {
-    family: 'serif',
-    size: 18,        // in points
-    weight: 'bold',
-  },
-
-  // Font for the chord quality and extensions (e.g. "m7" in "Cm7")
-  chordSuffix: {
-    family: 'serif',
-    size: 14,
-    weight: 'normal',
-  },
-
-  // Font for section labels (e.g. "[Verse]")
-  sectionLabel: {
-    family: 'sans-serif',
-    size: 13,
-    weight: 'bold',
-  },
-
-  // Font for time signatures
-  timeSignature: {
-    family: 'serif',
-    size: 14,
-    weight: 'normal',
-  },
-
-  // Font for volta bracket labels (e.g. "1.", "2.")
-  voltaLabel: {
-    family: 'sans-serif',
-    size: 11,
-    weight: 'normal',
-  },
 }
 ```
 
