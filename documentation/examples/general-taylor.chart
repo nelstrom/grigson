@@ -1,0 +1,17 @@
+---
+title: "General Taylor"
+key: F
+---
+
+# In 6/8, the beat unit is an eighth note (6 slots per bar).
+# Two dotted-quarter chords per bar are written as even-split (no dots needed).
+# The cadential figure Bb(quarter) C(eighth) F(dotted quarter) = 2+1+3 eighths,
+# written as: Bb . C F . .
+
+[Verse]
+| (6/8) F | C F | C F | C |
+| Bb | F C | F | Bb . C F . . |
+
+[Chorus]
+| (6/8) F Bb | F C | C F | C |
+| Bb | F C | F | Bb . C F . . |

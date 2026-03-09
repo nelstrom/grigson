@@ -1,0 +1,17 @@
+---
+title: "Here's a Health to the Company"
+key: Em
+---
+
+# In 3/4, the beat unit is a quarter note (3 slots per bar).
+# A dotted half note fills the whole bar, written as a single chord.
+# G . A = G for 2 beats, A for 1 beat (half note + quarter note).
+
+[Intro]
+||: (3/4) Em | D | Em | D :||
+
+[Verse/Chorus]
+| Em | Bm | D | Em |
+| G . A | Em | Em | D |
+| G . A | Em | Em | D |
+| Em | Bm | D . G | Em |
