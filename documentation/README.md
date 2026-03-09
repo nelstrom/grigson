@@ -1,5 +1,7 @@
 # Grigson Format Reference
 
+> See also: [Renderer Documentation](renderer.md) — configuration, transposition, notation styles, and custom renderers.
+
 Grigson is a plain-text format for writing chord charts, named after Lionel Grigson, author of *The Jazz Chord Book*. It is designed so that the source text closely resembles the rendered output, and so that the **form of a song** (AABA, verse/chorus, 12-bar blues, etc.) is apparent at a glance.
 
 Grigson source files use the `.chart` extension.
