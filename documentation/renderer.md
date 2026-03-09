@@ -41,6 +41,7 @@ const config = {
   transpose: { ... },
   notation:  { ... },
   simile:    { ... },
+  repeats:   { ... },
   layout:    { ... },
 };
 ```
@@ -168,20 +169,49 @@ notation: {
 
 ### `simile`
 
-Controls when and how the "repeat previous bar" (`%`) symbol is used in the output.
+Controls whether repeated bars are rendered as simile symbols (`%`) or written out in full.
 
-Note that `%` marks written explicitly in the source are always rendered as simile symbols. These settings only govern whether the renderer *additionally* replaces repeated bars with simile symbols automatically.
+The source format and the rendered output are independent. Both of the following parse to the same AST:
+
+```
+| C | C | C | C |     ← longhand
+| C | % | % | % |     ← shorthand
+```
+
+The renderer then decides which form to use in the output, regardless of which form was in the source. One fixed rule always applies: **the first bar of a new row is always rendered in full — never as `%`**. Simile symbols may only appear from the second bar of a row onwards.
 
 ```javascript
 simile: {
-  // Automatically replace runs of identical consecutive bars with simile symbols.
-  // Applies to bars that are written out in full in the source (not already `%`).
-  autoInsert: false,
-
-  // Minimum number of consecutive identical bars before auto-inserting simile.
-  // Only relevant when autoInsert is true.
-  minRun: 2,
+  // 'shorthand' — use % for consecutive identical bars (after the first bar of each row).
+  // 'longhand'  — always write chords out in full, never use %.
+  output: 'shorthand', // default
 }
+```
+
+### `repeats`
+
+Controls whether repeat barlines and volta brackets are rendered as written or expanded into linear (through-composed) form.
+
+```javascript
+repeats: {
+  // 'repeat'  — render ||: :|| and volta brackets as written.
+  // 'expand'  — unroll all repeats into a fully written-out linear sequence.
+  output: 'repeat', // default
+}
+```
+
+When `output: 'expand'`, a passage like:
+
+```
+||: Am | G |[1.] F | G :||
+[2.] F | C ||.
+```
+
+is rendered as:
+
+```
+| Am | G | F | G |
+| Am | G | F | C ||.
 ```
 
 ---

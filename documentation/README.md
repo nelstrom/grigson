@@ -189,13 +189,14 @@ Different bars within the same row may independently use mode 1 or mode 2:
 
 ## Simile Marks
 
-The `%` symbol means "repeat the previous bar":
+The `%` symbol means "repeat the previous bar". It is shorthand for writing the same chord content again:
 
 ```
-| Am | % | % | Am G |
+| Am | G | G | G |     ← longhand
+| Am | G | % | % |     ← shorthand, same meaning
 ```
 
-In the rendered output, `%` is drawn using the standard "repeat bar" symbol.
+Both forms parse to the same AST. Whether the output uses `%` or writes chords out in full is controlled by the renderer configuration, not the source.
 
 There is no double-bar simile symbol in grigson. To repeat two bars, write `%` twice.
 
