@@ -211,27 +211,43 @@ In the source, each bar is written out individually. The renderer may choose to 
 
 ---
 
-## Repeat and Navigation Signs
+## Repeats and Volta Brackets
 
-These signs appear inside measures, after any chord that precedes them in the same bar:
+### Repeat barlines
+
+Repeat signs are expressed as part of the barline:
 
 | Symbol | Meaning |
 |---|---|
-| `<S>` | Segno |
-| `<Coda>` | Coda |
-| `<to Coda>` | To Coda |
-| `<D.S.>` | Dal Segno |
-| `<D.S. al Coda>` | Dal Segno al Coda |
-| `<D.C.>` | Da Capo |
-| `<D.C. al Coda>` | Da Capo al Coda |
-| `<Fine>` | Fine |
+| `\|\|:` | Start repeat |
+| `:\|\|` | End repeat (play twice by default) |
+| `:\|\|x3` | End repeat, play 3 times |
+| `:\|\|:` | End repeat and immediately start a new repeat |
 
-Volta brackets (first/second endings) are written as text inside square brackets at the start of a measure group:
+These are the same barline symbols described in the Barlines section above; they are listed here again for completeness alongside volta brackets.
+
+### Volta brackets
+
+Volta brackets (first-time / second-time endings) are written by placing a bracket label in square brackets immediately after a barline, before the contents of that bar:
 
 ```
 ||: Am | G |[1.] F | G :||
 [2.] F | C ||.
 ```
+
+The label can be any short text: `[1.]`, `[2.]`, `[1.-3.]`, `[2.-4.]`, etc. The bracket applies to the bar it opens and continues until the next barline that ends or restarts the repeat.
+
+A typical use with a two-bar ending:
+
+```
+||: (4/4) C | Am | F | G |
+| C | Am |[1.] F | G :||
+[2.] F | C ||.
+```
+
+### What is not supported in v1
+
+Navigation signs — Coda, Segno, Da Capo, Dal Segno, Fine, and "To Coda" — are out of scope for v1. Songs that use these structures should be written out in full, or simplified to use repeat barlines and volta brackets.
 
 ---
 
@@ -257,5 +273,6 @@ feel: "swing"
 ## What Grigson Does Not Support (by design)
 
 - **Rhythm notation.** There is no staff, no note durations on individual chords, no ties or triplets beyond what beat-slot notation can express.
+- **Navigation signs.** Coda, Segno, Da Capo, Dal Segno, and Fine are not supported in v1. Use repeat barlines and volta brackets instead, or write the song out in full.
 - **Lyrics.** Grigson is a chord chart tool, not a lead sheet tool.
 - **Auto-reflow.** Row layout is always controlled explicitly by the source text.
