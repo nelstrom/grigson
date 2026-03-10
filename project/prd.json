@@ -77,6 +77,7 @@
   },
   {
     "id": "text-renderer",
+    "passes": true,
     "category": "functional",
     "description": "Render a parsed song AST back to .chart plain text format",
     "detail": "The plain text renderer takes a song AST and produces a valid .chart string. The output is a normalised (pretty-printed) form: front matter fields each on their own line, each row of bars on its own line, single spaces around chord names inside bars. The output need not be byte-for-byte identical to the input, but it must parse back to an equivalent AST (round-trip equivalence).",
