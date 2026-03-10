@@ -2,10 +2,10 @@ Grigson — MVP Progress
 ======================
 
 PRD features: 6
-Passing:      1 / 6
+Passing:      2 / 6
 
 chord-parsing     [x] complete
-bar-parsing       [ ] not started
+bar-parsing       [x] complete
 row-parsing       [ ] not started
 frontmatter-parsing [ ] not started
 song-parsing      [ ] not started

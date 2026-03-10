@@ -29,7 +29,7 @@
       "Write a test that asserts a bar with no chord (e.g. '| |') is rejected by the parser",
       "Write a test that asserts a bar with two chords (e.g. '| C G |') is rejected by the parser"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "row-parsing",

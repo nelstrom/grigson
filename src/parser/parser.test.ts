@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseChord } from './parser.js';
+import { parseChord, parseBar } from './parser.js';
 
 describe('chord parsing', () => {
   describe('major chords', () => {
@@ -43,6 +43,36 @@ describe('chord parsing', () => {
       expect(parseChord('F#7')).toEqual({ type: 'chord', root: 'F#', quality: 'dominant7' });
     });
   });
+
+describe('bar parsing', () => {
+  const cMajor = { type: 'chord', root: 'C', quality: 'major' };
+  const aMinor = { type: 'chord', root: 'A', quality: 'minor' };
+  const g7     = { type: 'chord', root: 'G', quality: 'dominant7' };
+
+  it('parses | C |', () => {
+    expect(parseBar('| C |')).toEqual({ type: 'bar', chord: cMajor });
+  });
+
+  it('parses | Am |', () => {
+    expect(parseBar('| Am |')).toEqual({ type: 'bar', chord: aMinor });
+  });
+
+  it('parses |C| with no spaces', () => {
+    expect(parseBar('|C|')).toEqual({ type: 'bar', chord: cMajor });
+  });
+
+  it('parses |  G7  | with extra spaces', () => {
+    expect(parseBar('|  G7  |')).toEqual({ type: 'bar', chord: g7 });
+  });
+
+  it('rejects an empty bar | |', () => {
+    expect(() => parseBar('| |')).toThrow();
+  });
+
+  it('rejects a bar with two chords | C G |', () => {
+    expect(() => parseBar('| C G |')).toThrow();
+  });
+});
 
   describe('unsupported qualities are rejected', () => {
     it('rejects Cm7', () => {

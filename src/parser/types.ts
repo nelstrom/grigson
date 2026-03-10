@@ -5,3 +5,8 @@ export interface Chord {
   root: string;
   quality: Quality;
 }
+
+export interface Bar {
+  type: 'bar';
+  chord: Chord;
+}
