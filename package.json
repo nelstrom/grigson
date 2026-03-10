@@ -1,6 +1,6 @@
 {
   "name": "grigson",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A plain-text chord chart format with parser and renderer",
   "type": "module",
   "main": "dist/index.js",

@@ -3,6 +3,6 @@ import { version } from './index.js';
 
 describe('grigson', () => {
   it('exports a version string', () => {
-    expect(version).toBe('0.1.0');
+    expect(version).toBe('1.0.0');
   });
 });
