@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseChord, parseBar, parseRow } from './parser.js';
+import { parseChord, parseBar, parseRow, parseFrontMatter } from './parser.js';
 
 describe('chord parsing', () => {
   describe('major chords', () => {
@@ -71,6 +71,44 @@ describe('bar parsing', () => {
 
   it('rejects a bar with two chords | C G |', () => {
     expect(() => parseBar('| C G |')).toThrow();
+  });
+});
+
+describe('front matter parsing', () => {
+  it('parses title and key', () => {
+    const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G\n---\n');
+    expect(fm).toEqual({ type: 'frontMatter', title: 'Autumn Leaves', key: 'G' });
+  });
+
+  it('parses title without key', () => {
+    const fm = parseFrontMatter('---\ntitle: "My Song"\n---\n');
+    expect(fm).toEqual({ type: 'frontMatter', title: 'My Song', key: null });
+  });
+
+  it('parses key without title', () => {
+    const fm = parseFrontMatter('---\nkey: Bb\n---\n');
+    expect(fm).toEqual({ type: 'frontMatter', title: null, key: 'Bb' });
+  });
+
+  it('parses empty front matter', () => {
+    const fm = parseFrontMatter('---\n---\n');
+    expect(fm).toEqual({ type: 'frontMatter', title: null, key: null });
+  });
+
+  it('accepts all 17 valid key spellings', () => {
+    const validKeys = ['C','C#','Db','D','D#','Eb','E','F','F#','Gb','G','G#','Ab','A','A#','Bb','B'];
+    for (const key of validKeys) {
+      const fm = parseFrontMatter(`---\nkey: ${key}\n---\n`);
+      expect(fm.key).toBe(key);
+    }
+  });
+
+  it('rejects an invalid key (H)', () => {
+    expect(() => parseFrontMatter('---\nkey: H\n---\n')).toThrow();
+  });
+
+  it('rejects a key with a mode suffix (Am)', () => {
+    expect(() => parseFrontMatter('---\nkey: Am\n---\n')).toThrow();
   });
 });
 

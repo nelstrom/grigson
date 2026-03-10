@@ -2,6 +2,34 @@
 // Supports: major, minor, and dominant seventh chords only.
 // Supports: single barlines | only.
 
+FrontMatter
+  = "---" Newline fields:FrontMatterField* "---" Newline? {
+      const meta = Object.fromEntries(fields.map(f => [f.key, f.value]));
+
+      const validKeys = [
+        "C", "C#", "Db", "D", "D#", "Eb", "E",
+        "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
+      ];
+      if (meta.key !== undefined && !validKeys.includes(meta.key)) {
+        error(`Invalid key: "${meta.key}". Must be a chromatic note name (e.g. C, F#, Bb).`);
+      }
+
+      return {
+        type: "frontMatter",
+        title: meta.title ?? null,
+        key: meta.key ?? null,
+      };
+    }
+
+FrontMatterField
+  = key:$[a-zA-Z]+ ":" _ value:FrontMatterValue Newline {
+      return { key, value };
+    }
+
+FrontMatterValue
+  = '"' value:$(!'"' .)* '"' { return value; }
+  / value:$[^\n\r]+ { return value.trim(); }
+
 Row
   = "|" _ bars:BarTail+ {
       return { type: "row", bars };
@@ -39,5 +67,7 @@ Quality
   = "m" { return "minor"; }
   / "7" { return "dominant7"; }
   / ""  { return "major"; }
+
+Newline = "\r\n" / "\n"
 
 _ = [ \t]*

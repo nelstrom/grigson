@@ -1,3 +1,9 @@
+export interface FrontMatter {
+  type: 'frontMatter';
+  title: string | null;
+  key: string | null;
+}
+
 export type Quality = 'major' | 'minor' | 'dominant7';
 
 export interface Chord {

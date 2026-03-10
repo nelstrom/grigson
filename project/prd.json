@@ -47,6 +47,7 @@
   },
   {
     "id": "frontmatter-parsing",
+    "passes": true,
     "category": "functional",
     "description": "Parse YAML front matter containing title and key fields",
     "detail": "Front matter is a YAML block enclosed between '---' delimiters at the start of the file. Two fields are supported in the MVP: 'title' (a string) and 'key' (one of the 12 chromatic note names, with optional accidental: C, C#, Db, D, D#, Eb, E, F, F#, Gb, G, G#, Ab, A, A#, Bb, B). Both fields are optional.",
