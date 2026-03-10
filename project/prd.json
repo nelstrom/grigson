@@ -88,4 +88,35 @@
     ],
     "passes": true
   }
+  ,
+  {
+    "id": "prettier",
+    "category": "tooling",
+    "description": "Install Prettier and format all non-generated source files",
+    "detail": "Prettier is added as a devDependency and configured for the project. A pnpm script applies formatting to all files under src/ except the generated parser output. The .gitignore or a .prettierignore file excludes generated files. All source files are formatted as part of this task.",
+    "steps": [
+      "Install prettier as a devDependency",
+      "Add a .prettierrc config file with sensible defaults for a TypeScript project",
+      "Add a .prettierignore file excluding src/parser/generated.js and src/parser/generated.d.ts",
+      "Add a 'format' script to package.json that runs prettier --write on src/",
+      "Run pnpm format and confirm it exits cleanly",
+      "Run pnpm test to confirm formatting did not break anything"
+    ],
+    "passes": false
+  },
+  {
+    "id": "eslint",
+    "category": "tooling",
+    "description": "Install ESLint with sensible configuration and fix any existing violations",
+    "detail": "ESLint is added as a devDependency with a configuration appropriate for a TypeScript ESM project. A lint script is added to package.json. Any violations in existing source files are fixed before the task is marked complete. Generated parser files are excluded from linting.",
+    "steps": [
+      "Install eslint and @eslint/js, typescript-eslint as devDependencies",
+      "Create an eslint.config.js (flat config) with rules appropriate for TypeScript and ESM",
+      "Exclude src/parser/generated.js from linting",
+      "Add a 'lint' script to package.json that runs eslint on src/",
+      "Run pnpm lint and fix all reported violations",
+      "Run pnpm test to confirm fixes did not break anything"
+    ],
+    "passes": false
+  }
 ]
