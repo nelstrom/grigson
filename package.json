@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "pnpm run build:grammar && pnpm run build:ts",
-    "build:grammar": "peggy --format es --dts --allowed-start-rules Bar,Chord -o src/parser/generated.js src/parser/grammar.pegjs",
+    "build:grammar": "peggy --format es --dts --allowed-start-rules Row,Bar,Chord -o src/parser/generated.js src/parser/grammar.pegjs",
     "build:ts": "tsc",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",

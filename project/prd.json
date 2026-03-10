@@ -43,7 +43,7 @@
       "Write a test that asserts a row not starting with '|' is rejected by the parser",
       "Write a test that asserts a row not ending with '|' is rejected by the parser"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "frontmatter-parsing",

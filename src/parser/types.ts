@@ -10,3 +10,8 @@ export interface Bar {
   type: 'bar';
   chord: Chord;
 }
+
+export interface Row {
+  type: 'row';
+  bars: Bar[];
+}

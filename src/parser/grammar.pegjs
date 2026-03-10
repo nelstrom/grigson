@@ -2,6 +2,18 @@
 // Supports: major, minor, and dominant seventh chords only.
 // Supports: single barlines | only.
 
+Row
+  = "|" _ bars:BarTail+ {
+      return { type: "row", bars };
+    }
+
+// A bar's content plus its closing barline.
+// The opening barline is consumed by Row (or the previous BarTail).
+BarTail
+  = chord:Chord _ "|" _ {
+      return { type: "bar", chord };
+    }
+
 Bar
   = "|" _ chord:Chord _ "|" {
       return { type: "bar", chord };

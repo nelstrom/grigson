@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseChord, parseBar } from './parser.js';
+import { parseChord, parseBar, parseRow } from './parser.js';
 
 describe('chord parsing', () => {
   describe('major chords', () => {
@@ -71,6 +71,46 @@ describe('bar parsing', () => {
 
   it('rejects a bar with two chords | C G |', () => {
     expect(() => parseBar('| C G |')).toThrow();
+  });
+});
+
+describe('row parsing', () => {
+  const bar = (root: string, quality: string) => ({
+    type: 'bar',
+    chord: { type: 'chord', root, quality },
+  });
+
+  it('parses a four-bar row', () => {
+    const row = parseRow('| C | Am | F | G |');
+    expect(row.type).toBe('row');
+    expect(row.bars).toHaveLength(4);
+    expect(row.bars[0]).toEqual(bar('C', 'major'));
+    expect(row.bars[1]).toEqual(bar('A', 'minor'));
+    expect(row.bars[2]).toEqual(bar('F', 'major'));
+    expect(row.bars[3]).toEqual(bar('G', 'major'));
+  });
+
+  it('parses a single-bar row', () => {
+    const row = parseRow('| C |');
+    expect(row.type).toBe('row');
+    expect(row.bars).toHaveLength(1);
+    expect(row.bars[0]).toEqual(bar('C', 'major'));
+  });
+
+  it('parses chord qualities correctly across bars', () => {
+    const row = parseRow('| G7 | C | Am | F |');
+    expect(row.bars[0]).toEqual(bar('G', 'dominant7'));
+    expect(row.bars[1]).toEqual(bar('C', 'major'));
+    expect(row.bars[2]).toEqual(bar('A', 'minor'));
+    expect(row.bars[3]).toEqual(bar('F', 'major'));
+  });
+
+  it('rejects a row not starting with |', () => {
+    expect(() => parseRow('C | Am | F | G |')).toThrow();
+  });
+
+  it('rejects a row not ending with |', () => {
+    expect(() => parseRow('| C | Am | F | G')).toThrow();
   });
 });
 
