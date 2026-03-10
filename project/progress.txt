@@ -1,30 +1,17 @@
-Grigson — MVP Progress
-======================
+## chord-parsing
+Implemented Root, Accidental, NoteLetter, Quality, and Chord rules in grammar.pegjs. Added Chord type and Quality union type to types.ts. Exported parseChord() from parser.ts. Added --allowed-start-rules flag to build:grammar so Chord can be used as an entry point. 12 acceptance tests covering C, F#, Bb (major), Am, C#m, Bbm (minor), G7, Bb7, F#7(dominant7), and rejection of Cm7, CM7, Cdim.
 
-PRD features: 6
-Passing:      6 / 6
+## bar-parsing
+Added Bar and BarTail rules to grammar.pegjs, with a _ whitespace rule for optional spaces and tabs around the chord. Added Bar type to types.ts. Exported parseBar() from parser.ts. Extended --allowed-start-rules to include Bar. 6 acceptance tests: standard spacing, no spaces, extra spaces, empty bar rejection, two-chord rejection.
 
-chord-parsing       [x] complete
-bar-parsing         [x] complete
-row-parsing         [x] complete
-frontmatter-parsing [x] complete
-song-parsing        [x] complete
-text-renderer       [x] complete
+## row-parsing
+Added Row rule that opens with | then matches one or more BarTail groups (chord + closing |), avoiding double-consumption of shared barlines. Added Row type to types.ts. Exported parseRow() from parser.ts. Extended --allowed-start-rules to include Row. 5 acceptance tests: four-bar row, single-bar row, quality correctness across bars, missing opening barline rejection, missing closing barline rejection.
 
-MVP complete.
+## frontmatter-parsing
+Added FrontMatter, FrontMatterField, FrontMatterValue, and Newline rules to grammar.pegjs. Front matter is enclosed in --- delimiters; fields are parsed as generic key: value pairs and then validated in the action. The key field is validated against the 17 chromatic note spellings (C through B with sharps and flats); invalid values are rejected via Peggy's error() function. Added FrontMatter type to types.ts. Exported parseFrontMatter() from parser.ts. 7 acceptance tests: title + key, title only, key only, empty front matter, all 17 valid keys, invalid key (H), mode suffix rejection (Am).
 
----
+## song-parsing
+Added Song and SongBody rules to grammar.pegjs. Song combines optional FrontMatter with zero or more Rows; blank lines between rows are filtered out in the SongBody action. Added Song type to types.ts. Exported parseSong() from parser.ts. Extended --allowed-start-rules to include Song. 4 acceptance tests: no front matter, front matter + multiple rows, blank line handling, front matter with no rows.
 
-Infrastructure complete:
-  - pnpm, TypeScript, Peggy, Vitest, fast-check all configured
-  - Build pipeline: build:grammar (peggy) -> build:ts (tsc)
-  - prepare script runs build:grammar automatically after pnpm install
-  - Placeholder grammar at src/parser/grammar.pegjs
-  - npm blocked by pre-tool-use hook; pnpm enforced
-
-Documentation complete:
-  - documentation/README.md    (format reference)
-  - documentation/renderer.md  (renderer API and config)
-  - documentation/testing.md   (testing strategy)
-  - documentation/examples/    (8 example .chart files)
-  - project/prd.json           (MVP requirements)
+## text-renderer
+Created src/renderers/text.ts with a TextRenderer class. renderChord() maps quality back to suffix ('' / 'm' / '7'). renderRow() joins bars as | chord | chord |. renderFrontMatter() emits a --- block only when title or key is non-null. The render() method joins front matter and rows with newlines. 7 tests: front matter output, front matter omission, spacing normalisation, four-bar row on one line, multi-row layout, and two round-trip tests (parse → render → parse produces equal AST).
