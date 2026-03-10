@@ -1,6 +1,23 @@
-// Grigson chord chart parser
-// This is a placeholder grammar. Rules will be filled in as the parser is built.
+// Grigson chord chart parser — MVP
+// Supports: major, minor, and dominant seventh chords only.
 
-Song = lines:Line* { return { lines }; }
+Chord
+  = root:Root quality:Quality {
+      return { type: "chord", root, quality };
+    }
 
-Line = text:$(!"\n" .)* "\n" { return text; }
+Root
+  = note:NoteLetter accidental:Accidental? {
+      return accidental ? note + accidental : note;
+    }
+
+NoteLetter
+  = [A-G]
+
+Accidental
+  = "#" / "b"
+
+Quality
+  = "m" { return "minor"; }
+  / "7" { return "dominant7"; }
+  / ""  { return "major"; }

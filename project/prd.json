@@ -14,7 +14,7 @@
       "Write a test that parses 'Bb7' and asserts root='Bb' and quality='dominant7'",
       "Write a test that asserts unsupported qualities (e.g. 'Cm7', 'CM7') are rejected by the parser"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "bar-parsing",
