@@ -1,12 +1,46 @@
 # Renderer Documentation
 
-Grigson separates parsing from rendering. The parser reads a `.chart` source file and produces an abstract song tree. A renderer takes that tree and produces output — SVG, canvas, PDF, plain text, etc.
-
-The default renderer targets SVG, for embedding in HTML pages. Other renderers can be created by implementing the same interface.
+Grigson separates parsing from rendering. The parser reads a `.chart` source file and produces an abstract song tree. A renderer takes that tree and produces output — plain text, SVG, or other formats. Other renderers can be created by implementing the same interface.
 
 ---
 
-## Basic Usage
+## The Plain Text Renderer
+
+The plain text renderer is the simplest renderer, and the best starting point for understanding the grigson pipeline. It takes a parsed song tree and produces a `.chart` file as output — making it, at its most basic, a round-trip identity function: parse a chart, then render it back to text.
+
+This becomes genuinely useful when combined with transposition. You can author a chart in one key, then use the plain text renderer to produce a transposed version as a new `.chart` file:
+
+```javascript
+import { parse } from 'grigson/parser';
+import { TextRenderer } from 'grigson/renderers/text';
+
+const source = `
+---
+title: "Autumn Leaves"
+key: G
+---
+
+[A]
+| (4/4) Cm7 | F7 | BbM7 | EbM7 |
+| Am7b5 | D7 | Gm | Gm |
+`;
+
+const song = parse(source);
+
+// Identity: renders back to the same .chart format
+const inG = new TextRenderer().render(song);
+
+// Transposed up a tone to A
+const inA = new TextRenderer({ transpose: { toKey: 'A' } }).render(song);
+```
+
+The plain text renderer supports all the same configuration options as the SVG renderer, except for `layout` (which has no meaning for text output).
+
+---
+
+## The SVG Renderer
+
+The SVG renderer produces an SVG string suitable for embedding in an HTML page.
 
 ```javascript
 import { parse } from 'grigson/parser';
@@ -248,26 +282,19 @@ layout: {
 
 ## Rendering the Same Chart Multiple Ways
 
-Because transposition and notation are renderer concerns, the same parsed song tree can be rendered into multiple output variations without re-parsing:
+Because transposition and notation are renderer concerns, the same parsed song tree can be rendered into multiple output variations without re-parsing. This works across renderer types too — you can produce a transposed `.chart` file with the text renderer and an SVG with the SVG renderer from the same parse result:
 
 ```javascript
 const song = parse(source);
 
-// Concert pitch, jazz notation
-const concertSvg = new SvgRenderer({
-  notation: { preset: 'jazz' },
-}).render(song);
+// Transposed .chart file for a Bb instrument
+const bbChart = new TextRenderer({ transpose: { semitones: 2 } }).render(song);
 
-// Bb instrument (up 2 semitones), same notation
-const bbSvg = new SvgRenderer({
-  transpose: { semitones: 2 },
-  notation: { preset: 'jazz' },
-}).render(song);
+// Concert pitch SVG for the music stand
+const concertSvg = new SvgRenderer({ notation: { preset: 'jazz' } }).render(song);
 
-// Guitar with capo 2 (down 2 semitones)
-const capoSvg = new SvgRenderer({
-  transpose: { semitones: -2 },
-}).render(song);
+// Transposed SVG for a guitarist with capo 2
+const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);
 ```
 
 ---
