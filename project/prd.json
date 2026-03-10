@@ -47,7 +47,6 @@
   },
   {
     "id": "frontmatter-parsing",
-    "passes": true,
     "category": "functional",
     "description": "Parse YAML front matter containing title and key fields",
     "detail": "Front matter is a YAML block enclosed between '---' delimiters at the start of the file. Two fields are supported in the MVP: 'title' (a string) and 'key' (one of the 12 chromatic note names, with optional accidental: C, C#, Db, D, D#, Eb, E, F, F#, Gb, G, G#, Ab, A, A#, Bb, B). Both fields are optional.",
@@ -59,11 +58,10 @@
       "Write a test that asserts an invalid key value (e.g. key: 'H') is rejected",
       "Write a test that asserts an invalid key value with a mode (e.g. key: 'Am') is rejected (modes are not in scope for MVP)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "song-parsing",
-    "passes": true,
     "category": "functional",
     "description": "Parse a complete song: optional front matter followed by one or more rows",
     "detail": "A complete .chart file consists of an optional YAML front matter block followed by one or more rows of bars. Blank lines between rows are permitted and ignored. The resulting AST is a song node containing metadata (from front matter) and an ordered list of rows.",
@@ -73,11 +71,10 @@
       "Write a test that parses a song with blank lines between rows and asserts blank lines do not produce extra row nodes",
       "Parse each of the .chart files in documentation/examples/ and assert that the parser does not throw (note: these files use features beyond MVP scope, so this step only asserts no crash on the supported subset)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "text-renderer",
-    "passes": true,
     "category": "functional",
     "description": "Render a parsed song AST back to .chart plain text format",
     "detail": "The plain text renderer takes a song AST and produces a valid .chart string. The output is a normalised (pretty-printed) form: front matter fields each on their own line, each row of bars on its own line, single spaces around chord names inside bars. The output need not be byte-for-byte identical to the input, but it must parse back to an equivalent AST (round-trip equivalence).",
@@ -89,6 +86,6 @@
       "Write a round-trip test: parse a source string, render to text, parse the rendered text, and assert the two ASTs are deeply equal",
       "Run the round-trip test against each of the manually authored example songs that use only MVP-supported features"
     ],
-    "passes": false
+    "passes": true
   }
 ]
