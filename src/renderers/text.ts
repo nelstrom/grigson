@@ -1,10 +1,7 @@
 import type { Song, Row, Bar, Chord } from '../parser/types.js';
 
 function renderChord(chord: Chord): string {
-  const suffix =
-    chord.quality === 'minor'     ? 'm' :
-    chord.quality === 'dominant7' ? '7' :
-    '';
+  const suffix = chord.quality === 'minor' ? 'm' : chord.quality === 'dominant7' ? '7' : '';
   return chord.root + suffix;
 }
 
@@ -19,7 +16,7 @@ function renderRow(row: Row): string {
 function renderFrontMatter(title: string | null, key: string | null): string {
   const lines: string[] = ['---'];
   if (title !== null) lines.push(`title: "${title}"`);
-  if (key   !== null) lines.push(`key: ${key}`);
+  if (key !== null) lines.push(`key: ${key}`);
   lines.push('---');
   return lines.join('\n') + '\n';
 }

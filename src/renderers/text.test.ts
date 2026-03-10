@@ -42,7 +42,8 @@ describe('text renderer', () => {
 
   describe('round-trip', () => {
     it('parse → render → parse produces an equal AST', () => {
-      const source = '---\ntitle: "Autumn Leaves"\nkey: G\n---\n| G7 | C | Am | F |\n| Dm | G7 | C | C |\n';
+      const source =
+        '---\ntitle: "Autumn Leaves"\nkey: G\n---\n| G7 | C | Am | F |\n| Dm | G7 | C | C |\n';
       const ast1 = parseSong(source);
       const ast2 = parseSong(render(source));
       expect(ast2).toEqual(ast1);

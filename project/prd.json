@@ -102,7 +102,7 @@
       "Run pnpm format and confirm it exits cleanly",
       "Run pnpm test to confirm formatting did not break anything"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "eslint",
