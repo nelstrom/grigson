@@ -21,3 +21,10 @@ export interface Row {
   type: 'row';
   bars: Bar[];
 }
+
+export interface Song {
+  type: 'song';
+  title: string | null;
+  key: string | null;
+  rows: Row[];
+}

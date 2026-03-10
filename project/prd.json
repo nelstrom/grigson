@@ -63,6 +63,7 @@
   },
   {
     "id": "song-parsing",
+    "passes": true,
     "category": "functional",
     "description": "Parse a complete song: optional front matter followed by one or more rows",
     "detail": "A complete .chart file consists of an optional YAML front matter block followed by one or more rows of bars. Blank lines between rows are permitted and ignored. The resulting AST is a song node containing metadata (from front matter) and an ordered list of rows.",

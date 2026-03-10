@@ -1,7 +1,7 @@
 import { parse as rawParse } from './generated.js';
-import type { FrontMatter, Chord, Bar, Row } from './types.js';
+import type { FrontMatter, Chord, Bar, Row, Song } from './types.js';
 
-export type { FrontMatter, Chord, Bar, Row, Quality } from './types.js';
+export type { FrontMatter, Chord, Bar, Row, Song, Quality } from './types.js';
 
 export function parseChord(input: string): Chord {
   return rawParse(input, { startRule: 'Chord' }) as Chord;
@@ -17,4 +17,8 @@ export function parseRow(input: string): Row {
 
 export function parseFrontMatter(input: string): FrontMatter {
   return rawParse(input, { startRule: 'FrontMatter' }) as FrontMatter;
+}
+
+export function parseSong(input: string): Song {
+  return rawParse(input, { startRule: 'Song' }) as Song;
 }

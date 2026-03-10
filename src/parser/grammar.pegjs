@@ -2,6 +2,21 @@
 // Supports: major, minor, and dominant seventh chords only.
 // Supports: single barlines | only.
 
+Song
+  = frontMatter:FrontMatter? _ rows:SongBody {
+      return {
+        type: "song",
+        title: frontMatter?.title ?? null,
+        key: frontMatter?.key ?? null,
+        rows,
+      };
+    }
+
+SongBody
+  = rows:(Newline / Row)* {
+      return rows.filter(r => r !== null && typeof r === "object");
+    }
+
 FrontMatter
   = "---" Newline fields:FrontMatterField* "---" Newline? {
       const meta = Object.fromEntries(fields.map(f => [f.key, f.value]));
