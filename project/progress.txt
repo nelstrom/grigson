@@ -16,5 +16,8 @@ Added Song and SongBody rules to grammar.pegjs. Song combines optional FrontMatt
 ## text-renderer
 Created src/renderers/text.ts with a TextRenderer class. renderChord() maps quality back to suffix ('' / 'm' / '7'). renderRow() joins bars as | chord | chord |. renderFrontMatter() emits a --- block only when title or key is non-null. The render() method joins front matter and rows with newlines. 7 tests: front matter output, front matter omission, spacing normalisation, four-bar row on one line, multi-row layout, and two round-trip tests (parse → render → parse produces equal AST).
 
+## eslint
+Installed eslint 10, @eslint/js, and typescript-eslint as devDependencies. Created eslint.config.js using flat config format, composing js.configs.recommended and tseslint.configs.recommended. Excluded both generated parser files (generated.js and generated.d.ts) from linting — the .d.ts file contained no-explicit-any and no-empty-object-type violations that are inherent to the generated output. Added a `lint` script to package.json. pnpm lint exits cleanly with no violations; all 42 tests continue to pass.
+
 ## prettier
 Installed prettier 3.8.1 as a devDependency. Added .prettierrc with singleQuote, trailingComma: all, printWidth: 100. Added .prettierignore excluding generated parser files and dist/. Added a `format` script to package.json running `prettier --write src/`. Ran pnpm format — three files were reformatted (parser.test.ts, text.test.ts, text.ts); all 42 tests continue to pass.

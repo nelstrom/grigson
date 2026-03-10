@@ -15,14 +15,18 @@
     "test": "vitest",
     "test:run": "vitest run",
     "coverage": "vitest run --coverage",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "lint": "eslint src/"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^10.0.3",
     "fast-check": "^4.6.0",
     "peggy": "^5.1.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.0",
     "vitest": "^4.0.18"
   }
 }
