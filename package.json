@@ -1,0 +1,20 @@
+{
+  "name": "grigson",
+  "version": "0.1.0",
+  "description": "A plain-text chord chart format with parser and renderer",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm run build:grammar && pnpm run build:ts",
+    "build:grammar": "peggy --format es --dts -o src/parser/generated.js src/parser/grammar.pegjs",
+    "build:ts": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm run build:grammar"
+  },
+  "devDependencies": {
+    "peggy": "^5.1.0",
+    "typescript": "^5.9.3"
+  }
+}
