@@ -1,4 +1,14 @@
 {
+  "allowedTools": [
+    "Bash(pnpm run *)",
+    "Bash(pnpm install*)",
+    "Bash(pnpm add *)",
+    "Bash(git status)",
+    "Bash(git diff*)",
+    "Bash(git log*)",
+    "Bash(git add *)",
+    "Bash(git commit*)"
+  ],
   "hooks": {
     "PreToolUse": [
       {
