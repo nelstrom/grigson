@@ -1,0 +1,91 @@
+[
+  {
+    "id": "chord-parsing",
+    "category": "functional",
+    "description": "Parse chord symbols covering major, minor, and dominant seventh qualities",
+    "detail": "A chord symbol is a root note (A–G, with optional b or # accidental) followed by an optional quality suffix. Three qualities are supported in the MVP: major (no suffix), minor ('m'), and dominant seventh ('7'). Examples: C, F#, Bb, Am, C#m, Bbm, G7, Bb7, F#7.",
+    "steps": [
+      "Write a test that parses 'C' and asserts the AST node has root='C' and quality='major'",
+      "Write a test that parses 'F#' and asserts root='F#' and quality='major'",
+      "Write a test that parses 'Bb' and asserts root='Bb' and quality='major'",
+      "Write a test that parses 'Am' and asserts root='A' and quality='minor'",
+      "Write a test that parses 'C#m' and asserts root='C#' and quality='minor'",
+      "Write a test that parses 'G7' and asserts root='G' and quality='dominant7'",
+      "Write a test that parses 'Bb7' and asserts root='Bb' and quality='dominant7'",
+      "Write a test that asserts unsupported qualities (e.g. 'Cm7', 'CM7') are rejected by the parser"
+    ],
+    "passes": false
+  },
+  {
+    "id": "bar-parsing",
+    "category": "functional",
+    "description": "Parse a single bar containing one chord, delimited by single barlines",
+    "detail": "A bar is written as | chord |. Only the single barline | is supported in the MVP. Each bar contains exactly one chord. Whitespace around the chord is insignificant.",
+    "steps": [
+      "Write a test that parses '| C |' and asserts a bar node with a single chord C major",
+      "Write a test that parses '| Am |' and asserts a bar node with a single chord A minor",
+      "Write a test that parses '|C|' (no spaces) and produces the same AST as '| C |'",
+      "Write a test that parses '|  G7  |' (extra spaces) and produces the same AST as '| G7 |'",
+      "Write a test that asserts a bar with no chord (e.g. '| |') is rejected by the parser",
+      "Write a test that asserts a bar with two chords (e.g. '| C G |') is rejected by the parser"
+    ],
+    "passes": false
+  },
+  {
+    "id": "row-parsing",
+    "category": "functional",
+    "description": "Parse a row of consecutive bars on a single line",
+    "detail": "A row is a sequence of bars on one line, beginning and ending with a barline. The row produces an ordered list of bar nodes. The opening barline of the row and the closing barline are both represented in the AST.",
+    "steps": [
+      "Write a test that parses '| C | Am | F | G |' and asserts four bar nodes in order",
+      "Write a test that parses a single-bar row '| C |' and asserts one bar node",
+      "Write a test that parses '| G7 | C | Am | F |' and asserts the chord qualities are correct for each bar",
+      "Write a test that asserts a row not starting with '|' is rejected by the parser",
+      "Write a test that asserts a row not ending with '|' is rejected by the parser"
+    ],
+    "passes": false
+  },
+  {
+    "id": "frontmatter-parsing",
+    "category": "functional",
+    "description": "Parse YAML front matter containing title and key fields",
+    "detail": "Front matter is a YAML block enclosed between '---' delimiters at the start of the file. Two fields are supported in the MVP: 'title' (a string) and 'key' (one of the 12 chromatic note names, with optional accidental: C, C#, Db, D, D#, Eb, E, F, F#, Gb, G, G#, Ab, A, A#, Bb, B). Both fields are optional.",
+    "steps": [
+      "Write a test that parses a front matter block with title and key and asserts the correct values on the song AST node",
+      "Write a test that parses a front matter block with only a title (no key) and asserts key is null/undefined",
+      "Write a test that parses a front matter block with only a key (no title) and asserts title is null/undefined",
+      "Write a test that parses a source file with no front matter at all and asserts the song node has no title or key",
+      "Write a test that asserts an invalid key value (e.g. key: 'H') is rejected",
+      "Write a test that asserts an invalid key value with a mode (e.g. key: 'Am') is rejected (modes are not in scope for MVP)"
+    ],
+    "passes": false
+  },
+  {
+    "id": "song-parsing",
+    "category": "functional",
+    "description": "Parse a complete song: optional front matter followed by one or more rows",
+    "detail": "A complete .chart file consists of an optional YAML front matter block followed by one or more rows of bars. Blank lines between rows are permitted and ignored. The resulting AST is a song node containing metadata (from front matter) and an ordered list of rows.",
+    "steps": [
+      "Write a test that parses a minimal song (no front matter, one row) and asserts the correct structure",
+      "Write a test that parses a song with front matter and multiple rows and asserts metadata and rows are both present",
+      "Write a test that parses a song with blank lines between rows and asserts blank lines do not produce extra row nodes",
+      "Parse each of the .chart files in documentation/examples/ and assert that the parser does not throw (note: these files use features beyond MVP scope, so this step only asserts no crash on the supported subset)"
+    ],
+    "passes": false
+  },
+  {
+    "id": "text-renderer",
+    "category": "functional",
+    "description": "Render a parsed song AST back to .chart plain text format",
+    "detail": "The plain text renderer takes a song AST and produces a valid .chart string. The output is a normalised (pretty-printed) form: front matter fields each on their own line, each row of bars on its own line, single spaces around chord names inside bars. The output need not be byte-for-byte identical to the input, but it must parse back to an equivalent AST (round-trip equivalence).",
+    "steps": [
+      "Write a test that renders a song with title and key and asserts the output contains a correctly formatted '---' YAML front matter block",
+      "Write a test that renders a single bar '| Am |' and asserts the output is '| Am |' with normalised spacing",
+      "Write a test that renders a row of four bars and asserts the output is a single line with all bars separated by barlines",
+      "Write a test that renders a multi-row song and asserts each row appears on its own line",
+      "Write a round-trip test: parse a source string, render to text, parse the rendered text, and assert the two ASTs are deeply equal",
+      "Run the round-trip test against each of the manually authored example songs that use only MVP-supported features"
+    ],
+    "passes": false
+  }
+]

@@ -1,0 +1,28 @@
+Grigson — MVP Progress
+======================
+
+PRD features: 6
+Passing:      0 / 6
+
+chord-parsing     [ ] not started
+bar-parsing       [ ] not started
+row-parsing       [ ] not started
+frontmatter-parsing [ ] not started
+song-parsing      [ ] not started
+text-renderer     [ ] not started
+
+---
+
+Infrastructure complete:
+  - pnpm, TypeScript, Peggy, Vitest, fast-check all configured
+  - Build pipeline: build:grammar (peggy) -> build:ts (tsc)
+  - prepare script runs build:grammar automatically after pnpm install
+  - Placeholder grammar at src/parser/grammar.pegjs
+  - npm blocked by pre-tool-use hook; pnpm enforced
+
+Documentation complete:
+  - documentation/README.md    (format reference)
+  - documentation/renderer.md  (renderer API and config)
+  - documentation/testing.md   (testing strategy)
+  - documentation/examples/    (8 example .chart files)
+  - project/prd.json           (MVP requirements)
