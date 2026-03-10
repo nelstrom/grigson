@@ -11,10 +11,16 @@
     "build:ts": "tsc",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "prepare": "pnpm run build:grammar"
+    "prepare": "pnpm run build:grammar",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "fast-check": "^4.6.0",
     "peggy": "^5.1.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
