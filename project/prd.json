@@ -134,7 +134,7 @@
       "Extend the TextRenderer to render halfDiminished chords with the 'm7b5' suffix",
       "Run pnpm build to regenerate the parser, then run pnpm test to confirm all tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "pitch-class",

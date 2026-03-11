@@ -1,7 +1,14 @@
 import type { Song, Row, Bar, Chord } from '../parser/types.js';
 
 function renderChord(chord: Chord): string {
-  const suffix = chord.quality === 'minor' ? 'm' : chord.quality === 'dominant7' ? '7' : '';
+  const suffix =
+    chord.quality === 'minor'
+      ? 'm'
+      : chord.quality === 'dominant7'
+        ? '7'
+        : chord.quality === 'halfDiminished'
+          ? 'm7b5'
+          : '';
   return chord.root + suffix;
 }
 

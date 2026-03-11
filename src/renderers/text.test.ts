@@ -40,6 +40,20 @@ describe('text renderer', () => {
     });
   });
 
+  describe('half-diminished chords', () => {
+    it('renders a half-diminished chord with m7b5 suffix', () => {
+      const out = render('| Bm7b5 | E7 | Am |\n');
+      expect(out).toContain('| Bm7b5 |');
+    });
+
+    it('round-trips a half-diminished chord', () => {
+      const source = '| Bm7b5 | E7 | Am |\n';
+      const ast1 = parseSong(source);
+      const ast2 = parseSong(render(source));
+      expect(ast2).toEqual(ast1);
+    });
+  });
+
   describe('round-trip', () => {
     it('parse → render → parse produces an equal AST', () => {
       const source =

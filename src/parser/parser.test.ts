@@ -216,6 +216,24 @@ describe('chord parsing', () => {
     });
   });
 
+  describe('half-diminished chords', () => {
+    it('parses Bm7b5', () => {
+      expect(parseChord('Bm7b5')).toEqual({ type: 'chord', root: 'B', quality: 'halfDiminished' });
+    });
+
+    it('parses Am7b5', () => {
+      expect(parseChord('Am7b5')).toEqual({ type: 'chord', root: 'A', quality: 'halfDiminished' });
+    });
+
+    it('parses C#m7b5', () => {
+      expect(parseChord('C#m7b5')).toEqual({
+        type: 'chord',
+        root: 'C#',
+        quality: 'halfDiminished',
+      });
+    });
+  });
+
   describe('unsupported qualities are rejected', () => {
     it('rejects Cm7', () => {
       expect(() => parseChord('Cm7')).toThrow();

@@ -79,7 +79,8 @@ Accidental
   = "#" / "b"
 
 Quality
-  = "m" { return "minor"; }
+  = "m7b5" { return "halfDiminished"; }
+  / "m" { return "minor"; }
   / "7" { return "dominant7"; }
   / ""  { return "major"; }
 

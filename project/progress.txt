@@ -21,3 +21,6 @@ Installed eslint 10, @eslint/js, and typescript-eslint as devDependencies. Creat
 
 ## prettier
 Installed prettier 3.8.1 as a devDependency. Added .prettierrc with singleQuote, trailingComma: all, printWidth: 100. Added .prettierignore excluding generated parser files and dist/. Added a `format` script to package.json running `prettier --write src/`. Ran pnpm format — three files were reformatted (parser.test.ts, text.test.ts, text.ts); all 42 tests continue to pass.
+
+## half-diminished-quality
+Added 'halfDiminished' to the Quality union type in types.ts. Extended the Peggy grammar (grammar.pegjs) with an 'm7b5' alternative before 'm' in the Quality rule so that PEG ordered choice matches it first. Extended TextRenderer.renderChord() to emit the 'm7b5' suffix for halfDiminished chords. Rebuilt the generated parser with pnpm build:grammar. Added 3 parser tests (Bm7b5, Am7b5, C#m7b5) and 2 renderer tests (suffix output and round-trip). All 47 tests pass.

@@ -4,7 +4,7 @@ export interface FrontMatter {
   key: string | null;
 }
 
-export type Quality = 'major' | 'minor' | 'dominant7';
+export type Quality = 'major' | 'minor' | 'dominant7' | 'halfDiminished';
 
 export interface Chord {
   type: 'chord';
