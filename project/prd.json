@@ -118,5 +118,92 @@
       "Run pnpm test to confirm fixes did not break anything"
     ],
     "passes": true
+  },
+  {
+    "id": "half-diminished-quality",
+    "category": "functional",
+    "description": "Extend the parser to support the half-diminished chord quality (m7b5)",
+    "detail": "The half-diminished quality (written as 'm7b5', e.g. Bm7b5) is needed to represent the ii° chord in harmonic minor keys (e.g. Bm7b5 | E7 | Am). The Quality union type gains a new 'halfDiminished' member. The Peggy grammar is extended to recognise the 'm7b5' suffix. The allowed-start-rules build script is unchanged.",
+    "steps": [
+      "Write a test that parses 'Bm7b5' and asserts root='B' and quality='halfDiminished'",
+      "Write a test that parses 'Am7b5' and asserts root='A' and quality='halfDiminished'",
+      "Write a test that parses 'C#m7b5' and asserts root='C#' and quality='halfDiminished'",
+      "Write a test that the text renderer round-trips a chord with quality halfDiminished back to the 'm7b5' suffix",
+      "Add 'halfDiminished' to the Quality union type in src/parser/types.ts",
+      "Extend the Peggy grammar in src/parser/grammar.pegjs to match the 'm7b5' suffix and emit quality: 'halfDiminished'",
+      "Extend the TextRenderer to render halfDiminished chords with the 'm7b5' suffix",
+      "Run pnpm build to regenerate the parser, then run pnpm test to confirm all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "pitch-class",
+    "category": "functional",
+    "description": "Implement the pitchClass theory module mapping note spellings to chromatic integers",
+    "detail": "src/theory/pitchClass.ts provides: (1) a PitchClass const object mapping canonical flat-side names to integers 0–11; (2) rootToPitchClass(root: string): PitchClass that accepts any valid spelling including enharmonic equivalents (e.g. 'A#' → 10); (3) ENHARMONIC_PAIRS mapping each sharp spelling to its flat equivalent and vice-versa (C#↔Db, D#↔Eb, F#↔Gb, G#↔Ab, A#↔Bb). Double accidentals (E#, B#, Cb, Fb) are out of scope.",
+    "steps": [
+      "Write tests asserting rootToPitchClass returns the correct integer for every natural note: C=0, D=2, E=4, F=5, G=7, A=9, B=11",
+      "Write tests asserting rootToPitchClass handles all five sharp spellings: C#=1, D#=3, F#=6, G#=8, A#=10",
+      "Write tests asserting rootToPitchClass handles all five flat spellings: Db=1, Eb=3, Gb=6, Ab=8, Bb=10",
+      "Write a test asserting rootToPitchClass('A#') === rootToPitchClass('Bb') (enharmonic equivalence)",
+      "Write tests asserting ENHARMONIC_PAIRS maps 'A#' to 'Bb', 'Bb' to 'A#', and similarly for all five pairs",
+      "Write a test asserting rootToPitchClass throws (or returns undefined) for an unrecognised input like 'X'",
+      "Create src/theory/pitchClass.ts and implement the PitchClass constants, ENHARMONIC_PAIRS, and rootToPitchClass",
+      "Run pnpm test to confirm all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "keys",
+    "category": "functional",
+    "description": "Implement the keys theory module defining diatonic note sets for all 24 in-scope keys",
+    "detail": "src/theory/keys.ts provides: (1) a KEYS record keyed by key name (e.g. 'F', 'Am') with each value containing the 7 diatonic note names as strings; (2) diatonicNotes(key: string): ReadonlySet<string> returning the note set for a given key. All 12 major keys and 10 harmonic minor keys are in scope (G#m and Ebm are excluded because they require double accidentals). The relative field linking each minor key to its relative major (and vice-versa) is also stored, to assist tie-breaking during key detection.",
+    "steps": [
+      "Write a test asserting diatonicNotes('C') returns the set {C, D, E, F, G, A, B}",
+      "Write a test asserting diatonicNotes('F') returns {F, G, A, Bb, C, D, E}",
+      "Write a test asserting diatonicNotes('G') returns {G, A, B, C, D, E, F#}",
+      "Write a test asserting diatonicNotes('Am') returns {A, B, C, D, E, F, G#} (harmonic minor with raised 7th)",
+      "Write a test asserting diatonicNotes('Dm') returns {D, E, F, G, A, Bb, C#}",
+      "Write a test asserting diatonicNotes('F#') returns {F#, G#, A#, B, C#, D#, E#} — E# is in scope here as a diatonic note of F# major even though it is not a chord root that the normaliser will ever write",
+      "Write a test asserting diatonicNotes('Db') returns {Db, Eb, F, Gb, Ab, Bb, C}",
+      "Write a test asserting diatonicNotes for an unknown key throws or returns null",
+      "Write a test asserting KEYS contains exactly 22 entries (12 major + 10 minor)",
+      "Create src/theory/keys.ts and implement KEYS and diatonicNotes",
+      "Run pnpm test to confirm all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "key-detector",
+    "category": "functional",
+    "description": "Implement the key detection algorithm that scores candidate keys against a chord list",
+    "detail": "src/theory/keyDetector.ts exports detectKey(chords: Chord[], declaredKey?: string | null): string | null. The algorithm: (1) scores each of the 22 in-scope keys by counting how many chord roots (converted to pitch class) are diatonic to that key; (2) weights a dominant-7th chord whose root is scale-degree V very heavily (strong V7 signal); (3) breaks major/relative-minor ties using last-chord-as-tonic (strongest) then first-chord-as-tonic (weaker) then prefer-major; (4) if the declared key is among the top-scoring candidates, leaves it undisturbed; (5) returns null only when no chord roots match any candidate key at all.",
+    "steps": [
+      "Write tests for Category 1 (unambiguous major keys): T1-a F major I-IV-V-I, T1-b G major I-V-vi-IV, T1-c Bb major, T1-d E major (B must not become Cb), T1-e F# major",
+      "Write tests for Category 3 (major/minor disambiguation): T3-a G7 → C major, T3-b E7 → A minor, T3-c last-chord G → C major, T3-d last-chord Am → A minor, T3-e first+last both Am → A minor, T3-f first C last Am → A minor (last wins), T3-g Bm7b5+E7 → A minor",
+      "Write tests for Category 4 (V7 as strong anchor): T4-a ii-V-I in C, T4-b C7 clinches F major, T4-c F7 clinches Bb major",
+      "Write tests for Category 6 (graceful degradation): T6-a single chord C → key C, T6-b declared key D preserved when D is a candidate, T6-c declared key E corrected when E scores zero, T6-d three chords uniquely identifying F major",
+      "Write tests for Category 7 (non-diatonic robustness): T7-a one chromatic chord in C, T7-b secondary dominant A7 in C, T7-c fully chromatic → no key",
+      "Write tests for Category 9 (enharmonic boundary): T9-a Db major input stays Db, T9-b Gb major input — prefer flat, T9-c F#/Gb with fSharpOrGFlat config option",
+      "Create src/theory/keyDetector.ts and implement detectKey with scoring, V7 weighting, and tie-breaking logic",
+      "Run pnpm test to confirm all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "normalise",
+    "category": "functional",
+    "description": "Implement normaliseSong: detect the key, rewrite enharmonic spellings, and update front matter",
+    "detail": "src/theory/normalise.ts exports normaliseSong(song: Song, config?: { fSharpOrGFlat?: 'f-sharp' | 'g-flat' }): Song. It calls detectKey to determine the canonical key, rewrites each chord root that is diatonic to the detected key but spelled incorrectly (e.g. A# → Bb in F major), leaves non-diatonic (borrowed) chord roots alone unless next-chord borrowing analysis can determine the correct spelling, and updates or adds the key field in the Song AST. The function is pure and returns a new Song object; it does not mutate its input.",
+    "steps": [
+      "Write tests for Category 2 (enharmonic correction): T2-a A# → Bb in F major, T2-b D# → Eb in Bb major, T2-c multiple A# instances corrected, T2-d mixed A#/Bb both normalised, T2-e all-sharps Db major rewritten, T2-f D#/A# in Bb major rewritten",
+      "Write tests for Category 5 (front matter): T5-a correct key unchanged, T5-b wrong key corrected, T5-c absent key added, T5-d wrong key with diatonic mismatch corrected",
+      "Write tests for Category 8 (borrowed chords): T8-a secondary dominant Eb7 → Ab, T8-b A7 root unchanged in C major, T8-c borrowed bVII Bb in C stays Bb and key stays C",
+      "Write a test asserting normaliseSong returns a new object and does not mutate the input Song",
+      "Write a test asserting normaliseSong is idempotent: normalising an already-normalised song produces an identical output",
+      "Create src/theory/normalise.ts and implement normaliseSong",
+      "Run pnpm test to confirm all tests pass"
+    ],
+    "passes": false
   }
 ]
