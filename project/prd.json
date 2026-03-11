@@ -187,7 +187,7 @@
       "Create src/theory/keyDetector.ts and implement detectKey with diatonic-root scoring",
       "Run pnpm test to confirm all Category 1 tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "key-detector-cat3",
