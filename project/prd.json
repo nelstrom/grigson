@@ -171,7 +171,7 @@
       "Create src/theory/keys.ts and implement KEYS and diatonicNotes",
       "Run pnpm test to confirm all tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "key-detector",

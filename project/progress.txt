@@ -27,3 +27,6 @@ Added 'halfDiminished' to the Quality union type in types.ts. Extended the Peggy
 
 ## pitch-class
 Created src/theory/pitchClass.ts with: a PitchClass type (union of 0–11), a NOTE_MAP covering all 17 note spellings (7 naturals, 5 sharps, 5 flats), ENHARMONIC_PAIRS mapping each sharp to its flat equivalent and vice-versa, and rootToPitchClass() which throws for unrecognised inputs. Created src/theory/pitchClass.test.ts with 7 tests covering natural notes, sharp spellings, flat spellings, enharmonic equivalence, and error for invalid input. All 54 tests pass.
+
+## keys
+Created src/theory/keys.ts with: a KeyInfo interface (notes array + optional relative field), a KEYS record of 22 entries (12 major + 10 harmonic minor, excluding G#m and Ebm which require double accidentals), and diatonicNotes() which returns a ReadonlySet<string> for a given key or throws for unknown keys. Harmonic minor keys use the natural minor scale with the 7th degree raised (e.g. Am → G#, C#m → B#, F#m → E#). Relative major/minor links are stored for all pairs that fall within the 22-key set. Created src/theory/keys.test.ts with 9 tests. All 63 tests pass.
