@@ -174,35 +174,142 @@
     "passes": true
   },
   {
-    "id": "key-detector",
+    "id": "key-detector-cat1",
     "category": "functional",
-    "description": "Implement the key detection algorithm that scores candidate keys against a chord list",
-    "detail": "src/theory/keyDetector.ts exports detectKey(chords: Chord[], declaredKey?: string | null): string | null. The algorithm: (1) scores each of the 22 in-scope keys by counting how many chord roots (converted to pitch class) are diatonic to that key; (2) weights a dominant-7th chord whose root is scale-degree V very heavily (strong V7 signal); (3) breaks major/relative-minor ties using last-chord-as-tonic (strongest) then first-chord-as-tonic (weaker) then prefer-major; (4) if the declared key is among the top-scoring candidates, leaves it undisturbed; (5) returns null only when no chord roots match any candidate key at all.",
+    "description": "Key detector — Category 1: unambiguous major keys",
+    "detail": "Create src/theory/keyDetector.ts and implement the basic scoring pass: for each of the 22 in-scope keys count how many chord roots (converted to pitch class via rootToPitchClass) are diatonic to that key; return the highest-scoring key name. This initial implementation does not yet need V7 weighting or tie-breaking — the Category 1 progressions are unambiguous enough to be decided by score alone.",
     "steps": [
-      "Write tests for Category 1 (unambiguous major keys): T1-a F major I-IV-V-I, T1-b G major I-V-vi-IV, T1-c Bb major, T1-d E major (B must not become Cb), T1-e F# major",
-      "Write tests for Category 3 (major/minor disambiguation): T3-a G7 → C major, T3-b E7 → A minor, T3-c last-chord G → C major, T3-d last-chord Am → A minor, T3-e first+last both Am → A minor, T3-f first C last Am → A minor (last wins), T3-g Bm7b5+E7 → A minor",
-      "Write tests for Category 4 (V7 as strong anchor): T4-a ii-V-I in C, T4-b C7 clinches F major, T4-c F7 clinches Bb major",
-      "Write tests for Category 6 (graceful degradation): T6-a single chord C → key C, T6-b declared key D preserved when D is a candidate, T6-c declared key E corrected when E scores zero, T6-d three chords uniquely identifying F major",
-      "Write tests for Category 7 (non-diatonic robustness): T7-a one chromatic chord in C, T7-b secondary dominant A7 in C, T7-c fully chromatic → no key",
-      "Write tests for Category 9 (enharmonic boundary): T9-a Db major input stays Db, T9-b Gb major input — prefer flat, T9-c F#/Gb with fSharpOrGFlat config option",
-      "Create src/theory/keyDetector.ts and implement detectKey with scoring, V7 weighting, and tie-breaking logic",
-      "Run pnpm test to confirm all tests pass"
+      "Write test T1-a: detectKey([F, Bb, C, F]) === 'F' (F major I-IV-V-I)",
+      "Write test T1-b: detectKey([G, D, Em, C]) === 'G' (G major I-V-vi-IV)",
+      "Write test T1-c: detectKey([Bb, Eb, F, Bb]) === 'Bb' (Bb major I-IV-V)",
+      "Write test T1-d: detectKey([E, A, B, E]) === 'E' (E major I-IV-V; B must not become Cb)",
+      "Write test T1-e: detectKey([F#, B, C#, F#]) === 'F#' (F# major I-IV-V)",
+      "Create src/theory/keyDetector.ts and implement detectKey with diatonic-root scoring",
+      "Run pnpm test to confirm all Category 1 tests pass"
     ],
     "passes": false
   },
   {
-    "id": "normalise",
+    "id": "key-detector-cat3",
     "category": "functional",
-    "description": "Implement normaliseSong: detect the key, rewrite enharmonic spellings, and update front matter",
-    "detail": "src/theory/normalise.ts exports normaliseSong(song: Song, config?: { fSharpOrGFlat?: 'f-sharp' | 'g-flat' }): Song. It calls detectKey to determine the canonical key, rewrites each chord root that is diatonic to the detected key but spelled incorrectly (e.g. A# → Bb in F major), leaves non-diatonic (borrowed) chord roots alone unless next-chord borrowing analysis can determine the correct spelling, and updates or adds the key field in the Song AST. The function is pure and returns a new Song object; it does not mutate its input.",
+    "description": "Key detector — Category 3: major/minor disambiguation",
+    "detail": "Extend detectKey with relative-major/minor tie-breaking. When a major key and its relative harmonic minor are tied on diatonic score, apply (in order): (1) V7 of harmonic minor present → minor; (2) last-chord-as-tonic — if the last chord root matches a key's tonic, prefer that key; (3) first-chord-as-tonic (weaker); (4) prefer-major as final fallback. The half-diminished quality (Bm7b5) on the ii° degree is a strong minor signal.",
     "steps": [
-      "Write tests for Category 2 (enharmonic correction): T2-a A# → Bb in F major, T2-b D# → Eb in Bb major, T2-c multiple A# instances corrected, T2-d mixed A#/Bb both normalised, T2-e all-sharps Db major rewritten, T2-f D#/A# in Bb major rewritten",
-      "Write tests for Category 5 (front matter): T5-a correct key unchanged, T5-b wrong key corrected, T5-c absent key added, T5-d wrong key with diatonic mismatch corrected",
-      "Write tests for Category 8 (borrowed chords): T8-a secondary dominant Eb7 → Ab, T8-b A7 root unchanged in C major, T8-c borrowed bVII Bb in C stays Bb and key stays C",
-      "Write a test asserting normaliseSong returns a new object and does not mutate the input Song",
-      "Write a test asserting normaliseSong is idempotent: normalising an already-normalised song produces an identical output",
-      "Create src/theory/normalise.ts and implement normaliseSong",
-      "Run pnpm test to confirm all tests pass"
+      "Write test T3-a: detectKey([Am, F, C, G7]) === 'C' (G7 = V7 of C major)",
+      "Write test T3-b: detectKey([Am, Dm, E7, Am]) === 'Am' (E7 = V7 of A harmonic minor)",
+      "Write test T3-c: detectKey([Am, F, C, G]) === 'C' (last chord G → C major via last-chord heuristic)",
+      "Write test T3-d: detectKey([C, Am, F, Am]) === 'Am' (last chord Am → A minor)",
+      "Write test T3-e: detectKey([Am, F, C, Am]) === 'Am' (first and last both Am)",
+      "Write test T3-f: detectKey([C, Am, F, Am]) === 'Am' (first C, last Am — last wins)",
+      "Write test T3-g: detectKey([Bm7b5, E7, Am, Am]) === 'Am' (ii° + V7 = strongest minor signal)",
+      "Extend keyDetector.ts with V7/harmonic-minor detection and last/first-chord tiebreaking",
+      "Run pnpm test to confirm all Category 1 and Category 3 tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "key-detector-cat4",
+    "category": "functional",
+    "description": "Key detector — Category 4: V7 as a strong tonic anchor",
+    "detail": "Extend detectKey so that a dominant-7th chord whose root is scale-degree V of a candidate key receives a heavy bonus (e.g. 5× the normal diatonic point), making V7 a near-definitive signal. This weight must be strong enough to resolve ties in Category 4 progressions but must not override a conclusive Category 1 majority.",
+    "steps": [
+      "Write test T4-a: detectKey([Dm, G7, C]) === 'C' (ii-V-I; G7 = V7 of C)",
+      "Write test T4-b: detectKey([F, Bb, C7, F]) === 'F' (C7 = V7 of F major)",
+      "Write test T4-c: detectKey([D#, A#, F7, A#]) === 'Bb' (F7 = V7 of Bb; D#→Eb, A#→Bb after key confirmed)",
+      "Extend keyDetector.ts to apply V7 dominant weighting during the scoring pass",
+      "Run pnpm test to confirm all Category 1, 3, and 4 tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "key-detector-cat6",
+    "category": "functional",
+    "description": "Key detector — Category 6: graceful degradation with sparse data",
+    "detail": "Extend detectKey to handle sparse chord lists and the optional declaredKey parameter. Rules: (1) if declaredKey is among the top-scoring candidates, return it unchanged; (2) only override declaredKey if it scores zero (no diatonic overlap); (3) always return a key if any candidate scores > 0 — never return null when there is any match; (4) return null only when no chord root matches any candidate key.",
+    "steps": [
+      "Write test T6-a: detectKey([C]) === 'C' (single chord, no declared key; best-guess C major)",
+      "Write test T6-b: detectKey([G, D], 'D') === 'D' (declared key D is a valid candidate — preserve it)",
+      "Write test T6-c: detectKey([G, D], 'E') === 'G' or 'D' but not 'E' (E scores zero — correct the declared key)",
+      "Write test T6-d: detectKey([F, Gm, C]) === 'F' (three chords uniquely identifying F major)",
+      "Extend keyDetector.ts to accept and honour the declaredKey parameter",
+      "Run pnpm test to confirm all Category 1, 3, 4, and 6 tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "key-detector-cat7",
+    "category": "functional",
+    "description": "Key detector — Category 7: robustness to non-diatonic and chromatic chords",
+    "detail": "Verify that detectKey handles borrowed and chromatic chord roots without being derailed. A single non-diatonic chord in an otherwise clear key should not change the result. A fully chromatic progression with no majority key should return null.",
+    "steps": [
+      "Write test T7-a: detectKey([C, F, Ab, G]) === 'C' (Ab is chromatic/borrowed bVI; C F G anchor C major)",
+      "Write test T7-b: detectKey([C, A7, Dm, G7, C]) === 'C' (A7 is secondary dominant V7/ii; overall key C)",
+      "Write test T7-c: detectKey([C, Db, D, Eb]) === null (chromatic ascent — no key fits majority)",
+      "Run pnpm test to confirm all Category 1, 3, 4, 6, and 7 tests pass (no implementation changes expected)"
+    ],
+    "passes": false
+  },
+  {
+    "id": "key-detector-cat9",
+    "category": "functional",
+    "description": "Key detector — Category 9: enharmonic boundary keys (Db/C#, Gb/F#)",
+    "detail": "Extend detectKey with an optional config parameter { fSharpOrGFlat?: 'f-sharp' | 'g-flat' } (default 'f-sharp'). For all keys except the F#/Gb pair, prefer the flat-side spelling when both enharmonic equivalents score equally. For F#/Gb specifically, use the config option to break the tie.",
+    "steps": [
+      "Write test T9-a: detectKey([Db, Ab, Bbm, Gb]) === 'Db' (all chords diatonic to Db major; stay on flat side)",
+      "Write test T9-b: detectKey([Gb, Db, Ebm, Ab]) === 'Gb' (prefer flat spelling over F# major)",
+      "Write test T9-c default: detectKey([F#, C#, D#m, B]) === 'F#' (default fSharpOrGFlat = 'f-sharp')",
+      "Write test T9-c config: detectKey([F#, C#, D#m, B], null, { fSharpOrGFlat: 'g-flat' }) === 'Gb'",
+      "Extend keyDetector.ts to accept the config parameter and apply the F#/Gb tiebreak rule",
+      "Run pnpm test to confirm all Category 1, 3, 4, 6, 7, and 9 tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "normalise-cat2",
+    "category": "functional",
+    "description": "normaliseSong — Category 2: enharmonic correction of diatonic chord roots",
+    "detail": "Create src/theory/normalise.ts exporting normaliseSong(song: Song, config?: { fSharpOrGFlat?: 'f-sharp' | 'g-flat' }): Song. The initial implementation calls detectKey and rewrites every chord root that is diatonic to the detected key but spelled with the wrong enharmonic. Non-diatonic (borrowed) roots are left untouched. The function must be pure: it returns a new Song and never mutates its input.",
+    "steps": [
+      "Write test T2-a: | F | A# | F | C | → A# rewritten to Bb; key detected as F",
+      "Write test T2-b: | Bb | D# | F | Bb | → D# rewritten to Eb; key detected as Bb",
+      "Write test T2-c: two rows each containing A# in F major — both instances rewritten to Bb",
+      "Write test T2-d: | F | A# | F | Bb | — A# rewritten to Bb, existing Bb unchanged",
+      "Write test T2-e: | C# | F# | G# | C# | → all three roots rewritten to Db Gb Ab Db; key detected as Db",
+      "Write test T2-f: | D# | A# | F | D# | → D#→Eb, A#→Bb; key detected as Bb",
+      "Write a test asserting normaliseSong returns a new Song object (not the same reference as the input)",
+      "Write a test asserting normaliseSong is idempotent: calling it twice produces the same output as calling it once",
+      "Create src/theory/normalise.ts and implement normaliseSong with diatonic-root enharmonic rewriting",
+      "Run pnpm test to confirm all Category 2 tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "normalise-cat5",
+    "category": "functional",
+    "description": "normaliseSong — Category 5: front matter key field read and write",
+    "detail": "Extend normaliseSong so that after detecting the canonical key it updates the song's front matter: if the key field is already correct, leave it; if it is wrong (i.e. not among the top-scoring candidates), replace it; if it is absent, add it. The chord roots are also corrected as in Cat 2.",
+    "steps": [
+      "Write test T5-a: song with key: F and chords | F | Bb | C | F | — key field unchanged, no chord changes",
+      "Write test T5-b: song with key: G and chords | F | Bb | C | F | — key field corrected to F",
+      "Write test T5-c: song with no front matter and chords | G | D | Em | C | — key: G added to front matter",
+      "Write test T5-d: song with key: C and chords | Bb | F | C | Gm | — key corrected to F (Bb and Gm not diatonic to C)",
+      "Extend normaliseSong to read and write the song's key field in front matter",
+      "Run pnpm test to confirm all Category 2 and Category 5 tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "normalise-cat8",
+    "category": "functional",
+    "description": "normaliseSong — Category 8: borrowed chords and secondary dominants",
+    "detail": "Extend normaliseSong with a next-chord borrowing heuristic for non-diatonic roots: assume the chord is a secondary dominant (V or V7) and look at the following chord to determine the correct spelling. When the heuristic is inconclusive, fall back to preferring the flat spelling for pitch classes 1, 3, 6, 8, 10. Chord roots that are already correctly spelled must not be disturbed.",
+    "steps": [
+      "Write test T8-a: | F | Bb | Eb7 | Ab | — Eb7 is V7 of Ab (next chord); spelling Eb7 is correct (not D#7)",
+      "Write test T8-b: | C | A7 | Dm | G7 | C | — A7 root stays A (diatonic to C major as vi); no root rewrite",
+      "Write test T8-c: | C | Bb | F | C | — Bb is borrowed bVII in C major; stays Bb (not A#); key stays C",
+      "Write test T8-d: | C | G | Ab | Bb | C | — Ab and Bb are borrowed bVI/bVII in C; both spellings preserved; key stays C",
+      "Extend normaliseSong with next-chord borrowing analysis and flat-fallback for non-diatonic roots",
+      "Run pnpm test to confirm all Category 2, 5, and 8 tests pass"
     ],
     "passes": false
   }
