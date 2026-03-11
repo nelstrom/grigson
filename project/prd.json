@@ -151,7 +151,7 @@
       "Create src/theory/pitchClass.ts and implement the PitchClass constants, ENHARMONIC_PAIRS, and rootToPitchClass",
       "Run pnpm test to confirm all tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "keys",

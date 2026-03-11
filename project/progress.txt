@@ -24,3 +24,6 @@ Installed prettier 3.8.1 as a devDependency. Added .prettierrc with singleQuote,
 
 ## half-diminished-quality
 Added 'halfDiminished' to the Quality union type in types.ts. Extended the Peggy grammar (grammar.pegjs) with an 'm7b5' alternative before 'm' in the Quality rule so that PEG ordered choice matches it first. Extended TextRenderer.renderChord() to emit the 'm7b5' suffix for halfDiminished chords. Rebuilt the generated parser with pnpm build:grammar. Added 3 parser tests (Bm7b5, Am7b5, C#m7b5) and 2 renderer tests (suffix output and round-trip). All 47 tests pass.
+
+## pitch-class
+Created src/theory/pitchClass.ts with: a PitchClass type (union of 0–11), a NOTE_MAP covering all 17 note spellings (7 naturals, 5 sharps, 5 flats), ENHARMONIC_PAIRS mapping each sharp to its flat equivalent and vice-versa, and rootToPitchClass() which throws for unrecognised inputs. Created src/theory/pitchClass.test.ts with 7 tests covering natural notes, sharp spellings, flat spellings, enharmonic equivalence, and error for invalid input. All 54 tests pass.
