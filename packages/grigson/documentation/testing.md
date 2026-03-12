@@ -1,9 +1,3 @@
----
-layout: base.njk
-title: Testing
-permalink: /testing/
----
-
 # Testing Strategy
 
 ## Overview
@@ -65,7 +59,7 @@ expect(parseBar('C . . G')).toEqual([
 expect(parseRow('| C | C | C |')).toEqual(parseRow('| C | % | % |'));
 ```
 
-**Integration tests** parse the complete example `.chart` files from `documentation/examples/` and assert the resulting AST matches a stored snapshot. These act as regression tests for the full grammar.
+**Integration tests** parse the complete example `.chart` files from `packages/grigson/documentation/examples/` and assert the resulting AST matches a stored snapshot. These act as regression tests for the full grammar.
 
 **Error cases** verify that malformed input produces useful error messages rather than silent failures or cryptic crashes.
 
@@ -76,32 +70,35 @@ Transposition logic is self-contained and well-suited to both example-based and 
 **Example-based tests** cover known cases:
 
 ```typescript
-expect(transpose('C',  2)).toBe('D');
+expect(transpose('C', 2)).toBe('D');
 expect(transpose('Bb', 2)).toBe('C');
-expect(transpose('B',  1)).toBe('C');
-expect(transpose('F',  6, { accidentals: 'sharps' })).toBe('B');
-expect(transpose('F',  6, { accidentals: 'flats'  })).toBe('Gb');
+expect(transpose('B', 1)).toBe('C');
+expect(transpose('F', 6, { accidentals: 'sharps' })).toBe('B');
+expect(transpose('F', 6, { accidentals: 'flats' })).toBe('Gb');
 ```
 
 **Property-based tests** with fast-check verify invariants that must hold for all inputs:
 
 ```typescript
 // Round-trip: transposing up N then down N is the identity
-fc.assert(fc.property(
-  fc.constantFrom(...ALL_CHORD_NAMES),
-  fc.integer({ min: 0, max: 11 }),
-  (chord, semitones) => {
-    const up   = transpose(chord, semitones);
-    const down = transpose(up, 12 - semitones);
-    expect(enharmonicEquals(down, chord)).toBe(true);
-  }
-));
+fc.assert(
+  fc.property(
+    fc.constantFrom(...ALL_CHORD_NAMES),
+    fc.integer({ min: 0, max: 11 }),
+    (chord, semitones) => {
+      const up = transpose(chord, semitones);
+      const down = transpose(up, 12 - semitones);
+      expect(enharmonicEquals(down, chord)).toBe(true);
+    },
+  ),
+);
 
 // Octave equivalence: transposing by 12 semitones is the identity
-fc.assert(fc.property(
-  fc.constantFrom(...ALL_CHORD_NAMES),
-  (chord) => expect(enharmonicEquals(transpose(chord, 12), chord)).toBe(true)
-));
+fc.assert(
+  fc.property(fc.constantFrom(...ALL_CHORD_NAMES), (chord) =>
+    expect(enharmonicEquals(transpose(chord, 12), chord)).toBe(true),
+  ),
+);
 ```
 
 **Per-section key tests** verify that transposition applies correctly when a chart has different keys per section:
@@ -135,7 +132,7 @@ SVG snapshot tests are kept minimal because full SVG string snapshots are verbos
 
 ### End-to-End Tests
 
-A small suite of tests exercises the full pipeline — source text → parse → render — using the `documentation/examples/*.chart` files as input. These exist to catch integration bugs that unit tests miss.
+A small suite of tests exercises the full pipeline — source text → parse → render — using the `packages/grigson/documentation/examples/*.chart` files as input. These exist to catch integration bugs that unit tests miss.
 
 ## Coverage
 

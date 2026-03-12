@@ -1,3 +1,10 @@
-src/parser/generated.js
-src/parser/generated.d.ts
-dist/
+# Ignore generated files in the grigson package
+packages/grigson/src/parser/generated.js
+packages/grigson/src/parser/generated.d.ts
+packages/grigson/dist/
+
+# Ignore website output
+packages/website/_site/
+
+# Ignore node_modules
+**/node_modules/

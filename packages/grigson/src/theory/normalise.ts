@@ -56,7 +56,11 @@ function preferredNonDiatonicSpelling(chord: Chord, nextChord: Chord | undefined
   return FLAT_SPELLING[pc]!;
 }
 
-function normaliseChord(chord: Chord, pcToNote: Map<number, string>, nextChord: Chord | undefined): Chord {
+function normaliseChord(
+  chord: Chord,
+  pcToNote: Map<number, string>,
+  nextChord: Chord | undefined,
+): Chord {
   let pc: number;
   try {
     pc = rootToPitchClass(chord.root);

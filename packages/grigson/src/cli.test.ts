@@ -81,7 +81,7 @@ describe('CLI normalise subcommand', () => {
 
     runCli(['normalise', tmpFile]);
 
-    const output = (stdoutSpy.mock.calls[0][0] as string);
+    const output = stdoutSpy.mock.calls[0][0] as string;
     expect(output).toContain('Bb');
     fs.unlinkSync(tmpFile);
   });

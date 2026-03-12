@@ -1,6 +1,14 @@
+# Dependency folders
 node_modules/
-dist/
-src/parser/generated.js
-src/parser/generated.d.ts
-website/_site/
-website/node_modules/
+**/node_modules/
+
+# Package outputs
+packages/grigson/dist/
+packages/website/_site/
+
+# Generated parser files in the grigson package
+packages/grigson/src/parser/generated.js
+packages/grigson/src/parser/generated.d.ts
+
+# Misc
+.DS_Store

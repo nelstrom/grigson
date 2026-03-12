@@ -2,10 +2,10 @@
 
 The grigson library ships two browser-ready bundles alongside the Node.js CommonJS/ESM build:
 
-| File | Format | Global |
-|---|---|---|
+| File                   | Format                | Global    |
+| ---------------------- | --------------------- | --------- |
 | `dist/grigson.iife.js` | IIFE (self-executing) | `grigson` |
-| `dist/grigson.esm.js` | ES module | — |
+| `dist/grigson.esm.js`  | ES module             | —         |
 
 Both are produced by Vite in library mode and are rebuilt automatically as part of `pnpm build`.
 
@@ -45,7 +45,7 @@ import { parseSong, normaliseSong, TextRenderer } from './grigson.esm.js';
 
 ## Website integration
 
-The Eleventy website (in `website/`) loads the IIFE bundle on every page via the pnpm workspace symlink. In `website/.eleventy.js`:
+The Eleventy website (in `packages/website/`) loads the IIFE bundle on every page via the pnpm workspace symlink. In `packages/website/.eleventy.js`:
 
 ```js
 eleventyConfig.addPassthroughCopy({
@@ -53,7 +53,7 @@ eleventyConfig.addPassthroughCopy({
 });
 ```
 
-`node_modules/grigson` is a symlink to the workspace root, so the copy always reflects the latest `pnpm build` output. The layout at `website/_includes/base.njk` includes:
+`node_modules/grigson` is a symlink to `packages/grigson`, so the copy always reflects the latest `pnpm build` output. The layout at `packages/website/_includes/base.njk` includes:
 
 ```html
 <script src="/js/grigson.iife.js"></script>

@@ -69,7 +69,7 @@
       "Write a test that parses a minimal song (no front matter, one row) and asserts the correct structure",
       "Write a test that parses a song with front matter and multiple rows and asserts metadata and rows are both present",
       "Write a test that parses a song with blank lines between rows and asserts blank lines do not produce extra row nodes",
-      "Parse each of the .chart files in documentation/examples/ and assert that the parser does not throw (note: these files use features beyond MVP scope, so this step only asserts no crash on the supported subset)"
+      "Parse each of the .chart files in packages/grigson/documentation/examples/ and assert that the parser does not throw (note: these files use features beyond MVP scope, so this step only asserts no crash on the supported subset)"
     ],
     "passes": true
   },
@@ -93,12 +93,12 @@
     "id": "prettier",
     "category": "tooling",
     "description": "Install Prettier and format all non-generated source files",
-    "detail": "Prettier is added as a devDependency and configured for the project. A pnpm script applies formatting to all files under src/ except the generated parser output. The .gitignore or a .prettierignore file excludes generated files. All source files are formatted as part of this task.",
+    "detail": "Prettier is added as a devDependency and configured for the project. A pnpm script applies formatting to all files under packages/grigson/src/ except the generated parser output. The .gitignore or a .prettierignore file excludes generated files. All source files are formatted as part of this task.",
     "steps": [
       "Install prettier as a devDependency",
       "Add a .prettierrc config file with sensible defaults for a TypeScript project",
-      "Add a .prettierignore file excluding src/parser/generated.js and src/parser/generated.d.ts",
-      "Add a 'format' script to package.json that runs prettier --write on src/",
+      "Add a .prettierignore file excluding packages/grigson/src/parser/generated.js and packages/grigson/src/parser/generated.d.ts",
+      "Add a 'format' script to package.json that runs prettier --write on packages/grigson/src/",
       "Run pnpm format and confirm it exits cleanly",
       "Run pnpm test to confirm formatting did not break anything"
     ],
@@ -112,8 +112,8 @@
     "steps": [
       "Install eslint and @eslint/js, typescript-eslint as devDependencies",
       "Create an eslint.config.js (flat config) with rules appropriate for TypeScript and ESM",
-      "Exclude src/parser/generated.js from linting",
-      "Add a 'lint' script to package.json that runs eslint on src/",
+      "Exclude packages/grigson/src/parser/generated.js from linting",
+      "Add a 'lint' script to package.json that runs eslint on packages/grigson/src/",
       "Run pnpm lint and fix all reported violations",
       "Run pnpm test to confirm fixes did not break anything"
     ],
@@ -129,8 +129,8 @@
       "Write a test that parses 'Am7b5' and asserts root='A' and quality='halfDiminished'",
       "Write a test that parses 'C#m7b5' and asserts root='C#' and quality='halfDiminished'",
       "Write a test that the text renderer round-trips a chord with quality halfDiminished back to the 'm7b5' suffix",
-      "Add 'halfDiminished' to the Quality union type in src/parser/types.ts",
-      "Extend the Peggy grammar in src/parser/grammar.pegjs to match the 'm7b5' suffix and emit quality: 'halfDiminished'",
+      "Add 'halfDiminished' to the Quality union type in packages/grigson/src/parser/types.ts",
+      "Extend the Peggy grammar in packages/grigson/src/parser/grammar.pegjs to match the 'm7b5' suffix and emit quality: 'halfDiminished'",
       "Extend the TextRenderer to render halfDiminished chords with the 'm7b5' suffix",
       "Run pnpm build to regenerate the parser, then run pnpm test to confirm all tests pass"
     ],
@@ -140,7 +140,7 @@
     "id": "pitch-class",
     "category": "functional",
     "description": "Implement the pitchClass theory module mapping note spellings to chromatic integers",
-    "detail": "src/theory/pitchClass.ts provides: (1) a PitchClass const object mapping canonical flat-side names to integers 0–11; (2) rootToPitchClass(root: string): PitchClass that accepts any valid spelling including enharmonic equivalents (e.g. 'A#' → 10); (3) ENHARMONIC_PAIRS mapping each sharp spelling to its flat equivalent and vice-versa (C#↔Db, D#↔Eb, F#↔Gb, G#↔Ab, A#↔Bb). Double accidentals (E#, B#, Cb, Fb) are out of scope.",
+    "detail": "packages/grigson/src/theory/pitchClass.ts provides: (1) a PitchClass const object mapping canonical flat-side names to integers 0–11; (2) rootToPitchClass(root: string): PitchClass that accepts any valid spelling including enharmonic equivalents (e.g. 'A#' → 10); (3) ENHARMONIC_PAIRS mapping each sharp spelling to its flat equivalent and vice-versa (C#↔Db, D#↔Eb, F#↔Gb, G#↔Ab, A#↔Bb). Double accidentals (E#, B#, Cb, Fb) are out of scope.",
     "steps": [
       "Write tests asserting rootToPitchClass returns the correct integer for every natural note: C=0, D=2, E=4, F=5, G=7, A=9, B=11",
       "Write tests asserting rootToPitchClass handles all five sharp spellings: C#=1, D#=3, F#=6, G#=8, A#=10",
@@ -148,7 +148,7 @@
       "Write a test asserting rootToPitchClass('A#') === rootToPitchClass('Bb') (enharmonic equivalence)",
       "Write tests asserting ENHARMONIC_PAIRS maps 'A#' to 'Bb', 'Bb' to 'A#', and similarly for all five pairs",
       "Write a test asserting rootToPitchClass throws (or returns undefined) for an unrecognised input like 'X'",
-      "Create src/theory/pitchClass.ts and implement the PitchClass constants, ENHARMONIC_PAIRS, and rootToPitchClass",
+      "Create packages/grigson/src/theory/pitchClass.ts and implement the PitchClass constants, ENHARMONIC_PAIRS, and rootToPitchClass",
       "Run pnpm test to confirm all tests pass"
     ],
     "passes": true
@@ -157,7 +157,7 @@
     "id": "keys",
     "category": "functional",
     "description": "Implement the keys theory module defining diatonic note sets for all 24 in-scope keys",
-    "detail": "src/theory/keys.ts provides: (1) a KEYS record keyed by key name (e.g. 'F', 'Am') with each value containing the 7 diatonic note names as strings; (2) diatonicNotes(key: string): ReadonlySet<string> returning the note set for a given key. All 12 major keys and 10 harmonic minor keys are in scope (G#m and Ebm are excluded because they require double accidentals). The relative field linking each minor key to its relative major (and vice-versa) is also stored, to assist tie-breaking during key detection.",
+    "detail": "packages/grigson/src/theory/keys.ts provides: (1) a KEYS record keyed by key name (e.g. 'F', 'Am') with each value containing the 7 diatonic note names as strings; (2) diatonicNotes(key: string): ReadonlySet<string> returning the note set for a given key. All 12 major keys and 10 harmonic minor keys are in scope (G#m and Ebm are excluded because they require double accidentals). The relative field linking each minor key to its relative major (and vice-versa) is also stored, to assist tie-breaking during key detection.",
     "steps": [
       "Write a test asserting diatonicNotes('C') returns the set {C, D, E, F, G, A, B}",
       "Write a test asserting diatonicNotes('F') returns {F, G, A, Bb, C, D, E}",
@@ -168,7 +168,7 @@
       "Write a test asserting diatonicNotes('Db') returns {Db, Eb, F, Gb, Ab, Bb, C}",
       "Write a test asserting diatonicNotes for an unknown key throws or returns null",
       "Write a test asserting KEYS contains exactly 22 entries (12 major + 10 minor)",
-      "Create src/theory/keys.ts and implement KEYS and diatonicNotes",
+      "Create packages/grigson/src/theory/keys.ts and implement KEYS and diatonicNotes",
       "Run pnpm test to confirm all tests pass"
     ],
     "passes": true
@@ -177,14 +177,14 @@
     "id": "key-detector-cat1",
     "category": "functional",
     "description": "Key detector — Category 1: unambiguous major keys",
-    "detail": "Create src/theory/keyDetector.ts and implement the basic scoring pass: for each of the 22 in-scope keys count how many chord roots (converted to pitch class via rootToPitchClass) are diatonic to that key; return the highest-scoring key name. This initial implementation does not yet need V7 weighting or tie-breaking — the Category 1 progressions are unambiguous enough to be decided by score alone.",
+    "detail": "Create packages/grigson/src/theory/keyDetector.ts and implement the basic scoring pass: for each of the 22 in-scope keys count how many chord roots (converted to pitch class via rootToPitchClass) are diatonic to that key; return the highest-scoring key name. This initial implementation does not yet need V7 weighting or tie-breaking — the Category 1 progressions are unambiguous enough to be decided by score alone.",
     "steps": [
       "Write test T1-a: detectKey([F, Bb, C, F]) === 'F' (F major I-IV-V-I)",
       "Write test T1-b: detectKey([G, D, Em, C]) === 'G' (G major I-V-vi-IV)",
       "Write test T1-c: detectKey([Bb, Eb, F, Bb]) === 'Bb' (Bb major I-IV-V)",
       "Write test T1-d: detectKey([E, A, B, E]) === 'E' (E major I-IV-V; B must not become Cb)",
       "Write test T1-e: detectKey([F#, B, C#, F#]) === 'F#' (F# major I-IV-V)",
-      "Create src/theory/keyDetector.ts and implement detectKey with diatonic-root scoring",
+      "Create packages/grigson/src/theory/keyDetector.ts and implement detectKey with diatonic-root scoring",
       "Run pnpm test to confirm all Category 1 tests pass"
     ],
     "passes": true
@@ -202,7 +202,7 @@
       "Write test T3-e: detectKey([Am, F, C, Am]) === 'Am' (first and last both Am)",
       "Write test T3-f: detectKey([C, Am, F, Am]) === 'Am' (first C, last Am — last wins)",
       "Write test T3-g: detectKey([Bm7b5, E7, Am, Am]) === 'Am' (ii° + V7 = strongest minor signal)",
-      "Extend keyDetector.ts with V7/harmonic-minor detection and last/first-chord tiebreaking",
+      "Extend packages/grigson/src/theory/keyDetector.ts with V7/harmonic-minor detection and last/first-chord tiebreaking",
       "Run pnpm test to confirm all Category 1 and Category 3 tests pass"
     ],
     "passes": true
@@ -216,7 +216,7 @@
       "Write test T4-a: detectKey([Dm, G7, C]) === 'C' (ii-V-I; G7 = V7 of C)",
       "Write test T4-b: detectKey([F, Bb, C7, F]) === 'F' (C7 = V7 of F major)",
       "Write test T4-c: detectKey([D#, A#, F7, A#]) === 'Bb' (F7 = V7 of Bb; D#→Eb, A#→Bb after key confirmed)",
-      "Extend keyDetector.ts to apply V7 dominant weighting during the scoring pass",
+      "Extend packages/grigson/src/theory/keyDetector.ts to apply V7 dominant weighting during the scoring pass",
       "Run pnpm test to confirm all Category 1, 3, and 4 tests pass"
     ],
     "passes": true
@@ -231,7 +231,7 @@
       "Write test T6-b: detectKey([G, D], 'D') === 'D' (declared key D is a valid candidate — preserve it)",
       "Write test T6-c: detectKey([G, D], 'E') === 'G' or 'D' but not 'E' (E scores zero — correct the declared key)",
       "Write test T6-d: detectKey([F, Gm, C]) === 'F' (three chords uniquely identifying F major)",
-      "Extend keyDetector.ts to accept and honour the declaredKey parameter",
+      "Extend packages/grigson/src/theory/keyDetector.ts to accept and honour the declaredKey parameter",
       "Run pnpm test to confirm all Category 1, 3, 4, and 6 tests pass"
     ],
     "passes": true
@@ -259,7 +259,7 @@
       "Write test T9-b: detectKey([Gb, Db, Ebm, Ab]) === 'Gb' (prefer flat spelling over F# major)",
       "Write test T9-c default: detectKey([F#, C#, D#m, B]) === 'F#' (default fSharpOrGFlat = 'f-sharp')",
       "Write test T9-c config: detectKey([F#, C#, D#m, B], null, { fSharpOrGFlat: 'g-flat' }) === 'Gb'",
-      "Extend keyDetector.ts to accept the config parameter and apply the F#/Gb tiebreak rule",
+      "Extend packages/grigson/src/theory/keyDetector.ts to accept the config parameter and apply the F#/Gb tiebreak rule",
       "Run pnpm test to confirm all Category 1, 3, 4, 6, 7, and 9 tests pass"
     ],
     "passes": true
@@ -268,7 +268,7 @@
     "id": "normalise-cat2",
     "category": "functional",
     "description": "normaliseSong — Category 2: enharmonic correction of diatonic chord roots",
-    "detail": "Create src/theory/normalise.ts exporting normaliseSong(song: Song, config?: { fSharpOrGFlat?: 'f-sharp' | 'g-flat' }): Song. The initial implementation calls detectKey and rewrites every chord root that is diatonic to the detected key but spelled with the wrong enharmonic. Non-diatonic (borrowed) roots are left untouched. The function must be pure: it returns a new Song and never mutates its input.",
+    "detail": "Create packages/grigson/src/theory/normalise.ts exporting normaliseSong(song: Song, config?: { fSharpOrGFlat?: 'f-sharp' | 'g-flat' }): Song. The initial implementation calls detectKey and rewrites every chord root that is diatonic to the detected key but spelled with the wrong enharmonic. Non-diatonic (borrowed) roots are left untouched. The function must be pure: it returns a new Song and never mutates its input.",
     "steps": [
       "Write test T2-a: | F | A# | F | C | → A# rewritten to Bb; key detected as F",
       "Write test T2-b: | Bb | D# | F | Bb | → D# rewritten to Eb; key detected as Bb",
@@ -278,7 +278,7 @@
       "Write test T2-f: | D# | A# | F | D# | → D#→Eb, A#→Bb; key detected as Bb",
       "Write a test asserting normaliseSong returns a new Song object (not the same reference as the input)",
       "Write a test asserting normaliseSong is idempotent: calling it twice produces the same output as calling it once",
-      "Create src/theory/normalise.ts and implement normaliseSong with diatonic-root enharmonic rewriting",
+      "Create packages/grigson/src/theory/normalise.ts and implement normaliseSong with diatonic-root enharmonic rewriting",
       "Run pnpm test to confirm all Category 2 tests pass"
     ],
     "passes": true
@@ -308,7 +308,7 @@
       "Write test T8-b: | C | A7 | Dm | G7 | C | — A7 root stays A (diatonic to C major as vi); no root rewrite",
       "Write test T8-c: | C | Bb | F | C | — Bb is borrowed bVII in C major; stays Bb (not A#); key stays C",
       "Write test T8-d: | C | G | Ab | Bb | C | — Ab and Bb are borrowed bVI/bVII in C; both spellings preserved; key stays C",
-      "Extend normaliseSong with next-chord borrowing analysis and flat-fallback for non-diatonic roots",
+      "Extend packages/grigson/src/theory/normalise.ts with next-chord borrowing analysis and flat-fallback for non-diatonic roots",
       "Run pnpm test to confirm all Category 2, 5, and 8 tests pass"
     ],
     "passes": true
@@ -317,16 +317,16 @@
     "id": "cli-scaffold",
     "category": "tooling",
     "description": "Set up the CLI entry point, shebang, and subcommand dispatch",
-    "detail": "Create src/cli.ts as the CLI entry point with a Node.js shebang. Add a 'bin' field to package.json pointing to dist/cli.js. Install a lightweight argument-parsing library. Implement top-level subcommand dispatch and --help output. Unknown subcommands should exit with a non-zero code and a useful error message.",
+    "detail": "Create packages/grigson/src/cli.ts as the CLI entry point with a Node.js shebang. Add a 'bin' field to packages/grigson/package.json pointing to packages/grigson/dist/cli.js. Install a lightweight argument-parsing library. Implement top-level subcommand dispatch and --help output. Unknown subcommands should exit with a non-zero code and a useful error message.",
     "steps": [
       "Install a lightweight argument-parsing library (e.g. minimist or commander) as a dependency",
-      "Create src/cli.ts with a #!/usr/bin/env node shebang and top-level subcommand dispatch",
-      "Add a 'bin' field to package.json: { \"grigson\": \"./dist/cli.js\" }",
-      "Ensure the TypeScript build includes src/cli.ts and emits dist/cli.js",
+      "Create packages/grigson/src/cli.ts with a #!/usr/bin/env node shebang and top-level subcommand dispatch",
+      "Add a 'bin' field to packages/grigson/package.json: { \"grigson\": \"./dist/cli.js\" }",
+      "Ensure the TypeScript build includes packages/grigson/src/cli.ts and emits packages/grigson/dist/cli.js",
       "Implement --help / -h output that lists available subcommands and exits with code 0",
       "Write a test asserting that invoking the CLI with an unknown subcommand exits with a non-zero code",
       "Write a test asserting that invoking the CLI with --help exits with code 0 and prints usage",
-      "Run pnpm build and confirm dist/cli.js is produced with the shebang line intact"
+      "Run pnpm build and confirm packages/grigson/dist/cli.js is produced with the shebang line intact"
     ],
     "passes": true
   },
@@ -342,7 +342,7 @@
       "Write a test asserting that --enharmonic g-flat is forwarded to normaliseSong config",
       "Write a test asserting that -i edits the file in place and produces no stdout",
       "Write a test asserting that -i with no file argument exits with a non-zero code and an error message",
-      "Implement the normalise subcommand handler in src/cli.ts using parseSong, normaliseSong, and TextRenderer",
+      "Implement the normalise subcommand handler in packages/grigson/src/cli.ts using parseSong, normaliseSong, and TextRenderer",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
     "passes": true
@@ -358,7 +358,7 @@
       "Write a test asserting that `grigson render --format text` behaves identically to the default",
       "Write a test asserting that `grigson render --format svg` exits with a non-zero code and a 'not yet implemented' message",
       "Write a test asserting that `grigson render --format unknown` exits with a non-zero code",
-      "Implement the render subcommand handler in src/cli.ts using parseSong and TextRenderer",
+      "Implement the render subcommand handler in packages/grigson/src/cli.ts using parseSong and TextRenderer",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
     "passes": true
@@ -376,7 +376,7 @@
       "Write a test asserting that providing both --semitones and --to exits with a non-zero code",
       "Write a test asserting that providing neither --semitones nor --to exits with a non-zero code",
       "Write a test asserting that `grigson transpose` with no file argument reads from stdin",
-      "Implement the transpose subcommand handler in src/cli.ts using the (not yet available) transposeSong export",
+      "Implement the transpose subcommand handler in packages/grigson/src/cli.ts using the (not yet available) transposeSong export",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
     "passes": false
@@ -385,15 +385,15 @@
     "id": "website-scaffold",
     "category": "tooling",
     "description": "Set up the Eleventy website sub-project structure",
-    "detail": "Create a website/ directory as a self-contained Eleventy project with its own package.json and node_modules. Install @11ty/eleventy as a dev dependency. Add an .eleventy.js config that reads from website/content/, uses website/_includes/ for layouts, and writes to website/_site/. Add a base Nunjucks layout at website/_includes/base.njk with minimal HTML shell (head, nav, main, footer). Add website/_site/ and website/node_modules/ to the root .gitignore. Confirm that running npm run build inside website/ produces the _site/ directory without errors. See project/plans/mossy-honking-star.md for the full design.",
+    "detail": "Create a packages/website/ directory as a self-contained Eleventy project with its own package.json and node_modules. Install @11ty/eleventy as a dev dependency. Add an .eleventy.js config that reads from packages/website/content/, uses packages/website/_includes/ for layouts, and writes to packages/website/_site/. Add a base Nunjucks layout at packages/website/_includes/base.njk with minimal HTML shell (head, nav, main, footer). Add packages/website/_site/ and packages/website/node_modules/ to the root .gitignore. Confirm that running pnpm run build inside packages/website/ produces the _site/ directory without errors. See project/plans/mossy-honking-star.md for the full design.",
     "steps": [
-      "Create website/package.json with name, version, scripts (build: eleventy, serve: eleventy --serve), and @11ty/eleventy as a devDependency",
-      "Create website/.eleventy.js with addPassthroughCopy('assets') and dir config: { input: 'content', includes: '../_includes', output: '_site' }",
-      "Create website/_includes/base.njk with a minimal HTML layout: doctype, head with charset/viewport/title, a nav placeholder, a <main> block for {{ content | safe }}, and a footer",
-      "Add website/_site/ and website/node_modules/ to the root .gitignore",
-      "Run npm install inside website/ and confirm it succeeds",
-      "Create a temporary website/content/index.md with front matter (layout: base.njk, title: grigson) and placeholder body text",
-      "Run npm run build inside website/ and confirm _site/index.html is produced",
+      "Create packages/website/package.json with name, version, scripts (build: eleventy, serve: eleventy --serve), and @11ty/eleventy as a devDependency",
+      "Create packages/website/.eleventy.js with addPassthroughCopy('assets') and dir config: { input: 'content', includes: '../_includes', output: '_site' }",
+      "Create packages/website/_includes/base.njk with a minimal HTML layout: doctype, head with charset/viewport/title, a nav placeholder, a <main> block for {{ content | safe }}, and a footer",
+      "Add packages/website/_site/ and packages/website/node_modules/ to the root .gitignore",
+      "Run pnpm install inside packages/website/ and confirm it succeeds",
+      "Create a temporary packages/website/content/index.md with front matter (layout: base.njk, title: grigson) and placeholder body text",
+      "Run pnpm run build inside packages/website/ and confirm _site/index.html is produced",
       "Remove the temporary index.md (it will be added properly in website-content)"
     ],
     "passes": true
@@ -402,15 +402,15 @@
     "id": "website-content",
     "category": "tooling",
     "description": "Add documentation content pages to the Eleventy website",
-    "detail": "Create website/content/ with five pages: an index.md homepage and four documentation pages derived from the existing documentation/ markdown files. Each page needs Eleventy front matter (layout, title, permalink). The documentation content should be adapted for the web (add front matter, fix relative links if any). Confirm that npm run build inside website/ renders all five pages to _site/. See project/plans/mossy-honking-star.md for the full design.",
+    "detail": "Create packages/website/content/ with five pages: an index.md homepage and four documentation pages derived from the existing documentation/ markdown files. Each page needs Eleventy front matter (layout, title, permalink). The documentation content should be adapted for the web (add front matter, fix relative links if any). Confirm that pnpm run build inside packages/website/ renders all five pages to _site/. See project/plans/mossy-honking-star.md for the full design.",
     "steps": [
-      "Create website/content/index.md: front matter with layout: base.njk, title: grigson, permalink: /; body with a short description of grigson and links to the documentation pages",
-      "Create website/content/format.md: front matter with layout: base.njk, title: Chart Format, permalink: /format/; body copied from documentation/README.md",
-      "Create website/content/cli.md: front matter with layout: base.njk, title: CLI Reference, permalink: /cli/; body copied from documentation/cli.md",
-      "Create website/content/renderer.md: front matter with layout: base.njk, title: Renderer, permalink: /renderer/; body copied from documentation/renderer.md",
-      "Create website/content/testing.md: front matter with layout: base.njk, title: Testing, permalink: /testing/; body copied from documentation/testing.md",
-      "Update website/_includes/base.njk nav to include links to all five pages",
-      "Run npm run build inside website/ and confirm _site/ contains index.html, format/index.html, cli/index.html, renderer/index.html, testing/index.html"
+      "Create packages/website/content/index.md: front matter with layout: base.njk, title: grigson, permalink: /; body with a short description of grigson and links to the documentation pages",
+      "Create packages/website/content/format.md: front matter with layout: base.njk, title: Chart Format, permalink: /format/; body copied from packages/grigson/documentation/README.md",
+      "Create packages/website/content/cli.md: front matter with layout: base.njk, title: CLI Reference, permalink: /cli/; body copied from packages/grigson/documentation/cli.md",
+      "Create packages/website/content/renderer.md: front matter with layout: base.njk, title: Renderer, permalink: /renderer/; body copied from packages/grigson/documentation/renderer.md",
+      "Create packages/website/content/testing.md: front matter with layout: base.njk, title: Testing, permalink: /testing/; body copied from packages/grigson/documentation/testing.md",
+      "Update packages/website/_includes/base.njk nav to include links to all five pages",
+      "Run pnpm run build inside packages/website/ and confirm _site/ contains index.html, format/index.html, cli/index.html, renderer/index.html, testing/index.html"
     ],
     "passes": true
   },
@@ -418,7 +418,7 @@
     "id": "website-deploy",
     "category": "tooling",
     "description": "Add GitHub Actions workflow to deploy the website to GitHub Pages",
-    "detail": "Create .github/workflows/deploy.yml with two jobs: build (checkout, setup-node, npm install in website/, npm run build in website/, upload-pages-artifact from website/_site/) and deploy (deploy-pages). The workflow triggers on push to main. Required permissions: contents: read, pages: write, id-token: write. Note: the GitHub repository must be configured with Settings → Pages → Source: GitHub Actions for this to work. See project/plans/mossy-honking-star.md for the full design.",
+    "detail": "Create .github/workflows/deploy.yml with two jobs: build (checkout, setup-node, pnpm install in packages/website/, pnpm run build in packages/website/, upload-pages-artifact from packages/website/_site/) and deploy (deploy-pages). The workflow triggers on push to main. Required permissions: contents: read, pages: write, id-token: write. Note: the GitHub repository must be configured with Settings → Pages → Source: GitHub Actions for this to work. See project/plans/mossy-honking-star.md for the full design.",
     "steps": [
       "Create .github/workflows/ directory if it does not exist",
       "Create .github/workflows/deploy.yml with the workflow trigger (push to main), permissions block, build job, and deploy job as specified in the plan",
@@ -431,12 +431,12 @@
     "id": "pnpm-workspace",
     "category": "tooling",
     "description": "Set up a pnpm workspace so website can depend on grigson",
-    "detail": "Add a pnpm-workspace.yaml at the repo root listing both '.' and 'website' as packages. Update website/package.json to declare grigson as a dependency using the workspace:* protocol. Run pnpm install from the root to verify the workspace links correctly and that importing from 'grigson' resolves inside website/node_modules.",
+    "detail": "Add a pnpm-workspace.yaml at the repo root listing 'packages/*' as packages. Update packages/website/package.json to declare grigson as a dependency using the workspace:* protocol. Run pnpm install from the root to verify the workspace links correctly and that importing from 'grigson' resolves inside packages/website/node_modules.",
     "steps": [
-      "Create pnpm-workspace.yaml at the repo root with packages: ['.', 'website']",
-      "Add 'grigson': 'workspace:*' to the dependencies field of website/package.json",
+      "Create pnpm-workspace.yaml at the repo root with packages: ['packages/*']",
+      "Add 'grigson': 'workspace:*' to the dependencies field of packages/website/package.json",
       "Run pnpm install from the repo root and confirm it exits cleanly",
-      "Confirm that website/node_modules/grigson is a symlink pointing to the repo root"
+      "Confirm that packages/website/node_modules/grigson is a symlink pointing to packages/grigson"
     ],
     "passes": true
   },
@@ -444,14 +444,14 @@
     "id": "browser-bundle",
     "category": "tooling",
     "description": "Configure Vite library mode in grigson to produce a browser bundle",
-    "detail": "Add Vite as a devDependency to the grigson package. Create src/index.browser.ts as the browser entry point, exporting only the browser-safe API (parseSong, parseChord, TextRenderer — no CLI code). Add vite.config.ts configured for library mode, producing dist/grigson.iife.js (global name 'grigson') and dist/grigson.esm.js. Add a 'build:browser' script to package.json and incorporate it into the main 'build' script. Confirm the IIFE bundle exposes grigson.parseSong and grigson.TextRenderer as globals.",
+    "detail": "Add Vite as a devDependency to the grigson package. Create packages/grigson/src/index.browser.ts as the browser entry point, exporting only the browser-safe API (parseSong, parseChord, TextRenderer — no CLI code). Add packages/grigson/vite.config.ts configured for library mode, producing packages/grigson/dist/grigson.iife.js (global name 'grigson') and packages/grigson/dist/grigson.esm.js. Add a 'build:browser' script to packages/grigson/package.json and incorporate it into the main 'build' script. Confirm the IIFE bundle exposes grigson.parseSong and grigson.TextRenderer as globals.",
     "steps": [
       "Install vite as a devDependency in the grigson package",
-      "Create src/index.browser.ts exporting parseSong, parseChord, and TextRenderer (no CLI imports)",
-      "Create vite.config.ts in library mode: entry src/index.browser.ts, formats ['iife', 'es'], fileName 'grigson', globalName 'grigson', output to dist/",
-      "Add a 'build:browser' script to package.json that runs 'vite build'",
+      "Create packages/grigson/src/index.browser.ts exporting parseSong, parseChord, and TextRenderer (no CLI imports)",
+      "Create packages/grigson/vite.config.ts in library mode: entry src/index.browser.ts, formats ['iife', 'es'], fileName 'grigson', globalName 'grigson', output to dist/",
+      "Add a 'build:browser' script to packages/grigson/package.json that runs 'vite build'",
       "Add 'build:browser' as the final step in the main 'build' script",
-      "Run pnpm build and confirm dist/grigson.iife.js and dist/grigson.esm.js are produced",
+      "Run pnpm build and confirm packages/grigson/dist/grigson.iife.js and packages/grigson/dist/grigson.esm.js are produced",
       "Verify the IIFE bundle exports grigson.parseSong and grigson.TextRenderer (e.g. via node --input-type=module or a quick smoke test)"
     ],
     "passes": true
@@ -460,12 +460,12 @@
     "id": "website-grigson-script",
     "category": "tooling",
     "description": "Wire the grigson browser bundle into the Eleventy website",
-    "detail": "Configure Eleventy to copy the grigson IIFE bundle from the workspace into the website's _site/js/ directory. Add a <script> tag to website/_includes/base.njk that loads /js/grigson.iife.js, making the grigson global available on every page. The copy should source from node_modules/grigson/dist/ (resolved via the pnpm workspace symlink) so it stays in sync with the built library.",
+    "detail": "Configure Eleventy to copy the grigson IIFE bundle from the workspace into the website's _site/js/ directory. Add a <script> tag to packages/website/_includes/base.njk that loads /js/grigson.iife.js, making the grigson global available on every page. The copy should source from packages/website/node_modules/grigson/dist/ (resolved via the pnpm workspace symlink) so it stays in sync with the built library.",
     "steps": [
-      "In website/.eleventy.js, add an addPassthroughCopy mapping node_modules/grigson/dist/grigson.iife.js to js/grigson.iife.js",
-      "Add <script src='/js/grigson.iife.js'></script> to the <head> (or end of <body>) in website/_includes/base.njk",
-      "Run pnpm build in the root (to ensure dist/grigson.iife.js exists), then pnpm build in website/",
-      "Confirm _site/js/grigson.iife.js is present in the built output"
+      "In packages/website/.eleventy.js, add an addPassthroughCopy mapping node_modules/grigson/dist/grigson.iife.js to js/grigson.iife.js",
+      "Add <script src='/js/grigson.iife.js'></script> to the <head> (or end of <body>) in packages/website/_includes/base.njk",
+      "Run pnpm build in the root (to ensure packages/grigson/dist/grigson.iife.js exists), then pnpm build in packages/website/",
+      "Confirm packages/website/_site/js/grigson.iife.js is present in the built output"
     ],
     "passes": true
   },
@@ -473,14 +473,14 @@
     "id": "website-normalise-demo",
     "category": "functional",
     "description": "Add a page showing a before/after normalisation example powered by grigson",
-    "detail": "Create website/content/demo.md (permalink: /demo/) with a hardcoded 'badly formatted' chart example. An inline <script> on the page calls grigson.parseSong() and grigson.normaliseSong() at page load, then writes the normalised output into a <pre> element. The input is shown as static text; the output is injected by the script. This validates that the browser bundle works end-to-end on a real page.",
+    "detail": "Create packages/website/content/demo.md (permalink: /demo/) with a hardcoded 'badly formatted' chart example. An inline <script> on the page calls grigson.parseSong() and grigson.normaliseSong() at page load, then writes the normalised output into a <pre> element. The input is shown as static text; the output is injected by the script. This validates that the browser bundle works end-to-end on a real page.",
     "steps": [
-      "Add normaliseSong to the exports in src/index.browser.ts and rebuild the browser bundle",
-      "Create website/content/demo.md with layout: base.njk, title: Demo, permalink: /demo/",
+      "Add normaliseSong to the exports in packages/grigson/src/index.browser.ts and rebuild the browser bundle",
+      "Create packages/website/content/demo.md with layout: base.njk, title: Demo, permalink: /demo/",
       "Add a hardcoded input chart string, a <pre id='input'> block showing it, and a <pre id='output'> block as the target",
       "Add an inline <script> that calls grigson.parseSong() + grigson.normaliseSong() + grigson.TextRenderer and sets output.textContent",
-      "Add a link to /demo/ in the nav in website/_includes/base.njk",
-      "Run pnpm build in website/ and open _site/demo/index.html to confirm the output is rendered correctly"
+      "Add a link to /demo/ in the nav in packages/website/_includes/base.njk",
+      "Run pnpm build in packages/website/ and open _site/demo/index.html to confirm the output is rendered correctly"
     ],
     "passes": true
   },
@@ -488,15 +488,15 @@
     "id": "website-playground",
     "category": "functional",
     "description": "Add an interactive playground page with live normalisation output",
-    "detail": "Create website/content/playground.md (permalink: /playground/) with a <textarea> for chart input and a <pre> for normalised output. An inline <script> listens to input events on the textarea, calls grigson.parseSong() + grigson.normaliseSong() + TextRenderer on each keystroke, and updates the output element. Parse errors should be caught and displayed as a plain error message rather than crashing the page.",
+    "detail": "Create packages/website/content/playground.md (permalink: /playground/) with a <textarea> for chart input and a <pre> for normalised output. An inline <script> listens to input events on the textarea, calls grigson.parseSong() + grigson.normaliseSong() + TextRenderer on each keystroke, and updates the output element. Parse errors should be caught and displayed as a plain error message rather than crashing the page.",
     "steps": [
-      "Create website/content/playground.md with layout: base.njk, title: Playground, permalink: /playground/",
+      "Create packages/website/content/playground.md with layout: base.njk, title: Playground, permalink: /playground/",
       "Add a <textarea id='input'> with a placeholder chart and a <pre id='output'> for results",
       "Add an inline <script> with an 'input' event listener that calls parseSong → normaliseSong → TextRenderer.render and updates output.textContent",
       "Wrap the processing in a try/catch and display error.message in the output element on parse failure",
       "Pre-populate the textarea with a short example chart containing at least one enharmonic spelling that normalisation will correct",
-      "Add a link to /playground/ in the nav in website/_includes/base.njk",
-      "Run pnpm build in website/ and confirm the page builds; manually verify in a browser that typing updates the output live"
+      "Add a link to /playground/ in the nav in packages/website/_includes/base.njk",
+      "Run pnpm build in packages/website/ and confirm the page builds; manually verify in a browser that typing updates the output live"
     ],
     "passes": false
   }

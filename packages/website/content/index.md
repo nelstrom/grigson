@@ -8,7 +8,7 @@ permalink: /
 
 A plain-text format and toolkit for writing chord charts.
 
-Grigson is named after Lionel Grigson, author of *The Jazz Chord Book*. Source files use the `.chart` extension and look like the charts they describe — pipe characters for bar lines, standard chord names, YAML front matter for metadata.
+Grigson is named after Lionel Grigson, author of _The Jazz Chord Book_. Source files use the `.chart` extension and look like the charts they describe — pipe characters for bar lines, standard chord names, YAML front matter for metadata.
 
 ```
 ---

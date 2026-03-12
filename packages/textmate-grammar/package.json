@@ -1,0 +1,6 @@
+{
+  "name": "grigson-textmate-grammar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TextMate grammar for the Grigson chord chart format"
+}

@@ -1,0 +1,34 @@
+{
+  "name": "vscode-grigson",
+  "displayName": "Grigson Chord Charts",
+  "description": "Syntax highlighting and tools for Grigson .chart files",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "grigson",
+        "aliases": [
+          "Grigson",
+          "grigson"
+        ],
+        "extensions": [
+          ".chart"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "grigson",
+        "scopeName": "source.grigson",
+        "path": "./syntaxes/grigson.tmLanguage.json"
+      }
+    ]
+  }
+}

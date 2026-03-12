@@ -1,9 +1,3 @@
----
-layout: base.njk
-title: CLI Reference
-permalink: /cli/
----
-
 # grigson CLI
 
 The `grigson` command-line tool processes `.chart` files. It reads from a file argument or stdin, and writes to stdout by default, making it suitable for use in shell pipelines.
@@ -58,11 +52,11 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option | Description |
-|---|---|
-| `--key <key>` | Hint or override the detected key (e.g. `--key F`, `--key Am`) |
-| `--enharmonic <f-sharp\|g-flat>` | Prefer `F#` or `Gb` when the two are tied (default: `f-sharp`) |
-| `-i`, `--in-place` | Edit the file in place instead of writing to stdout (requires a file argument) |
+| Option                           | Description                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `--key <key>`                    | Hint or override the detected key (e.g. `--key F`, `--key Am`)                 |
+| `--enharmonic <f-sharp\|g-flat>` | Prefer `F#` or `Gb` when the two are tied (default: `f-sharp`)                 |
+| `-i`, `--in-place`               | Edit the file in place instead of writing to stdout (requires a file argument) |
 
 **Examples**
 
@@ -88,10 +82,10 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option | Description |
-|---|---|
+| Option            | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
 | `--semitones <n>` | Transpose up (positive) or down (negative) by `n` semitones |
-| `--to <key>` | Transpose to a target key (e.g. `--to G`, `--to Bbm`) |
+| `--to <key>`      | Transpose to a target key (e.g. `--to G`, `--to Bbm`)       |
 
 Exactly one of `--semitones` or `--to` is required.
 
@@ -118,8 +112,8 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option | Description |
-|---|---|
+| Option              | Description                              |
+| ------------------- | ---------------------------------------- |
 | `--format <format>` | Output format: `text` (default) or `svg` |
 
 **Examples**

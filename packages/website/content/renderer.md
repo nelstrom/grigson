@@ -90,20 +90,31 @@ const config = {
 
 Because the output is SVG, fonts and colours are controlled via CSS rather than through renderer configuration. The SVG renderer applies class names to its elements so they can be targeted from a stylesheet:
 
-| Element | Class |
-|---|---|
-| Chord root (e.g. the "C" in "Cm7") | `.grigson-chord-root` |
-| Chord suffix (e.g. "m7" in "Cm7") | `.grigson-chord-suffix` |
-| Section label (e.g. "Verse") | `.grigson-section-label` |
-| Time signature | `.grigson-time-signature` |
-| Volta bracket label (e.g. "1.") | `.grigson-volta-label` |
+| Element                            | Class                     |
+| ---------------------------------- | ------------------------- |
+| Chord root (e.g. the "C" in "Cm7") | `.grigson-chord-root`     |
+| Chord suffix (e.g. "m7" in "Cm7")  | `.grigson-chord-suffix`   |
+| Section label (e.g. "Verse")       | `.grigson-section-label`  |
+| Time signature                     | `.grigson-time-signature` |
+| Volta bracket label (e.g. "1.")    | `.grigson-volta-label`    |
 
 Example:
 
 ```css
-.grigson-chord-root   { font-family: serif; font-size: 18px; font-weight: bold; }
-.grigson-chord-suffix { font-family: serif; font-size: 14px; }
-.grigson-section-label { font-family: sans-serif; font-size: 13px; font-weight: bold; }
+.grigson-chord-root {
+  font-family: serif;
+  font-size: 18px;
+  font-weight: bold;
+}
+.grigson-chord-suffix {
+  font-family: serif;
+  font-size: 14px;
+}
+.grigson-section-label {
+  font-family: sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+}
 ```
 
 ### `transpose`
@@ -136,23 +147,31 @@ Suppose the source chart is in G. All of the following renderer configs produce 
 
 ```javascript
 // Option 1: name the target key
-{ transpose: { toKey: 'A' } }
+{
+  transpose: {
+    toKey: 'A';
+  }
+}
 
 // Option 2: specify the interval
-{ transpose: { semitones: 2 } }
+{
+  transpose: {
+    semitones: 2;
+  }
+}
 ```
 
 If the source chart has per-section key overrides, transposition applies to each section independently. For example, if verse is in `Eb` and chorus is in `Ab`, and you transpose `toKey: 'F'`, the verse will render in F and the chorus in Bb.
 
 #### Common transposition use cases
 
-| Use case | Config |
-|---|---|
-| Concert pitch (no transposition) | *(omit `transpose`)* |
-| Bb instrument (e.g. trumpet, clarinet) | `{ semitones: 2 }` |
-| Eb instrument (e.g. alto sax) | `{ semitones: -3 }` |
-| Guitar capo 2 | `{ semitones: -2 }` |
-| Guitar capo 4 | `{ semitones: -4 }` |
+| Use case                               | Config               |
+| -------------------------------------- | -------------------- |
+| Concert pitch (no transposition)       | _(omit `transpose`)_ |
+| Bb instrument (e.g. trumpet, clarinet) | `{ semitones: 2 }`   |
+| Eb instrument (e.g. alto sax)          | `{ semitones: -3 }`  |
+| Guitar capo 2                          | `{ semitones: -2 }`  |
+| Guitar capo 4                          | `{ semitones: -4 }`  |
 
 ---
 
@@ -197,11 +216,11 @@ notation: {
 
 #### Built-in presets
 
-| Preset | Minor | Maj7 | Half-dim | Dim |
-|---|---|---|---|---|
-| `jazz` (default) | `m` | `M7` | `m7b5` | `dim` |
-| `pop` | `m` | `maj7` | `m7b5` | `dim` |
-| `symbolic` | `-` | `Δ` | `ø` | `°` |
+| Preset           | Minor | Maj7   | Half-dim | Dim   |
+| ---------------- | ----- | ------ | -------- | ----- |
+| `jazz` (default) | `m`   | `M7`   | `m7b5`   | `dim` |
+| `pop`            | `m`   | `maj7` | `m7b5`   | `dim` |
+| `symbolic`       | `-`   | `Δ`    | `ø`      | `°`   |
 
 ---
 

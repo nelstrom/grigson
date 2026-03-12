@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Grigson",
+  "scopeName": "source.grigson",
+  "patterns": [
+    {
+      "include": "#main"
+    }
+  ],
+  "repository": {
+    "main": {
+      "patterns": [
+        {
+          "include": "#barline"
+        }
+      ]
+    },
+    "barline": {
+      "patterns": [
+        {
+          "match": "\\|",
+          "name": "punctuation.definition.barline.grigson"
+        }
+      ]
+    }
+  }
+}

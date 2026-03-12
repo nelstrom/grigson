@@ -6,7 +6,7 @@ The grigson documentation website is deployed to GitHub Pages automatically on e
 
 The workflow at `.github/workflows/deploy.yml` has two jobs:
 
-1. **build** — checks out the repo, installs dependencies in `website/`, runs `npm run build`, and uploads `website/_site/` as a Pages artifact.
+1. **build** — checks out the repo, installs dependencies in `packages/website/`, runs `npm run build`, and uploads `packages/website/_site/` as a Pages artifact.
 2. **deploy** — takes the uploaded artifact and deploys it to GitHub Pages.
 
 ## Prerequisites
@@ -21,10 +21,10 @@ Without this setting the deploy job will fail with a permissions error.
 
 The workflow requests the minimum permissions required:
 
-| Permission | Purpose |
-|---|---|
-| `contents: read` | Checkout the repository |
-| `pages: write` | Upload and deploy Pages artifacts |
+| Permission        | Purpose                           |
+| ----------------- | --------------------------------- |
+| `contents: read`  | Checkout the repository           |
+| `pages: write`    | Upload and deploy Pages artifacts |
 | `id-token: write` | OIDC token for trusted deployment |
 
 ## Local preview
@@ -32,7 +32,7 @@ The workflow requests the minimum permissions required:
 To preview the site locally before pushing:
 
 ```sh
-cd website
+cd packages/website
 npm install
 npm run serve
 ```

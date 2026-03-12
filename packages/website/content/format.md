@@ -1,9 +1,12 @@
+---
+layout: base.njk
+title: Chart Format
+permalink: /format/
+---
+
 # Grigson Format Reference
 
-> See also: [Renderer Documentation](renderer.md) — configuration, transposition, notation styles, and custom renderers.
-> See also: [Testing Strategy](testing.md) — test runner, conventions, and what is tested at each layer.
-
-Grigson is a plain-text format for writing chord charts, named after Lionel Grigson, author of *The Jazz Chord Book*. It is designed so that the source text closely resembles the rendered output, and so that the **form of a song** (AABA, verse/chorus, 12-bar blues, etc.) is apparent at a glance.
+Grigson is a plain-text format for writing chord charts, named after Lionel Grigson, author of _The Jazz Chord Book_. It is designed so that the source text closely resembles the rendered output, and so that the **form of a song** (AABA, verse/chorus, 12-bar blues, etc.) is apparent at a glance.
 
 Grigson source files use the `.chart` extension.
 
@@ -48,13 +51,13 @@ key: Ab
 
 Front matter is written in YAML. All fields are optional.
 
-| Field | Type | Description |
-|---|---|---|
-| `title` | string | Title of the song |
-| `artist` | string | Composer or artist name |
-| `key` | string | Global key (see Key Notation below) |
-| `tempo` | integer | Tempo in BPM |
-| `feel` | string | e.g. `"swing"`, `"latin"`, `"waltz"` |
+| Field    | Type    | Description                          |
+| -------- | ------- | ------------------------------------ |
+| `title`  | string  | Title of the song                    |
+| `artist` | string  | Composer or artist name              |
+| `key`    | string  | Global key (see Key Notation below)  |
+| `tempo`  | integer | Tempo in BPM                         |
+| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"` |
 
 ---
 
@@ -78,13 +81,13 @@ Section names can be anything: `[A]`, `[Verse]`, `[Chorus]`, `[Intro]`, `[Bridge
 
 A key is a root note followed by an optional mode name:
 
-| Example | Meaning |
-|---|---|
-| `F` | F major |
-| `Em` | E minor (lowercase `m`) |
-| `Bb` | Bb major |
-| `F# dorian` | F# Dorian |
-| `G mixolydian` | G Mixolydian |
+| Example        | Meaning                 |
+| -------------- | ----------------------- |
+| `F`            | F major                 |
+| `Em`           | E minor (lowercase `m`) |
+| `Bb`           | Bb major                |
+| `F# dorian`    | F# Dorian               |
+| `G mixolydian` | G Mixolydian            |
 
 Supported modes: `major`, `minor`, `dorian`, `phrygian`, `lydian`, `mixolydian`, `aeolian`, `locrian`.
 
@@ -105,15 +108,15 @@ A time signature appears immediately after the first barline it applies to, and 
 
 ## Barlines
 
-| Symbol | Meaning |
-|---|---|
-| `\|` | Single barline |
-| `\|\|` | Double barline |
-| `\|\|.` | Final barline (thick) |
-| `\|\|:` | Start repeat |
-| `:\|\|` | End repeat |
+| Symbol    | Meaning                  |
+| --------- | ------------------------ |
+| `\|`      | Single barline           |
+| `\|\|`    | Double barline           |
+| `\|\|.`   | Final barline (thick)    |
+| `\|\|:`   | Start repeat             |
+| `:\|\|`   | End repeat               |
 | `:\|\|x3` | End repeat, play 3 times |
-| `:\|\|:` | End and start repeat |
+| `:\|\|:`  | End and start repeat     |
 
 A row of measures begins and ends with a barline. There is no implicit barline at the start of a line; you must write it.
 
@@ -128,25 +131,25 @@ A row of measures begins and ends with a barline. There is no implicit barline a
 
 Chord names follow standard notation. The root note is a capital letter (A–G) followed by an optional accidental (`b` for flat, `#` for sharp).
 
-| Example | Chord |
-|---|---|
-| `C` | C major |
-| `Cm` | C minor |
-| `C7` | C dominant seventh |
-| `CM7` | C major seventh |
-| `Cm7` | C minor seventh |
-| `CmM7` | C minor-major seventh |
-| `Cm7b5` | C half-diminished (m7 flat 5) |
-| `Cdim` | C diminished |
-| `Cdim7` | C diminished seventh |
-| `C+` | C augmented |
-| `Csus4` | C suspended fourth |
-| `Cadd9` | C add ninth |
-| `C9`, `C11`, `C13` | Dominant extensions |
-| `CM9`, `CM11`, `CM13` | Major extensions |
-| `C7b9`, `C7#11` | Altered tensions |
-| `C/G` | C over G bass |
-| `/G` | G bass only (root unchanged) |
+| Example               | Chord                         |
+| --------------------- | ----------------------------- |
+| `C`                   | C major                       |
+| `Cm`                  | C minor                       |
+| `C7`                  | C dominant seventh            |
+| `CM7`                 | C major seventh               |
+| `Cm7`                 | C minor seventh               |
+| `CmM7`                | C minor-major seventh         |
+| `Cm7b5`               | C half-diminished (m7 flat 5) |
+| `Cdim`                | C diminished                  |
+| `Cdim7`               | C diminished seventh          |
+| `C+`                  | C augmented                   |
+| `Csus4`               | C suspended fourth            |
+| `Cadd9`               | C add ninth                   |
+| `C9`, `C11`, `C13`    | Dominant extensions           |
+| `CM9`, `CM11`, `CM13` | Major extensions              |
+| `C7b9`, `C7#11`       | Altered tensions              |
+| `C/G`                 | C over G bass                 |
+| `/G`                  | G bass only (root unchanged)  |
 
 ---
 
@@ -221,14 +224,12 @@ In the source, each bar is written out individually. The renderer may choose to 
 
 Repeat signs are expressed as part of the barline:
 
-| Symbol | Meaning |
-|---|---|
-| `\|\|:` | Start repeat |
-| `:\|\|` | End repeat (play twice by default) |
-| `:\|\|x3` | End repeat, play 3 times |
-| `:\|\|:` | End repeat and immediately start a new repeat |
-
-These are the same barline symbols described in the Barlines section above; they are listed here again for completeness alongside volta brackets.
+| Symbol    | Meaning                                       |
+| --------- | --------------------------------------------- |
+| `\|\|:`   | Start repeat                                  |
+| `:\|\|`   | End repeat (play twice by default)            |
+| `:\|\|x3` | End repeat, play 3 times                      |
+| `:\|\|:`  | End repeat and immediately start a new repeat |
 
 ### Volta brackets
 
@@ -239,7 +240,7 @@ Volta brackets (first-time / second-time endings) are written by placing a brack
 [2.] F | C ||.
 ```
 
-The label can be any short text: `[1.]`, `[2.]`, `[1.-3.]`, `[2.-4.]`, etc. The bracket applies to the bar it opens and continues until the next barline that ends or restarts the repeat.
+The label can be any short text: `[1.]`, `[2.]`, `[1.-3.]`, `[2.-4.]`, etc.
 
 A typical use with a two-bar ending:
 
