@@ -69,3 +69,17 @@ describe('detectKey — Category 3: major/minor disambiguation', () => {
     expect(detectKey([hd('B'), dom7('E'), min('A'), min('A')])).toBe('Am');
   });
 });
+
+describe('detectKey — Category 4: V7 as a strong tonic anchor', () => {
+  it('T4-a: ii-V-I; G7 = V7 of C', () => {
+    expect(detectKey([min('D'), dom7('G'), maj('C')])).toBe('C');
+  });
+
+  it('T4-b: C7 = V7 of F major', () => {
+    expect(detectKey([maj('F'), maj('Bb'), dom7('C'), maj('F')])).toBe('F');
+  });
+
+  it('T4-c: F7 = V7 of Bb; D#→Eb, A#→Bb after key confirmed', () => {
+    expect(detectKey([maj('D#'), maj('A#'), dom7('F'), maj('A#')])).toBe('Bb');
+  });
+});
