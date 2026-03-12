@@ -482,7 +482,7 @@
       "Add a link to /demo/ in the nav in website/_includes/base.njk",
       "Run pnpm build in website/ and open _site/demo/index.html to confirm the output is rendered correctly"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-playground",

@@ -84,3 +84,6 @@ Installed vite 8.0.0 as a devDependency at the workspace root. Created src/index
 
 ## website-grigson-script
 Added an addPassthroughCopy mapping in website/.eleventy.js that copies node_modules/grigson/dist/grigson.iife.js to js/grigson.iife.js in the built site (the source resolves through the pnpm workspace symlink, so it always reflects the latest build). Added a <script src="/js/grigson.iife.js"></script> tag to the <head> in website/_includes/base.njk, making the grigson global available on every page. Confirmed that running pnpm build at the root followed by pnpm build in website/ produces _site/js/grigson.iife.js. All 122 existing tests continue to pass.
+
+## website-normalise-demo
+Created website/content/demo.md with a hardcoded "badly spelled" chord chart (A# in F major) and an inline <script> block. The script uses the grigson browser bundle (loaded via the base.njk layout) to parse, normalise, and render the chart into an output <pre> element on DOMContentLoaded. Added a "Demo" link to the nav in website/_includes/base.njk. Confirmed that building the website produces the demo/index.html with the correct structure and script content. Updated documentation/browser-bundle.md to reference the new interactive demo. All 122 existing tests pass.

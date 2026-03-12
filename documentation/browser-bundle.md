@@ -61,6 +61,12 @@ eleventyConfig.addPassthroughCopy({
 
 This makes the `grigson` global available to all inline scripts on the site.
 
+## Interactive Demo
+
+The website includes an interactive demo page (at `/demo/`) that illustrates real-time normalisation using the browser bundle. It loads a "badly spelled" chord chart, parses it, normalises it, and renders the result into a `<pre>` element on page load.
+
+A live playground (at `/playground/`) is also available for testing arbitrary charts.
+
 ## Build configuration
 
 The bundle is configured in `vite.config.ts`:
