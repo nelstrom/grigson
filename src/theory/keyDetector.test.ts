@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectKey } from './keyDetector.js';
+import { detectKey, type DetectKeyConfig } from './keyDetector.js';
 import type { Chord } from '../parser/types.js';
 
 function maj(root: string): Chord {
@@ -115,5 +115,25 @@ describe('detectKey — Category 7: robustness to non-diatonic and chromatic cho
 
   it('T7-c: chromatic ascent — no key fits majority → null', () => {
     expect(detectKey([maj('C'), maj('Db'), maj('D'), maj('Eb')])).toBeNull();
+  });
+});
+
+describe('detectKey — Category 9: enharmonic boundary keys (Db/C#, Gb/F#)', () => {
+  it('T9-a: all chords diatonic to Db major; stay on flat side', () => {
+    expect(detectKey([maj('Db'), maj('Ab'), min('Bb'), maj('Gb')])).toBe('Db');
+  });
+
+  it('T9-b: prefer Gb flat spelling over F# major when chords are spelled flat', () => {
+    // Gb(I), Db(V), Ebm(VIm), Abm(IIm) in Gb major; Gb/F# tie on score, Gb root in chord wins
+    expect(detectKey([maj('Gb'), maj('Db'), min('Eb'), min('Ab')])).toBe('Gb');
+  });
+
+  it('T9-c default: detectKey([F#, C#, D#m, B]) === F# (default fSharpOrGFlat = f-sharp)', () => {
+    expect(detectKey([maj('F#'), maj('C#'), min('D#'), maj('B')])).toBe('F#');
+  });
+
+  it('T9-c config: fSharpOrGFlat g-flat overrides spelling preference → Gb', () => {
+    const cfg: DetectKeyConfig = { fSharpOrGFlat: 'g-flat' };
+    expect(detectKey([maj('F#'), maj('C#'), min('D#'), maj('B')], null, cfg)).toBe('Gb');
   });
 });

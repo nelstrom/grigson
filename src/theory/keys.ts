@@ -12,6 +12,7 @@ export const KEYS: Readonly<Record<string, KeyInfo>> = {
   E: { notes: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'], relative: 'C#m' },
   B: { notes: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'] },
   'F#': { notes: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'] },
+  Gb: { notes: ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'] },
   Db: { notes: ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'], relative: 'Bbm' },
   Ab: { notes: ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'], relative: 'Fm' },
   Eb: { notes: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'], relative: 'Cm' },

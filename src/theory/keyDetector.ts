@@ -105,7 +105,28 @@ function breakRelativeTie(major: string, minor: string, chords: Chord[]): string
   return major;
 }
 
-export function detectKey(chords: Chord[], declaredKey?: string | null): string | null {
+export interface DetectKeyConfig {
+  fSharpOrGFlat?: 'f-sharp' | 'g-flat';
+}
+
+function breakFSharpGbTie(chords: Chord[], config?: DetectKeyConfig): string {
+  // If config is explicitly provided, use it
+  if (config?.fSharpOrGFlat === 'g-flat') return 'Gb';
+  if (config?.fSharpOrGFlat === 'f-sharp') return 'F#';
+  // Fall back to chord-root spelling preference
+  const gbCount = chords.filter((c) => c.root === 'Gb').length;
+  const fSharpCount = chords.filter((c) => c.root === 'F#').length;
+  if (gbCount > fSharpCount) return 'Gb';
+  if (fSharpCount > gbCount) return 'F#';
+  // Default to F#
+  return 'F#';
+}
+
+export function detectKey(
+  chords: Chord[],
+  declaredKey?: string | null,
+  config?: DetectKeyConfig,
+): string | null {
   const scores = new Map<string, number>();
   let maxScore = 0;
   let bestKey: string | null = null;
@@ -142,6 +163,15 @@ export function detectKey(chords: Chord[], declaredKey?: string | null): string 
       const major = isMinor ? relative : bestKey;
       const minor = isMinor ? bestKey : relative;
       bestKey = breakRelativeTie(major, minor, chords);
+    }
+  }
+
+  // Handle F#/Gb enharmonic tiebreak
+  const fSharpGbOther = bestKey === 'F#' ? 'Gb' : bestKey === 'Gb' ? 'F#' : null;
+  if (fSharpGbOther !== null) {
+    const otherScore = scores.get(fSharpGbOther) ?? 0;
+    if (otherScore === maxScore) {
+      bestKey = breakFSharpGbTie(chords, config);
     }
   }
 
