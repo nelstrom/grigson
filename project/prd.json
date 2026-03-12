@@ -247,7 +247,7 @@
       "Write test T7-c: detectKey([C, Db, D, Eb]) === null (chromatic ascent — no key fits majority)",
       "Run pnpm test to confirm all Category 1, 3, 4, 6, and 7 tests pass (no implementation changes expected)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "key-detector-cat9",

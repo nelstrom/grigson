@@ -121,6 +121,10 @@ export function detectKey(chords: Chord[], declaredKey?: string | null): string 
 
   if (maxScore === 0 || bestKey === null) return null;
 
+  // Require the best score to average at least 1.5 points per chord (diatonic + quality match).
+  // A fully chromatic progression will not reach this bar even if 3/4 roots happen to be diatonic.
+  if (maxScore < 1.5 * chords.length) return null;
+
   // Preserve declaredKey if it has any diatonic overlap; only override if it scores zero
   if (declaredKey != null) {
     const declaredScore = scores.get(declaredKey) ?? 0;

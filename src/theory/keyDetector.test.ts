@@ -103,3 +103,17 @@ describe('detectKey — Category 6: graceful degradation with sparse data', () =
     expect(detectKey([maj('F'), min('G'), maj('C')])).toBe('F');
   });
 });
+
+describe('detectKey — Category 7: robustness to non-diatonic and chromatic chords', () => {
+  it('T7-a: Ab is chromatic bVI in C; C F G anchor C major', () => {
+    expect(detectKey([maj('C'), maj('F'), maj('Ab'), maj('G')])).toBe('C');
+  });
+
+  it('T7-b: A7 is secondary dominant V7/ii; overall key C', () => {
+    expect(detectKey([maj('C'), dom7('A'), min('D'), dom7('G'), maj('C')])).toBe('C');
+  });
+
+  it('T7-c: chromatic ascent — no key fits majority → null', () => {
+    expect(detectKey([maj('C'), maj('Db'), maj('D'), maj('Eb')])).toBeNull();
+  });
+});
