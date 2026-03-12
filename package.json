@@ -9,9 +9,10 @@
     "grigson": "./dist/cli.js"
   },
   "scripts": {
-    "build": "pnpm run build:grammar && pnpm run build:ts",
+    "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy",
     "build:grammar": "peggy --format es --dts --allowed-start-rules Song,FrontMatter,Row,Bar,Chord -o src/parser/generated.js src/parser/grammar.pegjs",
     "build:ts": "tsc",
+    "build:copy": "cp src/parser/generated.js dist/parser/generated.js",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepare": "pnpm run build:grammar",
