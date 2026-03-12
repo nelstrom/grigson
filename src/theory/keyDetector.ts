@@ -105,12 +105,14 @@ function breakRelativeTie(major: string, minor: string, chords: Chord[]): string
   return major;
 }
 
-export function detectKey(chords: Chord[]): string | null {
+export function detectKey(chords: Chord[], declaredKey?: string | null): string | null {
+  const scores = new Map<string, number>();
   let maxScore = 0;
   let bestKey: string | null = null;
 
   for (const key of Object.keys(KEYS)) {
     const score = computeScore(key, chords);
+    scores.set(key, score);
     if (score > maxScore) {
       maxScore = score;
       bestKey = key;
@@ -119,10 +121,18 @@ export function detectKey(chords: Chord[]): string | null {
 
   if (maxScore === 0 || bestKey === null) return null;
 
+  // Preserve declaredKey if it has any diatonic overlap; only override if it scores zero
+  if (declaredKey != null) {
+    const declaredScore = scores.get(declaredKey) ?? 0;
+    if (declaredScore > 0) {
+      return declaredKey;
+    }
+  }
+
   // If the relative major/minor is within 1 point, apply explicit tiebreaking
   const relative = KEYS[bestKey]?.relative;
   if (relative && KEYS[relative]) {
-    const relativeScore = computeScore(relative, chords);
+    const relativeScore = scores.get(relative) ?? 0;
     if (Math.abs(maxScore - relativeScore) <= 1) {
       const isMinor = bestKey.endsWith('m');
       const major = isMinor ? relative : bestKey;

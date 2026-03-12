@@ -39,3 +39,6 @@ Created src/theory/keys.ts with: a KeyInfo interface (notes array + optional rel
 
 ## key-detector-cat4
 Added 3 Category 4 tests (T4-a through T4-c) to keyDetector.test.ts: ii-V-I (G7=V7 of C), C7=V7 of F, and F7=V7 of Bb with enharmonic roots D#/A#. The existing diatonic-root + quality-bonus scoring (where dominant7 matches the major quality of scale degree V) already resolves all three progressions correctly without additional code changes — the quality bonus on the V7 chord provides sufficient signal. All 78 tests pass.
+
+## key-detector-cat6
+Added optional `declaredKey?: string | null` parameter to `detectKey`. The rule: if declaredKey scores > 0 (any diatonic overlap), return it unchanged; only override it if it scores zero. Also refactored `detectKey` to accumulate all scores into a Map upfront, so the relative-tiebreak lookup reuses cached values instead of recomputing. Added 4 Category 6 tests (T6-a through T6-d): single-chord best-guess, declared-key preservation, declared-key correction when score is zero, and three-chord unambiguous identification. All 82 tests pass.

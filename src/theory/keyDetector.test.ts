@@ -83,3 +83,23 @@ describe('detectKey — Category 4: V7 as a strong tonic anchor', () => {
     expect(detectKey([maj('D#'), maj('A#'), dom7('F'), maj('A#')])).toBe('Bb');
   });
 });
+
+describe('detectKey — Category 6: graceful degradation with sparse data', () => {
+  it('T6-a: single chord, no declared key; best-guess C major', () => {
+    expect(detectKey([maj('C')])).toBe('C');
+  });
+
+  it('T6-b: declared key D is a valid candidate — preserve it', () => {
+    expect(detectKey([maj('G'), maj('D')], 'D')).toBe('D');
+  });
+
+  it('T6-c: E scores zero — correct the declared key to G or D', () => {
+    const result = detectKey([maj('G'), maj('D')], 'E');
+    expect(['G', 'D']).toContain(result);
+    expect(result).not.toBe('E');
+  });
+
+  it('T6-d: three chords uniquely identifying F major', () => {
+    expect(detectKey([maj('F'), min('G'), maj('C')])).toBe('F');
+  });
+});

@@ -234,7 +234,7 @@
       "Extend keyDetector.ts to accept and honour the declaredKey parameter",
       "Run pnpm test to confirm all Category 1, 3, 4, and 6 tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "key-detector-cat7",
