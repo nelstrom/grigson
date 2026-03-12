@@ -43,6 +43,24 @@ Import named exports directly in an ES module context:
 import { parseSong, normaliseSong, TextRenderer } from './grigson.esm.js';
 ```
 
+## Website integration
+
+The Eleventy website (in `website/`) loads the IIFE bundle on every page via the pnpm workspace symlink. In `website/.eleventy.js`:
+
+```js
+eleventyConfig.addPassthroughCopy({
+  'node_modules/grigson/dist/grigson.iife.js': 'js/grigson.iife.js',
+});
+```
+
+`node_modules/grigson` is a symlink to the workspace root, so the copy always reflects the latest `pnpm build` output. The layout at `website/_includes/base.njk` includes:
+
+```html
+<script src="/js/grigson.iife.js"></script>
+```
+
+This makes the `grigson` global available to all inline scripts on the site.
+
 ## Build configuration
 
 The bundle is configured in `vite.config.ts`:

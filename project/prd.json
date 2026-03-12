@@ -467,7 +467,7 @@
       "Run pnpm build in the root (to ensure dist/grigson.iife.js exists), then pnpm build in website/",
       "Confirm _site/js/grigson.iife.js is present in the built output"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-normalise-demo",
