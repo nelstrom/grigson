@@ -49,30 +49,87 @@ function qualityMatches(chordQuality: Quality, expected: Quality | null): boolea
   return false;
 }
 
+function computeScore(key: string, chords: Chord[]): number {
+  const pcToQuality = buildKeyScoreMap(key);
+  let score = 0;
+  for (const chord of chords) {
+    let pc: number;
+    try {
+      pc = rootToPitchClass(chord.root);
+    } catch {
+      continue;
+    }
+    if (pcToQuality.has(pc)) {
+      score += 1; // diatonic root
+      const expectedQuality = pcToQuality.get(pc)!;
+      if (qualityMatches(chord.quality, expectedQuality)) {
+        score += 1; // quality bonus
+      }
+    }
+  }
+  return score;
+}
+
+// When a key and its relative major/minor are within 1 point, apply ordered tiebreakers.
+function breakRelativeTie(major: string, minor: string, chords: Chord[]): string {
+  const minorRootPC = rootToPitchClass(minor.slice(0, -1));
+  const majorRootPC = rootToPitchClass(major);
+
+  // 1. V7 of harmonic minor present → minor wins
+  const v7OfMinorPC = (minorRootPC + 7) % 12;
+  if (chords.some((c) => c.quality === 'dominant7' && rootToPitchClass(c.root) === v7OfMinorPC)) {
+    return minor;
+  }
+
+  // 2. V7 of major present → major wins
+  const v7OfMajorPC = (majorRootPC + 7) % 12;
+  if (chords.some((c) => c.quality === 'dominant7' && rootToPitchClass(c.root) === v7OfMajorPC)) {
+    return major;
+  }
+
+  // 3. Last chord tonic → that key wins
+  if (chords.length > 0) {
+    const lastPC = rootToPitchClass(chords[chords.length - 1].root);
+    if (lastPC === minorRootPC) return minor;
+    if (lastPC === majorRootPC) return major;
+  }
+
+  // 4. First chord tonic → that key wins
+  if (chords.length > 0) {
+    const firstPC = rootToPitchClass(chords[0].root);
+    if (firstPC === minorRootPC) return minor;
+    if (firstPC === majorRootPC) return major;
+  }
+
+  // 5. Prefer major as final fallback
+  return major;
+}
+
 export function detectKey(chords: Chord[]): string | null {
   let maxScore = 0;
   let bestKey: string | null = null;
 
   for (const key of Object.keys(KEYS)) {
-    const pcToQuality = buildKeyScoreMap(key);
-
-    let score = 0;
-    for (const chord of chords) {
-      const pc = rootToPitchClass(chord.root);
-      if (pcToQuality.has(pc)) {
-        score += 1; // diatonic root
-        const expectedQuality = pcToQuality.get(pc)!;
-        if (qualityMatches(chord.quality, expectedQuality)) {
-          score += 1; // quality bonus
-        }
-      }
-    }
-
+    const score = computeScore(key, chords);
     if (score > maxScore) {
       maxScore = score;
       bestKey = key;
     }
   }
 
-  return maxScore === 0 ? null : bestKey;
+  if (maxScore === 0 || bestKey === null) return null;
+
+  // If the relative major/minor is within 1 point, apply explicit tiebreaking
+  const relative = KEYS[bestKey]?.relative;
+  if (relative && KEYS[relative]) {
+    const relativeScore = computeScore(relative, chords);
+    if (Math.abs(maxScore - relativeScore) <= 1) {
+      const isMinor = bestKey.endsWith('m');
+      const major = isMinor ? relative : bestKey;
+      const minor = isMinor ? bestKey : relative;
+      bestKey = breakRelativeTie(major, minor, chords);
+    }
+  }
+
+  return bestKey;
 }

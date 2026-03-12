@@ -205,7 +205,7 @@
       "Extend keyDetector.ts with V7/harmonic-minor detection and last/first-chord tiebreaking",
       "Run pnpm test to confirm all Category 1 and Category 3 tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "key-detector-cat4",
