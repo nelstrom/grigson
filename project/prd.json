@@ -412,7 +412,7 @@
       "Update website/_includes/base.njk nav to include links to all five pages",
       "Run npm run build inside website/ and confirm _site/ contains index.html, format/index.html, cli/index.html, renderer/index.html, testing/index.html"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-deploy",
