@@ -18,24 +18,44 @@ describe('CLI', () => {
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
-  it('exits with code 0 and prints usage for --help', () => {
+  it('exits with code 0 and prints top-level usage for --help', () => {
     const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     runCli(['--help']);
 
     expect(exitSpy).toHaveBeenCalledWith(0);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Subcommands:'));
   });
 
-  it('exits with code 0 and prints usage for -h', () => {
+  it('exits with code 0 and prints top-level usage for -h', () => {
     const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     runCli(['-h']);
 
     expect(exitSpy).toHaveBeenCalledWith(0);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Usage:'));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Subcommands:'));
+  });
+
+  it('exits with code 0 and prints normalise-specific help for normalise --help', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['normalise', '--help']);
+
+    expect(exitSpy).toHaveBeenCalledWith(0);
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('--in-place'));
+  });
+
+  it('exits with code 0 and prints render-specific help for render --help', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['render', '--help']);
+
+    expect(exitSpy).toHaveBeenCalledWith(0);
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('--format'));
   });
 
   it('exits with code 1 when no subcommand is provided', () => {
