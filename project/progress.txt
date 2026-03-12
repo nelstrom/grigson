@@ -87,3 +87,6 @@ Added an addPassthroughCopy mapping in website/.eleventy.js that copies node_mod
 
 ## website-normalise-demo
 Created website/content/demo.md with a hardcoded "badly spelled" chord chart (A# in F major) and an inline <script> block. The script uses the grigson browser bundle (loaded via the base.njk layout) to parse, normalise, and render the chart into an output <pre> element on DOMContentLoaded. Added a "Demo" link to the nav in website/_includes/base.njk. Confirmed that building the website produces the demo/index.html with the correct structure and script content. Updated documentation/browser-bundle.md to reference the new interactive demo. All 122 existing tests pass.
+
+## website-playground
+Created website/content/playground.md with a <textarea> for input and a <pre> for output. Added an inline <script> that uses the grigson browser bundle to live-normalise the chart on every keystroke. The script includes error handling to display parse failures in the output area. Pre-populated the playground with an example chart (A# in F major) that demonstrates automatic enharmonic correction. Added a "Playground" link to the navigation menu in website/_includes/base.njk. Confirmed that running pnpm build in the website sub-project renders the playground/index.html correctly. All 122 existing tests pass.

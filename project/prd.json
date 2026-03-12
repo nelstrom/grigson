@@ -498,6 +498,6 @@
       "Add a link to /playground/ in the nav in packages/website/_includes/base.njk",
       "Run pnpm build in packages/website/ and confirm the page builds; manually verify in a browser that typing updates the output live"
     ],
-    "passes": false
+    "passes": true
   }
 ]
