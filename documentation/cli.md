@@ -2,6 +2,30 @@
 
 The `grigson` command-line tool processes `.chart` files. It reads from a file argument or stdin, and writes to stdout by default, making it suitable for use in shell pipelines.
 
+## Running the CLI
+
+**Installed from the registry**
+
+```sh
+pnpm add --global grigson
+grigson normalise song.chart
+```
+
+**As a developer (from source)**
+
+Build the project first, then either invoke Node directly or link the package globally:
+
+```sh
+pnpm run build
+
+# Run directly via Node
+node dist/cli.js normalise song.chart
+
+# Or link globally so the `grigson` command works
+pnpm link --global
+grigson normalise song.chart
+```
+
 ## Pipeline example
 
 ```sh
@@ -16,7 +40,7 @@ cat file.chart \
 
 ## Subcommands
 
-### `grigson normalise` _(not yet implemented)_
+### `grigson normalise`
 
 Detects the key of a chart and rewrites chord roots to their canonical enharmonic spelling for that key (e.g. `A#` → `Bb` in F major). Updates the `key` field in front matter to match.
 
@@ -76,7 +100,7 @@ cat song.chart | grigson transpose --to Dm    # from stdin
 
 ---
 
-### `grigson render` _(not yet implemented)_
+### `grigson render`
 
 Renders a chart to a specified output format.
 
