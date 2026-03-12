@@ -426,5 +426,78 @@
       "Commit the workflow file"
     ],
     "passes": false
+  },
+  {
+    "id": "pnpm-workspace",
+    "category": "tooling",
+    "description": "Set up a pnpm workspace so website can depend on grigson",
+    "detail": "Add a pnpm-workspace.yaml at the repo root listing both '.' and 'website' as packages. Update website/package.json to declare grigson as a dependency using the workspace:* protocol. Run pnpm install from the root to verify the workspace links correctly and that importing from 'grigson' resolves inside website/node_modules.",
+    "steps": [
+      "Create pnpm-workspace.yaml at the repo root with packages: ['.', 'website']",
+      "Add 'grigson': 'workspace:*' to the dependencies field of website/package.json",
+      "Run pnpm install from the repo root and confirm it exits cleanly",
+      "Confirm that website/node_modules/grigson is a symlink pointing to the repo root"
+    ],
+    "passes": false
+  },
+  {
+    "id": "browser-bundle",
+    "category": "tooling",
+    "description": "Configure Vite library mode in grigson to produce a browser bundle",
+    "detail": "Add Vite as a devDependency to the grigson package. Create src/index.browser.ts as the browser entry point, exporting only the browser-safe API (parseSong, parseChord, TextRenderer — no CLI code). Add vite.config.ts configured for library mode, producing dist/grigson.iife.js (global name 'grigson') and dist/grigson.esm.js. Add a 'build:browser' script to package.json and incorporate it into the main 'build' script. Confirm the IIFE bundle exposes grigson.parseSong and grigson.TextRenderer as globals.",
+    "steps": [
+      "Install vite as a devDependency in the grigson package",
+      "Create src/index.browser.ts exporting parseSong, parseChord, and TextRenderer (no CLI imports)",
+      "Create vite.config.ts in library mode: entry src/index.browser.ts, formats ['iife', 'es'], fileName 'grigson', globalName 'grigson', output to dist/",
+      "Add a 'build:browser' script to package.json that runs 'vite build'",
+      "Add 'build:browser' as the final step in the main 'build' script",
+      "Run pnpm build and confirm dist/grigson.iife.js and dist/grigson.esm.js are produced",
+      "Verify the IIFE bundle exports grigson.parseSong and grigson.TextRenderer (e.g. via node --input-type=module or a quick smoke test)"
+    ],
+    "passes": false
+  },
+  {
+    "id": "website-grigson-script",
+    "category": "tooling",
+    "description": "Wire the grigson browser bundle into the Eleventy website",
+    "detail": "Configure Eleventy to copy the grigson IIFE bundle from the workspace into the website's _site/js/ directory. Add a <script> tag to website/_includes/base.njk that loads /js/grigson.iife.js, making the grigson global available on every page. The copy should source from node_modules/grigson/dist/ (resolved via the pnpm workspace symlink) so it stays in sync with the built library.",
+    "steps": [
+      "In website/.eleventy.js, add an addPassthroughCopy mapping node_modules/grigson/dist/grigson.iife.js to js/grigson.iife.js",
+      "Add <script src='/js/grigson.iife.js'></script> to the <head> (or end of <body>) in website/_includes/base.njk",
+      "Run pnpm build in the root (to ensure dist/grigson.iife.js exists), then pnpm build in website/",
+      "Confirm _site/js/grigson.iife.js is present in the built output"
+    ],
+    "passes": false
+  },
+  {
+    "id": "website-normalise-demo",
+    "category": "functional",
+    "description": "Add a page showing a before/after normalisation example powered by grigson",
+    "detail": "Create website/content/demo.md (permalink: /demo/) with a hardcoded 'badly formatted' chart example. An inline <script> on the page calls grigson.parseSong() and grigson.normaliseSong() at page load, then writes the normalised output into a <pre> element. The input is shown as static text; the output is injected by the script. This validates that the browser bundle works end-to-end on a real page.",
+    "steps": [
+      "Add normaliseSong to the exports in src/index.browser.ts and rebuild the browser bundle",
+      "Create website/content/demo.md with layout: base.njk, title: Demo, permalink: /demo/",
+      "Add a hardcoded input chart string, a <pre id='input'> block showing it, and a <pre id='output'> block as the target",
+      "Add an inline <script> that calls grigson.parseSong() + grigson.normaliseSong() + grigson.TextRenderer and sets output.textContent",
+      "Add a link to /demo/ in the nav in website/_includes/base.njk",
+      "Run pnpm build in website/ and open _site/demo/index.html to confirm the output is rendered correctly"
+    ],
+    "passes": false
+  },
+  {
+    "id": "website-playground",
+    "category": "functional",
+    "description": "Add an interactive playground page with live normalisation output",
+    "detail": "Create website/content/playground.md (permalink: /playground/) with a <textarea> for chart input and a <pre> for normalised output. An inline <script> listens to input events on the textarea, calls grigson.parseSong() + grigson.normaliseSong() + TextRenderer on each keystroke, and updates the output element. Parse errors should be caught and displayed as a plain error message rather than crashing the page.",
+    "steps": [
+      "Create website/content/playground.md with layout: base.njk, title: Playground, permalink: /playground/",
+      "Add a <textarea id='input'> with a placeholder chart and a <pre id='output'> for results",
+      "Add an inline <script> with an 'input' event listener that calls parseSong → normaliseSong → TextRenderer.render and updates output.textContent",
+      "Wrap the processing in a try/catch and display error.message in the output element on parse failure",
+      "Pre-populate the textarea with a short example chart containing at least one enharmonic spelling that normalisation will correct",
+      "Add a link to /playground/ in the nav in website/_includes/base.njk",
+      "Run pnpm build in website/ and confirm the page builds; manually verify in a browser that typing updates the output live"
+    ],
+    "passes": false
   }
 ]
