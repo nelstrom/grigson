@@ -396,7 +396,7 @@
       "Run npm run build inside website/ and confirm _site/index.html is produced",
       "Remove the temporary index.md (it will be added properly in website-content)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-content",

@@ -1,0 +1,13 @@
+{
+  "name": "grigson-website",
+  "version": "0.1.0",
+  "description": "Eleventy documentation website for grigson",
+  "type": "module",
+  "scripts": {
+    "build": "eleventy",
+    "serve": "eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

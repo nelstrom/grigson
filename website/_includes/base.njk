@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }} — grigson</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">grigson</a>
+      |
+      <a href="/format/">Chart Format</a>
+      |
+      <a href="/cli/">CLI Reference</a>
+      |
+      <a href="/renderer/">Renderer</a>
+      |
+      <a href="/testing/">Testing</a>
+    </nav>
+    <main>
+      {{ content | safe }}
+    </main>
+    <footer>
+      <p>grigson — a .chart file parser and normaliser</p>
+    </footer>
+  </body>
+</html>

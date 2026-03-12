@@ -66,3 +66,6 @@ Implemented the `grigson normalise` subcommand in src/cli.ts. Added `runNormalis
 
 ## cli-render
 Implemented the `grigson render` subcommand in src/cli.ts. Added `runRender()` which reads input from a file argument or stdin, calls parseSong → TextRenderer.render(), and writes to stdout. Supports --format text (default) and rejects --format svg with a 'not yet implemented' message (exit 1) and any other unknown format value (exit 1). No normalisation is performed — pure parse-and-render. Added 5 acceptance tests. All 120 tests pass.
+
+## website-scaffold
+Created website/ as a self-contained Eleventy sub-project. Added website/package.json (with "type": "module", build/serve scripts, @11ty/eleventy 3.1.2 as devDependency). Created website/.eleventy.js with addPassthroughCopy('assets') and dir config { input: 'content', includes: '../_includes', output: '_site' }. Created website/_includes/base.njk with a minimal HTML shell including doctype, head (charset/viewport/title), nav with links to all five pages, a <main> block rendering {{ content | safe }}, and a footer. Added website/_site/ and website/node_modules/ to the root .gitignore. Confirmed pnpm install and pnpm build succeed (Eleventy 3.1.2 renders output without errors). Temporary index.md was created for the build test then removed. All 122 existing tests continue to pass.
