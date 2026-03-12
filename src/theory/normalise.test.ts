@@ -80,6 +80,35 @@ describe('normaliseSong — Category 2: enharmonic correction of diatonic chord 
   });
 });
 
+describe('normaliseSong — Category 8: borrowed chords and secondary dominants', () => {
+  it('T8-a: Eb7 as V7 of Ab stays Eb7 (not rewritten to D#7)', () => {
+    const s = song([row(ch('F'), ch('Bb'), ch('Eb', 'dominant7'), ch('Ab'))]);
+    const result = normaliseSong(s);
+    expect(result.rows[0].bars[2].chord.root).toBe('Eb');
+  });
+
+  it('T8-b: A7 (secondary dominant V7/ii in C major) root stays A', () => {
+    const s = song([
+      row(ch('C'), ch('A', 'dominant7'), ch('Dm', 'minor'), ch('G', 'dominant7'), ch('C')),
+    ]);
+    const result = normaliseSong(s);
+    expect(result.rows[0].bars[1].chord.root).toBe('A');
+  });
+
+  it('T8-c: Bb borrowed bVII in C major stays Bb (not rewritten to A#)', () => {
+    const s = song([row(ch('C'), ch('Bb'), ch('F'), ch('C'))]);
+    const result = normaliseSong(s);
+    expect(result.rows[0].bars[1].chord.root).toBe('Bb');
+  });
+
+  it('T8-d: Ab and Bb borrowed bVI/bVII in C major; both flat spellings preserved', () => {
+    const s = song([row(ch('C'), ch('G'), ch('Ab'), ch('Bb'), ch('C'))]);
+    const result = normaliseSong(s);
+    expect(result.rows[0].bars[2].chord.root).toBe('Ab');
+    expect(result.rows[0].bars[3].chord.root).toBe('Bb');
+  });
+});
+
 describe('normaliseSong — Category 5: front matter key field read and write', () => {
   it('T5-a: correct key: F preserved; no chord changes', () => {
     const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'F');

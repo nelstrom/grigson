@@ -311,6 +311,6 @@
       "Extend normaliseSong with next-chord borrowing analysis and flat-fallback for non-diatonic roots",
       "Run pnpm test to confirm all Category 2, 5, and 8 tests pass"
     ],
-    "passes": false
+    "passes": true
   }
 ]
