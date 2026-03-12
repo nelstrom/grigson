@@ -281,7 +281,7 @@
       "Create src/theory/normalise.ts and implement normaliseSong with diatonic-root enharmonic rewriting",
       "Run pnpm test to confirm all Category 2 tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "normalise-cat5",
