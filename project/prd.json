@@ -454,7 +454,7 @@
       "Run pnpm build and confirm dist/grigson.iife.js and dist/grigson.esm.js are produced",
       "Verify the IIFE bundle exports grigson.parseSong and grigson.TextRenderer (e.g. via node --input-type=module or a quick smoke test)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-grigson-script",

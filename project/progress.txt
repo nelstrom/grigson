@@ -78,3 +78,6 @@ Created .github/workflows/deploy.yml with a GitHub Actions workflow triggered on
 
 ## pnpm-workspace
 Created pnpm-workspace.yaml at the repo root listing both '.' (grigson) and 'website' as workspace packages. Added 'grigson': 'workspace:*' to the dependencies field of website/package.json. Ran pnpm install from the root — resolves and links 325 packages cleanly. Confirmed that website/node_modules/grigson is a symlink pointing to the repo root (../..); the grigson package is now available for import inside the website sub-project. All 122 existing tests continue to pass.
+
+## browser-bundle
+Installed vite 8.0.0 as a devDependency at the workspace root. Created src/index.browser.ts exporting parseSong, parseChord, TextRenderer, normaliseSong, and related types — no CLI imports. Created vite.config.ts in library mode with entry src/index.browser.ts, formats ['iife', 'es'], fileName function producing dist/grigson.iife.js and dist/grigson.esm.js, globalName 'grigson', emptyOutDir: false (to avoid clobbering the TypeScript output). Added a 'build:browser' script to package.json and appended it to the main 'build' script. Verified the IIFE bundle exposes grigson.parseSong, grigson.TextRenderer, and grigson.normaliseSong as globals via a Node smoke test. All 122 existing tests continue to pass.

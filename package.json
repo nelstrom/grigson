@@ -9,7 +9,8 @@
     "grigson": "./dist/cli.js"
   },
   "scripts": {
-    "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy",
+    "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy && pnpm run build:browser",
+    "build:browser": "vite build",
     "build:grammar": "peggy --format es --dts --allowed-start-rules Song,FrontMatter,Row,Bar,Chord -o src/parser/generated.js src/parser/grammar.pegjs",
     "build:ts": "tsc",
     "build:copy": "cp src/parser/generated.js dist/parser/generated.js",
@@ -33,6 +34,7 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
+    "vite": "^8.0.0",
     "vitest": "^4.0.18"
   },
   "dependencies": {
