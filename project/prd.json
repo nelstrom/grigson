@@ -380,5 +380,51 @@
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
     "passes": false
+  },
+  {
+    "id": "website-scaffold",
+    "category": "tooling",
+    "description": "Set up the Eleventy website sub-project structure",
+    "detail": "Create a website/ directory as a self-contained Eleventy project with its own package.json and node_modules. Install @11ty/eleventy as a dev dependency. Add an .eleventy.js config that reads from website/content/, uses website/_includes/ for layouts, and writes to website/_site/. Add a base Nunjucks layout at website/_includes/base.njk with minimal HTML shell (head, nav, main, footer). Add website/_site/ and website/node_modules/ to the root .gitignore. Confirm that running npm run build inside website/ produces the _site/ directory without errors. See project/plans/mossy-honking-star.md for the full design.",
+    "steps": [
+      "Create website/package.json with name, version, scripts (build: eleventy, serve: eleventy --serve), and @11ty/eleventy as a devDependency",
+      "Create website/.eleventy.js with addPassthroughCopy('assets') and dir config: { input: 'content', includes: '../_includes', output: '_site' }",
+      "Create website/_includes/base.njk with a minimal HTML layout: doctype, head with charset/viewport/title, a nav placeholder, a <main> block for {{ content | safe }}, and a footer",
+      "Add website/_site/ and website/node_modules/ to the root .gitignore",
+      "Run npm install inside website/ and confirm it succeeds",
+      "Create a temporary website/content/index.md with front matter (layout: base.njk, title: grigson) and placeholder body text",
+      "Run npm run build inside website/ and confirm _site/index.html is produced",
+      "Remove the temporary index.md (it will be added properly in website-content)"
+    ],
+    "passes": false
+  },
+  {
+    "id": "website-content",
+    "category": "tooling",
+    "description": "Add documentation content pages to the Eleventy website",
+    "detail": "Create website/content/ with five pages: an index.md homepage and four documentation pages derived from the existing documentation/ markdown files. Each page needs Eleventy front matter (layout, title, permalink). The documentation content should be adapted for the web (add front matter, fix relative links if any). Confirm that npm run build inside website/ renders all five pages to _site/. See project/plans/mossy-honking-star.md for the full design.",
+    "steps": [
+      "Create website/content/index.md: front matter with layout: base.njk, title: grigson, permalink: /; body with a short description of grigson and links to the documentation pages",
+      "Create website/content/format.md: front matter with layout: base.njk, title: Chart Format, permalink: /format/; body copied from documentation/README.md",
+      "Create website/content/cli.md: front matter with layout: base.njk, title: CLI Reference, permalink: /cli/; body copied from documentation/cli.md",
+      "Create website/content/renderer.md: front matter with layout: base.njk, title: Renderer, permalink: /renderer/; body copied from documentation/renderer.md",
+      "Create website/content/testing.md: front matter with layout: base.njk, title: Testing, permalink: /testing/; body copied from documentation/testing.md",
+      "Update website/_includes/base.njk nav to include links to all five pages",
+      "Run npm run build inside website/ and confirm _site/ contains index.html, format/index.html, cli/index.html, renderer/index.html, testing/index.html"
+    ],
+    "passes": false
+  },
+  {
+    "id": "website-deploy",
+    "category": "tooling",
+    "description": "Add GitHub Actions workflow to deploy the website to GitHub Pages",
+    "detail": "Create .github/workflows/deploy.yml with two jobs: build (checkout, setup-node, npm install in website/, npm run build in website/, upload-pages-artifact from website/_site/) and deploy (deploy-pages). The workflow triggers on push to main. Required permissions: contents: read, pages: write, id-token: write. Note: the GitHub repository must be configured with Settings → Pages → Source: GitHub Actions for this to work. See project/plans/mossy-honking-star.md for the full design.",
+    "steps": [
+      "Create .github/workflows/ directory if it does not exist",
+      "Create .github/workflows/deploy.yml with the workflow trigger (push to main), permissions block, build job, and deploy job as specified in the plan",
+      "Confirm the YAML file is valid (no syntax errors) by running: node -e \"require('js-yaml').load(require('fs').readFileSync('.github/workflows/deploy.yml','utf8'))\" or similar",
+      "Commit the workflow file"
+    ],
+    "passes": false
   }
 ]
