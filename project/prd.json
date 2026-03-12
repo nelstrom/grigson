@@ -328,7 +328,7 @@
       "Write a test asserting that invoking the CLI with --help exits with code 0 and prints usage",
       "Run pnpm build and confirm dist/cli.js is produced with the shebang line intact"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "cli-normalise",
