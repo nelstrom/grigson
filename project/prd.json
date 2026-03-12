@@ -312,5 +312,73 @@
       "Run pnpm test to confirm all Category 2, 5, and 8 tests pass"
     ],
     "passes": true
+  },
+  {
+    "id": "cli-scaffold",
+    "category": "tooling",
+    "description": "Set up the CLI entry point, shebang, and subcommand dispatch",
+    "detail": "Create src/cli.ts as the CLI entry point with a Node.js shebang. Add a 'bin' field to package.json pointing to dist/cli.js. Install a lightweight argument-parsing library. Implement top-level subcommand dispatch and --help output. Unknown subcommands should exit with a non-zero code and a useful error message.",
+    "steps": [
+      "Install a lightweight argument-parsing library (e.g. minimist or commander) as a dependency",
+      "Create src/cli.ts with a #!/usr/bin/env node shebang and top-level subcommand dispatch",
+      "Add a 'bin' field to package.json: { \"grigson\": \"./dist/cli.js\" }",
+      "Ensure the TypeScript build includes src/cli.ts and emits dist/cli.js",
+      "Implement --help / -h output that lists available subcommands and exits with code 0",
+      "Write a test asserting that invoking the CLI with an unknown subcommand exits with a non-zero code",
+      "Write a test asserting that invoking the CLI with --help exits with code 0 and prints usage",
+      "Run pnpm build and confirm dist/cli.js is produced with the shebang line intact"
+    ],
+    "passes": false
+  },
+  {
+    "id": "cli-normalise",
+    "category": "functional",
+    "description": "Implement the `grigson normalise` subcommand",
+    "detail": "The normalise subcommand reads a .chart file (from a file argument or stdin), runs normaliseSong, and writes the result to stdout. Supports --key to override key detection, --enharmonic to control F#/Gb preference, and -i/--in-place to edit the file on disk instead of writing to stdout.",
+    "steps": [
+      "Write a test asserting that `grigson normalise file.chart` writes normalised .chart text to stdout",
+      "Write a test asserting that `grigson normalise` with no file argument reads from stdin",
+      "Write a test asserting that --key <key> overrides key detection (e.g. --key Am)",
+      "Write a test asserting that --enharmonic g-flat is forwarded to normaliseSong config",
+      "Write a test asserting that -i edits the file in place and produces no stdout",
+      "Write a test asserting that -i with no file argument exits with a non-zero code and an error message",
+      "Implement the normalise subcommand handler in src/cli.ts using parseSong, normaliseSong, and TextRenderer",
+      "Run pnpm build && pnpm test to confirm all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "cli-render",
+    "category": "functional",
+    "description": "Implement the `grigson render` subcommand for plain-text output",
+    "detail": "The render subcommand reads a .chart file (from a file argument or stdin), parses it, and writes the rendered output to stdout. The only supported format in this task is 'text' (the default). An unknown --format value should exit with a non-zero code. Unlike normalise, render does not run normaliseSong — it is a pure parse-and-render operation.",
+    "steps": [
+      "Write a test asserting that `grigson render file.chart` writes plain-text .chart to stdout",
+      "Write a test asserting that `grigson render` with no file argument reads from stdin",
+      "Write a test asserting that `grigson render --format text` behaves identically to the default",
+      "Write a test asserting that `grigson render --format svg` exits with a non-zero code and a 'not yet implemented' message",
+      "Write a test asserting that `grigson render --format unknown` exits with a non-zero code",
+      "Implement the render subcommand handler in src/cli.ts using parseSong and TextRenderer",
+      "Run pnpm build && pnpm test to confirm all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "cli-transpose",
+    "category": "functional",
+    "description": "Implement the `grigson transpose` subcommand",
+    "detail": "The transpose subcommand reads a .chart file (from a file argument or stdin), transposes all chords by the specified interval, updates the key field in front matter, and writes the result to stdout. Accepts either --semitones <n> (positive or negative integer) or --to <key>; exactly one must be provided. This task is blocked until the grigson library exports a transposeSong function.",
+    "blocked": true,
+    "steps": [
+      "Write a test asserting that `grigson transpose --semitones 2 file.chart` transposes all chords up a whole step",
+      "Write a test asserting that `grigson transpose --semitones -3 file.chart` transposes down a minor third",
+      "Write a test asserting that `grigson transpose --to G file.chart` transposes to G major",
+      "Write a test asserting that providing both --semitones and --to exits with a non-zero code",
+      "Write a test asserting that providing neither --semitones nor --to exits with a non-zero code",
+      "Write a test asserting that `grigson transpose` with no file argument reads from stdin",
+      "Implement the transpose subcommand handler in src/cli.ts using the (not yet available) transposeSong export",
+      "Run pnpm build && pnpm test to confirm all tests pass"
+    ],
+    "passes": false
   }
 ]
