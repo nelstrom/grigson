@@ -425,7 +425,7 @@
       "Confirm the YAML file is valid (no syntax errors) by running: node -e \"require('js-yaml').load(require('fs').readFileSync('.github/workflows/deploy.yml','utf8'))\" or similar",
       "Commit the workflow file"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "pnpm-workspace",
