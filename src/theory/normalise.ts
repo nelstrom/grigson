@@ -79,7 +79,7 @@ function normaliseChord(chord: Chord, pcToNote: Map<number, string>, nextChord: 
 export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
   const chords: Chord[] = song.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
 
-  const detectedKey = detectKey(chords, null, config);
+  const detectedKey = config?.forceKey ?? detectKey(chords, null, config);
   const pcToNote = detectedKey !== null ? buildPCToNote(detectedKey) : new Map<number, string>();
 
   let chordIndex = 0;

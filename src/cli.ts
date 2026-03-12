@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 import { fileURLToPath } from 'url';
+import fs from 'node:fs';
 import minimist from 'minimist';
+import { parseSong } from './parser/parser.js';
+import { normaliseSong } from './theory/normalise.js';
+import { TextRenderer } from './renderers/text.js';
 
 const SUBCOMMANDS = ['normalise', 'render', 'transpose'] as const;
 type Subcommand = (typeof SUBCOMMANDS)[number];
@@ -16,8 +20,46 @@ Subcommands:
 Options:
   --help, -h   Show this help message and exit`;
 
+function readInput(filePath: string | undefined): string {
+  if (filePath) {
+    return fs.readFileSync(filePath, 'utf8');
+  }
+  return fs.readFileSync(0, 'utf8');
+}
+
+function runNormalise(parsed: minimist.ParsedArgs): void {
+  const filePath = parsed._[1] as string | undefined;
+  const key = parsed['key'] as string | undefined;
+  const enharmonic = parsed['enharmonic'] as string | undefined;
+  const inPlace: boolean = parsed['i'] === true || parsed['in-place'] === true;
+
+  if (inPlace && !filePath) {
+    console.error('Error: -i/--in-place requires a file argument.');
+    process.exit(1);
+    return;
+  }
+
+  const input = readInput(filePath);
+  const song = parseSong(input);
+
+  const config: { fSharpOrGFlat?: 'f-sharp' | 'g-flat'; forceKey?: string } = {};
+  if (key) config.forceKey = key;
+  if (enharmonic === 'g-flat') config.fSharpOrGFlat = 'g-flat';
+  else if (enharmonic === 'f-sharp') config.fSharpOrGFlat = 'f-sharp';
+
+  const normalised = normaliseSong(song, config);
+  const renderer = new TextRenderer();
+  const output = renderer.render(normalised);
+
+  if (inPlace && filePath) {
+    fs.writeFileSync(filePath, output, 'utf8');
+  } else {
+    process.stdout.write(output);
+  }
+}
+
 export function runCli(args: string[]): void {
-  const parsed = minimist(args, { boolean: ['help'], alias: { h: 'help' } });
+  const parsed = minimist(args, { boolean: ['help', 'i', 'in-place'], alias: { h: 'help' } });
 
   if (parsed['help']) {
     console.log(HELP);
@@ -43,8 +85,7 @@ export function runCli(args: string[]): void {
 
   switch (subcommand as Subcommand) {
     case 'normalise':
-      console.error("Error: 'normalise' subcommand not yet implemented.");
-      process.exit(1);
+      runNormalise(parsed);
       break;
     case 'render':
       console.error("Error: 'render' subcommand not yet implemented.");

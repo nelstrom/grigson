@@ -107,6 +107,7 @@ function breakRelativeTie(major: string, minor: string, chords: Chord[]): string
 
 export interface DetectKeyConfig {
   fSharpOrGFlat?: 'f-sharp' | 'g-flat';
+  forceKey?: string;
 }
 
 function breakFSharpGbTie(chords: Chord[], config?: DetectKeyConfig): string {

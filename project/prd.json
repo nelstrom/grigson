@@ -345,7 +345,7 @@
       "Implement the normalise subcommand handler in src/cli.ts using parseSong, normaliseSong, and TextRenderer",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "cli-render",
