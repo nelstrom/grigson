@@ -499,5 +499,60 @@
       "Run pnpm build in packages/website/ and confirm the page builds; manually verify in a browser that typing updates the output live"
     ],
     "passes": true
+  },
+  {
+    "id": "textmate-grammar-full",
+    "category": "tooling",
+    "description": "Complete the TextMate grammar to cover all Grigson syntax",
+    "detail": "Update the TextMate grammar in packages/textmate-grammar/grigson.tmLanguage.json to support all syntax elements defined in the Peggy grammar: front matter delimiters and fields, chord roots and accidentals, and all quality suffixes (m, 7, m7b5). The vscode-extension's copy should be kept in sync.",
+    "steps": [
+      "Add frontmatter repository item with patterns for '---' delimiters and 'key:', 'title:' fields",
+      "Add chord repository item with patterns for NoteLetter (A-G), Accidental (#, b), and Quality suffixes (m, 7, m7b5)",
+      "Update the main patterns to include frontmatter, barline, and chord",
+      "Copy the updated grammar to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Create a sample packages/grigson/documentation/examples/syntax-test.chart using all features and verify highlighting"
+    ],
+    "passes": false
+  },
+  {
+    "id": "playground-shiki",
+    "category": "functional",
+    "description": "Integrate Shiki for highlighted output in the playground",
+    "detail": "Use the Shiki library to apply syntax highlighting to the normalised output in the playground. The highlighter should use the Grigson TextMate grammar to ensure consistent styling with VS Code.",
+    "steps": [
+      "Install shiki as a devDependency in packages/website",
+      "Configure Eleventy to copy packages/textmate-grammar/grigson.tmLanguage.json to _site/js/grigson.tmLanguage.json",
+      "Update packages/website/content/playground.md to load Shiki and register the Grigson language",
+      "Update the playground update() function to use shiki.codeToHtml for the output element",
+      "Add basic CSS for Shiki tokens to ensure the highlighted code is legible"
+    ],
+    "passes": false
+  },
+  {
+    "id": "playground-monaco",
+    "category": "functional",
+    "description": "Replace textarea with Monaco Editor in the playground",
+    "detail": "Improve the input experience in the playground by replacing the basic <textarea> with a Monaco Editor instance. This provides a richer editing environment and sets the stage for grammar-based highlighting.",
+    "steps": [
+      "Install monaco-editor as a devDependency in packages/website",
+      "Configure Eleventy to copy Monaco workers and necessary assets to _site/js/monaco/",
+      "Update packages/website/content/playground.md to replace <textarea> with a <div> container",
+      "Initialize Monaco Editor in the playground script with the default chart content",
+      "Link Monaco's onDidChangeModelContent to the live-normalisation update() logic"
+    ],
+    "passes": false
+  },
+  {
+    "id": "playground-monaco-highlight",
+    "category": "functional",
+    "description": "Enable TextMate-based highlighting in Monaco Editor",
+    "detail": "Use monaco-textmate and vscode-oniguruma to provide full syntax highlighting in the Monaco input editor using the Grigson TextMate grammar.",
+    "steps": [
+      "Install monaco-textmate and vscode-oniguruma as devDependencies in packages/website",
+      "Configure the playground script to initialize vscode-oniguruma with its WASM binary",
+      "Register the Grigson language in Monaco and provide a TextMate grammar provider",
+      "Verify that typing in the Monaco editor now shows full syntax highlighting matching the Shiki output"
+    ],
+    "passes": false
   }
 ]
