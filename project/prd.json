@@ -296,7 +296,7 @@
       "Extend normaliseSong to read and write the song's key field in front matter",
       "Run pnpm test to confirm all Category 2 and Category 5 tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "normalise-cat8",

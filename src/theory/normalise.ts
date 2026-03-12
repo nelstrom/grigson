@@ -32,7 +32,7 @@ function normaliseChord(chord: Chord, pcToNote: Map<number, string>): Chord {
 export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
   const chords: Chord[] = song.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
 
-  const detectedKey = detectKey(chords, song.key, config);
+  const detectedKey = detectKey(chords, null, config);
   if (detectedKey === null) return { ...song };
 
   const pcToNote = buildPCToNote(detectedKey);
@@ -47,5 +47,5 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     ),
   }));
 
-  return { ...song, rows: newRows };
+  return { ...song, key: detectedKey, rows: newRows };
 }

@@ -79,3 +79,31 @@ describe('normaliseSong — Category 2: enharmonic correction of diatonic chord 
     expect(twice).toEqual(once);
   });
 });
+
+describe('normaliseSong — Category 5: front matter key field read and write', () => {
+  it('T5-a: correct key: F preserved; no chord changes', () => {
+    const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'F');
+    const result = normaliseSong(s);
+    expect(result.key).toBe('F');
+    expect(result.rows[0].bars[0].chord.root).toBe('F');
+    expect(result.rows[0].bars[1].chord.root).toBe('Bb');
+  });
+
+  it('T5-b: wrong key: G corrected to F', () => {
+    const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'G');
+    const result = normaliseSong(s);
+    expect(result.key).toBe('F');
+  });
+
+  it('T5-c: no key in front matter; key: G added', () => {
+    const s = song([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))]);
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G');
+  });
+
+  it('T5-d: wrong key: C corrected to F (Bb and Gm not diatonic to C)', () => {
+    const s = song([row(ch('Bb'), ch('F'), ch('C'), ch('Gm', 'minor'))], 'C');
+    const result = normaliseSong(s);
+    expect(result.key).toBe('F');
+  });
+});
