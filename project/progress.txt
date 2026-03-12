@@ -63,3 +63,6 @@ Created src/cli.ts as the CLI entry point with a #!/usr/bin/env node shebang. In
 
 ## cli-normalise
 Implemented the `grigson normalise` subcommand in src/cli.ts. Added `runNormalise()` which reads input from a file argument or stdin (fd 0), calls parseSong → normaliseSong → TextRenderer.render(), and writes to stdout or edits in place with -i/--in-place. Added --key support by extending DetectKeyConfig with an optional `forceKey?: string` field in keyDetector.ts, then using `config?.forceKey ?? detectKey(...)` in normaliseSong to bypass detection when a key is forced. Added --enharmonic support forwarding 'g-flat'/'f-sharp' to config.fSharpOrGFlat. -i without a file argument exits with code 1 and an error message. Added 6 acceptance tests covering all scenarios. All 115 tests pass.
+
+## cli-render
+Implemented the `grigson render` subcommand in src/cli.ts. Added `runRender()` which reads input from a file argument or stdin, calls parseSong → TextRenderer.render(), and writes to stdout. Supports --format text (default) and rejects --format svg with a 'not yet implemented' message (exit 1) and any other unknown format value (exit 1). No normalisation is performed — pure parse-and-render. Added 5 acceptance tests. All 120 tests pass.

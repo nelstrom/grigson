@@ -129,3 +129,67 @@ describe('CLI normalise subcommand', () => {
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('-i'));
   });
 });
+
+describe('CLI render subcommand', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('writes plain-text .chart to stdout when given a file argument', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-render.chart');
+    fs.writeFileSync(tmpFile, '| C | Am | F | G |\n', 'utf8');
+
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['render', tmpFile]);
+
+    const output = stdoutSpy.mock.calls[0][0] as string;
+    expect(output).toContain('| C |');
+    expect(output).toContain('| Am |');
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('reads from stdin when no file argument is given', () => {
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (p === 0) return '| C | Am |\n';
+      throw new Error('unexpected path');
+    });
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['render']);
+
+    expect(stdoutSpy).toHaveBeenCalled();
+  });
+
+  it('behaves identically to default when --format text is specified', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-render-text.chart');
+    fs.writeFileSync(tmpFile, '| G | D | Em | C |\n', 'utf8');
+
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['render', '--format', 'text', tmpFile]);
+
+    const output = stdoutSpy.mock.calls[0][0] as string;
+    expect(output).toContain('| G |');
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('exits with a non-zero code and a not-yet-implemented message for --format svg', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    runCli(['render', '--format', 'svg']);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('not yet implemented'));
+  });
+
+  it('exits with a non-zero code for an unknown --format value', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    runCli(['render', '--format', 'unknown']);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+});

@@ -58,6 +58,28 @@ function runNormalise(parsed: minimist.ParsedArgs): void {
   }
 }
 
+function runRender(parsed: minimist.ParsedArgs): void {
+  const filePath = parsed._[1] as string | undefined;
+  const format = (parsed['format'] as string | undefined) ?? 'text';
+
+  if (format === 'svg') {
+    console.error("Error: '--format svg' is not yet implemented.");
+    process.exit(1);
+    return;
+  }
+
+  if (format !== 'text') {
+    console.error(`Error: Unknown format '${format}'.`);
+    process.exit(1);
+    return;
+  }
+
+  const input = readInput(filePath);
+  const song = parseSong(input);
+  const renderer = new TextRenderer();
+  process.stdout.write(renderer.render(song));
+}
+
 export function runCli(args: string[]): void {
   const parsed = minimist(args, { boolean: ['help', 'i', 'in-place'], alias: { h: 'help' } });
 
@@ -88,8 +110,7 @@ export function runCli(args: string[]): void {
       runNormalise(parsed);
       break;
     case 'render':
-      console.error("Error: 'render' subcommand not yet implemented.");
-      process.exit(1);
+      runRender(parsed);
       break;
     case 'transpose':
       console.error("Error: 'transpose' subcommand not yet implemented.");

@@ -361,7 +361,7 @@
       "Implement the render subcommand handler in src/cli.ts using parseSong and TextRenderer",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "cli-transpose",
