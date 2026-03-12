@@ -438,7 +438,7 @@
       "Run pnpm install from the repo root and confirm it exits cleanly",
       "Confirm that website/node_modules/grigson is a symlink pointing to the repo root"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "browser-bundle",

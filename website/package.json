@@ -7,6 +7,9 @@
     "build": "eleventy",
     "serve": "eleventy --serve"
   },
+  "dependencies": {
+    "grigson": "workspace:*"
+  },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0"
   }

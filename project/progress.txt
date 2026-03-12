@@ -75,3 +75,6 @@ Created five website content pages under website/content/: index.md (homepage wi
 
 ## website-deploy
 Created .github/workflows/deploy.yml with a GitHub Actions workflow triggered on push to main. The workflow has two jobs: build (actions/checkout@v4, actions/setup-node@v4 with Node 20, npm install in website/, npm run build in website/, actions/upload-pages-artifact@v3 from website/_site/) and deploy (actions/deploy-pages@v4, environment: github-pages). Permissions are scoped to contents: read, pages: write, id-token: write. A concurrency group 'pages' prevents overlapping deployments. Note: the GitHub repository must be configured with Settings → Pages → Source: GitHub Actions for the deploy job to succeed. All 122 existing tests continue to pass.
+
+## pnpm-workspace
+Created pnpm-workspace.yaml at the repo root listing both '.' (grigson) and 'website' as workspace packages. Added 'grigson': 'workspace:*' to the dependencies field of website/package.json. Ran pnpm install from the root — resolves and links 325 packages cleanly. Confirmed that website/node_modules/grigson is a symlink pointing to the repo root (../..); the grigson package is now available for import inside the website sub-project. All 122 existing tests continue to pass.
