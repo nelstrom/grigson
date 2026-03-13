@@ -1,4 +1,4 @@
-import type { Song, Row, Bar, Chord } from '../parser/types.js';
+import type { Song, Section, Row, Bar, Chord } from '../parser/types.js';
 import { detectKey, type DetectKeyConfig } from './keyDetector.js';
 import { KEYS } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
@@ -81,20 +81,25 @@ function normaliseChord(
 }
 
 export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
-  const chords: Chord[] = song.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
+  const chords: Chord[] = song.sections.flatMap((section) =>
+    section.rows.flatMap((row) => row.bars.map((bar) => bar.chord)),
+  );
 
   const detectedKey = config?.forceKey ?? detectKey(chords, null, config);
   const pcToNote = detectedKey !== null ? buildPCToNote(detectedKey) : new Map<number, string>();
 
   let chordIndex = 0;
-  const newRows: Row[] = song.rows.map((row) => ({
-    ...row,
-    bars: row.bars.map((bar): Bar => {
-      const nextChord = chordIndex + 1 < chords.length ? chords[chordIndex + 1] : undefined;
-      chordIndex++;
-      return { ...bar, chord: normaliseChord(bar.chord, pcToNote, nextChord) };
-    }),
+  const newSections: Section[] = song.sections.map((section) => ({
+    ...section,
+    rows: section.rows.map((row): Row => ({
+      ...row,
+      bars: row.bars.map((bar): Bar => {
+        const nextChord = chordIndex + 1 < chords.length ? chords[chordIndex + 1] : undefined;
+        chordIndex++;
+        return { ...bar, chord: normaliseChord(bar.chord, pcToNote, nextChord) };
+      }),
+    })),
   }));
 
-  return { ...song, key: detectedKey ?? song.key, rows: newRows };
+  return { ...song, key: detectedKey ?? song.key, sections: newSections };
 }

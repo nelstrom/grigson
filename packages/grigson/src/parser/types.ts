@@ -22,9 +22,15 @@ export interface Row {
   bars: Bar[];
 }
 
+export interface Section {
+  type: 'section';
+  label: string | null;
+  rows: Row[];
+}
+
 export interface Song {
   type: 'song';
   title: string | null;
   key: string | null;
-  rows: Row[];
+  sections: Section[];
 }

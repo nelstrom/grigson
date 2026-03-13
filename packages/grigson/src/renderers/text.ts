@@ -66,8 +66,13 @@ export class TextRenderer {
       parts.push(renderFrontMatter(song.title, song.key));
     }
 
-    for (const row of song.rows) {
-      parts.push(renderRow(row, this.config));
+    for (const section of song.sections) {
+      if (section.label !== null) {
+        parts.push(`[${section.label}]`);
+      }
+      for (const row of section.rows) {
+        parts.push(renderRow(row, this.config));
+      }
     }
 
     return parts.join('\n') + (parts.length > 0 ? '\n' : '');

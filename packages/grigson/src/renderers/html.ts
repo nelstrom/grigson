@@ -72,8 +72,15 @@ export class HtmlRenderer {
       html += renderFrontMatter(song.title, song.key);
     }
 
-    for (const row of song.rows) {
-      html += renderRow(row, this.config);
+    for (const section of song.sections) {
+      html += '<div part="section">';
+      if (section.label !== null) {
+        html += `<div part="section-label">[${section.label}]</div>`;
+      }
+      for (const row of section.rows) {
+        html += renderRow(row, this.config);
+      }
+      html += '</div>';
     }
 
     html += '</div>';

@@ -395,14 +395,13 @@
       "Update any code in normalise.ts, keyDetector.ts, or the CLI that currently iterates Song.rows to iterate Song.sections[n].rows instead",
       "Run pnpm test to confirm all existing and new tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "normalise-per-section",
     "category": "functional",
     "description": "Refactor normaliseSong to operate per section with independent key detection",
-    "detail": "Extract a normaliseSection(chords: Chord[]): { homeKey: string | null; chords: Chord[] } function that detects the key for a given chord sequence and rewrites diatonic roots. Refactor normaliseSong to iterate Song.sections and call normaliseSection on each section's chords independently. The public API of normaliseSong is unchanged. The front-matter key field is set to the home key of the first section. This task is blocked on section-parsing.",
-    "blocked": true,
+    "detail": "Extract a normaliseSection(chords: Chord[]): { homeKey: string | null; chords: Chord[] } function that detects the key for a given chord sequence and rewrites diatonic roots. Refactor normaliseSong to iterate Song.sections and call normaliseSection on each section's chords independently. The public API of normaliseSong is unchanged. The front-matter key field is set to the home key of the first section.",
     "steps": [
       "Write a test asserting that a two-section song (verse in E major, chorus in A major) produces correct enharmonic spellings for each section independently",
       "Write a test asserting that a single-section song (no labels) produces the same result as the current normaliseSong",

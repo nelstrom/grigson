@@ -14,6 +14,9 @@
           "include": "#frontmatter"
         },
         {
+          "include": "#section-label"
+        },
+        {
           "include": "#barline"
         },
         {
@@ -64,6 +67,20 @@
           }
         }
       ]
+    },
+    "section-label": {
+      "match": "^(\\[)([^\\]\\r\\n]+)(\\])\\s*$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.section.begin.grigson"
+        },
+        "2": {
+          "name": "entity.name.section.grigson"
+        },
+        "3": {
+          "name": "punctuation.definition.section.end.grigson"
+        }
+      }
     },
     "barline": {
       "match": "\\|",

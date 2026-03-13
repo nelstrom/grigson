@@ -84,8 +84,10 @@ describe('chord parsing', () => {
       expect(song.type).toBe('song');
       expect(song.title).toBeNull();
       expect(song.key).toBeNull();
-      expect(song.rows).toHaveLength(1);
-      expect(song.rows[0]).toEqual(
+      expect(song.sections).toHaveLength(1);
+      expect(song.sections[0].label).toBeNull();
+      expect(song.sections[0].rows).toHaveLength(1);
+      expect(song.sections[0].rows[0]).toEqual(
         row(bar('C', 'major'), bar('A', 'minor'), bar('F', 'major'), bar('G', 'major')),
       );
     });
@@ -104,19 +106,19 @@ describe('chord parsing', () => {
       const song = parseSong(source);
       expect(song.title).toBe('My Song');
       expect(song.key).toBe('G');
-      expect(song.rows).toHaveLength(2);
+      expect(song.sections[0].rows).toHaveLength(2);
     });
 
     it('ignores blank lines between rows', () => {
       const source = '| C | Am |\n\n| F | G |\n';
       const song = parseSong(source);
-      expect(song.rows).toHaveLength(2);
+      expect(song.sections[0].rows).toHaveLength(2);
     });
 
     it('parses a song with front matter only (no rows)', () => {
       const song = parseSong('---\ntitle: "Empty"\n---\n');
       expect(song.title).toBe('Empty');
-      expect(song.rows).toHaveLength(0);
+      expect(song.sections[0].rows).toHaveLength(0);
     });
   });
 

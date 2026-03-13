@@ -3,18 +3,43 @@
 // Supports: single barlines | only.
 
 Song
-  = frontMatter:FrontMatter? _ rows:SongBody {
+  = frontMatter:FrontMatter? _ sections:SongBody {
       return {
         type: "song",
         title: frontMatter?.title ?? null,
         key: frontMatter?.key ?? null,
-        rows,
+        sections,
       };
     }
 
 SongBody
-  = rows:(Newline / Row)* {
-      return rows.filter(r => r !== null && typeof r === "object");
+  = items:(Newline / SectionLabel / Row)* {
+      const sections = [];
+      let pendingLabel = null;
+      let currentRows = [];
+
+      for (const item of items) {
+        // Skip newlines (strings) and nulls
+        if (typeof item !== "object" || item === null) continue;
+        if (item.type === "sectionLabel") {
+          if (currentRows.length > 0) {
+            sections.push({ type: "section", label: pendingLabel, rows: currentRows });
+            currentRows = [];
+          }
+          pendingLabel = item.label;
+        } else if (item.type === "row") {
+          currentRows.push(item);
+        }
+      }
+
+      // Always push the final section (ensures at least one section exists)
+      sections.push({ type: "section", label: pendingLabel, rows: currentRows });
+      return sections;
+    }
+
+SectionLabel
+  = "[" label:$[^\]\r\n]+ "]" _ Newline? {
+      return { type: "sectionLabel", label: label.trim() };
     }
 
 FrontMatter

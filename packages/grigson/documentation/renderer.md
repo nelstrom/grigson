@@ -55,13 +55,21 @@ const html = renderer.render(song);
 
 // Resulting HTML structure:
 // <div part="song">
-//   <div part="row">
-//     <span part="barline">|</span>
-//     <span part="chord"><span part="chord-root">C</span><span part="chord-suffix"></span></span>
-//     <span part="barline">|</span>
-//     <span part="chord"><span part="chord-root">A</span><span part="chord-suffix">-</span></span>
-//     <span part="barline">|</span>
+//   <div part="section">
+//     <div part="row">
+//       <span part="barline">|</span>
+//       <span part="chord"><span part="chord-root">C</span><span part="chord-suffix"></span></span>
+//       <span part="barline">|</span>
+//       <span part="chord"><span part="chord-root">A</span><span part="chord-suffix">-</span></span>
+//       <span part="barline">|</span>
+//     </div>
 //   </div>
+// </div>
+//
+// When section labels are present, each section includes a label element:
+// <div part="section">
+//   <div part="section-label">[Verse]</div>
+//   <div part="row">...</div>
 // </div>
 ```
 
