@@ -20,9 +20,9 @@ describe('GrigsonChart', () => {
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    const pre = shadowRoot.querySelector('pre');
-    expect(pre).not.toBeNull();
-    expect(pre!.textContent!.trim()).toBe('| C |');
+    const song = shadowRoot.querySelector('[part="song"]');
+    expect(song).not.toBeNull();
+    expect(song!.textContent!.trim()).toBe('| C |');
   });
 
   it('handles empty templates gracefully', async () => {
@@ -74,12 +74,12 @@ describe('GrigsonChart', () => {
     const shadowRoot = element.shadowRoot!;
     const template = element.querySelector('template')!;
     
-    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| C |');
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
     
     template.innerHTML = '| G |';
     element.update();
     
-    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| G |');
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| G |');
   });
 
   it('updates when notation-preset attribute changes', async () => {
@@ -95,17 +95,17 @@ describe('GrigsonChart', () => {
     const shadowRoot = element.shadowRoot!;
     
     // Default (jazz)
-    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
     
     // Change to symbolic
     element.setAttribute('notation-preset', 'symbolic');
     await wait();
-    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| A- | Bø |');
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| A- | Bø |');
     
     // Change back to jazz
     element.setAttribute('notation-preset', 'jazz');
     await wait();
-    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
   });
 
   it('reacts to multiple attribute changes', async () => {
@@ -122,6 +122,60 @@ describe('GrigsonChart', () => {
     element.setAttribute('transpose-semitones', '2'); // Transpose not implemented yet but should trigger update
     await wait();
     
-    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| A- |');
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| A- |');
+  });
+
+  it('renders with part attributes for styling', async () => {
+    document.body.innerHTML = `
+      <grigson-chart>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    
+    expect(shadowRoot.querySelector('[part="row"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="barline"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="chord"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="chord-root"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="chord-suffix"]')).not.toBeNull();
+  });
+
+  it('renders front matter with part attributes', async () => {
+    document.body.innerHTML = `
+      <grigson-chart>
+        <template>---
+title: "Test Song"
+key: C
+---
+| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    
+    expect(shadowRoot.querySelector('[part="frontmatter"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="frontmatter-value"]')).not.toBeNull();
+  });
+
+  it('allows styling via CSS Custom Properties', async () => {
+    document.body.innerHTML = `
+      <style>
+        grigson-chart {
+          --grigson-color: red;
+        }
+      </style>
+      <grigson-chart>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    
+    // Note: getComputedStyle might not work perfectly with happy-dom but we can check if it's applied to the element.
+    const style = window.getComputedStyle(element);
+    expect(style.getPropertyValue('--grigson-color').trim()).toBe('red');
   });
 });

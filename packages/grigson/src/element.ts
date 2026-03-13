@@ -1,5 +1,6 @@
 import { parseSong } from './parser/parser.js';
-import { TextRenderer } from './renderers/text.js';
+import { HtmlRenderer } from './renderers/html.js';
+import { type TextRendererConfig } from './renderers/text.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
@@ -7,13 +8,11 @@ export class GrigsonChart extends HTMLElement {
   }
 
   private _root: ShadowRoot;
-  private _renderer: TextRenderer;
   private _isInitialized = false;
 
   constructor() {
     super();
     this._root = this.attachShadow({ mode: 'open' });
-    this._renderer = new TextRenderer();
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
@@ -29,10 +28,59 @@ export class GrigsonChart extends HTMLElement {
     setTimeout(() => this.update(), 0);
   }
 
+  private _getStyles() {
+    return `
+      :host {
+        display: block;
+        font-family: var(--grigson-font-family, monospace);
+        color: var(--grigson-color, inherit);
+        background: var(--grigson-background, transparent);
+        line-height: var(--grigson-line-height, 1.5);
+        --grigson-barline-color: var(--grigson-color, inherit);
+        --grigson-chord-root-color: var(--grigson-color, inherit);
+        --grigson-chord-suffix-color: var(--grigson-color, inherit);
+        --grigson-frontmatter-color: #888;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :host {
+          --grigson-frontmatter-color: #aaa;
+        }
+      }
+
+      [part="song"] {
+        white-space: pre-wrap;
+      }
+
+      [part="frontmatter"] {
+        color: var(--grigson-frontmatter-color);
+        margin-bottom: 1em;
+      }
+
+      [part="row"] {
+        margin-bottom: 0.5em;
+      }
+
+      [part="barline"] {
+        color: var(--grigson-barline-color);
+        font-weight: bold;
+      }
+
+      [part="chord-root"] {
+        color: var(--grigson-chord-root-color);
+        font-weight: bold;
+      }
+
+      [part="chord-suffix"] {
+        color: var(--grigson-chord-suffix-color);
+      }
+    `;
+  }
+
   update() {
     const template = this.querySelector('template');
     if (!template) {
-      this._root.innerHTML = '<div class="error">Error: No &lt;template&gt; found inside &lt;grigson-chart&gt;.</div>';
+      this._root.innerHTML = `<style>${this._getStyles()}</style><div class="error">Error: No &lt;template&gt; found inside &lt;grigson-chart&gt;.</div>`;
       return;
     }
 
@@ -42,8 +90,8 @@ export class GrigsonChart extends HTMLElement {
       return;
     }
 
-    const config: any = {};
-    const notationPreset = this.getAttribute('notation-preset');
+    const config: TextRendererConfig = {};
+    const notationPreset = this.getAttribute('notation-preset') as any;
     if (notationPreset) {
       config.notation = { preset: notationPreset };
     }
@@ -56,15 +104,14 @@ export class GrigsonChart extends HTMLElement {
       if (transposeSemitones) config.transpose.semitones = parseInt(transposeSemitones, 10);
     }
 
-    // Update renderer instance with new config
-    this._renderer = new TextRenderer(config);
+    const renderer = new HtmlRenderer(config);
 
     try {
       const song = parseSong(content);
-      const rendered = this._renderer.render(song);
-      this._root.innerHTML = `<pre>${rendered}</pre>`;
+      const rendered = renderer.render(song);
+      this._root.innerHTML = `<style>${this._getStyles()}</style>${rendered}`;
     } catch (e: any) {
-      this._root.innerHTML = `<div class="error">Parse Error: ${e.message}</div>`;
+      this._root.innerHTML = `<style>${this._getStyles()}</style><div class="error">Parse Error: ${e.message}</div>`;
     }
   }
 }

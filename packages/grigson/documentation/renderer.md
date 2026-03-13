@@ -42,6 +42,34 @@ The plain text renderer supports notation presets (`jazz`, `pop`, `symbolic`) to
 
 ---
 
+## The HTML Renderer
+
+The HTML renderer produces an HTML string with `part` attributes, designed for use in the `<grigson-chart>` custom element or any scenario where semantic styling of chart elements is required.
+
+```javascript
+import { parseSong } from 'grigson';
+import { HtmlRenderer } from 'grigson/renderers/html';
+
+const song = parseSong('| C | Am |');
+const renderer = new HtmlRenderer({ notation: { preset: 'symbolic' } });
+const html = renderer.render(song);
+
+// Resulting HTML structure:
+// <div part="song">
+//   <div part="row">
+//     <span part="barline">|</span>
+//     <span part="chord"><span part="chord-root">C</span><span part="chord-suffix"></span></span>
+//     <span part="barline">|</span>
+//     <span part="chord"><span part="chord-root">A</span><span part="chord-suffix">-</span></span>
+//     <span part="barline">|</span>
+//   </div>
+// </div>
+```
+
+Elements rendered by `HtmlRenderer` are designed to be styled using the CSS `::part()` pseudo-element.
+
+---
+
 ## The SVG Renderer
 
 The SVG renderer produces an SVG string suitable for embedding in an HTML page.

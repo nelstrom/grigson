@@ -46,9 +46,54 @@ The `<grigson-chart>` element supports the following attributes for configuratio
 | `notation-preset`     | Set the chord notation style: `jazz` (default), `pop`, or `symbolic`.       |
 | `transpose-key`       | Target key for transposition (e.g., `A`).                                   |
 | `transpose-semitones` | Number of semitones to transpose (e.g., `2` for a whole step up).           |
-| `renderer`            | Choose the renderer type: `text` (default).                                 |
+| `renderer`            | Choose the renderer type: `text` (default) or `html`.                      |
 
 Changing these attributes via the DOM (e.g., `element.setAttribute('notation-preset', 'symbolic')`) will automatically re-render the chart.
+
+### CSS API
+
+The `<grigson-chart>` element uses a Shadow DOM and exposes several CSS Custom Properties and Parts for styling:
+
+#### Custom Properties
+
+| Property                       | Description                                | Default     |
+| ------------------------------ | ------------------------------------------ | ----------- |
+| `--grigson-font-family`        | Font family for the entire chart.           | `monospace` |
+| `--grigson-color`              | Base text color.                            | `inherit`   |
+| `--grigson-background`         | Background color.                           | `transparent`|
+| `--grigson-line-height`        | Line height for the chart rows.             | `1.5`       |
+| `--grigson-barline-color`      | Color of the barlines (`|`).                | `--grigson-color`|
+| `--grigson-chord-root-color`   | Color of the chord roots (e.g., `C`).       | `--grigson-color`|
+| `--grigson-chord-suffix-color` | Color of the chord suffixes (e.g., `m7`).   | `--grigson-color`|
+| `--grigson-frontmatter-color`  | Color of the YAML front matter block.       | `#888`      |
+
+#### Shadow Parts
+
+The following elements can be styled using the `::part()` pseudo-element:
+
+| Part                  | Description                                |
+| --------------------- | ------------------------------------------ |
+| `song`                | The container for the entire song.         |
+| `frontmatter`         | The YAML front matter block.               |
+| `frontmatter-value`   | Values within the front matter fields.     |
+| `row`                 | A single row of bars.                      |
+| `barline`             | A single barline.                          |
+| `chord`               | A complete chord symbol.                   |
+| `chord-root`          | The root note of a chord.                  |
+| `chord-suffix`        | The quality suffix of a chord.             |
+
+Example:
+
+```css
+grigson-chart::part(chord-root) {
+  color: #d33;
+  font-weight: bold;
+}
+
+grigson-chart {
+  --grigson-font-family: 'Fira Code', monospace;
+}
+```
 
 The `grigson-register` bundle is separate from the core `grigson` bundle to allow for side-effect-free imports of the library when the custom element is not needed.
 

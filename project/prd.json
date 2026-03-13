@@ -618,7 +618,7 @@
       "Implement prefers-color-scheme media queries in the default styles",
       "Verify that the element respects system dark mode and can be styled via ::part() and CSS variables"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-custom-element-dogfood",

@@ -6,6 +6,7 @@ export type { Song, Row, Bar, Chord, Quality, FrontMatter } from './parser/parse
 
 // Renderer
 export { TextRenderer } from './renderers/text.js';
+export { HtmlRenderer } from './renderers/html.js';
 
 // Normaliser
 export { normaliseSong } from './theory/normalise.js';
