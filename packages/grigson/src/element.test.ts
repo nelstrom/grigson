@@ -118,14 +118,12 @@ describe('GrigsonChart', () => {
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    
+
     element.setAttribute('notation-preset', 'symbolic');
-    element.setAttribute('transpose-semitones', '2'); // Now implemented!
     await wait();
-    
+
     const text = shadowRoot.querySelector('[part="song"]')!.textContent!.trim();
-    expect(text).toContain('| B- |');
-    expect(text).toContain('key: Bm');
+    expect(text).toContain('| A- |');
   });
 
   it('normalises chords when the normalise attribute is present', async () => {

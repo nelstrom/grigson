@@ -1,6 +1,5 @@
 import type { Song, Row, Bar, Chord } from '../parser/types.js';
 import { type TextRendererConfig } from './text.js';
-import { transposeSong } from '../theory/transpose.js';
 
 const DEFAULT_NOTATION = {
   preset: 'jazz',
@@ -67,18 +66,13 @@ export class HtmlRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
-    let targetSong = song;
-    if (this.config.transpose) {
-      targetSong = transposeSong(song, this.config.transpose);
-    }
-
     let html = '<div part="song">';
 
-    if (targetSong.title !== null || targetSong.key !== null) {
-      html += renderFrontMatter(targetSong.title, targetSong.key);
+    if (song.title !== null || song.key !== null) {
+      html += renderFrontMatter(song.title, song.key);
     }
 
-    for (const row of targetSong.rows) {
+    for (const row of song.rows) {
       html += renderRow(row, this.config);
     }
 

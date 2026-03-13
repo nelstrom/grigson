@@ -97,14 +97,6 @@ export class GrigsonChart extends HTMLElement {
       config.notation = { preset: notationPreset };
     }
 
-    const transposeKey = this.getAttribute('transpose-key');
-    const transposeSemitones = this.getAttribute('transpose-semitones');
-    if (transposeKey || transposeSemitones) {
-      config.transpose = {};
-      if (transposeKey) config.transpose.toKey = transposeKey;
-      if (transposeSemitones) config.transpose.semitones = parseInt(transposeSemitones, 10);
-    }
-
     const renderer = new HtmlRenderer(config);
 
     try {
