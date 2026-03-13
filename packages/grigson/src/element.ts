@@ -92,7 +92,7 @@ export class GrigsonChart extends HTMLElement {
     }
 
     const config: TextRendererConfig = {};
-    const notationPreset = this.getAttribute('notation-preset') as any;
+    const notationPreset = this.getAttribute('notation-preset') as TextRendererConfig['notation'] extends { preset?: infer P } ? P : never;
     if (notationPreset) {
       config.notation = { preset: notationPreset };
     }
@@ -114,8 +114,9 @@ export class GrigsonChart extends HTMLElement {
       }
       const rendered = renderer.render(song);
       this._root.innerHTML = `<style>${this._getStyles()}</style>${rendered}`;
-    } catch (e: any) {
-      this._root.innerHTML = `<style>${this._getStyles()}</style><div class="error">Parse Error: ${e.message}</div>`;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      this._root.innerHTML = `<style>${this._getStyles()}</style><div class="error">Parse Error: ${message}</div>`;
     }
   }
 }

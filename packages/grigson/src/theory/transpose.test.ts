@@ -5,7 +5,6 @@ import { Chord, Song } from '../parser/types.js';
 describe('transposeChord', () => {
   const cMaj: Chord = { root: 'C', quality: 'major' };
   const aMin: Chord = { root: 'A', quality: 'minor' };
-  const g7: Chord = { root: 'G', quality: 'dominant7' };
 
   it('transposes up a whole step', () => {
     expect(transposeChord(cMaj, 2)).toEqual({ root: 'D', quality: 'major' });

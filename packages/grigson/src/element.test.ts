@@ -1,6 +1,7 @@
 /** @vitest-environment happy-dom */
 import { describe, it, expect, beforeEach } from 'vitest';
 import './register.js';
+import { GrigsonChart } from './element.js';
 
 describe('GrigsonChart', () => {
   beforeEach(() => {
@@ -70,7 +71,7 @@ describe('GrigsonChart', () => {
       </grigson-chart>
     `;
     await wait();
-    const element = document.querySelector('grigson-chart') as any;
+    const element = document.querySelector('grigson-chart') as GrigsonChart;
     const shadowRoot = element.shadowRoot!;
     const template = element.querySelector('template')!;
     

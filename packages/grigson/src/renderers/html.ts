@@ -9,7 +9,7 @@ const DEFAULT_NOTATION = {
   halfDim: 'm7b5',
 };
 
-const PRESETS: Record<string, any> = {
+const PRESETS: Record<string, Partial<NonNullable<TextRendererConfig['notation']>>> = {
   jazz: { minor: 'm', halfDim: 'm7b5' },
   pop: { minor: 'm', halfDim: 'm7b5' },
   symbolic: { minor: '-', halfDim: 'ø' },
