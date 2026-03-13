@@ -51,6 +51,8 @@ permalink: /playground/
 <script src="/js/monaco/vs/loader.js"></script>
 <script type="module">
   import { createHighlighter } from 'https://esm.sh/shiki@4.0.2';
+  import { loadWASM, createOnigScanner, createOnigString } from 'https://esm.sh/vscode-oniguruma@2.0.1';
+  import { Registry, INITIAL } from 'https://esm.sh/monaco-textmate@3.0.1';
 
   require.config({ paths: { 'vs': '/js/monaco/vs' } });
 
@@ -58,11 +60,29 @@ permalink: /playground/
     const outputContainer = document.getElementById('output-container');
     const renderer = new grigson.TextRenderer();
 
-    let highlighter;
+    // 1. Initialize vscode-oniguruma
+    try {
+      const wasmResponse = await fetch('/js/onig.wasm');
+      const wasmBinary = await wasmResponse.arrayBuffer();
+      await loadWASM(wasmBinary);
+    } catch (e) {
+      console.error('Failed to initialize oniguruma:', e);
+    }
+
+    // 2. Load grammar
+    let grammar;
     try {
       const response = await fetch('/js/grigson.tmLanguage.json');
-      const grammar = await response.json();
+      grammar = await response.json();
+    } catch (e) {
+      console.error('Failed to load grammar:', e);
+      outputContainer.innerHTML = '<div class="error">Failed to load syntax grammar</div>';
+      return;
+    }
 
+    // 3. Setup Shiki
+    let highlighter;
+    try {
       highlighter = await createHighlighter({
         themes: ['nord'],
         langs: [{
@@ -71,14 +91,67 @@ permalink: /playground/
         }]
       });
     } catch (e) {
-      console.error('Failed to load Shiki or grammar:', e);
-      outputContainer.innerHTML = '<div class="error">Failed to load syntax highlighter</div>';
+      console.error('Failed to load Shiki:', e);
     }
+
+    // 4. Setup Monaco TextMate
+    const registry = new Registry({
+      getOnigLib: async () => ({
+        createOnigScanner: (sources) => createOnigScanner(sources),
+        createOnigString: (str) => createOnigString(str),
+      }),
+      getGrammarDefinition: async (scopeName) => {
+        if (scopeName === 'source.grigson') {
+          return {
+            format: 'json',
+            content: grammar
+          };
+        }
+        return null;
+      }
+    });
+
+    monaco.languages.register({ id: 'grigson' });
+    const monacoGrammar = await registry.loadGrammar('source.grigson');
+
+    monaco.languages.setTokensProvider('grigson', {
+      getInitialState: () => INITIAL,
+      tokenize: (line, state) => {
+        const result = monacoGrammar.tokenizeLine(line, state);
+        return {
+          tokens: result.tokens.map(token => ({
+            startIndex: token.startIndex,
+            scopes: token.scopes[token.scopes.length - 1]
+          })),
+          endState: result.ruleStack
+        };
+      }
+    });
+
+    // 5. Define theme
+    monaco.editor.defineTheme('grigson-theme', {
+      base: 'vs-light',
+      inherit: true,
+      rules: [
+        { token: 'punctuation.definition.header.grigson', foreground: 'A0A1A7' },
+        { token: 'variable.parameter.key.grigson', foreground: 'E45649', fontStyle: 'bold' },
+        { token: 'punctuation.separator.key-value.grigson', foreground: '404040' },
+        { token: 'string.quoted.double.grigson', foreground: '50A14F' },
+        { token: 'string.unquoted.grigson', foreground: '50A14F' },
+        { token: 'punctuation.definition.barline.grigson', foreground: 'A0A1A7', fontStyle: 'bold' },
+        { token: 'constant.other.chord.root.grigson', foreground: '4078F2', fontStyle: 'bold' },
+        { token: 'constant.other.chord.accidental.grigson', foreground: '4078F2' },
+        { token: 'keyword.other.chord.quality.grigson', foreground: '986801' },
+      ],
+      colors: {
+        'editor.background': '#FAFAFA',
+      }
+    });
 
     const editor = monaco.editor.create(document.getElementById('input-editor'), {
       value: '---\ntitle: Playground Example\nkey: F\n---\n| F | A# | F | C7 |\n|F|Bb|C|F|\n',
-      language: 'plaintext', // We will add grigson language in the next task
-      theme: 'vs-light',
+      language: 'grigson',
+      theme: 'grigson-theme',
       minimap: { enabled: false },
       automaticLayout: true,
       fontSize: 14,

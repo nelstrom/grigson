@@ -553,7 +553,7 @@
       "Register the Grigson language in Monaco and provide a TextMate grammar provider",
       "Verify that typing in the Monaco editor now shows full syntax highlighting matching the Shiki output"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "custom-element-scaffold",
