@@ -1,10 +1,11 @@
 import { parseSong } from './parser/parser.js';
 import { HtmlRenderer } from './renderers/html.js';
 import { type TextRendererConfig } from './renderers/text.js';
+import { normaliseSong } from './theory/normalise.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
-    return ['renderer', 'transpose-key', 'transpose-semitones', 'notation-preset'];
+    return ['renderer', 'transpose-key', 'transpose-semitones', 'notation-preset', 'normalise'];
   }
 
   private _root: ShadowRoot;
@@ -107,7 +108,10 @@ export class GrigsonChart extends HTMLElement {
     const renderer = new HtmlRenderer(config);
 
     try {
-      const song = parseSong(content);
+      let song = parseSong(content);
+      if (this.hasAttribute('normalise')) {
+        song = normaliseSong(song);
+      }
       const rendered = renderer.render(song);
       this._root.innerHTML = `<style>${this._getStyles()}</style>${rendered}`;
     } catch (e: any) {

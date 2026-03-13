@@ -31,7 +31,6 @@ const song = parse(source);
 const inG = new TextRenderer().render(song);
 
 // Transposed up a tone to A
-// (Note: transposition is currently implemented as a configuration stub)
 const inA = new TextRenderer({ transpose: { toKey: 'A' } }).render(song);
 
 // Using a notation preset

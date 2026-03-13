@@ -138,6 +138,15 @@ export function detectKey(
     if (score > maxScore) {
       maxScore = score;
       bestKey = key;
+    } else if (score === maxScore && maxScore > 0 && bestKey !== null) {
+      // Tie-breaker: prefer tonic match
+      const firstPC = rootToPitchClass(chords[0].root);
+      const currentBestPC = rootToPitchClass(bestKey.replace(/m$/, ''));
+      const candidatePC = rootToPitchClass(key.replace(/m$/, ''));
+      
+      if (candidatePC === firstPC && currentBestPC !== firstPC) {
+        bestKey = key;
+      }
     }
   }
 

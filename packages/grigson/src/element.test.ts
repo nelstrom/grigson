@@ -119,10 +119,29 @@ describe('GrigsonChart', () => {
     const shadowRoot = element.shadowRoot!;
     
     element.setAttribute('notation-preset', 'symbolic');
-    element.setAttribute('transpose-semitones', '2'); // Transpose not implemented yet but should trigger update
+    element.setAttribute('transpose-semitones', '2'); // Now implemented!
     await wait();
     
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| A- |');
+    const text = shadowRoot.querySelector('[part="song"]')!.textContent!.trim();
+    expect(text).toContain('| B- |');
+    expect(text).toContain('key: Bm');
+  });
+
+  it('normalises chords when the normalise attribute is present', async () => {
+    document.body.innerHTML = `
+      <grigson-chart normalise>
+        <template>
+          | F | A# |
+        </template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    
+    // A# in F major (or Bb major) should be normalised to Bb
+    const row = shadowRoot.querySelector('[part="row"]')!;
+    expect(row.textContent!.trim()).toBe('| F | Bb |');
   });
 
   it('renders with part attributes for styling', async () => {

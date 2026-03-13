@@ -2,6 +2,7 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy('assets');
   eleventyConfig.addPassthroughCopy({
     'node_modules/grigson/dist/grigson.iife.js': 'js/grigson.iife.js',
+    'node_modules/grigson/dist/grigson-register.iife.js': 'js/grigson-register.iife.js',
     '../textmate-grammar/grigson.tmLanguage.json': 'js/grigson.tmLanguage.json',
     'node_modules/monaco-editor/min/vs': 'js/monaco/vs',
     'node_modules/vscode-oniguruma/release/onig.wasm': 'js/onig.wasm',

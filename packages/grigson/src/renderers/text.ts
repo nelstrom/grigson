@@ -1,4 +1,5 @@
 import type { Song, Row, Bar, Chord } from '../parser/types.js';
+import { transposeSong } from '../theory/transpose.js';
 
 export interface TextRendererConfig {
   notation?: {
@@ -10,6 +11,7 @@ export interface TextRendererConfig {
   transpose?: {
     toKey?: string;
     semitones?: number;
+    accidentals?: 'sharps' | 'flats';
   };
 }
 
@@ -64,13 +66,18 @@ export class TextRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
-    const parts: string[] = [];
-
-    if (song.title !== null || song.key !== null) {
-      parts.push(renderFrontMatter(song.title, song.key));
+    let targetSong = song;
+    if (this.config.transpose) {
+      targetSong = transposeSong(song, this.config.transpose);
     }
 
-    for (const row of song.rows) {
+    const parts: string[] = [];
+
+    if (targetSong.title !== null || targetSong.key !== null) {
+      parts.push(renderFrontMatter(targetSong.title, targetSong.key));
+    }
+
+    for (const row of targetSong.rows) {
       parts.push(renderRow(row, this.config));
     }
 

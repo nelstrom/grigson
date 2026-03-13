@@ -12,6 +12,9 @@ export { HtmlRenderer } from './renderers/html.js';
 export { normaliseSong } from './theory/normalise.js';
 export type { DetectKeyConfig } from './theory/keyDetector.js';
 
+// Transposition
+export { transposeSong, transposeChord } from './theory/transpose.js';
+
 // Theory utilities
 export { detectKey } from './theory/keyDetector.js';
 export { diatonicNotes } from './theory/keys.js';

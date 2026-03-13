@@ -45,20 +45,20 @@ permalink: /playground/
 <div id="playground-container">
   <div id="input-editor"></div>
 
-  <div id="output-container"></div>
+  <div id="output-container">
+    <grigson-chart id="playground-output" normalise></grigson-chart>
+  </div>
 </div>
 
 <script src="/js/monaco/vs/loader.js"></script>
 <script type="module">
-  import { createHighlighter } from 'https://esm.sh/shiki@4.0.2';
   import { loadWASM, createOnigScanner, createOnigString } from 'https://esm.sh/vscode-oniguruma@2.0.1';
   import { Registry, INITIAL } from 'https://esm.sh/monaco-textmate@3.0.1';
 
   require.config({ paths: { 'vs': '/js/monaco/vs' } });
 
   require(['vs/editor/editor.main'], async function() {
-    const outputContainer = document.getElementById('output-container');
-    const renderer = new grigson.TextRenderer();
+    const outputElement = document.getElementById('playground-output');
 
     // 1. Initialize vscode-oniguruma
     try {
@@ -76,25 +76,10 @@ permalink: /playground/
       grammar = await response.json();
     } catch (e) {
       console.error('Failed to load grammar:', e);
-      outputContainer.innerHTML = '<div class="error">Failed to load syntax grammar</div>';
       return;
     }
 
-    // 3. Setup Shiki
-    let highlighter;
-    try {
-      highlighter = await createHighlighter({
-        themes: ['nord'],
-        langs: [{
-          ...grammar,
-          name: 'grigson'
-        }]
-      });
-    } catch (e) {
-      console.error('Failed to load Shiki:', e);
-    }
-
-    // 4. Setup Monaco TextMate
+    // 3. Setup Monaco TextMate
     const registry = new Registry({
       getOnigLib: async () => ({
         createOnigScanner: (sources) => createOnigScanner(sources),
@@ -128,7 +113,7 @@ permalink: /playground/
       }
     });
 
-    // 5. Define theme
+    // 4. Define theme
     monaco.editor.defineTheme('grigson-theme', {
       base: 'vs-light',
       inherit: true,
@@ -159,23 +144,14 @@ permalink: /playground/
     });
 
     function update() {
-      try {
-        const value = editor.getValue();
-        const song = grigson.parseSong(value);
-        const normalised = grigson.normaliseSong(song);
-        const text = renderer.render(normalised);
-
-        if (highlighter) {
-          outputContainer.innerHTML = highlighter.codeToHtml(text, {
-            lang: 'grigson',
-            theme: 'nord'
-          });
-        } else {
-          outputContainer.innerHTML = `<pre>${text}</pre>`;
-        }
-      } catch (e) {
-        outputContainer.innerHTML = `<div class="error">Error: ${e.message}</div>`;
+      const value = editor.getValue();
+      let template = outputElement.querySelector('template');
+      if (!template) {
+        template = document.createElement('template');
+        outputElement.appendChild(template);
       }
+      template.innerHTML = value;
+      outputElement.update();
     }
 
     editor.onDidChangeModelContent(update);

@@ -364,11 +364,25 @@
     "passes": true
   },
   {
+    "id": "transpose-logic",
+    "category": "functional",
+    "description": "Implement the core transposition logic in the grigson library",
+    "detail": "Create packages/grigson/src/theory/transpose.ts exporting transposeChord(chord: Chord, semitones: number, options?: { accidentals?: 'sharps' | 'flats' }): Chord and transposeSong(song: Song, interval: { semitones?: number, toKey?: string }): Song. The transposition must correctly handle enharmonic spelling based on the target key or preferred accidentals. Transposing a song should also update the key field in its front matter.",
+    "steps": [
+      "Write tests for transposeChord with various intervals and accidental preferences",
+      "Write tests for transposeSong asserting that all chords and the front matter key are updated",
+      "Implement transposeChord in packages/grigson/src/theory/transpose.ts",
+      "Implement transposeSong in packages/grigson/src/theory/transpose.ts",
+      "Export transposeSong and transposeChord from packages/grigson/src/index.ts",
+      "Run pnpm test to confirm all tests pass"
+    ],
+    "passes": true
+  },
+  {
     "id": "cli-transpose",
     "category": "functional",
     "description": "Implement the `grigson transpose` subcommand",
-    "detail": "The transpose subcommand reads a .chart file (from a file argument or stdin), transposes all chords by the specified interval, updates the key field in front matter, and writes the result to stdout. Accepts either --semitones <n> (positive or negative integer) or --to <key>; exactly one must be provided. This task is blocked until the grigson library exports a transposeSong function.",
-    "blocked": true,
+    "detail": "The transpose subcommand reads a .chart file (from a file argument or stdin), transposes all chords by the specified interval, updates the key field in front matter, and writes the result to stdout. Accepts either --semitones <n> (positive or negative integer) or --to <key>; exactly one must be provided. This task is no longer blocked.",
     "steps": [
       "Write a test asserting that `grigson transpose --semitones 2 file.chart` transposes all chords up a whole step",
       "Write a test asserting that `grigson transpose --semitones -3 file.chart` transposes down a minor third",
@@ -376,7 +390,7 @@
       "Write a test asserting that providing both --semitones and --to exits with a non-zero code",
       "Write a test asserting that providing neither --semitones nor --to exits with a non-zero code",
       "Write a test asserting that `grigson transpose` with no file argument reads from stdin",
-      "Implement the transpose subcommand handler in packages/grigson/src/cli.ts using the (not yet available) transposeSong export",
+      "Implement the transpose subcommand handler in packages/grigson/src/cli.ts using the transposeSong export",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
     "passes": false
@@ -631,6 +645,6 @@
       "Refactor demo.md and playground.md to use <grigson-chart> instead of manual grigson.parseSong calls",
       "Verify the website documentation and interactive features still function correctly"
     ],
-    "passes": false
+    "passes": true
   }
 ]
