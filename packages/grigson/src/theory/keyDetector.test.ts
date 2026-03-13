@@ -137,3 +137,17 @@ describe('detectKey — Category 9: enharmonic boundary keys (Db/C#, Gb/F#)', ()
     expect(detectKey([maj('F#'), maj('C#'), min('D#'), maj('B')], null, cfg)).toBe('Gb');
   });
 });
+
+describe('detectKey — ending-key-wins: cadential tonic overrides global winner', () => {
+  it('Whisper Not A-section: opens in Gm, cadences A7→Dm → Dm', () => {
+    expect(detectKey([min('C'), dom7('D'), min('G'), dom7('A'), min('D')])).toBe('Dm');
+  });
+
+  it('last chord G is V, not a tonic match — C major stays', () => {
+    expect(detectKey([min('A'), maj('F'), maj('C'), maj('G')])).toBe('C');
+  });
+
+  it('last chord Am → minor wins over C major', () => {
+    expect(detectKey([maj('C'), min('A'), maj('F'), min('A')])).toBe('Am');
+  });
+});

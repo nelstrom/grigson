@@ -376,7 +376,7 @@
       "Extend detectKey in packages/grigson/src/theory/keyDetector.ts: after scoring, if the last chord root matches a top-scoring candidate's tonic, promote that candidate to first",
       "Run pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "section-parsing",

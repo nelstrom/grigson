@@ -185,5 +185,50 @@ export function detectKey(
     }
   }
 
+  // Ending-key-wins: if the progression ends with a V7→tonic cadence into a candidate
+  // key that scored within 1 point of the best, prefer that cadence key. This handles
+  // progressions that modulate mid-section and resolve to a new tonic at the end.
+  if (chords.length >= 2) {
+    const lastChord = chords[chords.length - 1];
+    const penultimateChord = chords[chords.length - 2];
+    if (
+      (lastChord.quality === 'major' || lastChord.quality === 'minor') &&
+      penultimateChord.quality === 'dominant7'
+    ) {
+      let lastPC: number;
+      let penultimatePC: number;
+      try {
+        lastPC = rootToPitchClass(lastChord.root);
+        penultimatePC = rootToPitchClass(penultimateChord.root);
+      } catch {
+        return bestKey;
+      }
+      for (const [key, score] of scores) {
+        if (key === bestKey) continue;
+        const keyRoot = key.endsWith('m') ? key.slice(0, -1) : key;
+        let keyRootPC: number;
+        try {
+          keyRootPC = rootToPitchClass(keyRoot);
+        } catch {
+          continue;
+        }
+        // Verify it's an authentic cadence: penultimate is V7 of this candidate key
+        const expectedV7PC = (keyRootPC + 7) % 12;
+        if (
+          keyRootPC === lastPC &&
+          penultimatePC === expectedV7PC &&
+          maxScore - score <= 1
+        ) {
+          const keyIsMinor = key.endsWith('m');
+          const lastIsMinor = lastChord.quality === 'minor';
+          if (keyIsMinor === lastIsMinor) {
+            bestKey = key;
+            break;
+          }
+        }
+      }
+    }
+  }
+
   return bestKey;
 }
