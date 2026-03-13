@@ -80,26 +80,39 @@ function normaliseChord(
   return chord;
 }
 
-export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
-  const chords: Chord[] = song.sections.flatMap((section) =>
-    section.rows.flatMap((row) => row.bars.map((bar) => bar.chord)),
-  );
-
+export function normaliseSection(
+  chords: Chord[],
+  config?: DetectKeyConfig,
+): { homeKey: string | null; chords: Chord[] } {
   const detectedKey = config?.forceKey ?? detectKey(chords, null, config);
   const pcToNote = detectedKey !== null ? buildPCToNote(detectedKey) : new Map<number, string>();
 
-  let chordIndex = 0;
-  const newSections: Section[] = song.sections.map((section) => ({
-    ...section,
-    rows: section.rows.map((row): Row => ({
-      ...row,
-      bars: row.bars.map((bar): Bar => {
-        const nextChord = chordIndex + 1 < chords.length ? chords[chordIndex + 1] : undefined;
-        chordIndex++;
-        return { ...bar, chord: normaliseChord(bar.chord, pcToNote, nextChord) };
-      }),
-    })),
-  }));
+  const normalisedChords = chords.map((chord, i) => {
+    const nextChord = i + 1 < chords.length ? chords[i + 1] : undefined;
+    return normaliseChord(chord, pcToNote, nextChord);
+  });
 
-  return { ...song, key: detectedKey ?? song.key, sections: newSections };
+  return { homeKey: detectedKey, chords: normalisedChords };
+}
+
+export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
+  const sectionResults: { homeKey: string | null; section: Section }[] = song.sections.map(
+    (sec) => {
+      const chords = sec.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
+      const { homeKey, chords: normalisedChords } = normaliseSection(chords, config);
+
+      let chordIndex = 0;
+      const newRows: Row[] = sec.rows.map((row) => ({
+        ...row,
+        bars: row.bars.map((bar): Bar => ({ ...bar, chord: normalisedChords[chordIndex++] })),
+      }));
+
+      return { homeKey, section: { ...sec, rows: newRows } };
+    },
+  );
+
+  const firstSectionKey = sectionResults[0]?.homeKey ?? song.key;
+  const newSections = sectionResults.map((r) => r.section);
+
+  return { ...song, key: firstSectionKey, sections: newSections };
 }

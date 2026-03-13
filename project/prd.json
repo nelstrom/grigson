@@ -411,7 +411,7 @@
       "Export normaliseSection from packages/grigson/src/index.ts",
       "Run pnpm test to confirm all existing normalise tests and new section tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "harmonic-analysis-core",

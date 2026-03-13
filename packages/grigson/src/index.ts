@@ -9,7 +9,7 @@ export { TextRenderer } from './renderers/text.js';
 export { HtmlRenderer } from './renderers/html.js';
 
 // Normaliser
-export { normaliseSong } from './theory/normalise.js';
+export { normaliseSong, normaliseSection } from './theory/normalise.js';
 export type { DetectKeyConfig } from './theory/keyDetector.js';
 
 // Theory utilities

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normaliseSong } from './normalise.js';
+import { normaliseSong, normaliseSection } from './normalise.js';
 import type { Song, Chord, Bar, Row, Section } from '../parser/types.js';
 
 function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
@@ -138,5 +138,45 @@ describe('normaliseSong — Category 5: front matter key field read and write', 
     const s = song([row(ch('Bb'), ch('F'), ch('C'), ch('Gm', 'minor'))], 'C');
     const result = normaliseSong(s);
     expect(result.key).toBe('F');
+  });
+});
+
+describe('normaliseSong — per-section key detection', () => {
+  it('two-section song: each section normalised independently', () => {
+    // Verse: E major (no rewrites needed — E A B E)
+    // Chorus: Bb major with wrong enharmonics (A# D# F A#)
+    const verse = section([row(ch('E'), ch('A'), ch('B'), ch('E'))], 'Verse');
+    const chorus = section([row(ch('A#'), ch('D#'), ch('F'), ch('A#'))], 'Chorus');
+    const s: Song = { type: 'song', title: null, key: null, sections: [verse, chorus] };
+    const result = normaliseSong(s);
+    // Verse stays in E major
+    expect(result.sections[0].rows[0].bars[0].chord.root).toBe('E');
+    expect(result.sections[0].rows[0].bars[2].chord.root).toBe('B');
+    // Chorus normalised to Bb major
+    expect(result.sections[1].rows[0].bars[0].chord.root).toBe('Bb'); // A# → Bb
+    expect(result.sections[1].rows[0].bars[1].chord.root).toBe('Eb'); // D# → Eb
+    expect(result.sections[1].rows[0].bars[3].chord.root).toBe('Bb'); // A# → Bb
+  });
+
+  it('single-section song produces same result as before', () => {
+    const s = song([row(ch('F'), ch('A#'), ch('F'), ch('C'))]);
+    const result = normaliseSong(s);
+    expect(result.sections[0].rows[0].bars[1].chord.root).toBe('Bb'); // A# → Bb
+  });
+
+  it('front-matter key is set to home key of first section', () => {
+    const verse = section([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))], 'Verse');
+    const chorus = section([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'Chorus');
+    const s: Song = { type: 'song', title: null, key: null, sections: [verse, chorus] };
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G'); // first section is G major
+  });
+
+  it('normaliseSection returns homeKey and normalised chords', () => {
+    const chords = [ch('A#'), ch('D#'), ch('F'), ch('A#')];
+    const { homeKey, chords: out } = normaliseSection(chords);
+    expect(homeKey).toBe('Bb');
+    expect(out[0].root).toBe('Bb'); // A# → Bb
+    expect(out[1].root).toBe('Eb'); // D# → Eb
   });
 });
