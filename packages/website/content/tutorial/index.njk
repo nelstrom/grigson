@@ -1,0 +1,12 @@
+---
+layout: base.njk
+title: Tutorial
+permalink: /tutorial/
+---
+<h1>Tutorial</h1>
+<p>A step-by-step walkthrough of grigson chart features.</p>
+<ol>
+  {% for lesson in collections.tutorial | sort(false, false, 'data.order') %}
+    <li><a href="{{ lesson.url }}">{{ lesson.data.title }}</a></li>
+  {% endfor %}
+</ol>

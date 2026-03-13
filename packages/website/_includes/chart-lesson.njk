@@ -1,0 +1,23 @@
+---
+layout: base.njk
+---
+{{ content | safe }}
+
+<h2>Source</h2>
+{{ chartName | highlightChart | safe }}
+
+<h2>Normalised output</h2>
+<grigson-chart normalise>
+  <template>{{ chartName | readChart }}</template>
+</grigson-chart>
+
+{% set lessons = collections.tutorial | sort(false, false, 'data.order') %}
+{% set currentIndex = lessons | indexOf(page) %}
+<nav class="lesson-nav">
+  {% if currentIndex > 0 %}
+    <a href="{{ lessons[currentIndex - 1].url }}">← Previous</a>
+  {% endif %}
+  {% if currentIndex < lessons.length - 1 %}
+    <a href="{{ lessons[currentIndex + 1].url }}">Next →</a>
+  {% endif %}
+</nav>
