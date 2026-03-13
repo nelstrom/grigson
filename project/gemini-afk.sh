@@ -17,8 +17,10 @@ for ((i=1; i<=$1; i++)); do
   2. Run pnpm test. Fix any failures before proceeding. \
   3. Update project/prd.json to mark the completed task as passes: true. \
   4. Append a summary of what you did to project/progress.txt. \
-  5. Commit your changes. \
+  5. Add or update .md files in the documentation directory \
+  6. Commit your changes. \
   ONLY WORK ON A SINGLE TASK. \
+  The PRD is complete when all tasks have passes: true (or are blocked)
   If the PRD is complete, output <promise>COMPLETE</promise>." | tee /dev/stderr)
 
   echo "--- Iteration $i complete ---"
