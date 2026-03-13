@@ -512,7 +512,7 @@
       "Copy the updated grammar to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
       "Create a sample packages/grigson/documentation/examples/syntax-test.chart using all features and verify highlighting"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "playground-shiki",

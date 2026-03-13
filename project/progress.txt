@@ -90,3 +90,6 @@ Created website/content/demo.md with a hardcoded "badly spelled" chord chart (A#
 
 ## website-playground
 Created website/content/playground.md with a <textarea> for input and a <pre> for output. Added an inline <script> that uses the grigson browser bundle to live-normalise the chart on every keystroke. The script includes error handling to display parse failures in the output area. Pre-populated the playground with an example chart (A# in F major) that demonstrates automatic enharmonic correction. Added a "Playground" link to the navigation menu in website/_includes/base.njk. Confirmed that running pnpm build in the website sub-project renders the playground/index.html correctly. All 122 existing tests pass.
+
+## textmate-grammar-full
+Updated packages/textmate-grammar/grigson.tmLanguage.json to cover all MVP syntax: front matter delimiters (---) and fields (title, key), barlines (|), and chords with support for all qualities (m, 7, m7b5). Used regex lookaheads/lookbehinds for chord matching to ensure precision without breaking on words. Synced the updated grammar to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Created a comprehensive syntax highlighting test file in packages/grigson/documentation/examples/syntax-test.chart.

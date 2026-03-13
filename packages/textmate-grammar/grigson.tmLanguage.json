@@ -11,17 +11,77 @@
     "main": {
       "patterns": [
         {
+          "include": "#frontmatter"
+        },
+        {
           "include": "#barline"
+        },
+        {
+          "include": "#chord"
+        }
+      ]
+    },
+    "frontmatter": {
+      "begin": "^---$",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.header.grigson"
+        }
+      },
+      "end": "^---$",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.header.grigson"
+        }
+      },
+      "patterns": [
+        {
+          "match": "([a-zA-Z]+)(:)\\s*(\".*\")",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.key.grigson"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.grigson"
+            },
+            "3": {
+              "name": "string.quoted.double.grigson"
+            }
+          }
+        },
+        {
+          "match": "([a-zA-Z]+)(:)\\s*(.*)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.key.grigson"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.grigson"
+            },
+            "3": {
+              "name": "string.unquoted.grigson"
+            }
+          }
         }
       ]
     },
     "barline": {
-      "patterns": [
-        {
-          "match": "\\|",
-          "name": "punctuation.definition.barline.grigson"
+      "match": "\\|",
+      "name": "punctuation.definition.barline.grigson"
+    },
+    "chord": {
+      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|m|7)?(?=\\s|\\||$)",
+      "captures": {
+        "1": {
+          "name": "constant.other.chord.root.grigson"
+        },
+        "2": {
+          "name": "constant.other.chord.accidental.grigson"
+        },
+        "3": {
+          "name": "keyword.other.chord.quality.grigson"
         }
-      ]
+      }
     }
   }
 }

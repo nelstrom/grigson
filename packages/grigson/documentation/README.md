@@ -274,6 +274,21 @@ feel: "swing"
 
 ---
 
+## Editor Support
+
+### VS Code
+
+Syntax highlighting for `.chart` files is available for VS Code.
+
+The extension provides:
+- Syntax highlighting for front matter delimiters and fields.
+- Highlighting for barlines (`|`).
+- Highlighting for chord roots, accidentals (`#`, `b`), and qualities (`m`, `7`, `m7b5`).
+
+To use the extension during development, open the `packages/vscode-extension` directory in VS Code and press `F5` to launch an Extension Development Host.
+
+---
+
 ## What Grigson Does Not Support (by design)
 
 - **Rhythm notation.** There is no staff, no note durations on individual chords, no ties or triplets beyond what beat-slot notation can express.
