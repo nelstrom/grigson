@@ -117,6 +117,3 @@ Created \`HtmlRenderer\` in \`src/renderers/html.ts\` which produces semantic HT
 
 ## website-custom-element-dogfood
 Added \`normalise\` attribute support to the \`GrigsonChart\` custom element to enable automatic enharmonic correction. Updated \`packages/website/.eleventy.js\` to passthrough the \`grigson-register.iife.js\` bundle. Loaded the register bundle in \`base.njk\`. Refactored \`demo.md\` to use \`<grigson-chart normalise>\`. Refactored \`playground.njk\` to use \`<grigson-chart id="playground-output" normalise>\` for output, removing the manual Shiki rendering while maintaining Monaco for input. All 133 tests pass.
-
-## transpose-logic
-Fixed musically incorrect test cases in \`transpose.test.ts\` and improved \`detectKey\` tie-breaking in \`keyDetector.ts\` to prefer tonic matches, which resolved failing transposition tests. Verified that \`transposeChord\` and \`transposeSong\` correctly handle semitones, target keys, and enharmonic spelling. Exported transposition utilities from \`src/index.ts\` and \`src/index.browser.ts\`. Integrated transposition support into both \`TextRenderer\` and \`HtmlRenderer\`, and updated the \`GrigsonChart\` custom element tests to reflect correct transposition behavior. All 140 tests pass.

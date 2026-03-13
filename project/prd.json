@@ -364,19 +364,124 @@
     "passes": true
   },
   {
-    "id": "transpose-logic",
+    "id": "detect-key-ending-wins",
     "category": "functional",
-    "description": "Implement the core transposition logic in the grigson library",
-    "detail": "Create packages/grigson/src/theory/transpose.ts exporting transposeChord(chord: Chord, semitones: number, options?: { accidentals?: 'sharps' | 'flats' }): Chord and transposeSong(song: Song, interval: { semitones?: number, toKey?: string }): Song. The transposition must correctly handle enharmonic spelling based on the target key or preferred accidentals. Transposing a song should also update the key field in its front matter.",
+    "description": "Extend detectKey with ending-key tie-breaking",
+    "detail": "Add a tie-breaking rule to detectKey so that when the last chord's root matches a candidate key's tonic and a tie exists on diatonic score, the key containing the last chord as tonic is preferred. This makes detectKey handle sections that open in one key and cadence in another (e.g. [Cm, D7, Gm, A7, Dm] → 'Dm'). This is an additive change to keyDetector.ts; no existing tests should break.",
     "steps": [
-      "Write tests for transposeChord with various intervals and accidental preferences",
-      "Write tests for transposeSong asserting that all chords and the front matter key are updated",
-      "Implement transposeChord in packages/grigson/src/theory/transpose.ts",
-      "Implement transposeSong in packages/grigson/src/theory/transpose.ts",
-      "Export transposeSong and transposeChord from packages/grigson/src/index.ts",
-      "Run pnpm test to confirm all tests pass"
+      "Write a test asserting detectKey([Cm, D7, Gm, A7, Dm]) === 'Dm' (Whisper Not A-section ending; Dm is the cadence tonic)",
+      "Write a test asserting detectKey([Am, F, C, G]) === 'C' (last chord G, not a tonic match — existing last-chord heuristic still returns C)",
+      "Write a test asserting detectKey([C, Am, F, Am]) === 'Am' (last chord Am → minor wins over C major)",
+      "Confirm the new test for ending-key-wins fails before any implementation",
+      "Extend detectKey in packages/grigson/src/theory/keyDetector.ts: after scoring, if the last chord root matches a top-scoring candidate's tonic, promote that candidate to first",
+      "Run pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "id": "section-parsing",
+    "category": "functional",
+    "description": "Extend the parser and AST to support labelled sections",
+    "detail": "A section label is a line of the form [Label] (a non-empty string surrounded by square brackets) that may appear between rows in the song body. Section labels group the rows that follow them. The Song AST gains a sections: Section[] field alongside (or replacing) rows: Row[]. The Section interface has { type: 'section'; label: string | null; rows: Row[] } where label is null for the implicit first section when no label precedes it. The Peggy grammar, type definitions, TextRenderer, and all downstream consumers must be updated consistently. The plain-text renderer outputs section labels on their own line, e.g. [Verse 1].",
+    "steps": [
+      "Add a Section interface to packages/grigson/src/parser/types.ts: { type: 'section'; label: string | null; rows: Row[] } and change Song.rows to Song.sections: Section[]",
+      "Extend the Peggy grammar in packages/grigson/src/parser/grammar.pegjs to parse section labels ([Label]) as top-level song body elements and group subsequent rows into Section nodes",
+      "Run pnpm build to regenerate the parser and resolve any TypeScript errors",
+      "Write a test that parses a song with no section labels and asserts Song.sections has one entry with label = null containing all rows",
+      "Write a test that parses '[Verse]\\n| C | Am |\\n[Chorus]\\n| F | G |' and asserts two Section nodes with the correct labels and rows",
+      "Write a test that parses a song where a section label appears after blank lines and asserts blank lines do not produce extra section nodes",
+      "Update TextRenderer to emit section labels (e.g. '[Verse]\\n') before each section's rows, skipping the label line when label is null",
+      "Write a round-trip test: parse a song with section labels, render to text, parse again, and assert the two ASTs are deeply equal",
+      "Update any code in normalise.ts, keyDetector.ts, or the CLI that currently iterates Song.rows to iterate Song.sections[n].rows instead",
+      "Run pnpm test to confirm all existing and new tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "normalise-per-section",
+    "category": "functional",
+    "description": "Refactor normaliseSong to operate per section with independent key detection",
+    "detail": "Extract a normaliseSection(chords: Chord[]): { homeKey: string | null; chords: Chord[] } function that detects the key for a given chord sequence and rewrites diatonic roots. Refactor normaliseSong to iterate Song.sections and call normaliseSection on each section's chords independently. The public API of normaliseSong is unchanged. The front-matter key field is set to the home key of the first section. This task is blocked on section-parsing.",
+    "blocked": true,
+    "steps": [
+      "Write a test asserting that a two-section song (verse in E major, chorus in A major) produces correct enharmonic spellings for each section independently",
+      "Write a test asserting that a single-section song (no labels) produces the same result as the current normaliseSong",
+      "Write a test asserting the front-matter key is set to the home key of the first section",
+      "Extract normaliseSection from normaliseSong in packages/grigson/src/theory/normalise.ts",
+      "Update normaliseSong to call normaliseSection per section and merge the results into a new Song",
+      "Export normaliseSection from packages/grigson/src/index.ts",
+      "Run pnpm test to confirm all existing normalise tests and new section tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "harmonic-analysis-core",
+    "category": "functional",
+    "description": "Implement harmonicAnalysis with 2-5-1 and 5-1 pattern detection",
+    "detail": "Create packages/grigson/src/theory/harmonicAnalysis.ts. Define the AnnotatedChord interface: { chord: Chord; homeKey: string; currentKey: string; currentKeyCandidates: string[] }. Export analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord[]. The function performs a left-to-right sliding window scan. Pattern priority (highest to lowest): (1) 2-5-1: minor/half-diminished a whole step below a dom7, followed by a chord a fifth below the dom7 — assign currentKey of all three to the resolved tonic; (2) 5-1: dom7 followed by a chord a fifth below — assign currentKey of both to the resolved tonic. Chords not matched by any pattern receive currentKey = homeKey.",
+    "steps": [
+      "Write a test asserting analyseHarmony([C, F, G, C], 'C') returns all chords with currentKey = 'C'",
+      "Write a test for 5-1: analyseHarmony([C, A7, Dm, G7, C], 'C') assigns A7 and Dm to currentKey = 'Dm', G7 and final C to currentKey = 'C'",
+      "Write a test for 2-5-1: analyseHarmony([C, Bbm, Eb7, Abmaj7, G7, C], 'C') assigns Bbm, Eb7, Abmaj7 to currentKey = 'Ab' and remaining chords to 'C'",
+      "Write a test for 2-5-1 in Db: analyseHarmony([F, Ebm, Ab7, Dbmaj7, C7, F], 'F') assigns Ebm, Ab7, Dbmaj7 to currentKey = 'Db'",
+      "Write a test asserting 2-5-1 takes priority over 5-1 when both patterns overlap at the same position",
+      "Create packages/grigson/src/theory/harmonicAnalysis.ts and implement the AnnotatedChord type and analyseHarmony with the 5-1 and 2-5-1 scanners",
+      "Export analyseHarmony and AnnotatedChord from packages/grigson/src/index.ts",
+      "Run pnpm test to confirm all new tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "harmonic-analysis-isolated",
+    "category": "functional",
+    "description": "Extend harmonic analysis to handle isolated borrowed chords via circle-of-fifths",
+    "detail": "Extend analyseHarmony so that a chord not covered by a 2-5-1 or 5-1 pattern, and whose root is not diatonic to homeKey, gets a currentKey derived from circle-of-fifths distance. Collect all 22 in-scope keys that contain the chord's pitch class as a diatonic note. Rank them by fewest steps from homeKey on the circle of fifths (relative major/minor counts as 0 extra steps). The closest key becomes currentKey; all candidates are stored in currentKeyCandidates.",
+    "steps": [
+      "Write a test for isolated bVI: analyseHarmony([C, Ab, G], 'C') assigns Ab a currentKey consistent with the closest key containing pitch class 8 to C (expected: 'Cm' or 'Am')",
+      "Write a test for isolated bVII: analyseHarmony([C, Bb, F, G], 'C') assigns Bb currentKey = 'F' (1 step from C on the circle)",
+      "Write a test for isolated Bb7: analyseHarmony([C, Bb7, C], 'C') assigns Bb7 currentKey = 'F' (closest key containing Bb as dom7 root is F major, 1 step from C)",
+      "Write a test asserting that for an unambiguously diatonic chord the currentKey remains homeKey and is not overridden by the circle-of-fifths logic",
+      "Add a circleOfFifthsDistance(keyA: string, keyB: string): number helper to harmonicAnalysis.ts",
+      "Extend analyseHarmony to call the circle-of-fifths fallback for chords not matched by a pattern and not diatonic to homeKey",
+      "Run pnpm test to confirm all existing and new harmonic analysis tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "normalise-harmonic",
+    "category": "functional",
+    "description": "Wire harmonic analysis into normalisation for correct borrowed-chord spelling",
+    "detail": "Extend normaliseSection to call analyseHarmony and use each chord's currentKey (rather than homeKey) when rewriting enharmonic spellings. A chord root diatonic to currentKey is spelled according to currentKey's diatonic note set. A chord root not diatonic to any candidate key is left unchanged. This supersedes the existing next-chord borrowing heuristic in normalise.ts.",
+    "steps": [
+      "Write a test: normaliseSong with [C, Bbm, Eb7, Abmaj7, G7, C] produces Bbm, Eb7, Abmaj7 (not A#m, D#7, G#maj7)",
+      "Write a test: normaliseSong with [F, Ebm, Ab7, Dbmaj7, C7, F] produces Ebm, Ab7, Dbmaj7 (What's New B section)",
+      "Write a test: normaliseSong with [C, Bb, F, G] preserves Bb (not A#); borrowed bVII stays flat-spelled",
+      "Write a test: normaliseSong with [C, A7, Dm, G7, C] does not rewrite A (A is diatonic root and the 7 quality does not affect root spelling)",
+      "Write a test: normaliseSong with [Dm7b5, G7, Am, Am] produces Dm7b5 (not C##m7b5 or similar nonsense)",
+      "Update normaliseSection in packages/grigson/src/theory/normalise.ts to call analyseHarmony and use currentKey per chord for spelling",
+      "Remove the old next-chord borrowing heuristic if it is now fully superseded",
+      "Run pnpm test to confirm all normalise tests (Cat 2, 5, 8) and the new harmonic-spelling tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "transpose-rewrite",
+    "category": "functional",
+    "description": "Implement transposition using a shift-then-normalise approach at section level",
+    "detail": "Create packages/grigson/src/theory/transpose.ts exporting three functions. transposeSection(chords: Chord[], semitones: number): Chord[] shifts every chord root's pitch class by the given semitone delta (mod 12), preserving chord quality, then delegates all enharmonic spelling decisions to normaliseSection. transposeSong(song: Song, semitones: number): Song applies transposeSection to each section's chords and updates the front-matter key field to the resulting home key. transposeSongToKey(song: Song, targetKey: string): Song computes the semitone interval from the detected home key of the first section to targetKey, then calls transposeSong. No spelling logic lives in transpose.ts — the correct note names emerge entirely from normalisation.",
+    "steps": [
+      "Write a test: transposeSong([C, F, G, Am] in C, +7) produces [G, C, D, Em] with homeKey = 'G'",
+      "Write a test: transposeSong([Bb, Eb, F, Gm] in Bb, +2) produces [C, F, G, Am] with homeKey = 'C'",
+      "Write a test: transposeSong([C, Bb, F, G] in C, +7) produces [G, F, C, D] — borrowed bVII shifts correctly with no E# spellings",
+      "Write a test: transposeSong([C, Ab, F, G] in C, +7) produces [G, Eb, C, D] — bVI shifts to Eb not D#",
+      "Write a test: transposeSong([C, Bbm, Eb7, Abmaj7, G7, C] in C, +2) produces [D, Cm, F7, Bbmaj7, A7, D] with Bbmaj7 spelled Bb not A#",
+      "Write a test: transposeSongToKey(song in C, 'G') produces the same result as transposeSong(song, +7)",
+      "Create packages/grigson/src/theory/transpose.ts implementing transposeSection, transposeSong, and transposeSongToKey",
+      "Export transposeSong, transposeSongToKey, and transposeSection from packages/grigson/src/index.ts",
+      "Re-wire the transpose-key and transpose-semitones attributes in packages/grigson/src/element.ts to call transposeSong",
+      "Run pnpm build && pnpm test to confirm all new tests pass and no regressions exist"
+    ],
+    "passes": false
   },
   {
     "id": "cli-transpose",
