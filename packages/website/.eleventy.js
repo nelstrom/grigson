@@ -33,6 +33,14 @@ export default async function (eleventyConfig) {
     arr.findIndex((item) => item.url === page.url)
   );
 
+  eleventyConfig.addWatchTarget('charts/');
+
+  eleventyConfig.setServerOptions({
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+  });
+
   eleventyConfig.addPassthroughCopy('assets');
   eleventyConfig.addPassthroughCopy({
     'node_modules/grigson/dist/grigson.iife.js': 'js/grigson.iife.js',
