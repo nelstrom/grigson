@@ -161,7 +161,7 @@ The playground script initializes the editor and hooks it into the grigson libra
 const editor = monaco.editor.create(document.getElementById('input-editor'), {
   value: initialContent,
   language: 'plaintext',
-  theme: 'vs-light',
+  theme: 'vs',
   minimap: { enabled: false },
   automaticLayout: true,
 });
