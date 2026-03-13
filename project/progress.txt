@@ -93,3 +93,5 @@ Created website/content/playground.md with a <textarea> for input and a <pre> fo
 
 ## textmate-grammar-full
 Updated packages/textmate-grammar/grigson.tmLanguage.json to cover all MVP syntax: front matter delimiters (---) and fields (title, key), barlines (|), and chords with support for all qualities (m, 7, m7b5). Used regex lookaheads/lookbehinds for chord matching to ensure precision without breaking on words. Synced the updated grammar to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Created a comprehensive syntax highlighting test file in packages/grigson/documentation/examples/syntax-test.chart.
+## playground-shiki
+Installed shiki as a devDependency in packages/website. Updated website/.eleventy.js to copy the Grigson TextMate grammar from packages/textmate-grammar to _site/js/. Integrated Shiki into website/content/playground.md using the ESM version from a CDN. The playground now loads the grammar, registers 'grigson' as a language, and uses shiki.codeToHtml() to provide live syntax highlighting (using the 'nord' theme) in the normalised output area. Added CSS to style the Shiki-generated output.

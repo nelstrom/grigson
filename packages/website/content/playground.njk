@@ -1,0 +1,108 @@
+---
+layout: base.njk
+title: Playground
+permalink: /playground/
+---
+
+<h1>Playground</h1>
+
+<p>Type or paste a chord chart below. <code>grigson</code> will live-normalise it for you.</p>
+
+<style>
+  #playground-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: calc(100vh - 300px);
+    min-height: 400px;
+  }
+  #input-textarea {
+    flex: 1;
+    font-family: monospace;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+  }
+  #output-container {
+    flex: 1;
+    overflow: auto;
+    border: 1px solid #ddd;
+    margin: 0;
+    position: relative;
+    background: #fff;
+  }
+  #output-container pre {
+    margin: 0;
+    padding: 1rem;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .error {
+    color: #cc0000;
+    padding: 1rem;
+    white-space: pre-wrap;
+    background: #fff;
+  }
+</style>
+
+<div id="playground-container">
+  <textarea id="input-textarea" spellcheck="false">
+---
+title: Playground Example
+key: F
+---
+| F | A# | F | C7 |
+|F|Bb|C|F|
+</textarea>
+
+  <div id="output-container"></div>
+</div>
+
+<script type="module">
+  import { createHighlighter } from 'https://esm.sh/shiki@4.0.2';
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    const input = document.getElementById('input-textarea');
+    const outputContainer = document.getElementById('output-container');
+    const renderer = new grigson.TextRenderer();
+
+    let highlighter;
+    try {
+      const response = await fetch('/js/grigson.tmLanguage.json');
+      const grammar = await response.json();
+
+      highlighter = await createHighlighter({
+        themes: ['nord'],
+        langs: [{
+          ...grammar,
+          name: 'grigson'
+        }]
+      });
+    } catch (e) {
+      console.error('Failed to load Shiki or grammar:', e);
+      outputContainer.innerHTML = '<div class="error">Failed to load syntax highlighter</div>';
+    }
+
+    function update() {
+      try {
+        const song = grigson.parseSong(input.value);
+        const normalised = grigson.normaliseSong(song);
+        const text = renderer.render(normalised);
+
+        if (highlighter) {
+          outputContainer.innerHTML = highlighter.codeToHtml(text, {
+            lang: 'grigson',
+            theme: 'nord'
+          });
+        } else {
+          outputContainer.innerHTML = `<pre>${text}</pre>`;
+        }
+      } catch (e) {
+        outputContainer.innerHTML = `<div class="error">Error: ${e.message}</div>`;
+      }
+    }
+
+    input.addEventListener('input', update);
+    update();
+  });
+</script>

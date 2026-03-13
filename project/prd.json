@@ -526,7 +526,7 @@
       "Update the playground update() function to use shiki.codeToHtml for the output element",
       "Add basic CSS for Shiki tokens to ensure the highlighted code is legible"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "playground-monaco",
