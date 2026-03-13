@@ -540,7 +540,7 @@
       "Initialize Monaco Editor in the playground script with the default chart content",
       "Link Monaco's onDidChangeModelContent to the live-normalisation update() logic"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "playground-monaco-highlight",

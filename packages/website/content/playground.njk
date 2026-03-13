@@ -16,11 +16,8 @@ permalink: /playground/
     height: calc(100vh - 300px);
     min-height: 400px;
   }
-  #input-textarea {
+  #input-editor {
     flex: 1;
-    font-family: monospace;
-    padding: 1rem;
-    font-size: 1rem;
     border: 1px solid #ccc;
   }
   #output-container {
@@ -46,23 +43,18 @@ permalink: /playground/
 </style>
 
 <div id="playground-container">
-  <textarea id="input-textarea" spellcheck="false">
----
-title: Playground Example
-key: F
----
-| F | A# | F | C7 |
-|F|Bb|C|F|
-</textarea>
+  <div id="input-editor"></div>
 
   <div id="output-container"></div>
 </div>
 
+<script src="/js/monaco/vs/loader.js"></script>
 <script type="module">
   import { createHighlighter } from 'https://esm.sh/shiki@4.0.2';
 
-  window.addEventListener('DOMContentLoaded', async () => {
-    const input = document.getElementById('input-textarea');
+  require.config({ paths: { 'vs': '/js/monaco/vs' } });
+
+  require(['vs/editor/editor.main'], async function() {
     const outputContainer = document.getElementById('output-container');
     const renderer = new grigson.TextRenderer();
 
@@ -83,9 +75,20 @@ key: F
       outputContainer.innerHTML = '<div class="error">Failed to load syntax highlighter</div>';
     }
 
+    const editor = monaco.editor.create(document.getElementById('input-editor'), {
+      value: '---\ntitle: Playground Example\nkey: F\n---\n| F | A# | F | C7 |\n|F|Bb|C|F|\n',
+      language: 'plaintext', // We will add grigson language in the next task
+      theme: 'vs-light',
+      minimap: { enabled: false },
+      automaticLayout: true,
+      fontSize: 14,
+      fontFamily: 'monospace',
+    });
+
     function update() {
       try {
-        const song = grigson.parseSong(input.value);
+        const value = editor.getValue();
+        const song = grigson.parseSong(value);
         const normalised = grigson.normaliseSong(song);
         const text = renderer.render(normalised);
 
@@ -102,7 +105,7 @@ key: F
       }
     }
 
-    input.addEventListener('input', update);
+    editor.onDidChangeModelContent(update);
     update();
   });
 </script>

@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",
+    "monaco-editor": "^0.55.1",
     "shiki": "^4.0.2"
   }
 }

@@ -65,11 +65,43 @@ This makes the `grigson` global available to all inline scripts on the site.
 
 The website includes an interactive demo page (at `/demo/`) that illustrates real-time normalisation using the browser bundle. It loads a "badly spelled" chord chart, parses it, normalises it, and renders the result into a `<pre>` element on page load.
 
-A live playground (at `/playground/`) is also available for testing arbitrary charts. The playground uses **Shiki** for syntax highlighting of the normalised output, leveraging the project's TextMate grammar for consistent styling with VS Code.
+A live playground (at `/playground/`) is also available for testing arbitrary charts. The playground uses **Monaco Editor** for the input area, providing a rich editing experience with automatic layout and monospace font. The editor's content is linked to the live-normalisation logic via the `onDidChangeModelContent` event.
+
+The playground also uses **Shiki** for syntax highlighting of the normalised output, leveraging the project's TextMate grammar for consistent styling with VS Code.
+
+## Monaco Editor Integration
+
+The playground integrates the Monaco Editor (the core of VS Code) for the input area. The editor is loaded from the `node_modules/monaco-editor` package via Eleventy's passthrough copy:
+
+```js
+eleventyConfig.addPassthroughCopy({
+  'node_modules/monaco-editor/min/vs': 'js/monaco/vs',
+});
+```
+
+The playground script initializes the editor and hooks it into the grigson library:
+
+```js
+const editor = monaco.editor.create(document.getElementById('input-editor'), {
+  value: initialContent,
+  language: 'plaintext',
+  theme: 'vs-light',
+  minimap: { enabled: false },
+  automaticLayout: true,
+});
+
+editor.onDidChangeModelContent(() => {
+  const value = editor.getValue();
+  const song = grigson.parseSong(value);
+  const normalised = grigson.normaliseSong(song);
+  const text = new grigson.TextRenderer().render(normalised);
+  // ... update output with Shiki
+});
+```
 
 ## Syntax Highlighting
 
-The playground integrates Shiki in the browser to provide live syntax highlighting for the `.chart` format. It loads the Grigson TextMate grammar (copied to `_site/js/grigson.tmLanguage.json` during the website build) and registers it as a language:
+The playground integrates Shiki in the browser to provide live syntax highlighting for the `.chart` format in the **output** area. It loads the Grigson TextMate grammar (copied to `_site/js/grigson.tmLanguage.json` during the website build) and registers it as a language:
 
 ```js
 const response = await fetch('/js/grigson.tmLanguage.json');

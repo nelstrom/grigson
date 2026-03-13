@@ -1,6 +1,7 @@
 # Dependency folders
 node_modules/
 **/node_modules/
+.pnpm-store
 
 # Package outputs
 packages/grigson/dist/
