@@ -554,5 +554,83 @@
       "Verify that typing in the Monaco editor now shows full syntax highlighting matching the Shiki output"
     ],
     "passes": false
+  },
+  {
+    "id": "custom-element-scaffold",
+    "category": "tooling",
+    "description": "Scaffold the side-effect-free custom element and build pipeline",
+    "detail": "Create the GrigsonChart class and its registration entry point. Update the build pipeline to produce an auto-registering bundle.",
+    "steps": [
+      "Create packages/grigson/src/element.ts with a side-effect-free GrigsonChart class extending HTMLElement",
+      "Create packages/grigson/src/register.ts to call customElements.define('grigson-chart', GrigsonChart)",
+      "Export GrigsonChart from packages/grigson/src/index.browser.ts",
+      "Update packages/grigson/vite.config.ts to produce a grigson-register.iife.js bundle from src/register.ts",
+      "Run pnpm build and verify both the core and register bundles are produced"
+    ],
+    "passes": false
+  },
+  {
+    "id": "custom-element-rendering",
+    "category": "functional",
+    "description": "Implement basic chart parsing and rendering in the custom element",
+    "detail": "The custom element should find a child <template>, parse its chart content, and render it to a Shadow Root using the TextRenderer.",
+    "steps": [
+      "Implement connectedCallback in GrigsonChart to locate a child <template> and parse its innerHTML",
+      "Initialize a Shadow Root and render the parsed song to a <pre> element",
+      "Implement an update() method to handle re-rendering",
+      "Verify that <grigson-chart><template>| C |</template></grigson-chart> renders correctly in a browser"
+    ],
+    "passes": false
+  },
+  {
+    "id": "custom-element-attributes",
+    "category": "functional",
+    "description": "Enable attribute-based configuration and reactivity",
+    "detail": "Map custom element attributes like transpose-key and notation-preset to renderer configuration and trigger re-renders on change.",
+    "steps": [
+      "Define observedAttributes for renderer, transpose-key, transpose-semitones, and notation-preset",
+      "Implement attributeChangedCallback to update the internal config and call update()",
+      "Verify that changing attributes via the DOM (e.g., setAttribute) updates the rendered chart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "custom-element-child-config",
+    "category": "functional",
+    "description": "Enable declarative configuration via child elements",
+    "detail": "Allow configuration using child elements like <grigson-transpose> and use a MutationObserver to react to changes.",
+    "blocked": true,
+    "steps": [
+      "Implement a MutationObserver in GrigsonChart to watch for additions/removals/changes to child config elements",
+      "Implement logic to harvest config from <grigson-transpose>, <grigson-notation>, etc.",
+      "Verify that adding or modifying child elements triggers a re-render with the new configuration"
+    ],
+    "passes": false
+  },
+  {
+    "id": "custom-element-styling",
+    "category": "functional",
+    "description": "Implement a CSS API with Custom Properties, Parts, and Theme Support",
+    "detail": "Provide a default stylesheet in the Shadow DOM that supports light/dark mode and exposes variables and parts for user customisation.",
+    "steps": [
+      "Add a default CSS block to the Shadow Root using CSS Custom Properties for colors and fonts",
+      "Add part='...' attributes to internal elements (chord-root, barline, etc.)",
+      "Implement prefers-color-scheme media queries in the default styles",
+      "Verify that the element respects system dark mode and can be styled via ::part() and CSS variables"
+    ],
+    "passes": false
+  },
+  {
+    "id": "website-custom-element-dogfood",
+    "category": "tooling",
+    "description": "Integrate the custom element into the website and playground",
+    "detail": "Replace manual scripting on the website with the new <grigson-chart> element to verify real-world usage.",
+    "steps": [
+      "Update packages/website/.eleventy.js to passthrough the new grigson-register.iife.js bundle",
+      "Update packages/website/_includes/base.njk to load the register bundle",
+      "Refactor demo.md and playground.md to use <grigson-chart> instead of manual grigson.parseSong calls",
+      "Verify the website documentation and interactive features still function correctly"
+    ],
+    "passes": false
   }
 ]
