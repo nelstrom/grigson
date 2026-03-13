@@ -4,5 +4,7 @@ export type { Song, Row, Bar, Chord, Quality, FrontMatter } from './parser/parse
 
 export { TextRenderer } from './renderers/text.js';
 
+export { GrigsonChart } from './element.js';
+
 export { normaliseSong } from './theory/normalise.js';
 export type { DetectKeyConfig } from './theory/keyDetector.js';

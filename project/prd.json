@@ -567,7 +567,7 @@
       "Update packages/grigson/vite.config.ts to produce a grigson-register.iife.js bundle from src/register.ts",
       "Run pnpm build and verify both the core and register bundles are produced"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "custom-element-rendering",

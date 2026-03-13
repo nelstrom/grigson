@@ -2,10 +2,12 @@
 
 The grigson library ships two browser-ready bundles alongside the Node.js CommonJS/ESM build:
 
-| File                   | Format                | Global    |
-| ---------------------- | --------------------- | --------- |
-| `dist/grigson.iife.js` | IIFE (self-executing) | `grigson` |
-| `dist/grigson.esm.js`  | ES module             | —         |
+| File                           | Format                | Global             |
+| ------------------------------ | --------------------- | ------------------ |
+| `dist/grigson.iife.js`         | IIFE (self-executing) | `grigson`          |
+| `dist/grigson.esm.js`          | ES module             | —                  |
+| `dist/grigson-register.iife.js`| IIFE (side-effect)    | `grigsonRegister`  |
+| `dist/grigson-register.esm.js` | ES module             | —                  |
 
 Both are produced by Vite in library mode and are rebuilt automatically as part of `pnpm build`.
 
@@ -16,10 +18,22 @@ The browser entry point (`src/index.browser.ts`) exports the browser-safe subset
 - `parseSong(input: string): Song`
 - `parseChord(input: string): Chord`
 - `TextRenderer` class with `render(song: Song): string`
+- `GrigsonChart` custom element class
 - `normaliseSong(song: Song, config?: DetectKeyConfig): Song`
 - All associated TypeScript types
 
 The CLI code (`src/cli.ts`) is **not** included in the browser bundle.
+
+## Custom Element
+
+The library provides a `<grigson-chart>` custom element for declarative chart rendering. To use it, include the auto-registering bundle:
+
+```html
+<script src="/js/grigson-register.iife.js"></script>
+<grigson-chart>| C | Am | F | G |</grigson-chart>
+```
+
+The `grigson-register` bundle is separate from the core `grigson` bundle to allow for side-effect-free imports of the library when the custom element is not needed.
 
 ## Using the IIFE bundle
 

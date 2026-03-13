@@ -102,3 +102,6 @@ Installed monaco-editor as a devDependency in packages/website. Updated website/
 
 ## playground-monaco-highlight
 Installed monaco-textmate and vscode-oniguruma as devDependencies in packages/website. Updated website/.eleventy.js to copy onig.wasm to _site/js/. Updated website/content/playground.njk to initialize vscode-oniguruma, register the 'grigson' language in Monaco, and provide a TextMate-based token provider using monaco-textmate. Defined a 'grigson-theme' in Monaco to map TextMate scopes to colors, ensuring full syntax highlighting in the input editor that matches the Shiki output. All 122 existing tests pass.
+
+## custom-element-scaffold
+Created src/element.ts with a side-effect-free GrigsonChart class. Created src/register.ts for auto-registration of the 'grigson-chart' element. Exported GrigsonChart from index.browser.ts. Updated vite.config.ts to use VITE_BUILD_REGISTER environment variable to switch between core and register bundles. Updated package.json with build:browser:register script. Verified that pnpm build produces both grigson.iife.js and grigson-register.iife.js. All 122 tests pass.
