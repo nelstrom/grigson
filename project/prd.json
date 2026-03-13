@@ -580,7 +580,7 @@
       "Implement an update() method to handle re-rendering",
       "Verify that <grigson-chart><template>| C |</template></grigson-chart> renders correctly in a browser"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "custom-element-attributes",

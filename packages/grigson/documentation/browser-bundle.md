@@ -30,7 +30,11 @@ The library provides a `<grigson-chart>` custom element for declarative chart re
 
 ```html
 <script src="/js/grigson-register.iife.js"></script>
-<grigson-chart>| C | Am | F | G |</grigson-chart>
+<grigson-chart>
+  <template>
+    | C | Am | F | G |
+  </template>
+</grigson-chart>
 ```
 
 The `grigson-register` bundle is separate from the core `grigson` bundle to allow for side-effect-free imports of the library when the custom element is not needed.
