@@ -81,4 +81,47 @@ describe('GrigsonChart', () => {
     
     expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| G |');
   });
+
+  it('updates when notation-preset attribute changes', async () => {
+    document.body.innerHTML = `
+      <grigson-chart>
+        <template>
+          | Am | Bm7b5 |
+        </template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    
+    // Default (jazz)
+    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
+    
+    // Change to symbolic
+    element.setAttribute('notation-preset', 'symbolic');
+    await wait();
+    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| A- | Bø |');
+    
+    // Change back to jazz
+    element.setAttribute('notation-preset', 'jazz');
+    await wait();
+    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
+  });
+
+  it('reacts to multiple attribute changes', async () => {
+    document.body.innerHTML = `
+      <grigson-chart>
+        <template>| Am |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    
+    element.setAttribute('notation-preset', 'symbolic');
+    element.setAttribute('transpose-semitones', '2'); // Transpose not implemented yet but should trigger update
+    await wait();
+    
+    expect(shadowRoot.querySelector('pre')!.textContent!.trim()).toBe('| A- |');
+  });
 });

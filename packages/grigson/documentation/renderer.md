@@ -31,10 +31,14 @@ const song = parse(source);
 const inG = new TextRenderer().render(song);
 
 // Transposed up a tone to A
+// (Note: transposition is currently implemented as a configuration stub)
 const inA = new TextRenderer({ transpose: { toKey: 'A' } }).render(song);
+
+// Using a notation preset
+const symbolic = new TextRenderer({ notation: { preset: 'symbolic' } }).render(song);
 ```
 
-The plain text renderer supports all the same configuration options as the SVG renderer, except for `layout` (which has no meaning for text output).
+The plain text renderer supports notation presets (`jazz`, `pop`, `symbolic`) to control chord suffixes.
 
 ---
 

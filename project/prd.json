@@ -592,7 +592,7 @@
       "Implement attributeChangedCallback to update the internal config and call update()",
       "Verify that changing attributes via the DOM (e.g., setAttribute) updates the rendered chart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "custom-element-child-config",

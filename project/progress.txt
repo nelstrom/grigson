@@ -105,5 +105,9 @@ Installed monaco-textmate and vscode-oniguruma as devDependencies in packages/we
 
 ## custom-element-scaffold
 Created src/element.ts with a side-effect-free GrigsonChart class. Created src/register.ts for auto-registration of the 'grigson-chart' element. Exported GrigsonChart from index.browser.ts. Updated vite.config.ts to use VITE_BUILD_REGISTER environment variable to switch between core and register bundles. Updated package.json with build:browser:register script. Verified that pnpm build produces both grigson.iife.js and grigson-register.iife.js. All 122 tests pass.
+
 ## custom-element-rendering
 Implemented the `GrigsonChart` custom element to parse chart content from a child `<template>` and render it into a Shadow Root using the `TextRenderer`. The `connectedCallback` defers the initial `update()` to ensure children are available. Added 5 tests in `src/element.test.ts` using `happy-dom` (installed as a devDependency in `packages/grigson`) covering rendering, empty template, error handling, and manual updates. Updated `browser-bundle.md` with the correct usage example. All 127 tests pass.
+
+## custom-element-attributes
+Implemented `observedAttributes` and `attributeChangedCallback` in `GrigsonChart` to handle `renderer`, `transpose-key`, `transpose-semitones`, and `notation-preset`. Updated `TextRenderer` to accept a `TextRendererConfig` object and support notation presets (`jazz`, `pop`, `symbolic`) for chord suffixes. Verified reactivity with new tests in `element.test.ts` showing that changing the `notation-preset` attribute via `setAttribute` correctly re-renders the chart with the new styling. Updated `browser-bundle.md` and `renderer.md` documentation. All 129 tests pass.

@@ -2,8 +2,13 @@ import { parseSong } from './parser/parser.js';
 import { TextRenderer } from './renderers/text.js';
 
 export class GrigsonChart extends HTMLElement {
+  static get observedAttributes() {
+    return ['renderer', 'transpose-key', 'transpose-semitones', 'notation-preset'];
+  }
+
   private _root: ShadowRoot;
   private _renderer: TextRenderer;
+  private _isInitialized = false;
 
   constructor() {
     super();
@@ -11,8 +16,16 @@ export class GrigsonChart extends HTMLElement {
     this._renderer = new TextRenderer();
   }
 
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    if (oldValue === newValue) return;
+    if (this._isInitialized) {
+      this.update();
+    }
+  }
+
   connectedCallback() {
-    // Defer update to next task to ensure children (template) are available
+    this._isInitialized = true;
+    // Defer update to ensure children (template) are available
     setTimeout(() => this.update(), 0);
   }
 
@@ -28,6 +41,23 @@ export class GrigsonChart extends HTMLElement {
       this._root.innerHTML = '';
       return;
     }
+
+    const config: any = {};
+    const notationPreset = this.getAttribute('notation-preset');
+    if (notationPreset) {
+      config.notation = { preset: notationPreset };
+    }
+
+    const transposeKey = this.getAttribute('transpose-key');
+    const transposeSemitones = this.getAttribute('transpose-semitones');
+    if (transposeKey || transposeSemitones) {
+      config.transpose = {};
+      if (transposeKey) config.transpose.toKey = transposeKey;
+      if (transposeSemitones) config.transpose.semitones = parseInt(transposeSemitones, 10);
+    }
+
+    // Update renderer instance with new config
+    this._renderer = new TextRenderer(config);
 
     try {
       const song = parseSong(content);

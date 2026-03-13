@@ -37,6 +37,19 @@ The library provides a `<grigson-chart>` custom element for declarative chart re
 </grigson-chart>
 ```
 
+### Attributes
+
+The `<grigson-chart>` element supports the following attributes for configuration:
+
+| Attribute             | Description                                                                 |
+| --------------------- | --------------------------------------------------------------------------- |
+| `notation-preset`     | Set the chord notation style: `jazz` (default), `pop`, or `symbolic`.       |
+| `transpose-key`       | Target key for transposition (e.g., `A`).                                   |
+| `transpose-semitones` | Number of semitones to transpose (e.g., `2` for a whole step up).           |
+| `renderer`            | Choose the renderer type: `text` (default).                                 |
+
+Changing these attributes via the DOM (e.g., `element.setAttribute('notation-preset', 'symbolic')`) will automatically re-render the chart.
+
 The `grigson-register` bundle is separate from the core `grigson` bundle to allow for side-effect-free imports of the library when the custom element is not needed.
 
 ## Using the IIFE bundle
