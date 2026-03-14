@@ -29,19 +29,27 @@ The function scans left-to-right and matches the following patterns, in priority
 
 ### 2-5-1 (ii–V7–I)
 
-A minor or half-diminished chord (ii) followed by a dominant-7th chord (V7) a perfect fourth above, followed by any chord (I) a perfect fifth below the V7. All three chords are assigned `currentKey` equal to the resolved tonic key.
+A chord with a ii quality followed by a dominant-7th chord (V7) a perfect fourth above, followed by a tonic chord (I) a perfect fifth below the V7. All three chords are assigned `currentKey` equal to the resolved tonic key.
+
+Accepted ii qualities: `minor`, `min7`, `halfDiminished`, `diminished`.
 
 ```
-Bbm  Eb7  Ab      → all three get currentKey = 'Ab'
-ii   V7   I
+Bbm   Eb7  Ab      → all three get currentKey = 'Ab'  (minor ii)
+Bbm7  Eb7  Abmaj7  → all three get currentKey = 'Ab'  (min7 ii with maj7 I)
+Bm7b5 E7   Am      → all three get currentKey = 'Am'  (half-diminished ii, minor 2-5-1)
+Bdim  E7   Am      → all three get currentKey = 'Am'  (diminished ii in harmonic minor)
+ii    V7   I
 ```
 
 ### 5-1 (V7–I)
 
-A dominant-7th chord followed by a chord a perfect fifth below. Both chords are assigned `currentKey` equal to the resolved tonic key.
+A dominant-7th chord followed by a tonic chord a perfect fifth below. Both chords are assigned `currentKey` equal to the resolved tonic key.
 
 ```
-G7  C    → both get currentKey = 'C'
+G7  C      → both get currentKey = 'C'   (major tonic)
+G7  Cmaj7  → both get currentKey = 'C'   (maj7 tonic)
+E7  Am     → both get currentKey = 'Am'  (minor tonic)
+E7  Am7    → both get currentKey = 'Am'  (min7 tonic)
 V7  I
 ```
 
@@ -91,8 +99,8 @@ const annotated = analyseHarmony(chords, 'C');
 
 When a pattern resolves to a tonic chord, the key name is determined by:
 
-- **Major tonic** (quality `major` or `dominant7`): maps to the major key (e.g., PC 8 → `'Ab'`)
-- **Minor tonic** (quality `minor` or `halfDiminished`): maps to the minor key (e.g., PC 2 → `'Dm'`)
+- **Major tonic** (quality `major`, `maj7`, or `dominant7`): maps to the major key (e.g., PC 8 → `'Ab'`)
+- **Minor tonic** (quality `minor`, `min7`, or `halfDiminished`): maps to the minor key (e.g., PC 2 → `'Dm'`)
 
 For pitch class 6 (F#/Gb), the flat-side spelling `'Gb'` is preferred by default.
 

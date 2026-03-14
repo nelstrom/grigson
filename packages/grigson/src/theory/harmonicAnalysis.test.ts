@@ -83,6 +83,45 @@ describe('analyseHarmony', () => {
   });
 });
 
+describe('analyseHarmony — tetrad quality support', () => {
+  function min7(root: string): Chord {
+    return { type: 'chord', root, quality: 'min7' };
+  }
+  function maj7(root: string): Chord {
+    return { type: 'chord', root, quality: 'maj7' };
+  }
+  function dim(root: string): Chord {
+    return { type: 'chord', root, quality: 'diminished' };
+  }
+
+  it('2-5-1 with min7 ii: Dm7-G7-Cmaj7 all assigned to C', () => {
+    const result = analyseHarmony([min7('D'), dom7('G'), maj7('C')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(result[1].currentKey).toBe('C');
+    expect(result[2].currentKey).toBe('C');
+  });
+
+  it('2-5-1 with halfDim ii and min7 I: Bm7b5-E7-Am7 all assigned to Am', () => {
+    const result = analyseHarmony([hd('B'), dom7('E'), min7('A')], 'Am');
+    expect(result[0].currentKey).toBe('Am');
+    expect(result[1].currentKey).toBe('Am');
+    expect(result[2].currentKey).toBe('Am');
+  });
+
+  it('5-1 with maj7 I: G7-Cmaj7 both assigned to C', () => {
+    const result = analyseHarmony([dom7('G'), maj7('C')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(result[1].currentKey).toBe('C');
+  });
+
+  it('2-5-1 with diminished ii: Bdim-E7-Am all assigned to Am', () => {
+    const result = analyseHarmony([dim('B'), dom7('E'), min('A')], 'Am');
+    expect(result[0].currentKey).toBe('Am');
+    expect(result[1].currentKey).toBe('Am');
+    expect(result[2].currentKey).toBe('Am');
+  });
+});
+
 describe('circle-of-fifths fallback for isolated borrowed chords', () => {
   it('isolated bVI: Ab in C major gets currentKey from closest key containing Ab', () => {
     // Ab is not diatonic to C major; closest keys by CoF are Eb and Cm (both distance 3).

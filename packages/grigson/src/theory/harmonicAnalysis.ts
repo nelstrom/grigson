@@ -133,7 +133,10 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
     // Try 2-5-1 pattern: ii (minor/halfDim) → V7 (dom7) → I
     if (
       pc !== null &&
-      (chord.quality === 'minor' || chord.quality === 'halfDiminished') &&
+      (chord.quality === 'minor' ||
+        chord.quality === 'halfDiminished' ||
+        chord.quality === 'min7' ||
+        chord.quality === 'diminished') &&
       i + 2 < chords.length
     ) {
       const v7Chord = chords[i + 1];
@@ -148,7 +151,10 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
         (v7PC - pc + 12) % 12 === 5 && // V7 is a perfect 4th above ii
         (v7PC + 5) % 12 === iPC // I is a perfect 5th below V7
       ) {
-        const iIsMinor = iChord.quality === 'minor' || iChord.quality === 'halfDiminished';
+        const iIsMinor =
+          iChord.quality === 'minor' ||
+          iChord.quality === 'halfDiminished' ||
+          iChord.quality === 'min7';
         const resolvedKey = resolveKey(iPC, iIsMinor) ?? homeKey;
         result.push(annotate(chord, homeKey, resolvedKey));
         result.push(annotate(v7Chord, homeKey, resolvedKey));
@@ -164,7 +170,10 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
       const iPC = getPC(iChord);
 
       if (iPC !== null && (pc + 5) % 12 === iPC) {
-        const iIsMinor = iChord.quality === 'minor' || iChord.quality === 'halfDiminished';
+        const iIsMinor =
+          iChord.quality === 'minor' ||
+          iChord.quality === 'halfDiminished' ||
+          iChord.quality === 'min7';
         const resolvedKey = resolveKey(iPC, iIsMinor) ?? homeKey;
         result.push(annotate(chord, homeKey, resolvedKey));
         result.push(annotate(iChord, homeKey, resolvedKey));

@@ -816,7 +816,7 @@
       "Update the 5-1 and 2-5-1 tonic-resolution quality check to accept 'major', 'minor', 'maj7', and 'min7'",
       "Run pnpm test to confirm all new and existing harmonic analysis tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "chord-qualities-normalise",
