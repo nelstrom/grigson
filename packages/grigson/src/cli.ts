@@ -7,8 +7,9 @@ import { parseSong } from './parser/parser.js';
 import { normaliseSong } from './theory/normalise.js';
 import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 import { TextRenderer } from './renderers/text.js';
+import { validate } from './validator.js';
 
-const SUBCOMMANDS = ['normalise', 'render', 'transpose'] as const;
+const SUBCOMMANDS = ['normalise', 'render', 'transpose', 'validate'] as const;
 type Subcommand = (typeof SUBCOMMANDS)[number];
 
 const HELP: Record<string, string> = {
@@ -18,6 +19,7 @@ Subcommands:
   normalise    Normalise chord spellings in a .chart file
   render       Render a .chart file to plain text
   transpose    Transpose chords in a .chart file
+  validate     Validate one or more .chart files
 
 Options:
   --help, -h   Show this help message and exit`,
@@ -52,6 +54,15 @@ Options:
   --lower <n>   Transpose down by n semitones (positive integer)
   --to <key>    Transpose to the given key (e.g. --to G)
   --help, -h    Show this help message and exit`,
+
+  validate: `Usage: grigson validate [options] [file...]
+
+Validates one or more .chart files (or stdin if no file is given).
+Exits with code 0 if no errors are found, code 1 if any errors are found.
+
+Options:
+  --format <fmt>   Output format: text (default) or json
+  --help, -h       Show this help message and exit`,
 };
 
 function readInput(filePath: string | undefined): string {
@@ -152,6 +163,67 @@ function runTranspose(parsed: minimist.ParsedArgs): void {
   process.stdout.write(renderer.render(transposed));
 }
 
+function runValidate(parsed: minimist.ParsedArgs): void {
+  const files = parsed._.slice(1) as string[];
+  const format = (parsed['format'] as string | undefined) ?? 'text';
+
+  if (format !== 'text' && format !== 'json') {
+    console.error(`Error: Unknown format '${format}'.`);
+    process.exit(1);
+    return;
+  }
+
+  type JsonEntry = {
+    file: string;
+    line: number;
+    character: number;
+    severity: string;
+    message: string;
+  };
+
+  const jsonEntries: JsonEntry[] = [];
+  let hasErrors = false;
+
+  const inputs: Array<{ label: string; source: string }> = [];
+
+  if (files.length === 0) {
+    const source = fs.readFileSync(0, 'utf8');
+    inputs.push({ label: '<stdin>', source });
+  } else {
+    for (const file of files) {
+      inputs.push({ label: file, source: fs.readFileSync(file, 'utf8') });
+    }
+  }
+
+  for (const { label, source } of inputs) {
+    const diagnostics = validate(source);
+    for (const d of diagnostics) {
+      hasErrors = true;
+      if (format === 'json') {
+        jsonEntries.push({
+          file: label,
+          line: d.range.start.line + 1,
+          character: d.range.start.character + 1,
+          severity: d.severity,
+          message: d.message,
+        });
+      } else {
+        const line = d.range.start.line + 1;
+        const char = d.range.start.character + 1;
+        console.log(`${label}:${line}:${char}: ${d.severity}: ${d.message}`);
+      }
+    }
+  }
+
+  if (format === 'json') {
+    console.log(JSON.stringify(jsonEntries, null, 2));
+  }
+
+  if (hasErrors) {
+    process.exit(1);
+  }
+}
+
 export function runCli(args: string[]): void {
   const parsed = minimist(args, {
     boolean: ['help', 'i', 'in-place'],
@@ -190,6 +262,9 @@ export function runCli(args: string[]): void {
       break;
     case 'transpose':
       runTranspose(parsed);
+      break;
+    case 'validate':
+      runValidate(parsed);
       break;
   }
 }

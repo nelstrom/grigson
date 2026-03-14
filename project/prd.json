@@ -877,7 +877,7 @@
       "Register 'validate' in the subcommand dispatch table and --help output",
       "Run pnpm build && pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "language-server",

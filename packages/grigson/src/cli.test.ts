@@ -228,6 +228,96 @@ describe('CLI transpose subcommand', () => {
   });
 });
 
+describe('CLI validate subcommand', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('exits with code 0 for a valid .chart file', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-validate-valid.chart');
+    fs.writeFileSync(tmpFile, '| C | Am | F | G |\n', 'utf8');
+
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+
+    runCli(['validate', tmpFile]);
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('exits with code 1 and prints filename and line number for a file with a parse error', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-validate-invalid.chart');
+    fs.writeFileSync(tmpFile, '| Csus4 |\n', 'utf8');
+
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['validate', tmpFile]);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    const output = logSpy.mock.calls[0][0] as string;
+    expect(output).toContain(tmpFile);
+    expect(output).toMatch(/:\d+:/);
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('reads from stdin when no file argument is given', () => {
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (p === 0) return '| C | Am |\n';
+      throw new Error('unexpected path');
+    });
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+
+    runCli(['validate']);
+
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it('exits with code 0 and prints [] for a valid file with --format json', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-validate-json-valid.chart');
+    fs.writeFileSync(tmpFile, '| C | F | G |\n', 'utf8');
+
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['validate', '--format', 'json', tmpFile]);
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    const output = logSpy.mock.calls[0][0] as string;
+    expect(JSON.parse(output)).toEqual([]);
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('exits with code 1 and prints JSON array with error entry for an invalid file with --format json', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-validate-json-invalid.chart');
+    fs.writeFileSync(tmpFile, '| Csus4 |\n', 'utf8');
+
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['validate', '--format', 'json', tmpFile]);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    const output = logSpy.mock.calls[0][0] as string;
+    const entries = JSON.parse(output) as Array<{
+      file: string;
+      line: number;
+      character: number;
+      severity: string;
+      message: string;
+    }>;
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries[0]).toMatchObject({
+      file: tmpFile,
+      severity: 'error',
+    });
+    expect(typeof entries[0].line).toBe('number');
+    expect(typeof entries[0].character).toBe('number');
+    expect(typeof entries[0].message).toBe('string');
+    fs.unlinkSync(tmpFile);
+  });
+});
+
 describe('CLI render subcommand', () => {
   afterEach(() => {
     vi.restoreAllMocks();

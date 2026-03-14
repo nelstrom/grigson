@@ -107,6 +107,55 @@ cat song.chart | grigson transpose --to Dm    # from stdin
 
 ---
 
+### `grigson validate`
+
+Validates one or more `.chart` files and reports parse errors. Suitable for CI pipelines and pre-commit hooks.
+
+```
+grigson validate [options] [file...]
+```
+
+Reads from `file` (or multiple files) if given, otherwise from stdin. Writes diagnostics to stdout. Exits with code 0 if no errors, code 1 if any errors are found.
+
+**Options**
+
+| Option              | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `--format <format>` | Output format: `text` (default) or `json`         |
+
+**Text output format** (default)
+
+```
+song.chart:3:7: error: Expected "|" or end of input but "sus4" found.
+```
+
+Each line follows the standard linter format: `<file>:<line>:<character>: <severity>: <message>` with 1-indexed line and character numbers.
+
+**JSON output format** (`--format json`)
+
+```json
+[
+  {
+    "file": "song.chart",
+    "line": 3,
+    "character": 7,
+    "severity": "error",
+    "message": "Expected \"|\""
+  }
+]
+```
+
+**Examples**
+
+```sh
+grigson validate song.chart                    # validate a single file
+grigson validate *.chart                       # validate multiple files
+grigson validate --format json song.chart      # machine-readable output
+cat song.chart | grigson validate              # read from stdin
+```
+
+---
+
 ### `grigson render`
 
 Renders a chart to a specified output format.
