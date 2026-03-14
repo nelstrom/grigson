@@ -1,0 +1,20 @@
+{
+  "name": "tree-sitter-grigson",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for the Grigson chord chart format",
+  "main": "bindings/node",
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "build": "tree-sitter generate",
+    "test": "tree-sitter test"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.25.0"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.grigson",
+      "file-types": ["chart"]
+    }
+  ]
+}

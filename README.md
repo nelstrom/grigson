@@ -30,6 +30,7 @@ This is a pnpm monorepo. Each package lives under `packages/`.
 | [`grigson`](packages/grigson/README.md) | Core library: parser, normaliser, transposer, renderer, and CLI |
 | [`language-server`](packages/language-server/README.md) | Standalone LSP server for `.chart` files |
 | [`textmate-grammar`](packages/textmate-grammar/README.md) | TextMate grammar (`source.grigson`) shared by the VS Code extension and Shiki |
+| [`tree-sitter-grammar`](packages/tree-sitter-grammar/README.md) | Tree-sitter grammar for structural highlighting and text objects |
 | [`vscode-extension`](packages/vscode-extension/README.md) | VS Code extension: syntax highlighting and LSP client |
 | [`website`](packages/website/README.md) | Eleventy documentation site with interactive playground |
 
@@ -117,6 +118,11 @@ packages/
 
   textmate-grammar/        Shared TextMate grammar file
     grigson.tmLanguage.json
+
+  tree-sitter-grammar/     Tree-sitter grammar
+    grammar.js             Grammar definition (source of truth)
+    src/                   Generated C parser and metadata (committed)
+    queries/               Highlight queries
 
   vscode-extension/        VS Code extension
     src/extension.ts       LSP client activation

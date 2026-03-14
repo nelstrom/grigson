@@ -989,7 +989,7 @@
       "Run pnpm test from the workspace root to confirm all existing grigson tests still pass",
       "Commit packages/tree-sitter-grammar/package.json, grammar.js, src/parser.c, src/grammar.json, src/node-types.json"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "tree-sitter-chord-grammar",

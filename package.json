@@ -8,6 +8,9 @@
     "lint": "pnpm -r lint",
     "format": "prettier --write \"packages/**/*.{ts,js,json,md}\""
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["tree-sitter-cli"]
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.3",
