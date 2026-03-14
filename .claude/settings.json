@@ -14,7 +14,9 @@
     "Bash(git diff*)",
     "Bash(git log*)",
     "Bash(git add *)",
-    "Bash(git commit*)"
+    "Bash(git commit*)",
+    "Bash(./project/prd-done *)",
+    "Bash(./project/prd-status*)"
   ],
   "hooks": {
     "PreToolUse": [
