@@ -59,7 +59,8 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
 }
 
 function renderBar(bar: Bar, config: TextRendererConfig): string {
-  return renderChord(bar.chord, config);
+  const ts = bar.timeSignature ? `(${bar.timeSignature.numerator}/${bar.timeSignature.denominator}) ` : '';
+  return ts + renderChord(bar.chord, config);
 }
 
 function renderRow(row: Row, config: TextRendererConfig): string {

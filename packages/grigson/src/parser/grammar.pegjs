@@ -78,13 +78,22 @@ Row
 // A bar's content plus its closing barline.
 // The opening barline is consumed by Row (or the previous BarTail).
 BarTail
-  = chord:Chord _ "|" _ {
-      return { type: "bar", chord };
+  = ts:TimeSignatureToken? _ chord:Chord _ "|" _ {
+      const bar = { type: "bar", chord };
+      if (ts) bar.timeSignature = ts;
+      return bar;
     }
 
 Bar
-  = "|" _ chord:Chord _ "|" {
-      return { type: "bar", chord };
+  = "|" _ ts:TimeSignatureToken? _ chord:Chord _ "|" {
+      const bar = { type: "bar", chord };
+      if (ts) bar.timeSignature = ts;
+      return bar;
+    }
+
+TimeSignatureToken
+  = "(" numerator:$[0-9]+ "/" denominator:$[0-9]+ ")" {
+      return { numerator: parseInt(numerator, 10), denominator: parseInt(denominator, 10) };
     }
 
 Chord

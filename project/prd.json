@@ -87,8 +87,7 @@
       "Run the round-trip test against each of the manually authored example songs that use only MVP-supported features"
     ],
     "passes": true
-  }
-  ,
+  },
   {
     "id": "prettier",
     "category": "tooling",
@@ -930,7 +929,7 @@
       "Export TimeSignature from packages/grigson/src/index.ts",
       "Run pnpm build && pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "beat-slot-parsing",

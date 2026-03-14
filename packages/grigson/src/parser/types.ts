@@ -20,9 +20,15 @@ export interface Chord {
   quality: Quality;
 }
 
+export interface TimeSignature {
+  numerator: number;
+  denominator: number;
+}
+
 export interface Bar {
   type: 'bar';
   chord: Chord;
+  timeSignature?: TimeSignature;
 }
 
 export interface Row {
