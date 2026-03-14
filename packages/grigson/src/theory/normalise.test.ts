@@ -187,6 +187,58 @@ describe('normaliseSong — Category 5: front matter key field read and write', 
   });
 });
 
+describe('normaliseSong — chord-qualities smoke tests', () => {
+  it('Dm7 G7 Cmaj7 in C: all roots already correct, no rewrites', () => {
+    const s = song([row(ch('D', 'min7'), ch('G', 'dominant7'), ch('C', 'maj7'))]);
+    const result = normaliseSong(s);
+    const bars = result.sections[0].rows[0].bars;
+    expect(bars[0].chord.root).toBe('D');
+    expect(bars[0].chord.quality).toBe('min7');
+    expect(bars[1].chord.root).toBe('G');
+    expect(bars[1].chord.quality).toBe('dominant7');
+    expect(bars[2].chord.root).toBe('C');
+    expect(bars[2].chord.quality).toBe('maj7');
+    expect(result.key).toBe('C');
+  });
+
+  it('D#m7 G#7 C#maj7: detected key Db, roots rewritten to Ebm7 Ab7 Dbmaj7', () => {
+    const s = song([row(ch('D#', 'min7'), ch('G#', 'dominant7'), ch('C#', 'maj7'))]);
+    const result = normaliseSong(s);
+    const bars = result.sections[0].rows[0].bars;
+    expect(bars[0].chord.root).toBe('Eb');
+    expect(bars[0].chord.quality).toBe('min7');
+    expect(bars[1].chord.root).toBe('Ab');
+    expect(bars[1].chord.quality).toBe('dominant7');
+    expect(bars[2].chord.root).toBe('Db');
+    expect(bars[2].chord.quality).toBe('maj7');
+    expect(result.key).toBe('Db');
+  });
+
+  it('Bm7b5 E7 Am7: identifies Am, all roots unchanged', () => {
+    const s = song([row(ch('B', 'halfDiminished'), ch('E', 'dominant7'), ch('A', 'min7'))]);
+    const result = normaliseSong(s);
+    const bars = result.sections[0].rows[0].bars;
+    expect(bars[0].chord.root).toBe('B');
+    expect(bars[1].chord.root).toBe('E');
+    expect(bars[2].chord.root).toBe('A');
+    expect(result.key).toBe('Am');
+  });
+
+  it('Am7 Dm7 G#dim7 Am7: identifies Am, G# (raised VII) preserved as G#', () => {
+    const s = song([
+      row(ch('A', 'min7'), ch('D', 'min7'), ch('G#', 'dim7'), ch('A', 'min7')),
+    ]);
+    const result = normaliseSong(s);
+    const bars = result.sections[0].rows[0].bars;
+    expect(bars[0].chord.root).toBe('A');
+    expect(bars[1].chord.root).toBe('D');
+    expect(bars[2].chord.root).toBe('G#');
+    expect(bars[2].chord.quality).toBe('dim7');
+    expect(bars[3].chord.root).toBe('A');
+    expect(result.key).toBe('Am');
+  });
+});
+
 describe('normaliseSong — per-section key detection', () => {
   it('two-section song: each section normalised independently', () => {
     // Verse: E major (no rewrites needed — E A B E)

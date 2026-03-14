@@ -830,6 +830,6 @@
       "Write a test: normaliseSong with [Am7, Dm7, G#dim7, Am7] identifies Am and preserves G#dim7 root as G# (diatonic raised VII of Am)",
       "Run pnpm build && pnpm test to confirm all normalise tests (Cat 2, 5, 8 and harmonic-based spelling) pass with no regressions"
     ],
-    "passes": false
+    "passes": true
   }
 ]
