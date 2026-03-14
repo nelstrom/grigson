@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+// Usage:
+//   prd-status          # short:    id + description
+//   prd-status -d       # detailed: + detail
+//   prd-status -v       # verbose:  + steps
+
+const path = require('path');
+const tasks = require(path.join(__dirname, 'prd.json'));
+
+const flag = process.argv[2];
+const mode = flag === '-v' ? 'verbose' : flag === '-d' ? 'detailed' : 'short';
+
+const tty = process.stdout.isTTY;
+const yellow = s => tty ? `\x1b[33m${s}\x1b[0m` : s;
+const dim    = s => tty ? `\x1b[2m${s}\x1b[0m`  : s;
+
+const incomplete = tasks.filter(t => !t.passes && !t.blocked);
+
+if (incomplete.length === 0) {
+  console.log('All tasks complete.');
+  process.exit(0);
+}
+
+console.log(dim(`${incomplete.length} incomplete task(s):\n`));
+
+for (const t of incomplete) {
+  console.log(`${yellow(t.id)}: ${t.description}`);
+  if (mode !== 'short' && t.detail) {
+    console.log(dim(`  ${t.detail}`));
+  }
+  if (mode === 'verbose' && t.steps) {
+    t.steps.forEach((s, i) => console.log(dim(`  ${i + 1}. ${s}`)));
+  }
+  console.log();
+}

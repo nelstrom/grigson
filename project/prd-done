@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+// Usage: prd-done <task-id>
+// Marks a task as complete (passes: true) in prd.json.
+
+const fs = require('fs');
+const path = require('path');
+
+const id = process.argv[2];
+if (!id) {
+  console.error('Usage: prd-done <task-id>');
+  process.exit(1);
+}
+
+const prdPath = path.join(__dirname, 'prd.json');
+const tasks = JSON.parse(fs.readFileSync(prdPath, 'utf8'));
+const task = tasks.find(t => t.id === id);
+
+if (!task) {
+  console.error(`Task not found: ${id}`);
+  process.exit(1);
+}
+if (task.passes) {
+  console.log(`Already complete: ${id}`);
+  process.exit(0);
+}
+
+task.passes = true;
+fs.writeFileSync(prdPath, JSON.stringify(tasks, null, 2) + '\n');
+console.log(`Marked complete: ${id}`);
