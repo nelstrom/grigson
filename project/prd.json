@@ -444,7 +444,7 @@
       "Extend analyseHarmony to call the circle-of-fifths fallback for chords not matched by a pattern and not diatonic to homeKey",
       "Run pnpm test to confirm all existing and new harmonic analysis tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "normalise-harmonic",

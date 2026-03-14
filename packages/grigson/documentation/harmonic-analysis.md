@@ -45,9 +45,28 @@ G7  C    → both get currentKey = 'C'
 V7  I
 ```
 
-### Unmatched chords
+### Circle-of-fifths fallback (isolated borrowed chords)
 
-Any chord not captured by a pattern receives `currentKey = homeKey`.
+A chord not captured by any pattern and **not diatonic to homeKey** receives a `currentKey` derived from the circle of fifths. All 22 in-scope keys whose diatonic note set contains the chord's root (by spelling) are collected and ranked by `circleOfFifthsDistance` from `homeKey`. The closest key becomes `currentKey`; all tied candidates are stored in `currentKeyCandidates`.
+
+Tie-breaking rules:
+1. If the homeKey's **parallel minor** (e.g. `Cm` for homeKey `C`) is among the tied candidates, it is preferred.
+2. Otherwise, the first **major** key in the tied set is chosen.
+
+```
+C  Ab  G    (homeKey = 'C')
+   ↑
+   Ab is not diatonic to C. Closest keys: Eb and Cm (both 3 CoF steps).
+   Cm is the parallel minor of C → currentKey = 'Cm'
+
+C  Bb  F  G  (homeKey = 'C')
+   ↑
+   Bb is not diatonic to C. Closest key: F (1 CoF step, major) → currentKey = 'F'
+```
+
+### Unmatched diatonic chords
+
+A chord that is diatonic to homeKey and not captured by any pattern receives `currentKey = homeKey`.
 
 ## Example
 
@@ -76,3 +95,17 @@ When a pattern resolves to a tonic chord, the key name is determined by:
 - **Minor tonic** (quality `minor` or `halfDiminished`): maps to the minor key (e.g., PC 2 → `'Dm'`)
 
 For pitch class 6 (F#/Gb), the flat-side spelling `'Gb'` is preferred by default.
+
+## Circle-of-fifths distance
+
+```typescript
+import { circleOfFifthsDistance } from 'grigson';
+
+circleOfFifthsDistance('C', 'G');   // 1
+circleOfFifthsDistance('C', 'F');   // 1
+circleOfFifthsDistance('C', 'Bb');  // 2
+circleOfFifthsDistance('C', 'Am');  // 0  (Am is relative of C)
+circleOfFifthsDistance('C', 'Dm');  // 1  (Dm is relative of F)
+```
+
+Minor keys are mapped to their relative major before computing the distance, so relative pairs always have distance 0 from each other.

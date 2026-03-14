@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyseHarmony } from './harmonicAnalysis.js';
+import { analyseHarmony, circleOfFifthsDistance } from './harmonicAnalysis.js';
 import type { Chord } from '../parser/types.js';
 
 function maj(root: string): Chord {
@@ -80,5 +80,53 @@ describe('analyseHarmony', () => {
   it('homeKey is always preserved on each AnnotatedChord', () => {
     const result = analyseHarmony([maj('C'), dom7('G'), maj('C')], 'C');
     expect(result.every((a) => a.homeKey === 'C')).toBe(true);
+  });
+});
+
+describe('circle-of-fifths fallback for isolated borrowed chords', () => {
+  it('isolated bVI: Ab in C major gets currentKey from closest key containing Ab', () => {
+    // Ab is not diatonic to C major; closest keys by CoF are Eb and Cm (both distance 3).
+    // Parallel minor (Cm) is preferred when tied.
+    const result = analyseHarmony([maj('C'), maj('Ab'), maj('G')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(['Cm', 'Ab']).toContain(result[1].currentKey);
+    expect(result[2].currentKey).toBe('C');
+  });
+
+  it('isolated bVII: Bb in C major gets currentKey = F (1 step from C on the circle)', () => {
+    const result = analyseHarmony([maj('C'), maj('Bb'), maj('F'), maj('G')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(result[1].currentKey).toBe('F');
+    expect(result[2].currentKey).toBe('C'); // F is diatonic to C
+    expect(result[3].currentKey).toBe('C'); // G is diatonic to C
+  });
+
+  it('isolated Bb7 in C major gets currentKey = F (closest key containing Bb)', () => {
+    const result = analyseHarmony([maj('C'), dom7('Bb'), maj('C')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(result[1].currentKey).toBe('F');
+    expect(result[2].currentKey).toBe('C');
+  });
+
+  it('diatonic chords always keep homeKey regardless of circle-of-fifths logic', () => {
+    // G, Am, F, Em are all diatonic to C major
+    const result = analyseHarmony(
+      [maj('C'), maj('G'), min('A'), maj('F'), min('E')],
+      'C',
+    );
+    expect(result.every((a) => a.currentKey === 'C')).toBe(true);
+  });
+
+  it('circleOfFifthsDistance returns correct distances', () => {
+    expect(circleOfFifthsDistance('C', 'C')).toBe(0);
+    expect(circleOfFifthsDistance('C', 'G')).toBe(1);
+    expect(circleOfFifthsDistance('C', 'F')).toBe(1);
+    expect(circleOfFifthsDistance('C', 'Bb')).toBe(2);
+    expect(circleOfFifthsDistance('C', 'Eb')).toBe(3);
+    expect(circleOfFifthsDistance('C', 'Ab')).toBe(4);
+    // Minor keys use relative major position
+    expect(circleOfFifthsDistance('C', 'Am')).toBe(0); // Am relative of C
+    expect(circleOfFifthsDistance('C', 'Dm')).toBe(1); // Dm relative of F
+    expect(circleOfFifthsDistance('C', 'Cm')).toBe(3); // Cm relative of Eb
   });
 });

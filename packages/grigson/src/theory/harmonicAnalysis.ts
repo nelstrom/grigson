@@ -1,6 +1,49 @@
-import { KEYS } from './keys.js';
+import { KEYS, diatonicNotes } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord } from '../parser/types.js';
+
+// Circle-of-fifths positions indexed by major key root pitch class
+const COF_POSITIONS: Readonly<Record<number, number>> = {
+  0: 0, // C
+  7: 1, // G
+  2: 2, // D
+  9: 3, // A
+  4: 4, // E
+  11: 5, // B
+  6: 6, // F#/Gb
+  1: 7, // Db/C#
+  8: 8, // Ab/G#
+  3: 9, // Eb/D#
+  10: 10, // Bb/A#
+  5: 11, // F
+};
+
+/**
+ * Returns the circle-of-fifths distance between two keys.
+ * Minor keys are mapped to their relative major before computing distance,
+ * so relative major/minor pairs have distance 0 from each other.
+ */
+export function circleOfFifthsDistance(keyA: string, keyB: string): number {
+  const getPosition = (key: string): number => {
+    const majorKey = key.endsWith('m') && KEYS[key]?.relative ? KEYS[key].relative! : key;
+    const root = majorKey.endsWith('m') ? majorKey.slice(0, -1) : majorKey;
+    let pc: number;
+    try {
+      pc = rootToPitchClass(root);
+    } catch {
+      return -1;
+    }
+    const pos = COF_POSITIONS[pc];
+    return pos !== undefined ? pos : -1;
+  };
+
+  const posA = getPosition(keyA);
+  const posB = getPosition(keyB);
+  if (posA === -1 || posB === -1) return Infinity;
+
+  const diff = Math.abs(posA - posB);
+  return Math.min(diff, 12 - diff);
+}
 
 export interface AnnotatedChord {
   chord: Chord;
@@ -75,6 +118,14 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
   const result: AnnotatedChord[] = [];
   let i = 0;
 
+  // Pre-compute home key diatonic note set for borrowed-chord detection
+  let homeNotes: ReadonlySet<string>;
+  try {
+    homeNotes = diatonicNotes(homeKey);
+  } catch {
+    homeNotes = new Set<string>();
+  }
+
   while (i < chords.length) {
     const chord = chords[i];
     const pc = getPC(chord);
@@ -122,7 +173,43 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
       }
     }
 
-    // No pattern matched — assign home key
+    // No pattern matched — check if chord is diatonic to homeKey
+    if (pc !== null && !homeNotes.has(chord.root)) {
+      // Non-diatonic borrowed chord: find closest key via circle of fifths
+      const candidateKeys = Object.keys(KEYS).filter((key) => KEYS[key].notes.includes(chord.root));
+
+      if (candidateKeys.length > 0) {
+        candidateKeys.sort(
+          (a, b) => circleOfFifthsDistance(homeKey, a) - circleOfFifthsDistance(homeKey, b),
+        );
+        const minDist = circleOfFifthsDistance(homeKey, candidateKeys[0]);
+        const closestCandidates = candidateKeys.filter(
+          (k) => circleOfFifthsDistance(homeKey, k) === minDist,
+        );
+
+        // Prefer the parallel minor of homeKey if it's among the closest candidates,
+        // then fall back to preferring major keys over minor keys.
+        let pickedKey: string;
+        if (!homeKey.endsWith('m')) {
+          const parallelMinor = homeKey + 'm';
+          if (closestCandidates.includes(parallelMinor)) {
+            pickedKey = parallelMinor;
+          } else {
+            const majors = closestCandidates.filter((k) => !k.endsWith('m'));
+            pickedKey = majors.length > 0 ? majors[0] : closestCandidates[0];
+          }
+        } else {
+          const majors = closestCandidates.filter((k) => !k.endsWith('m'));
+          pickedKey = majors.length > 0 ? majors[0] : closestCandidates[0];
+        }
+
+        result.push({ chord, homeKey, currentKey: pickedKey, currentKeyCandidates: closestCandidates });
+        i += 1;
+        continue;
+      }
+    }
+
+    // Diatonic chord or unrecognised root — assign home key
     result.push(annotate(chord, homeKey, homeKey));
     i += 1;
   }
