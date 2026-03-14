@@ -910,6 +910,6 @@
       "Open a valid .chart file and confirm no diagnostics are shown",
       "Run pnpm test to confirm no regressions in the grigson package tests"
     ],
-    "passes": false
+    "passes": true
   }
 ]

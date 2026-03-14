@@ -29,7 +29,28 @@ On every `textDocument/didOpen` and `textDocument/didChange` event, the server:
 
 ### VS Code
 
-The `packages/vscode-extension` package activates automatically for `.chart` files and spawns the language server as its LSP backend. See `vscode-extension-lsp` for setup details.
+The `packages/vscode-extension` package activates automatically for `.chart` files (via `"activationEvents": ["onLanguage:grigson"]`) and spawns the language server as its LSP backend.
+
+**Building the extension:**
+
+```
+cd packages/vscode-extension
+pnpm install
+pnpm build
+```
+
+This produces `packages/vscode-extension/dist/extension.js`. The extension uses `vscode-languageclient` to spawn `packages/language-server/dist/server.js` via IPC and proxy LSP messages to VS Code.
+
+**What you get for free once active:**
+- Red squiggly underlines under parse errors
+- Hover tooltip showing the error message
+- Problems panel (`Cmd+Shift+M`) listing all errors with clickable links
+
+No additional VS Code API calls are needed — `connection.sendDiagnostics()` in the server drives all of this.
+
+**Packaging for the VS Code Marketplace:**
+
+When packaging the extension for distribution, the language server's built output must be bundled alongside it. Copy `packages/language-server/dist/server.js` into the extension before running `vsce package`.
 
 ### Neovim (nvim-lspconfig)
 

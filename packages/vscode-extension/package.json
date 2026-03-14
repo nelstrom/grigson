@@ -9,6 +9,10 @@
   "categories": [
     "Programming Languages"
   ],
+  "activationEvents": [
+    "onLanguage:grigson"
+  ],
+  "main": "./dist/extension.js",
   "contributes": {
     "languages": [
       {
@@ -30,5 +34,15 @@
         "path": "./syntaxes/grigson.tmLanguage.json"
       }
     ]
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
   }
 }
