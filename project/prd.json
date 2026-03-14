@@ -750,5 +750,86 @@
       "Verify the website documentation and interactive features still function correctly"
     ],
     "passes": true
+  },
+  {
+    "id": "chord-qualities-parse-render",
+    "category": "functional",
+    "description": "Extend parser and renderer with diminished, maj7, min7, and dim7 qualities",
+    "detail": "Add four new members to the Quality union type and update all layers that touch Quality. See project/plans/chord-qualities.md — Phase 1 for the full rationale and grammar ordering rules.\n\nNew qualities: 'diminished' (suffix 'dim'), 'maj7' (suffixes 'maj7' and 'M7' on input, canonical output 'maj7'), 'min7' (suffix 'm7'), 'dim7' (suffix 'dim7').\n\nGrammar ordering in the Quality rule is critical — longer alternatives must precede shorter ones to avoid premature matches: m7b5 > maj7 > M7 > m7 > m, and dim7 > dim.",
+    "steps": [
+      "Add 'diminished' | 'maj7' | 'min7' | 'dim7' to the Quality union in packages/grigson/src/parser/types.ts",
+      "Extend the Quality rule in packages/grigson/src/parser/grammar.pegjs with the new alternatives in the correct PEG order (see plan)",
+      "Run pnpm build to regenerate the parser and confirm it compiles",
+      "Extend TextRenderer.renderChord() in packages/grigson/src/renderers/text.ts to emit the correct suffix for each new quality",
+      "Write parser tests: 'Cdim' → root='C' quality='diminished', 'Bdim' → root='B' quality='diminished'",
+      "Write parser tests: 'Cmaj7' → quality='maj7', 'CM7' → quality='maj7', 'Fmaj7' → quality='maj7'",
+      "Write parser tests: 'Dm7' → quality='min7', 'Am7' → quality='min7', 'Bm7' → quality='min7'",
+      "Write parser tests: 'Bdim7' → quality='dim7', 'G#dim7' → quality='dim7'",
+      "Write a round-trip test for each new quality: parse the chord string, render it, parse again, assert both ASTs are equal",
+      "Run pnpm test to confirm all new and existing tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "chord-qualities-key-detector",
+    "category": "functional",
+    "description": "Update key detector to use Set-based degree quality tables covering triads and tetrads",
+    "detail": "Replace the single-Quality-per-degree arrays in keyDetector.ts with Set<Quality> arrays that cover both the triad and tetrad quality for each scale degree. See project/plans/chord-qualities.md — Phase 2 and the Degree Quality Tables section for the complete tables.\n\nThe V degree set { 'major', 'dominant7' } makes the existing dom7→major special-case in qualityMatches redundant — remove it. All 22 KEYS entries are updated (12 major + 10 harmonic minor).\n\nThis task depends on chord-qualities-parse-render (the new Quality members must exist before they can appear in the Set literals).",
+    "steps": [
+      "Replace MAJOR_DEGREE_QUALITIES with MAJOR_DEGREE_QUALITY_SETS (Set<Quality>[] with triad+tetrad per degree) in packages/grigson/src/theory/keyDetector.ts",
+      "Replace HARMONIC_MINOR_DEGREE_QUALITIES with HARMONIC_MINOR_DEGREE_QUALITY_SETS — include 'diminished' on degree II triad, 'dim7' on degree VII tetrad (see plan tables)",
+      "Update buildKeyScoreMap to store Map<number, Set<Quality>> instead of Map<number, Quality | null>",
+      "Replace qualityMatches with qualityMatchesSet(chordQuality: Quality, expected: Set<Quality>): boolean using Set.has()",
+      "Remove the explicit dominant7→major override from qualityMatches (now handled by the V degree's set)",
+      "Update computeScore to call qualityMatchesSet with the Set from the map",
+      "Run pnpm test to confirm all existing key detector tests pass with no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "chord-qualities-tetrad-tests",
+    "category": "functional",
+    "description": "Add key detection tests that demonstrate tetrad qualities disambiguating key",
+    "detail": "Add a new 'key-detector-tetrads' describe block in keyDetector.test.ts with cases where triad-only progressions are ambiguous but tetrad qualities resolve the key unambiguously. See project/plans/chord-qualities.md — Phase 3 for the full list of test cases.\n\nThis task depends on chord-qualities-parse-render (new qualities must be parseable to construct Chord objects in tests) and chord-qualities-key-detector (the Set-based scorer must be in place).",
+    "steps": [
+      "Write test: detectKey([Cmaj7, Gmaj7, Cmaj7, Gmaj7]) === 'G' — Gmaj7=I, Cmaj7=IV; Gmaj7 is not the diatonic V tetrad of C",
+      "Write test: detectKey([Cmaj7, G7, Cmaj7, G7]) === 'C' — Cmaj7=I, G7=V7; G7 is not the diatonic I tetrad of G",
+      "Write test: detectKey([Dm7, G7, Cmaj7, Am7]) === 'C' — full ii-V-I-vi tetrad progression",
+      "Write test: detectKey([Em7, A7, Dmaj7]) === 'D' — ii-V-I in D major",
+      "Write test: detectKey([Bm7b5, E7, Am7]) === 'Am' — iiø-V7-i in A harmonic minor with tetrads",
+      "Write test: detectKey([Am7, Dm7, Gdim7, Am7]) === 'Am' — G#dim7 (VIIdim7 of Am) as dominant substitute",
+      "Run pnpm test to confirm all new tetrad tests pass alongside existing tests"
+    ],
+    "passes": false
+  },
+  {
+    "id": "chord-qualities-harmonic-analysis",
+    "category": "functional",
+    "description": "Update harmonic analysis pattern matching to recognise min7 and dim7 in 2-5-1 and 5-1 patterns",
+    "detail": "analyseHarmony in harmonicAnalysis.ts matches chord quality to identify 2-5-1 and 5-1 patterns. The ii slot currently accepts 'minor' and 'halfDiminished'. Extend it to also accept 'min7' (the tetrad form of the major-key ii chord) and 'diminished' (the triad form of the harmonic minor ii). The I (tonic) resolution slot should accept 'major', 'minor', 'maj7', and 'min7'. See project/plans/chord-qualities.md — Phase 4.\n\nThis task depends on chord-qualities-parse-render.",
+    "steps": [
+      "Write a test: analyseHarmony([Dm7, G7, Cmaj7], 'C') assigns Dm7+G7+Cmaj7 all to currentKey='C' via 2-5-1",
+      "Write a test: analyseHarmony([Bm7b5, E7, Am7], 'Am') assigns all three to currentKey='Am' via 2-5-1",
+      "Write a test: analyseHarmony([G7, Cmaj7], 'C') assigns both to currentKey='C' via 5-1",
+      "Write a test: analyseHarmony([Bdim, E7, Am], 'Am') assigns all three to currentKey='Am' — diminished triad ii in harmonic minor",
+      "Update the 2-5-1 ii-chord quality check in packages/grigson/src/theory/harmonicAnalysis.ts to accept 'minor', 'min7', 'halfDiminished', and 'diminished'",
+      "Update the 5-1 and 2-5-1 tonic-resolution quality check to accept 'major', 'minor', 'maj7', and 'min7'",
+      "Run pnpm test to confirm all new and existing harmonic analysis tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "chord-qualities-normalise",
+    "category": "functional",
+    "description": "Verify normalisation handles new chord qualities correctly end-to-end",
+    "detail": "normaliseSection calls analyseHarmony and rewrites chord roots based on currentKey. The normaliser operates on roots, not qualities, so new quality values should pass through without requiring structural changes. This task is a targeted smoke test and regression check. See project/plans/chord-qualities.md — Phase 5.\n\nThis task depends on chord-qualities-harmonic-analysis.",
+    "steps": [
+      "Write a test: normaliseSong with [Dm7, G7, Cmaj7] in C produces Dm7 Bb→Bb (no root changes needed, roots already correct)",
+      "Write a test: normaliseSong with [D#m7, G#7, C#maj7] detects key as Db/C# and rewrites roots to Ebm7, Ab7, Dbmaj7",
+      "Write a test: normaliseSong with [Bm7b5, E7, Am7] identifies Am and leaves all roots unchanged",
+      "Write a test: normaliseSong with [Am7, Dm7, G#dim7, Am7] identifies Am and preserves G#dim7 root as G# (diatonic raised VII of Am)",
+      "Run pnpm build && pnpm test to confirm all normalise tests (Cat 2, 5, 8 and harmonic-based spelling) pass with no regressions"
+    ],
+    "passes": false
   }
 ]
