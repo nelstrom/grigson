@@ -1053,7 +1053,7 @@
       "Run tree-sitter test — all corpus tests in chords.txt, bars.txt, and frontmatter.txt must pass",
       "Commit updated grammar.js, regenerated src/parser.c, and test/corpus/frontmatter.txt"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "tree-sitter-section-grammar",

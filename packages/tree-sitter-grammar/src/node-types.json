@@ -46,6 +46,44 @@
     }
   },
   {
+    "type": "frontmatter",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "frontmatter_delimiter",
+          "named": true
+        },
+        {
+          "type": "frontmatter_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "frontmatter_field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "frontmatter_key",
+          "named": true
+        },
+        {
+          "type": "frontmatter_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "row",
     "named": true,
     "fields": {},
@@ -73,6 +111,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "frontmatter",
+          "named": true
+        },
         {
           "type": "row",
           "named": true
@@ -108,11 +150,27 @@
     "named": false
   },
   {
+    "type": ":",
+    "named": false
+  },
+  {
     "type": "accidental",
     "named": true
   },
   {
     "type": "barline",
+    "named": true
+  },
+  {
+    "type": "frontmatter_delimiter",
+    "named": true
+  },
+  {
+    "type": "frontmatter_key",
+    "named": true
+  },
+  {
+    "type": "frontmatter_value",
     "named": true
   },
   {

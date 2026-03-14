@@ -4,7 +4,19 @@ module.exports = grammar({
   extras: (_$) => [/[ \t]/],
 
   rules: {
-    song: ($) => repeat(choice($.row, /\r?\n/)),
+    song: ($) => repeat(choice($.frontmatter, $.row, /\r?\n/)),
+
+    frontmatter: ($) =>
+      seq($.frontmatter_delimiter, repeat($.frontmatter_field), $.frontmatter_delimiter),
+
+    frontmatter_delimiter: (_$) => /---[ \t]*\r?\n/,
+
+    frontmatter_field: ($) =>
+      seq($.frontmatter_key, ':', $.frontmatter_value, /\r?\n/),
+
+    frontmatter_key: (_$) => /[a-zA-Z]+/,
+
+    frontmatter_value: (_$) => /[^\r\n]+/,
 
     row: ($) => seq($.barline, repeat1($.bar_tail)),
 

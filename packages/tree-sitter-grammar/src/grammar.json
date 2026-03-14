@@ -9,6 +9,10 @@
         "members": [
           {
             "type": "SYMBOL",
+            "name": "frontmatter"
+          },
+          {
+            "type": "SYMBOL",
             "name": "row"
           },
           {
@@ -17,6 +21,59 @@
           }
         ]
       }
+    },
+    "frontmatter": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "frontmatter_delimiter"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "frontmatter_field"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "frontmatter_delimiter"
+        }
+      ]
+    },
+    "frontmatter_delimiter": {
+      "type": "PATTERN",
+      "value": "---[ \\t]*\\r?\\n"
+    },
+    "frontmatter_field": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "frontmatter_key"
+        },
+        {
+          "type": "STRING",
+          "value": ":"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "frontmatter_value"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\r?\\n"
+        }
+      ]
+    },
+    "frontmatter_key": {
+      "type": "PATTERN",
+      "value": "[a-zA-Z]+"
+    },
+    "frontmatter_value": {
+      "type": "PATTERN",
+      "value": "[^\\r\\n]+"
     },
     "row": {
       "type": "SEQ",

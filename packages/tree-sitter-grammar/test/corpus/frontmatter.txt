@@ -1,0 +1,119 @@
+================================================================================
+Frontmatter with title field
+================================================================================
+
+---
+title: My Song
+---
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_delimiter)))
+
+================================================================================
+Frontmatter with title and key fields
+================================================================================
+
+---
+title: My Song
+key: C
+---
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_delimiter)))
+
+================================================================================
+Frontmatter with quoted value
+================================================================================
+
+---
+title: "All The Things"
+---
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_delimiter)))
+
+================================================================================
+Frontmatter with unquoted value containing special characters
+================================================================================
+
+---
+key: F#
+---
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_delimiter)))
+
+================================================================================
+Empty frontmatter
+================================================================================
+
+---
+---
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_delimiter)))
+
+================================================================================
+Frontmatter followed by a row
+================================================================================
+
+---
+key: C
+---
+| C | Am |
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_delimiter))
+  (row
+    (barline)
+    (bar_tail
+      (chord
+        (note_letter))
+      (barline))
+    (bar_tail
+      (chord
+        (note_letter)
+        (quality))
+      (barline))))
