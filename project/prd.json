@@ -843,7 +843,7 @@
       "Update packages/grigson/documentation/examples/syntax-test.chart to include representative chords for each new quality: Cdim, Cmaj7, CM7, Dm7, Bdim7",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "validator-core",

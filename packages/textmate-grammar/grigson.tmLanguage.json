@@ -87,7 +87,7 @@
       "name": "punctuation.definition.barline.grigson"
     },
     "chord": {
-      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|m|7)?(?=\\s|\\||$)",
+      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7)?(?=\\s|\\||$)",
       "captures": {
         "1": {
           "name": "constant.other.chord.root.grigson"
