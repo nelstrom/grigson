@@ -1,0 +1,19 @@
+{
+  "name": "grigson-language-server",
+  "version": "0.1.0",
+  "description": "LSP language server for .chart files",
+  "bin": {
+    "grigson-language-server": "./dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node -e \"import('fs').then(fs => { let s = fs.readFileSync('dist/server.js', 'utf8'); if (!s.startsWith('#!')) { fs.writeFileSync('dist/server.js', '#!/usr/bin/env node\\n' + s); } })\""
+  },
+  "dependencies": {
+    "grigson": "workspace:*",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

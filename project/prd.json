@@ -894,7 +894,7 @@
       "Run pnpm build in packages/language-server/ and confirm dist/server.js is produced",
       "Smoke-test the server: echo a valid .chart document through the LSP initialize/didOpen sequence and confirm a publishDiagnostics message with zero errors is received"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "vscode-extension-lsp",
