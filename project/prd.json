@@ -784,7 +784,7 @@
       "Update computeScore to call qualityMatchesSet with the Set from the map",
       "Run pnpm test to confirm all existing key detector tests pass with no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "chord-qualities-tetrad-tests",

@@ -2,55 +2,51 @@ import { KEYS } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord, Quality } from '../parser/types.js';
 
-// Expected chord quality for each scale degree (null = no match possible with our Quality type)
-const MAJOR_DEGREE_QUALITIES: (Quality | null)[] = [
-  'major', // I
-  'minor', // II
-  'minor', // III
-  'major', // IV
-  'major', // V
-  'minor', // VI
-  'halfDiminished', // VII
+// Expected chord qualities (triad + tetrad) for each scale degree
+const MAJOR_DEGREE_QUALITY_SETS: Set<Quality>[] = [
+  new Set<Quality>(['major', 'maj7']), // I
+  new Set<Quality>(['minor', 'min7']), // II
+  new Set<Quality>(['minor', 'min7']), // III
+  new Set<Quality>(['major', 'maj7']), // IV
+  new Set<Quality>(['major', 'dominant7']), // V
+  new Set<Quality>(['minor', 'min7']), // VI
+  new Set<Quality>(['diminished', 'halfDiminished']), // VII
 ];
 
-const HARMONIC_MINOR_DEGREE_QUALITIES: (Quality | null)[] = [
-  'minor', // I
-  'halfDiminished', // II
-  null, // III (augmented)
-  'minor', // IV
-  'major', // V
-  'major', // VI
-  null, // VII (diminished)
+const HARMONIC_MINOR_DEGREE_QUALITY_SETS: Set<Quality>[] = [
+  new Set<Quality>(['minor']), // I (minMaj7 placeholder omitted)
+  new Set<Quality>(['diminished', 'halfDiminished']), // II
+  new Set<Quality>(), // III (augmented — placeholder)
+  new Set<Quality>(['minor', 'min7']), // IV
+  new Set<Quality>(['major', 'dominant7']), // V
+  new Set<Quality>(['major', 'maj7']), // VI
+  new Set<Quality>(['diminished', 'dim7']), // VII
 ];
 
 const MAJOR_INTERVALS = [0, 2, 4, 5, 7, 9, 11];
 const HARMONIC_MINOR_INTERVALS = [0, 2, 3, 5, 7, 8, 11];
 
-function buildKeyScoreMap(key: string): Map<number, Quality | null> {
+function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
   const isMinor = key.endsWith('m');
   const rootName = isMinor ? key.slice(0, -1) : key;
   const rootPC = rootToPitchClass(rootName);
   const intervals = isMinor ? HARMONIC_MINOR_INTERVALS : MAJOR_INTERVALS;
-  const qualities = isMinor ? HARMONIC_MINOR_DEGREE_QUALITIES : MAJOR_DEGREE_QUALITIES;
+  const qualitySets = isMinor ? HARMONIC_MINOR_DEGREE_QUALITY_SETS : MAJOR_DEGREE_QUALITY_SETS;
 
-  const map = new Map<number, Quality | null>();
+  const map = new Map<number, Set<Quality>>();
   for (let i = 0; i < intervals.length; i++) {
     const pc = (rootPC + intervals[i]) % 12;
-    map.set(pc, qualities[i]);
+    map.set(pc, qualitySets[i]);
   }
   return map;
 }
 
-// Dominant7 is treated as major for quality matching (it's the V chord with an added 7th)
-function qualityMatches(chordQuality: Quality, expected: Quality | null): boolean {
-  if (expected === null) return false;
-  if (chordQuality === expected) return true;
-  if (chordQuality === 'dominant7' && expected === 'major') return true;
-  return false;
+function qualityMatchesSet(chordQuality: Quality, expected: Set<Quality>): boolean {
+  return expected.has(chordQuality);
 }
 
 function computeScore(key: string, chords: Chord[]): number {
-  const pcToQuality = buildKeyScoreMap(key);
+  const pcToQualitySet = buildKeyScoreMap(key);
   let score = 0;
   for (const chord of chords) {
     let pc: number;
@@ -59,10 +55,10 @@ function computeScore(key: string, chords: Chord[]): number {
     } catch {
       continue;
     }
-    if (pcToQuality.has(pc)) {
+    if (pcToQualitySet.has(pc)) {
       score += 1; // diatonic root
-      const expectedQuality = pcToQuality.get(pc)!;
-      if (qualityMatches(chord.quality, expectedQuality)) {
+      const expectedSet = pcToQualitySet.get(pc)!;
+      if (qualityMatchesSet(chord.quality, expectedSet)) {
         score += 1; // quality bonus
       }
     }
