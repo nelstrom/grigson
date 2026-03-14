@@ -25,9 +25,20 @@ export interface TimeSignature {
   denominator: number;
 }
 
+export interface ChordSlot {
+  type: 'chord';
+  chord: Chord;
+}
+
+export interface DotSlot {
+  type: 'dot';
+}
+
+export type BeatSlot = ChordSlot | DotSlot;
+
 export interface Bar {
   type: 'bar';
-  chord: Chord;
+  slots: BeatSlot[];
   timeSignature?: TimeSignature;
 }
 

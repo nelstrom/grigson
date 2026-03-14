@@ -2,7 +2,7 @@ export const version = '1.0.0';
 
 // Parser
 export { parseSong, parseChord, parseBar, parseRow, parseFrontMatter } from './parser/parser.js';
-export type { Song, Section, Row, Bar, Chord, Quality, FrontMatter, TimeSignature } from './parser/parser.js';
+export type { Song, Section, Row, Bar, Chord, Quality, FrontMatter, TimeSignature, ChordSlot, DotSlot, BeatSlot } from './parser/parser.js';
 
 // Renderer
 export { TextRenderer } from './renderers/text.js';

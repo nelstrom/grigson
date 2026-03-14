@@ -18,10 +18,12 @@ describe('section parsing', () => {
     expect(song.sections).toHaveLength(2);
     expect(song.sections[0].label).toBe('Verse');
     expect(song.sections[0].rows).toHaveLength(1);
-    expect(song.sections[0].rows[0].bars[0].chord.root).toBe('C');
+    const bar0slot0 = song.sections[0].rows[0].bars[0].slots[0];
+    expect(bar0slot0.type === 'chord' && bar0slot0.chord.root).toBe('C');
     expect(song.sections[1].label).toBe('Chorus');
     expect(song.sections[1].rows).toHaveLength(1);
-    expect(song.sections[1].rows[0].bars[0].chord.root).toBe('F');
+    const bar1slot0 = song.sections[1].rows[0].bars[0].slots[0];
+    expect(bar1slot0.type === 'chord' && bar1slot0.chord.root).toBe('F');
   });
 
   it('blank lines between section label and rows do not produce extra section nodes', () => {

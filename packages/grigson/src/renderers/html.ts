@@ -34,7 +34,13 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
 }
 
 function renderBar(bar: Bar, config: TextRendererConfig): string {
-  return renderChord(bar.chord, config);
+  return bar.slots
+    .map((slot) =>
+      slot.type === 'chord'
+        ? renderChord(slot.chord, config)
+        : '<span part="dot">.</span>',
+    )
+    .join(' ');
 }
 
 function renderRow(row: Row, config: TextRendererConfig): string {

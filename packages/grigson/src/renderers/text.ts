@@ -60,7 +60,10 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
 
 function renderBar(bar: Bar, config: TextRendererConfig): string {
   const ts = bar.timeSignature ? `(${bar.timeSignature.numerator}/${bar.timeSignature.denominator}) ` : '';
-  return ts + renderChord(bar.chord, config);
+  const slotsText = bar.slots
+    .map((slot) => (slot.type === 'chord' ? renderChord(slot.chord, config) : '.'))
+    .join(' ');
+  return ts + slotsText;
 }
 
 function renderRow(row: Row, config: TextRendererConfig): string {

@@ -1,4 +1,4 @@
-import type { Song, Section, Row, Bar, Chord } from '../parser/types.js';
+import type { Song, Section, Row, Bar, Chord, ChordSlot } from '../parser/types.js';
 import { rootToPitchClass } from './pitchClass.js';
 import { normaliseSection } from './normalise.js';
 import { detectKey } from './keyDetector.js';
@@ -47,7 +47,11 @@ export function transposeSong(song: Song, semitones: number): Song {
   let firstSectionKey: string | null = null;
 
   const newSections: Section[] = song.sections.map((sec, secIndex) => {
-    const chords = sec.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
+    const chords = sec.rows.flatMap((row) =>
+      row.bars.flatMap((bar) =>
+        bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
+      ),
+    );
     const { chords: transposedChords, homeKey } = transposeSectionInternal(chords, semitones);
 
     if (secIndex === 0) {
@@ -57,7 +61,16 @@ export function transposeSong(song: Song, semitones: number): Song {
     let chordIndex = 0;
     const newRows: Row[] = sec.rows.map((row) => ({
       ...row,
-      bars: row.bars.map((bar): Bar => ({ ...bar, chord: transposedChords[chordIndex++] })),
+      bars: row.bars.map(
+        (bar): Bar => ({
+          ...bar,
+          slots: bar.slots.map((slot) =>
+            slot.type === 'chord'
+              ? { type: 'chord' as const, chord: transposedChords[chordIndex++] }
+              : slot,
+          ),
+        }),
+      ),
     }));
 
     return { ...sec, rows: newRows };
@@ -68,7 +81,11 @@ export function transposeSong(song: Song, semitones: number): Song {
 
 export function transposeSongToKey(song: Song, targetKey: string): Song {
   const firstSectionChords =
-    song.sections[0]?.rows.flatMap((row) => row.bars.map((bar) => bar.chord)) ?? [];
+    song.sections[0]?.rows.flatMap((row) =>
+      row.bars.flatMap((bar) =>
+        bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
+      ),
+    ) ?? [];
   const homeKey = detectKey(firstSectionChords, song.key) ?? 'C';
 
   const homeTonicNote = KEYS[homeKey]?.notes[0] ?? homeKey.replace(/m$/, '');

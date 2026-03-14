@@ -952,7 +952,7 @@
       "Write a round-trip test for each new multi-slot pattern",
       "Run pnpm build && pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "validate-beat-balance",

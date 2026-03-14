@@ -98,33 +98,51 @@ describe('chord parsing', () => {
     const g7 = { type: 'chord', root: 'G', quality: 'dominant7' };
 
     it('parses | C |', () => {
-      expect(parseBar('| C |')).toEqual({ type: 'bar', chord: cMajor });
+      expect(parseBar('| C |')).toEqual({
+        type: 'bar',
+        slots: [{ type: 'chord', chord: cMajor }],
+      });
     });
 
     it('parses | Am |', () => {
-      expect(parseBar('| Am |')).toEqual({ type: 'bar', chord: aMinor });
+      expect(parseBar('| Am |')).toEqual({
+        type: 'bar',
+        slots: [{ type: 'chord', chord: aMinor }],
+      });
     });
 
     it('parses |C| with no spaces', () => {
-      expect(parseBar('|C|')).toEqual({ type: 'bar', chord: cMajor });
+      expect(parseBar('|C|')).toEqual({
+        type: 'bar',
+        slots: [{ type: 'chord', chord: cMajor }],
+      });
     });
 
     it('parses |  G7  | with extra spaces', () => {
-      expect(parseBar('|  G7  |')).toEqual({ type: 'bar', chord: g7 });
+      expect(parseBar('|  G7  |')).toEqual({
+        type: 'bar',
+        slots: [{ type: 'chord', chord: g7 }],
+      });
     });
 
     it('rejects an empty bar | |', () => {
       expect(() => parseBar('| |')).toThrow();
     });
 
-    it('rejects a bar with two chords | C G |', () => {
-      expect(() => parseBar('| C G |')).toThrow();
+    it('parses | C G | as two ChordSlots', () => {
+      const bar = parseBar('| C G |');
+      expect(bar.slots).toHaveLength(2);
+      expect(bar.slots[0]).toEqual({ type: 'chord', chord: cMajor });
+      expect(bar.slots[1]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'G', quality: 'major' } });
     });
   });
 
   describe('song parsing', () => {
     const chord = (root: string, quality: string) => ({ type: 'chord', root, quality });
-    const bar = (root: string, quality: string) => ({ type: 'bar', chord: chord(root, quality) });
+    const bar = (root: string, quality: string) => ({
+      type: 'bar',
+      slots: [{ type: 'chord', chord: chord(root, quality) }],
+    });
     const row = (...bars: ReturnType<typeof bar>[]) => ({ type: 'row', bars });
 
     it('parses a minimal song with no front matter', () => {
@@ -229,7 +247,7 @@ describe('chord parsing', () => {
   describe('row parsing', () => {
     const bar = (root: string, quality: string) => ({
       type: 'bar',
-      chord: { type: 'chord', root, quality },
+      slots: [{ type: 'chord', chord: { type: 'chord', root, quality } }],
     });
 
     it('parses a four-bar row', () => {

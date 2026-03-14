@@ -1,4 +1,4 @@
-import type { Song, Section, Row, Bar, Chord } from '../parser/types.js';
+import type { Song, Section, Row, Bar, Chord, ChordSlot } from '../parser/types.js';
 import { detectKey, type DetectKeyConfig } from './keyDetector.js';
 import { KEYS } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
@@ -64,13 +64,26 @@ export function normaliseSection(
 export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
   const sectionResults: { homeKey: string | null; section: Section }[] = song.sections.map(
     (sec) => {
-      const chords = sec.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
+      const chords = sec.rows.flatMap((row) =>
+        row.bars.flatMap((bar) =>
+          bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
+        ),
+      );
       const { homeKey, chords: normalisedChords } = normaliseSection(chords, config);
 
       let chordIndex = 0;
       const newRows: Row[] = sec.rows.map((row) => ({
         ...row,
-        bars: row.bars.map((bar): Bar => ({ ...bar, chord: normalisedChords[chordIndex++] })),
+        bars: row.bars.map(
+          (bar): Bar => ({
+            ...bar,
+            slots: bar.slots.map((slot) =>
+              slot.type === 'chord'
+                ? { type: 'chord' as const, chord: normalisedChords[chordIndex++] }
+                : slot,
+            ),
+          }),
+        ),
       }));
 
       return { homeKey, section: { ...sec, rows: newRows } };
