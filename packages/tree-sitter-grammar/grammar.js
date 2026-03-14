@@ -1,10 +1,20 @@
 module.exports = grammar({
   name: 'grigson',
 
-  extras: (_$) => [/[ \t\r\n]/],
+  extras: (_$) => [/[ \t]/],
 
   rules: {
-    song: ($) => repeat($.chord),
+    song: ($) => repeat(choice($.row, /\r?\n/)),
+
+    row: ($) => seq($.barline, repeat1($.bar_tail)),
+
+    bar_tail: ($) => seq(optional($.time_signature), $.chord, $.barline),
+
+    barline: (_$) => '|',
+
+    time_signature: ($) => seq('(', $.integer, '/', $.integer, ')'),
+
+    integer: (_$) => /[0-9]+/,
 
     chord: ($) =>
       seq($.note_letter, optional($.accidental), optional($.quality)),

@@ -1,5 +1,28 @@
 [
   {
+    "type": "bar_tail",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "barline",
+          "named": true
+        },
+        {
+          "type": "chord",
+          "named": true
+        },
+        {
+          "type": "time_signature",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "chord",
     "named": true,
     "fields": {},
@@ -23,6 +46,25 @@
     }
   },
   {
+    "type": "row",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "bar_tail",
+          "named": true
+        },
+        {
+          "type": "barline",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "song",
     "named": true,
     "root": true,
@@ -32,14 +74,49 @@
       "required": false,
       "types": [
         {
-          "type": "chord",
+          "type": "row",
           "named": true
         }
       ]
     }
   },
   {
+    "type": "time_signature",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "integer",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
     "type": "accidental",
+    "named": true
+  },
+  {
+    "type": "barline",
+    "named": true
+  },
+  {
+    "type": "integer",
     "named": true
   },
   {
