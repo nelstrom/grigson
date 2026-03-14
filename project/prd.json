@@ -486,18 +486,18 @@
     "id": "cli-transpose",
     "category": "functional",
     "description": "Implement the `grigson transpose` subcommand",
-    "detail": "The transpose subcommand reads a .chart file (from a file argument or stdin), transposes all chords by the specified interval, updates the key field in front matter, and writes the result to stdout. Accepts either --semitones <n> (positive or negative integer) or --to <key>; exactly one must be provided. This task is no longer blocked.",
+    "detail": "The transpose subcommand reads a .chart file (from a file argument or stdin), transposes all chords by the specified interval, updates the key field in front matter, and writes the result to stdout. Accepts --raise <n>, --lower <n>, or --to <key>; exactly one must be provided. --raise and --lower take positive integers, avoiding negative-number flag-parsing ambiguity.",
     "steps": [
-      "Write a test asserting that `grigson transpose --semitones 2 file.chart` transposes all chords up a whole step",
-      "Write a test asserting that `grigson transpose --semitones -3 file.chart` transposes down a minor third",
+      "Write a test asserting that `grigson transpose --raise 2 file.chart` transposes all chords up a whole step",
+      "Write a test asserting that `grigson transpose --lower 3 file.chart` transposes down a minor third",
       "Write a test asserting that `grigson transpose --to G file.chart` transposes to G major",
-      "Write a test asserting that providing both --semitones and --to exits with a non-zero code",
-      "Write a test asserting that providing neither --semitones nor --to exits with a non-zero code",
+      "Write a test asserting that providing both --raise and --to exits with a non-zero code",
+      "Write a test asserting that providing neither --raise, --lower, nor --to exits with a non-zero code",
       "Write a test asserting that `grigson transpose` with no file argument reads from stdin",
       "Implement the transpose subcommand handler in packages/grigson/src/cli.ts using the transposeSong export",
       "Run pnpm build && pnpm test to confirm all tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "website-scaffold",

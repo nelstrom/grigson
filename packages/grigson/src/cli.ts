@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import minimist from 'minimist';
 import { parseSong } from './parser/parser.js';
 import { normaliseSong } from './theory/normalise.js';
+import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 import { TextRenderer } from './renderers/text.js';
 
 const SUBCOMMANDS = ['normalise', 'render', 'transpose'] as const;
@@ -47,9 +48,10 @@ Reads a .chart file (or stdin if no file is given), transposes all chords
 by the specified interval, and writes the result to stdout.
 
 Options:
-  --semitones <n>  Transpose by n semitones (positive or negative integer)
-  --to <key>       Transpose to the given key (e.g. --to G)
-  --help, -h       Show this help message and exit`,
+  --raise <n>   Transpose up by n semitones (positive integer)
+  --lower <n>   Transpose down by n semitones (positive integer)
+  --to <key>    Transpose to the given key (e.g. --to G)
+  --help, -h    Show this help message and exit`,
 };
 
 function readInput(filePath: string | undefined): string {
@@ -112,8 +114,50 @@ function runRender(parsed: minimist.ParsedArgs): void {
   process.stdout.write(renderer.render(song));
 }
 
+function runTranspose(parsed: minimist.ParsedArgs): void {
+  const filePath = parsed._[1] as string | undefined;
+  const raise = parsed['raise'];
+  const lower = parsed['lower'];
+  const toKey = parsed['to'] as string | undefined;
+
+  const hasRaise = raise !== undefined;
+  const hasLower = lower !== undefined;
+  const hasTo = toKey !== undefined;
+
+  const intervalCount = (hasRaise ? 1 : 0) + (hasLower ? 1 : 0) + (hasTo ? 1 : 0);
+
+  if (intervalCount > 1) {
+    console.error('Error: --raise, --lower, and --to are mutually exclusive. Provide exactly one.');
+    process.exit(1);
+    return;
+  }
+
+  if (intervalCount === 0) {
+    console.error('Error: One of --raise <n>, --lower <n>, or --to <key> must be provided.');
+    process.exit(1);
+    return;
+  }
+
+  const input = readInput(filePath);
+  const song = parseSong(input);
+  let transposed;
+  if (hasTo) {
+    transposed = transposeSongToKey(song, toKey!);
+  } else if (hasRaise) {
+    transposed = transposeSong(song, Number(raise));
+  } else {
+    transposed = transposeSong(song, -Number(lower));
+  }
+  const renderer = new TextRenderer();
+  process.stdout.write(renderer.render(transposed));
+}
+
 export function runCli(args: string[]): void {
-  const parsed = minimist(args, { boolean: ['help', 'i', 'in-place'], alias: { h: 'help' } });
+  const parsed = minimist(args, {
+    boolean: ['help', 'i', 'in-place'],
+    string: ['raise', 'lower', 'to', 'key', 'enharmonic'],
+    alias: { h: 'help' }
+  });
 
   const subcommand = parsed._[0] as string | undefined;
 
@@ -145,8 +189,7 @@ export function runCli(args: string[]): void {
       runRender(parsed);
       break;
     case 'transpose':
-      console.error("Error: 'transpose' subcommand not yet implemented.");
-      process.exit(1);
+      runTranspose(parsed);
       break;
   }
 }

@@ -150,6 +150,84 @@ describe('CLI normalise subcommand', () => {
   });
 });
 
+describe('CLI transpose subcommand', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('transposes all chords up a whole step with --raise 2', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-transpose-raise.chart');
+    fs.writeFileSync(tmpFile, '| C | F | G | C |\n', 'utf8');
+
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['transpose', '--raise', '2', tmpFile]);
+
+    const output = stdoutSpy.mock.calls[0][0] as string;
+    expect(output).toContain('| D |');
+    expect(output).toContain('| G |');
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('transposes down a minor third with --lower 3', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-transpose-lower.chart');
+    fs.writeFileSync(tmpFile, '| C | F | G | C |\n', 'utf8');
+
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['transpose', '--lower', '3', tmpFile]);
+
+    const output = stdoutSpy.mock.calls[0][0] as string;
+    expect(output).toContain('| A |');
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('transposes to the given key with --to G', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-transpose-to.chart');
+    fs.writeFileSync(tmpFile, '| C | F | G | C |\n', 'utf8');
+
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['transpose', '--to', 'G', tmpFile]);
+
+    const output = stdoutSpy.mock.calls[0][0] as string;
+    expect(output).toContain('key: G');
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('exits with a non-zero code when both --raise and --to are provided', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    runCli(['transpose', '--raise', '2', '--to', 'G']);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('exits with a non-zero code when neither --raise, --lower, nor --to is provided', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    runCli(['transpose']);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('reads from stdin when no file argument is given', () => {
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (p === 0) return '| C | Am | F | G |\n';
+      throw new Error('unexpected path');
+    });
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    runCli(['transpose', '--raise', '7']);
+
+    expect(stdoutSpy).toHaveBeenCalled();
+    const output = stdoutSpy.mock.calls[0][0] as string;
+    expect(output).toContain('| G |');
+  });
+});
+
 describe('CLI render subcommand', () => {
   afterEach(() => {
     vi.restoreAllMocks();

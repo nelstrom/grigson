@@ -26,12 +26,18 @@ pnpm link --global
 grigson normalise song.chart
 ```
 
-## Pipeline example
+## Pipeline examples
+
+```sh
+echo "| C | F | G | C | C | F | Bb | C | C | A7 | Dm | G7 |" \
+  | node dist/cli.js normalise \
+  | node dist/cli.js transpose --raise 2 \
+```
 
 ```sh
 cat file.chart \
   | grigson normalise \
-  | grigson transpose --semitones 2 \
+  | grigson transpose --raise 2 \
   | grigson render --format svg \
   > output.svg
 ```
@@ -70,7 +76,7 @@ cat song.chart | grigson normalise         # read from stdin
 
 ---
 
-### `grigson transpose` _(not yet implemented)_
+### `grigson transpose`
 
 Transposes every chord in a chart by a given interval and updates the `key` field in front matter accordingly.
 
@@ -82,19 +88,20 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option            | Description                                                 |
-| ----------------- | ----------------------------------------------------------- |
-| `--semitones <n>` | Transpose up (positive) or down (negative) by `n` semitones |
-| `--to <key>`      | Transpose to a target key (e.g. `--to G`, `--to Bbm`)       |
+| Option         | Description                                              |
+| -------------- | -------------------------------------------------------- |
+| `--raise <n>`  | Transpose up by `n` semitones (positive integer)         |
+| `--lower <n>`  | Transpose down by `n` semitones (positive integer)       |
+| `--to <key>`   | Transpose to a target key (e.g. `--to G`, `--to Dm`)    |
 
-Exactly one of `--semitones` or `--to` is required.
+Exactly one of `--raise`, `--lower`, or `--to` is required.
 
 **Examples**
 
 ```sh
-grigson transpose --semitones 2 song.chart    # up a whole step
-grigson transpose --semitones -3 song.chart   # down a minor third
-grigson transpose --to G song.chart           # to G major
+grigson transpose --raise 2 song.chart    # up a whole step
+grigson transpose --lower 3 song.chart   # down a minor third
+grigson transpose --to G song.chart      # to G major
 cat song.chart | grigson transpose --to Dm    # from stdin
 ```
 
