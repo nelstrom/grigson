@@ -844,5 +844,72 @@
       "Run pnpm test to confirm no regressions"
     ],
     "passes": false
+  },
+  {
+    "id": "validator-core",
+    "category": "functional",
+    "description": "Implement a pure validate() function that maps chart source text to structured diagnostics",
+    "detail": "Create packages/grigson/src/validator.ts exporting a Diagnostic interface and a validate(source: string): Diagnostic[] function. The function calls parseSong() and converts any thrown Peggy parse error into a Diagnostic with a 0-indexed LSP-style range (Peggy errors expose .location.start.line and .location.start.column, both 1-indexed — subtract 1 when mapping). Returns an empty array for valid input. Has no LSP dependency — it is a pure TypeScript function usable by the CLI, the language server, and any future tooling. Export validate and Diagnostic from packages/grigson/src/index.ts. See project/plans/grigson-tooling.md — Task 1 for the full Diagnostic interface shape, the Peggy location structure, the isPeggyError type guard, and implementation sketch.",
+    "steps": [
+      "Create packages/grigson/src/validator.ts with the DiagnosticRange and Diagnostic interfaces and the validate() function as described in project/plans/grigson-tooling.md",
+      "Write a test: validate('') returns [] (empty file is valid)",
+      "Write a test: validate('| C |') returns [] (minimal valid chart)",
+      "Write a test: validate('| Cm7 |') returns one Diagnostic with severity 'error' and a non-empty message (unsupported quality)",
+      "Write a test: the returned error's range.start.line and range.start.character are non-negative integers (0-indexed)",
+      "Write a test: validate('garbage') returns exactly one Diagnostic",
+      "Export validate and Diagnostic from packages/grigson/src/index.ts",
+      "Run pnpm test to confirm all new and existing tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "cli-validate",
+    "category": "functional",
+    "description": "Implement the `grigson validate` subcommand",
+    "detail": "Add a validate subcommand to packages/grigson/src/cli.ts. Reads one or more file arguments (or stdin when no file is given), calls validate() on each, and writes results to stdout. Default text output format: '<file>:<line>:<character>: <severity>: <message>' (1-indexed in printed output; Diagnostic uses 0-indexed internally so add 1 when printing). Supports --format json for machine-readable output. Exits with code 0 when no errors are found across all inputs, code 1 when any error is found. See project/plans/grigson-tooling.md — Task 2 for the exact output format, stdin handling, JSON schema, and test scenarios.",
+    "steps": [
+      "Write a test: grigson validate on a valid .chart file exits 0",
+      "Write a test: grigson validate on a file with a parse error exits 1 and prints a line containing the filename and line number",
+      "Write a test: grigson validate with no file argument reads from stdin",
+      "Write a test: grigson validate --format json on a valid file exits 0 and prints '[]'",
+      "Write a test: grigson validate --format json on an invalid file exits 1 and prints a JSON array with at least one entry containing file, line, character, severity, and message fields",
+      "Implement runValidate() in packages/grigson/src/cli.ts following the text output format in project/plans/grigson-tooling.md",
+      "Register 'validate' in the subcommand dispatch table and --help output",
+      "Run pnpm build && pnpm test to confirm all new and existing tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "language-server",
+    "category": "tooling",
+    "description": "Create a standalone LSP language server for .chart files",
+    "detail": "Create packages/language-server/ as a new workspace package. The server imports validate() from 'grigson', listens for textDocument/didOpen and textDocument/didChange events, calls validate() on the document text, and sends diagnostics via connection.sendDiagnostics(). Uses the vscode-languageserver npm package (which implements the open LSP standard — not VS Code-specific). The built dist/server.js has a #!/usr/bin/env node shebang and is pointed to by the package.json 'bin' field as 'grigson-language-server'. This task depends on validator-core. See project/plans/grigson-tooling.md — Task 3 for the full server implementation, package.json shape, build configuration, and per-editor configuration examples for Neovim, Helix, and Emacs.",
+    "steps": [
+      "Create packages/language-server/package.json with name 'grigson-language-server', a 'bin' field pointing to dist/server.js, and dependencies: vscode-languageserver, vscode-languageserver-textdocument, grigson (workspace:*)",
+      "Create packages/language-server/src/server.ts implementing the LSP server as described in project/plans/grigson-tooling.md — Task 3",
+      "Create packages/language-server/tsconfig.json targeting ESNext/Node16, outDir: dist",
+      "Add packages/language-server to pnpm-workspace.yaml",
+      "Add a 'build' script to packages/language-server/package.json that compiles src/server.ts to dist/server.js with the shebang intact",
+      "Run pnpm install from the repo root and confirm the workspace links grigson correctly",
+      "Run pnpm build in packages/language-server/ and confirm dist/server.js is produced",
+      "Smoke-test the server: echo a valid .chart document through the LSP initialize/didOpen sequence and confirm a publishDiagnostics message with zero errors is received"
+    ],
+    "passes": false
+  },
+  {
+    "id": "vscode-extension-lsp",
+    "category": "tooling",
+    "description": "Extend the VS Code extension to activate as an LSP client for the language server",
+    "detail": "The existing packages/vscode-extension/ provides syntax highlighting only (no src/, no activation logic). Extend it to spawn the language server and act as a thin LSP client. Add src/extension.ts using vscode-languageclient to start the server and proxy messages. Update package.json with activationEvents, main, and the vscode-languageclient dependency. Add a tsconfig.json and build script. The TextMate grammar is unchanged. Once active, VS Code will show red squiggly underlines under parse errors, a hover tooltip with the error message, and entries in the Problems panel — all driven by connection.sendDiagnostics() in the language server with no additional VS Code API calls needed. This task depends on language-server. See project/plans/grigson-tooling.md — Task 4 for the full extension.ts implementation, the updated package.json fields, the serverModule path resolution in the monorepo layout, and notes on packaging for the VS Code Marketplace.",
+    "steps": [
+      "Add activationEvents, main, scripts (build), and dependencies (vscode-languageclient) to packages/vscode-extension/package.json as described in project/plans/grigson-tooling.md",
+      "Create packages/vscode-extension/tsconfig.json targeting ES2020 / Node16, outDir: dist",
+      "Create packages/vscode-extension/src/extension.ts with the activate() and deactivate() functions as described in project/plans/grigson-tooling.md — Task 4",
+      "Run pnpm build in packages/vscode-extension/ and confirm dist/extension.js is produced",
+      "Open a .chart file with a deliberate parse error in VS Code with the extension loaded and confirm: (1) a red squiggle appears under the offending text, (2) hovering shows the error message, (3) the Problems panel lists the error",
+      "Open a valid .chart file and confirm no diagnostics are shown",
+      "Run pnpm test to confirm no regressions in the grigson package tests"
+    ],
+    "passes": false
   }
 ]
