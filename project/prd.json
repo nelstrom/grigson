@@ -800,7 +800,7 @@
       "Write test: detectKey([Am7, Dm7, Gdim7, Am7]) === 'Am' — G#dim7 (VIIdim7 of Am) as dominant substitute",
       "Run pnpm test to confirm all new tetrad tests pass alongside existing tests"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "chord-qualities-harmonic-analysis",

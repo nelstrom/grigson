@@ -18,6 +18,18 @@ function hd(root: string): Chord {
   return { type: 'chord', root, quality: 'halfDiminished' };
 }
 
+function maj7(root: string): Chord {
+  return { type: 'chord', root, quality: 'maj7' };
+}
+
+function min7(root: string): Chord {
+  return { type: 'chord', root, quality: 'min7' };
+}
+
+function dim7(root: string): Chord {
+  return { type: 'chord', root, quality: 'dim7' };
+}
+
 describe('detectKey — Category 1: unambiguous major keys', () => {
   it('T1-a: F major I-IV-V-I', () => {
     expect(detectKey([maj('F'), maj('Bb'), maj('C'), maj('F')])).toBe('F');
@@ -149,5 +161,32 @@ describe('detectKey — ending-key-wins: cadential tonic overrides global winner
 
   it('last chord Am → minor wins over C major', () => {
     expect(detectKey([maj('C'), min('A'), maj('F'), min('A')])).toBe('Am');
+  });
+});
+
+describe('detectKey — tetrad quality disambiguation', () => {
+  it('Cmaj7/Gmaj7 alternation → G (Gmaj7=I scores better than Gmaj7=V of C)', () => {
+    // In G major both Cmaj7(IV) and Gmaj7(I) match maj7 quality; in C major Gmaj7 misses V set {major,dominant7}
+    expect(detectKey([maj7('C'), maj7('G'), maj7('C'), maj7('G')])).toBe('G');
+  });
+
+  it('Cmaj7/G7 alternation → C (Cmaj7=I, G7=V; G7 misses I-maj7 set of G)', () => {
+    expect(detectKey([maj7('C'), dom7('G'), maj7('C'), dom7('G')])).toBe('C');
+  });
+
+  it('ii-V-I-vi in C with tetrads → C', () => {
+    expect(detectKey([min7('D'), dom7('G'), maj7('C'), min7('A')])).toBe('C');
+  });
+
+  it('ii-V-I in D major with tetrads → D', () => {
+    expect(detectKey([min7('E'), dom7('A'), maj7('D')])).toBe('D');
+  });
+
+  it('iiø-V7-i in A harmonic minor with tetrads → Am', () => {
+    expect(detectKey([hd('B'), dom7('E'), min7('A')])).toBe('Am');
+  });
+
+  it('Am harmonic minor with G#dim7 (VIIdim7) as dominant substitute → Am', () => {
+    expect(detectKey([min7('A'), min7('D'), dim7('G#'), min7('A')])).toBe('Am');
   });
 });
