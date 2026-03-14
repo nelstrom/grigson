@@ -860,7 +860,7 @@
       "Export validate and Diagnostic from packages/grigson/src/index.ts",
       "Run pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "cli-validate",

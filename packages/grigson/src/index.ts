@@ -21,3 +21,7 @@ export { diatonicNotes } from './theory/keys.js';
 export { rootToPitchClass, ENHARMONIC_PAIRS } from './theory/pitchClass.js';
 export { analyseHarmony, circleOfFifthsDistance } from './theory/harmonicAnalysis.js';
 export type { AnnotatedChord } from './theory/harmonicAnalysis.js';
+
+// Validator
+export { validate } from './validator.js';
+export type { Diagnostic, DiagnosticRange } from './validator.js';
