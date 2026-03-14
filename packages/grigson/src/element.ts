@@ -2,6 +2,7 @@ import { parseSong } from './parser/parser.js';
 import { HtmlRenderer } from './renderers/html.js';
 import { type TextRendererConfig } from './renderers/text.js';
 import { normaliseSong } from './theory/normalise.js';
+import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
@@ -103,6 +104,16 @@ export class GrigsonChart extends HTMLElement {
       let song = parseSong(content);
       if (this.hasAttribute('normalise')) {
         song = normaliseSong(song);
+      }
+      const transposeKey = this.getAttribute('transpose-key');
+      const transposeSemitonesAttr = this.getAttribute('transpose-semitones');
+      if (transposeKey) {
+        song = transposeSongToKey(song, transposeKey);
+      } else if (transposeSemitonesAttr !== null) {
+        const semitones = parseInt(transposeSemitonesAttr, 10);
+        if (!isNaN(semitones)) {
+          song = transposeSong(song, semitones);
+        }
       }
       const rendered = renderer.render(song);
       this._root.innerHTML = `<style>${this._getStyles()}</style>${rendered}`;

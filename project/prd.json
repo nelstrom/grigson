@@ -480,7 +480,7 @@
       "Re-wire the transpose-key and transpose-semitones attributes in packages/grigson/src/element.ts to call transposeSong",
       "Run pnpm build && pnpm test to confirm all new tests pass and no regressions exist"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "cli-transpose",

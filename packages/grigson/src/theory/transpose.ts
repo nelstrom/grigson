@@ -1,0 +1,82 @@
+import type { Song, Section, Row, Bar, Chord } from '../parser/types.js';
+import { rootToPitchClass } from './pitchClass.js';
+import { normaliseSection } from './normalise.js';
+import { detectKey } from './keyDetector.js';
+import { KEYS } from './keys.js';
+
+// Flat-side chromatic scale used as a neutral intermediate spelling before normalisation
+const PC_TO_FLAT: readonly string[] = [
+  'C',
+  'Db',
+  'D',
+  'Eb',
+  'E',
+  'F',
+  'Gb',
+  'G',
+  'Ab',
+  'A',
+  'Bb',
+  'B',
+];
+
+function shiftChord(chord: Chord, semitones: number): Chord {
+  let pc: number;
+  try {
+    pc = rootToPitchClass(chord.root);
+  } catch {
+    return chord;
+  }
+  const newPC = ((pc + semitones) % 12 + 12) % 12;
+  return { ...chord, root: PC_TO_FLAT[newPC] };
+}
+
+function transposeSectionInternal(
+  chords: Chord[],
+  semitones: number,
+): { chords: Chord[]; homeKey: string | null } {
+  const shifted = chords.map((chord) => shiftChord(chord, semitones));
+  return normaliseSection(shifted);
+}
+
+export function transposeSection(chords: Chord[], semitones: number): Chord[] {
+  return transposeSectionInternal(chords, semitones).chords;
+}
+
+export function transposeSong(song: Song, semitones: number): Song {
+  let firstSectionKey: string | null = null;
+
+  const newSections: Section[] = song.sections.map((sec, secIndex) => {
+    const chords = sec.rows.flatMap((row) => row.bars.map((bar) => bar.chord));
+    const { chords: transposedChords, homeKey } = transposeSectionInternal(chords, semitones);
+
+    if (secIndex === 0) {
+      firstSectionKey = homeKey;
+    }
+
+    let chordIndex = 0;
+    const newRows: Row[] = sec.rows.map((row) => ({
+      ...row,
+      bars: row.bars.map((bar): Bar => ({ ...bar, chord: transposedChords[chordIndex++] })),
+    }));
+
+    return { ...sec, rows: newRows };
+  });
+
+  return { ...song, key: firstSectionKey, sections: newSections };
+}
+
+export function transposeSongToKey(song: Song, targetKey: string): Song {
+  const firstSectionChords =
+    song.sections[0]?.rows.flatMap((row) => row.bars.map((bar) => bar.chord)) ?? [];
+  const homeKey = detectKey(firstSectionChords, song.key) ?? 'C';
+
+  const homeTonicNote = KEYS[homeKey]?.notes[0] ?? homeKey.replace(/m$/, '');
+  const targetTonicNote = KEYS[targetKey]?.notes[0] ?? targetKey.replace(/m$/, '');
+
+  const homeTonicPC = rootToPitchClass(homeTonicNote);
+  const targetTonicPC = rootToPitchClass(targetTonicNote);
+  const semitones = ((targetTonicPC - homeTonicPC) + 12) % 12;
+
+  return transposeSong(song, semitones);
+}

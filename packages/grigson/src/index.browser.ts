@@ -9,3 +9,5 @@ export { GrigsonChart } from './element.js';
 
 export { normaliseSong, normaliseSection } from './theory/normalise.js';
 export type { DetectKeyConfig } from './theory/keyDetector.js';
+
+export { transposeSong, transposeSongToKey, transposeSection } from './theory/transpose.js';
