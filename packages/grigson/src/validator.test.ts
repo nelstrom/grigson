@@ -1,6 +1,41 @@
 import { describe, it, expect } from 'vitest';
 import { validate } from './validator.js';
 
+describe('validate — beat balance', () => {
+  it('returns [] for 3 slots in 3/4 (balanced)', () => {
+    expect(validate('| (3/4) C . G |')).toEqual([]);
+  });
+
+  it('returns [] for 4 slots in 4/4 (balanced)', () => {
+    expect(validate('| (4/4) C . . G |')).toEqual([]);
+  });
+
+  it('returns one warning for 4 slots in 5/4 (underfilled)', () => {
+    const result = validate('| (5/4) C . . G |');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('warning');
+    expect(result[0].source).toBe('grigson');
+  });
+
+  it('returns one warning for 7 slots in 4/4 (overfilled)', () => {
+    const result = validate('| (4/4) C . . . . . G |');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('warning');
+  });
+
+  it('returns [] for mode-1 bar (no dots), no warning regardless of chord count', () => {
+    expect(validate('| C G |')).toEqual([]);
+  });
+
+  it('returns [] when second bar is mode-2 with exactly 3 slots in 3/4', () => {
+    expect(validate('| (4/4) C | (3/4) Am . G |')).toEqual([]);
+  });
+
+  it('returns [] when second bar inherits 3/4 and has 3 slots', () => {
+    expect(validate('| (3/4) C | Am . G |')).toEqual([]);
+  });
+});
+
 describe('validate', () => {
   it('returns [] for an empty file', () => {
     expect(validate('')).toEqual([]);
