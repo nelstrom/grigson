@@ -768,7 +768,7 @@
       "Write a round-trip test for each new quality: parse the chord string, render it, parse again, assert both ASTs are equal",
       "Run pnpm test to confirm all new and existing tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "chord-qualities-key-detector",

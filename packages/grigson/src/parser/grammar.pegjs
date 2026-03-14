@@ -105,9 +105,14 @@ Accidental
 
 Quality
   = "m7b5" { return "halfDiminished"; }
-  / "m" { return "minor"; }
-  / "7" { return "dominant7"; }
-  / ""  { return "major"; }
+  / "maj7" { return "maj7"; }
+  / "M7"   { return "maj7"; }
+  / "dim7" { return "dim7"; }
+  / "m7"   { return "min7"; }
+  / "dim"  { return "diminished"; }
+  / "m"    { return "minor"; }
+  / "7"    { return "dominant7"; }
+  / ""     { return "major"; }
 
 Newline = "\r\n" / "\n"
 

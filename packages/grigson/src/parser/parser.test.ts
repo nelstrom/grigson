@@ -44,6 +44,54 @@ describe('chord parsing', () => {
     });
   });
 
+  describe('diminished chords', () => {
+    it('parses Cdim', () => {
+      expect(parseChord('Cdim')).toEqual({ type: 'chord', root: 'C', quality: 'diminished' });
+    });
+
+    it('parses Bdim', () => {
+      expect(parseChord('Bdim')).toEqual({ type: 'chord', root: 'B', quality: 'diminished' });
+    });
+  });
+
+  describe('maj7 chords', () => {
+    it('parses Cmaj7', () => {
+      expect(parseChord('Cmaj7')).toEqual({ type: 'chord', root: 'C', quality: 'maj7' });
+    });
+
+    it('parses CM7 as maj7', () => {
+      expect(parseChord('CM7')).toEqual({ type: 'chord', root: 'C', quality: 'maj7' });
+    });
+
+    it('parses Fmaj7', () => {
+      expect(parseChord('Fmaj7')).toEqual({ type: 'chord', root: 'F', quality: 'maj7' });
+    });
+  });
+
+  describe('min7 chords', () => {
+    it('parses Dm7', () => {
+      expect(parseChord('Dm7')).toEqual({ type: 'chord', root: 'D', quality: 'min7' });
+    });
+
+    it('parses Am7', () => {
+      expect(parseChord('Am7')).toEqual({ type: 'chord', root: 'A', quality: 'min7' });
+    });
+
+    it('parses Bm7', () => {
+      expect(parseChord('Bm7')).toEqual({ type: 'chord', root: 'B', quality: 'min7' });
+    });
+  });
+
+  describe('dim7 chords', () => {
+    it('parses Bdim7', () => {
+      expect(parseChord('Bdim7')).toEqual({ type: 'chord', root: 'B', quality: 'dim7' });
+    });
+
+    it('parses G#dim7', () => {
+      expect(parseChord('G#dim7')).toEqual({ type: 'chord', root: 'G#', quality: 'dim7' });
+    });
+  });
+
   describe('bar parsing', () => {
     const cMajor = { type: 'chord', root: 'C', quality: 'major' };
     const aMinor = { type: 'chord', root: 'A', quality: 'minor' };
@@ -237,16 +285,12 @@ describe('chord parsing', () => {
   });
 
   describe('unsupported qualities are rejected', () => {
-    it('rejects Cm7', () => {
-      expect(() => parseChord('Cm7')).toThrow();
+    it('rejects Csus4', () => {
+      expect(() => parseChord('Csus4')).toThrow();
     });
 
-    it('rejects CM7', () => {
-      expect(() => parseChord('CM7')).toThrow();
-    });
-
-    it('rejects Cdim', () => {
-      expect(() => parseChord('Cdim')).toThrow();
+    it('rejects Caug', () => {
+      expect(() => parseChord('Caug')).toThrow();
     });
   });
 });

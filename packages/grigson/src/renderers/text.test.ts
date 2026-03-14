@@ -54,6 +54,53 @@ describe('text renderer', () => {
     });
   });
 
+  describe('new chord qualities', () => {
+    it('renders diminished chord with dim suffix', () => {
+      const out = render('| Cdim |\n');
+      expect(out).toContain('| Cdim |');
+    });
+
+    it('renders maj7 chord with maj7 suffix', () => {
+      const out = render('| Cmaj7 |\n');
+      expect(out).toContain('| Cmaj7 |');
+    });
+
+    it('renders CM7 as maj7', () => {
+      const out = render('| CM7 |\n');
+      expect(out).toContain('| Cmaj7 |');
+    });
+
+    it('renders min7 chord with m7 suffix', () => {
+      const out = render('| Dm7 |\n');
+      expect(out).toContain('| Dm7 |');
+    });
+
+    it('renders dim7 chord with dim7 suffix', () => {
+      const out = render('| Bdim7 |\n');
+      expect(out).toContain('| Bdim7 |');
+    });
+
+    it('round-trips diminished', () => {
+      const source = '| Cdim |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+
+    it('round-trips maj7', () => {
+      const source = '| Cmaj7 |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+
+    it('round-trips min7', () => {
+      const source = '| Dm7 |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+
+    it('round-trips dim7', () => {
+      const source = '| Bdim7 |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+  });
+
   describe('round-trip', () => {
     it('parse → render → parse produces an equal AST', () => {
       const source =

@@ -29,14 +29,32 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
     ...config.notation,
   };
 
-  const suffix =
-    chord.quality === 'minor'
-      ? notation.minor
-      : chord.quality === 'dominant7'
-        ? notation.dominant7
-        : chord.quality === 'halfDiminished'
-          ? notation.halfDim
-          : '';
+  let suffix: string;
+  switch (chord.quality) {
+    case 'minor':
+      suffix = notation.minor;
+      break;
+    case 'dominant7':
+      suffix = notation.dominant7;
+      break;
+    case 'halfDiminished':
+      suffix = notation.halfDim;
+      break;
+    case 'diminished':
+      suffix = 'dim';
+      break;
+    case 'maj7':
+      suffix = 'maj7';
+      break;
+    case 'min7':
+      suffix = 'm7';
+      break;
+    case 'dim7':
+      suffix = 'dim7';
+      break;
+    default:
+      suffix = '';
+  }
   return chord.root + suffix;
 }
 
