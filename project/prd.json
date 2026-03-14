@@ -428,7 +428,7 @@
       "Export analyseHarmony and AnnotatedChord from packages/grigson/src/index.ts",
       "Run pnpm test to confirm all new tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "harmonic-analysis-isolated",

@@ -126,3 +126,6 @@ Added a `Section` interface to `src/parser/types.ts` with `{ type: 'section'; la
 
 ## normalise-per-section
 Refactored normaliseSong to operate per section with independent key detection.
+
+## harmonic-analysis-core
+Created src/theory/harmonicAnalysis.ts exporting the AnnotatedChord interface ({ chord, homeKey, currentKey, currentKeyCandidates }) and analyseHarmony(chords, homeKey). The function performs a left-to-right sliding window scan with two pattern detectors: (1) 2-5-1 — a minor or half-diminished ii chord followed by a dominant7 V7 a perfect 4th above, followed by a tonic I a perfect 5th below the V7; all three get currentKey set to the resolved tonic key; (2) 5-1 — a dominant7 followed by a tonic a perfect 5th below; both get the resolved tonic key. 2-5-1 is checked first at each position, giving it natural priority. Key names are resolved from pitch class via two lookup maps (major and minor) built from the KEYS record, with Gb preferred over F# for pitch class 6. Exported analyseHarmony and AnnotatedChord from index.ts. Added 7 tests covering: all-homeKey baseline, 5-1 detection (A7→Dm, G7→C), 2-5-1 detection (Bbm-Eb7-Ab in C context), 2-5-1 in Db (Ebm-Ab7-Db in F context), 2-5-1 priority over 5-1, half-diminished ii in 2-5-1, and homeKey preservation. All 154 tests pass.

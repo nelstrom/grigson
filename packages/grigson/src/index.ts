@@ -16,3 +16,5 @@ export type { DetectKeyConfig } from './theory/keyDetector.js';
 export { detectKey } from './theory/keyDetector.js';
 export { diatonicNotes } from './theory/keys.js';
 export { rootToPitchClass, ENHARMONIC_PAIRS } from './theory/pitchClass.js';
+export { analyseHarmony } from './theory/harmonicAnalysis.js';
+export type { AnnotatedChord } from './theory/harmonicAnalysis.js';
