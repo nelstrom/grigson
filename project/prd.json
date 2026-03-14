@@ -461,7 +461,7 @@
       "Remove the old next-chord borrowing heuristic if it is now fully superseded",
       "Run pnpm test to confirm all normalise tests (Cat 2, 5, 8) and the new harmonic-spelling tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "transpose-rewrite",

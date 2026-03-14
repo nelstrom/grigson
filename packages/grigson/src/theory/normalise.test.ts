@@ -84,6 +84,52 @@ describe('normaliseSong — Category 2: enharmonic correction of diatonic chord 
   });
 });
 
+describe('normaliseSong — harmonic-analysis-based spelling', () => {
+  it('2-5-1 Bbm-Eb7-Ab in C: roots spelled Bb, Eb, Ab (not A#m, D#7, G#)', () => {
+    const s = song([
+      row(ch('C'), ch('Bb', 'minor'), ch('Eb', 'dominant7'), ch('Ab'), ch('G', 'dominant7'), ch('C')),
+    ]);
+    const result = normaliseSong(s);
+    const bars = result.sections[0].rows[0].bars;
+    expect(bars[1].chord.root).toBe('Bb'); // not A#
+    expect(bars[2].chord.root).toBe('Eb'); // not D#
+    expect(bars[3].chord.root).toBe('Ab'); // not G#
+  });
+
+  it('2-5-1 Ebm-Ab7-Db in F (What\'s New B): roots spelled Eb, Ab, Db', () => {
+    const s = song([
+      row(ch('F'), ch('Eb', 'minor'), ch('Ab', 'dominant7'), ch('Db'), ch('C', 'dominant7'), ch('F')),
+    ]);
+    const result = normaliseSong(s);
+    const bars = result.sections[0].rows[0].bars;
+    expect(bars[1].chord.root).toBe('Eb');
+    expect(bars[2].chord.root).toBe('Ab');
+    expect(bars[3].chord.root).toBe('Db');
+  });
+
+  it('borrowed bVII Bb in C: stays Bb (not A#)', () => {
+    const s = song([row(ch('C'), ch('Bb'), ch('F'), ch('G'))]);
+    const result = normaliseSong(s);
+    expect(result.sections[0].rows[0].bars[1].chord.root).toBe('Bb');
+  });
+
+  it('A7 secondary dominant in C: root A not rewritten', () => {
+    const s = song([
+      row(ch('C'), ch('A', 'dominant7'), ch('D', 'minor'), ch('G', 'dominant7'), ch('C')),
+    ]);
+    const result = normaliseSong(s);
+    expect(result.sections[0].rows[0].bars[1].chord.root).toBe('A');
+  });
+
+  it('Dm7b5-G7-Am-Am: root D not mangled (not C##)', () => {
+    const s = song([
+      row(ch('D', 'halfDiminished'), ch('G', 'dominant7'), ch('A', 'minor'), ch('A', 'minor')),
+    ]);
+    const result = normaliseSong(s);
+    expect(result.sections[0].rows[0].bars[0].chord.root).toBe('D');
+  });
+});
+
 describe('normaliseSong — Category 8: borrowed chords and secondary dominants', () => {
   it('T8-a: Eb7 as V7 of Ab stays Eb7 (not rewritten to D#7)', () => {
     const s = song([row(ch('F'), ch('Bb'), ch('Eb', 'dominant7'), ch('Ab'))]);

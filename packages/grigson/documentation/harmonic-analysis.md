@@ -96,6 +96,19 @@ When a pattern resolves to a tonic chord, the key name is determined by:
 
 For pitch class 6 (F#/Gb), the flat-side spelling `'Gb'` is preferred by default.
 
+## Integration with normalisation
+
+`normaliseSong` (and `normaliseSection`) use `analyseHarmony` internally to determine the correct enharmonic spelling for each chord. The algorithm is:
+
+1. Detect the section's `homeKey` via `detectKey`.
+2. Call `analyseHarmony(chords, homeKey)` to get a `currentKey` per chord.
+3. For each chord:
+   - If the chord's pitch class is **diatonic to `homeKey`** (by pitch class, not spelling), use `homeKey`'s canonical note name. This corrects enharmonics like `C#` → `Db` in Db major.
+   - Otherwise, use `currentKey`'s canonical note name. This correctly spells borrowed chords: e.g., `Bb` in C major gets `currentKey = 'F'`, so `Bb` stays `Bb` (not `A#`).
+   - If the pitch class appears in neither map, the chord root is left unchanged.
+
+This means `normaliseSong` handles both diatonic enharmonic corrections (Category 2) and borrowed-chord spelling (Category 8) through a single unified mechanism.
+
 ## Circle-of-fifths distance
 
 ```typescript
