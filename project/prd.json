@@ -973,5 +973,144 @@
       "Run pnpm build && pnpm test to confirm all new and existing tests pass"
     ],
     "passes": false
+  },
+  {
+    "id": "tree-sitter-scaffold",
+    "category": "tooling",
+    "description": "Create the tree-sitter-grammar package with a buildable skeleton",
+    "detail": "Create packages/tree-sitter-grammar/ as a new workspace package. package.json sets name to \"tree-sitter-grigson\" and includes tree-sitter-cli as a devDependency. The \"tree-sitter\" field in package.json declares scope \"source.grigson\" and file-types [\"chart\"]. grammar.js contains a minimal skeleton: a song rule that matches zero or more newlines, enough for tree-sitter generate to succeed without errors. Run tree-sitter generate to produce src/parser.c, src/grammar.json, and src/node-types.json — all three generated files are committed to the repo so consumers do not need tree-sitter-cli installed. Add packages/tree-sitter-grammar/node_modules/ to the root .gitignore.",
+    "steps": [
+      "Create packages/tree-sitter-grammar/package.json with name \"tree-sitter-grigson\", version \"0.1.0\", scripts: { \"generate\": \"tree-sitter generate\", \"build\": \"tree-sitter generate\", \"test\": \"tree-sitter test\" }, devDependencies: { \"tree-sitter-cli\": \"^0.25.0\" }, and a \"tree-sitter\" array entry with scope \"source.grigson\" and file-types [\"chart\"]",
+      "Create packages/tree-sitter-grammar/grammar.js with a minimal skeleton: module.exports = grammar({ name: \"grigson\", extras: $ => [/[ \\t]/], rules: { song: $ => repeat(/[^\\n]*\\n/) } })",
+      "Run pnpm install from the workspace root to install tree-sitter-cli into the new package",
+      "Run pnpm --filter tree-sitter-grigson generate to produce src/parser.c, src/grammar.json, and src/node-types.json",
+      "Verify src/parser.c exists and is non-empty",
+      "Add packages/tree-sitter-grammar/node_modules/ to the root .gitignore (do not add src/parser.c — it must be committed)",
+      "Run pnpm test from the workspace root to confirm all existing grigson tests still pass",
+      "Commit packages/tree-sitter-grammar/package.json, grammar.js, src/parser.c, src/grammar.json, src/node-types.json"
+    ],
+    "passes": false
+  },
+  {
+    "id": "tree-sitter-chord-grammar",
+    "category": "tooling",
+    "description": "Implement chord, note_letter, accidental, and quality rules in the tree-sitter grammar",
+    "detail": "Extend grammar.js with chord, note_letter, accidental, and quality rules. note_letter matches [A-G]. accidental and quality use token.immediate() so no whitespace can appear between the root letter and its suffix. quality choices in longest-first order: m7b5, maj7, M7, dim7, m7, dim, m, 7. A chord is seq(note_letter, optional(accidental), optional(quality)). Write tree-sitter corpus tests in test/corpus/chords.txt. Run tree-sitter generate then tree-sitter test.",
+    "steps": [
+      "Add note_letter, accidental, quality, and chord rules to grammar.js using token.immediate() for accidental and quality",
+      "Update the song rule to use repeat(choice($.chord, /[^\\n]*\\n/)) as a temporary placeholder so chords appear at the top level for testing",
+      "Run pnpm --filter tree-sitter-grigson generate",
+      "Create test/corpus/ directory and test/corpus/chords.txt",
+      "Add corpus test: \"C\" parses to a chord node containing a note_letter",
+      "Add corpus test: \"F#\" parses to a chord with note_letter and accidental",
+      "Add corpus test: \"Bb\" parses to a chord with note_letter and flat accidental",
+      "Add corpus test: \"Am\" parses to a chord with note_letter and quality",
+      "Add corpus test: \"G7\" parses to a chord with note_letter and quality",
+      "Add corpus test: \"Bm7b5\" parses to a chord with note_letter and quality",
+      "Add corpus test: \"Cmaj7\", \"CM7\", \"Dm7\", \"Bdim7\" each parse to a chord with note_letter and quality",
+      "Run tree-sitter test — all corpus tests must pass",
+      "Commit updated grammar.js, regenerated src/parser.c, and test/corpus/chords.txt"
+    ],
+    "passes": false
+  },
+  {
+    "id": "tree-sitter-bar-grammar",
+    "category": "tooling",
+    "description": "Implement row, bar_tail, barline, and time_signature rules",
+    "detail": "Extend grammar.js with row, bar_tail, barline, and time_signature rules. barline is the literal \"|\". integer matches /[0-9]+/ as a named token. time_signature is seq(\"(\", $.integer, \"/\", $.integer, \")\"). bar_tail is seq(optional($.time_signature), $.chord, $.barline). row is seq($.barline, repeat1($.bar_tail), optional(/\\r?\\n/)). Update song to repeat(choice($.row, /\\r?\\n/)). Write corpus tests in test/corpus/bars.txt covering single-bar rows, four-bar rows, bars with and without time signatures.",
+    "steps": [
+      "Add integer, barline, time_signature, bar_tail, and row rules to grammar.js",
+      "Update song to seq(optional($.frontmatter), repeat(choice($.row, /\\r?\\n/))) as a placeholder (frontmatter will be added in the next task)",
+      "Run pnpm --filter tree-sitter-grigson generate",
+      "Create test/corpus/bars.txt",
+      "Add corpus test: \"| C |\" produces a row node containing a barline and one bar_tail with chord and closing barline",
+      "Add corpus test: \"| C | Am | F | G |\" produces a row with four bar_tail nodes",
+      "Add corpus test: \"| (4/4) C |\" — bar_tail contains a time_signature with integer children 4 and 4",
+      "Add corpus test: \"| (4/4) C | Am |\" — first bar_tail has time_signature, second does not",
+      "Add corpus test: \"| (6/8) G7 |\" — time_signature integers are 6 and 8",
+      "Add corpus test: \"| F# | Bb | Am | G7 |\" — mixed accidentals and qualities across bars",
+      "Run tree-sitter test — all corpus tests in chords.txt and bars.txt must pass",
+      "Commit updated grammar.js, regenerated src/parser.c, and test/corpus/bars.txt"
+    ],
+    "passes": false
+  },
+  {
+    "id": "tree-sitter-frontmatter-grammar",
+    "category": "tooling",
+    "description": "Implement frontmatter rules in the tree-sitter grammar",
+    "detail": "Extend grammar.js with frontmatter, frontmatter_delimiter, frontmatter_field, frontmatter_key, and frontmatter_value rules. frontmatter_delimiter matches /---[ \\t]*\\r?\\n/. frontmatter_key matches /[a-zA-Z]+/. frontmatter_value matches a double-quoted string or an unquoted value (/[^\\r\\n]+/). frontmatter_field is seq(frontmatter_key, \":\", frontmatter_value, /\\r?\\n/). frontmatter is seq(frontmatter_delimiter, repeat(frontmatter_field), frontmatter_delimiter). Update song to seq(optional($.frontmatter), repeat(choice($.row, /\\r?\\n/))). Write corpus tests in test/corpus/frontmatter.txt.",
+    "steps": [
+      "Add frontmatter_delimiter, frontmatter_key, frontmatter_value, frontmatter_field, and frontmatter rules to grammar.js",
+      "Update song to seq(optional($.frontmatter), repeat(choice($.row, /\\r?\\n/)))",
+      "Run pnpm --filter tree-sitter-grigson generate",
+      "Create test/corpus/frontmatter.txt",
+      "Add corpus test: \"---\\ntitle: My Song\\n---\" produces a frontmatter node with one frontmatter_field containing frontmatter_key and frontmatter_value",
+      "Add corpus test: frontmatter with title and key fields produces two frontmatter_field nodes",
+      "Add corpus test: quoted value \"title: \\\"All The Things\\\"\" — frontmatter_value node captures the quoted string",
+      "Add corpus test: unquoted value \"key: F#\" — frontmatter_value is F#",
+      "Add corpus test: empty frontmatter (--- delimiter pair with no fields) — frontmatter node has no frontmatter_field children",
+      "Add corpus test: frontmatter followed by a row — song node contains both frontmatter and row children",
+      "Run tree-sitter test — all corpus tests in chords.txt, bars.txt, and frontmatter.txt must pass",
+      "Commit updated grammar.js, regenerated src/parser.c, and test/corpus/frontmatter.txt"
+    ],
+    "passes": false
+  },
+  {
+    "id": "tree-sitter-section-grammar",
+    "category": "tooling",
+    "description": "Implement section_label rule and complete the song assembly",
+    "detail": "Extend grammar.js with section_label and section_name rules. section_label matches seq(\"[\", $.section_name, \"]\", optional(/\\r?\\n/)). section_name is /[^\\]\\r\\n]+/. Update song to seq(optional($.frontmatter), repeat(choice($.section_label, $.row, /\\r?\\n/))). This completes the grammar covering all constructs in the current .chart format. Write corpus tests in test/corpus/sections.txt and a full integration test in test/corpus/song.txt.",
+    "steps": [
+      "Add section_name and section_label rules to grammar.js",
+      "Update song to seq(optional($.frontmatter), repeat(choice($.section_label, $.row, /\\r?\\n/)))",
+      "Run pnpm --filter tree-sitter-grigson generate",
+      "Create test/corpus/sections.txt",
+      "Add corpus test: \"[A]\" produces a section_label node containing a section_name",
+      "Add corpus test: \"[Chorus]\" produces a section_label with section_name \"Chorus\"",
+      "Add corpus test: a song with two section labels produces two section_label nodes",
+      "Add corpus test: section_label immediately followed by a row produces section_label then row as siblings in song",
+      "Create test/corpus/song.txt with a full song combining frontmatter, [A] label, two rows, blank line, [B] label, two rows",
+      "Verify the full song corpus test tree has: frontmatter, section_label(\"A\"), row, row, section_label(\"B\"), row, row as top-level children of song",
+      "Run tree-sitter test — all corpus tests across all .txt files must pass",
+      "Commit updated grammar.js, regenerated src/parser.c, test/corpus/sections.txt, and test/corpus/song.txt"
+    ],
+    "passes": false
+  },
+  {
+    "id": "tree-sitter-highlight-queries",
+    "category": "tooling",
+    "description": "Write highlight queries mapping tree-sitter nodes to semantic capture names",
+    "detail": "Create queries/highlights.scm mapping each named node to a standard tree-sitter highlight capture name. Captures to define: frontmatter_delimiter → @punctuation.special; frontmatter_key → @variable.member; frontmatter_value → @string; section_label brackets → @punctuation.bracket; section_name → @markup.heading; barline → @punctuation.delimiter; time_signature parentheses → @punctuation.bracket, slash → @operator, integers → @number; chord note_letter → @constant; chord accidental → @operator; chord quality → @keyword. Verify with tree-sitter highlight run against a sample .chart file.",
+    "steps": [
+      "Create queries/ directory and queries/highlights.scm",
+      "Add: (frontmatter_delimiter) @punctuation.special",
+      "Add: (frontmatter_field (frontmatter_key) @variable.member) and (frontmatter_field (frontmatter_value) @string)",
+      "Add: (section_label \"[\" @punctuation.bracket (section_name) @markup.heading \"]\" @punctuation.bracket)",
+      "Add: (barline) @punctuation.delimiter",
+      "Add time_signature captures: parentheses as @punctuation.bracket, \"/\" as @operator, (integer) as @number",
+      "Add chord captures: (chord (note_letter) @constant) (chord (accidental) @operator) (chord (quality) @keyword)",
+      "Run: echo \"---\\ntitle: Test\\n---\\n[A]\\n| Cmaj7 | Am | (3/4) F | G7 |\" > /tmp/test.chart && tree-sitter highlight /tmp/test.chart",
+      "Verify the highlight output shows captures for all node types with no \"ERROR\" or uncaptured nodes for known constructs",
+      "Commit queries/highlights.scm"
+    ],
+    "passes": false
+  },
+  {
+    "id": "tree-sitter-integration-docs",
+    "category": "documentation",
+    "description": "Write editor integration documentation for Neovim and Helix",
+    "detail": "Create packages/grigson/documentation/tree-sitter.md documenting how to install and configure the tree-sitter-grigson grammar in Neovim (two paths: nvim-treesitter upstream PR and manual parser_config registration) and Helix (languages.toml stanzas + hx --grammar build). Include a note that tree-sitter (structural highlighting, text objects) and the LSP (diagnostics) are complementary and can both be active. Update documentation/language-server.md to cross-reference tree-sitter.md.",
+    "steps": [
+      "Create packages/grigson/documentation/tree-sitter.md",
+      "Write intro: what tree-sitter provides (incremental structural highlighting, text objects, error tolerance) vs LSP (diagnostics, hover)",
+      "Write Neovim — Path A: TSInstall grigson after upstream nvim-treesitter PR is merged; include the BufRead autocmd to set filetype=grigson for .chart files",
+      "Write Neovim — Path B: full init.lua snippet using require(\"nvim-treesitter.parsers\").get_parser_configs() for manual registration before upstream acceptance; explain where to place highlights.scm",
+      "Write Helix section: full languages.toml [[grammar]] and [[language]] stanzas; explain the hx --grammar build step",
+      "Add a \"using both LSP and tree-sitter\" note explaining they run side-by-side: tree-sitter for colour, LSP for diagnostics squiggles",
+      "Add a cross-reference link in documentation/language-server.md pointing to tree-sitter.md",
+      "Run pnpm test to confirm all existing tests still pass",
+      "Commit documentation/tree-sitter.md and the updated documentation/language-server.md"
+    ],
+    "passes": false
   }
 ]
