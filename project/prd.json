@@ -831,5 +831,18 @@
       "Run pnpm build && pnpm test to confirm all normalise tests (Cat 2, 5, 8 and harmonic-based spelling) pass with no regressions"
     ],
     "passes": true
+  },
+  {
+    "id": "textmate-grammar-chord-qualities",
+    "category": "tooling",
+    "description": "Extend the TextMate grammar to highlight the four new chord qualities",
+    "detail": "The chord quality regex in packages/textmate-grammar/grigson.tmLanguage.json currently matches only 'm7b5', 'm', and '7'. It must be extended to also match 'dim7', 'maj7', 'M7', 'm7', and 'dim' — the five suffix forms added in chord-qualities-parse-render. Regex ordering is critical: longer alternatives must precede shorter ones to avoid premature matches (e.g. 'dim7' before 'dim', 'maj7' before 'm7', 'm7b5' before 'm7' before 'm'). The correct order is: m7b5|maj7|M7|dim7|m7|dim|m|7. The vscode-extension copy must be kept in sync. The syntax-test.chart example file should be updated to include chords using the new qualities.",
+    "steps": [
+      "Update the chord quality alternation in the 'chord' repository item regex in packages/textmate-grammar/grigson.tmLanguage.json from 'm7b5|m|7' to 'm7b5|maj7|M7|dim7|m7|dim|m|7'",
+      "Copy the updated grammar to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Update packages/grigson/documentation/examples/syntax-test.chart to include representative chords for each new quality: Cdim, Cmaj7, CM7, Dm7, Bdim7",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
   }
 ]
