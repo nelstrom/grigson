@@ -1,8 +1,53 @@
 [
   {
+    "type": "chord",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "accidental",
+          "named": true
+        },
+        {
+          "type": "note_letter",
+          "named": true
+        },
+        {
+          "type": "quality",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "song",
     "named": true,
     "root": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "chord",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "accidental",
+    "named": true
+  },
+  {
+    "type": "note_letter",
+    "named": true
+  },
+  {
+    "type": "quality",
+    "named": true
   }
 ]

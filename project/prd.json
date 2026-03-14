@@ -1011,7 +1011,7 @@
       "Run tree-sitter test — all corpus tests must pass",
       "Commit updated grammar.js, regenerated src/parser.c, and test/corpus/chords.txt"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "tree-sitter-bar-grammar",

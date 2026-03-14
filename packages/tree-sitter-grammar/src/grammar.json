@@ -5,15 +5,99 @@
     "song": {
       "type": "REPEAT",
       "content": {
+        "type": "SYMBOL",
+        "name": "chord"
+      }
+    },
+    "chord": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "note_letter"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "accidental"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "quality"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "note_letter": {
+      "type": "PATTERN",
+      "value": "[A-G]"
+    },
+    "accidental": {
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
         "type": "PATTERN",
-        "value": "[^\\n]*\\n"
+        "value": "[#b]"
+      }
+    },
+    "quality": {
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "m7b5"
+          },
+          {
+            "type": "STRING",
+            "value": "maj7"
+          },
+          {
+            "type": "STRING",
+            "value": "M7"
+          },
+          {
+            "type": "STRING",
+            "value": "dim7"
+          },
+          {
+            "type": "STRING",
+            "value": "m7"
+          },
+          {
+            "type": "STRING",
+            "value": "dim"
+          },
+          {
+            "type": "STRING",
+            "value": "m"
+          },
+          {
+            "type": "STRING",
+            "value": "7"
+          }
+        ]
       }
     }
   },
   "extras": [
     {
       "type": "PATTERN",
-      "value": "[ \\t]"
+      "value": "[ \\t\\r\\n]"
     }
   ],
   "conflicts": [],
