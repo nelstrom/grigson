@@ -911,5 +911,68 @@
       "Run pnpm test to confirm no regressions in the grigson package tests"
     ],
     "passes": true
+  },
+  {
+    "id": "time-signature-parsing",
+    "category": "functional",
+    "description": "Extend the parser to recognise time signature annotations in bars",
+    "detail": "A time signature is written as (N/D) immediately after a barline and before the bar's chord content, e.g. | (4/4) C | or | (3/4) Am |. It applies to that bar and remains in effect for all subsequent bars until a new time signature is encountered. The Bar AST node gains an optional 'timeSignature?: { numerator: number; denominator: number }' field which is set only on bars that explicitly declare one — tracking the effective time signature across bars is the responsibility of later passes, not the parser. The TextRenderer emits '(N/D) ' before the first chord of any bar that declares a time signature. This task does not change the Bar's chord content structure — it only adds the time signature field alongside the existing 'chord: Chord' field.",
+    "steps": [
+      "Add a TimeSignature interface to packages/grigson/src/parser/types.ts: { numerator: number; denominator: number } and add 'timeSignature?: TimeSignature' to the Bar interface",
+      "Extend the Peggy grammar in packages/grigson/src/parser/grammar.pegjs to optionally parse a '(N/D)' token after a barline and before chord content; store it in the Bar action",
+      "Write a test: parse '| (4/4) C |' and assert bar.timeSignature equals { numerator: 4, denominator: 4 }",
+      "Write a test: parse '| (3/4) Am |' and assert bar.timeSignature equals { numerator: 3, denominator: 4 }",
+      "Write a test: parse '| (6/8) G7 |' and assert bar.timeSignature equals { numerator: 6, denominator: 8 }",
+      "Write a test: parse '| C |' and assert bar.timeSignature is undefined",
+      "Write a test: parse '| (4/4) C | Am |' — assert the first bar has timeSignature { numerator: 4, denominator: 4 } and the second bar has timeSignature undefined (propagation is not the parser's job)",
+      "Update TextRenderer to emit '(N/D) ' immediately before the chord text when bar.timeSignature is defined",
+      "Write a round-trip test: parse '| (3/4) Am |', render to text, parse again, and assert the two ASTs are deeply equal",
+      "Export TimeSignature from packages/grigson/src/index.ts",
+      "Run pnpm build && pnpm test to confirm all new and existing tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "beat-slot-parsing",
+    "category": "functional",
+    "description": "Extend Bar to hold a sequence of chords and dots, replacing the single-chord field",
+    "detail": "Replace 'Bar.chord: Chord' with 'Bar.slots: BeatSlot[]'. A BeatSlot is either a ChordSlot ({ type: 'chord'; chord: Chord }) or a DotSlot ({ type: 'dot' }). The grammar is updated to parse one or more chord-or-dot tokens inside a bar. A bar must contain at least one ChordSlot (a bar of only dots is invalid). All existing consumers of bar.chord are updated: TextRenderer and HtmlRenderer join slots with spaces rendering dots as '.'; normalise.ts, keyDetector callers, and harmonicAnalysis callers extract chords by filtering slots for ChordSlots. All bar-parsing tests are updated from bar.chord to bar.slots[0].chord (or the equivalent typed access). This is a breaking AST change — TypeScript compilation errors are the guide for finding all affected sites. This task depends on time-signature-parsing (the grammar changes are additive to that task's output).",
+    "steps": [
+      "Add ChordSlot ({ type: 'chord'; chord: Chord }), DotSlot ({ type: 'dot' }), and BeatSlot (ChordSlot | DotSlot) to packages/grigson/src/parser/types.ts; replace Bar.chord with Bar.slots: BeatSlot[]",
+      "Update the Peggy grammar to parse a sequence of one or more (Chord / '.') tokens inside a bar; the bar action collects them into the slots array",
+      "Run pnpm build to surface all TypeScript errors caused by the Bar.chord → Bar.slots change, then fix each affected site",
+      "Update TextRenderer.renderBar() to map slots: ChordSlots render as the chord text, DotSlots render as '.', joined by single spaces",
+      "Update HtmlRenderer similarly for slots",
+      "Update normalise.ts to extract Chord[] from bar.slots by filtering for ChordSlots; rewrite chord roots in-place within ChordSlots",
+      "Update all bar-parsing tests in parser.test.ts to access bar.slots instead of bar.chord",
+      "Write a test: parse '| C |' → one ChordSlot with chord C major (single-chord backward compatibility)",
+      "Write a test: parse '| C G |' → two ChordSlots in order",
+      "Write a test: parse '| C . . G |' → ChordSlot(C), DotSlot, DotSlot, ChordSlot(G)",
+      "Write a test: parse '| C G . . |' → ChordSlot(C), ChordSlot(G), DotSlot, DotSlot",
+      "Write a test: parse '| . |' (dot only, no chord) and assert the parser rejects it",
+      "Write a round-trip test for each new multi-slot pattern",
+      "Run pnpm build && pnpm test to confirm all new and existing tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "validate-beat-balance",
+    "category": "functional",
+    "description": "Semantic validator check: warn when a mode-2 bar's slot count does not match its effective time signature",
+    "detail": "After a successful parse, validate() runs a new semanticChecks(song: Song): Diagnostic[] pass. The first semantic check is beat balance. For each bar in the song (iterating sections → rows → bars), track the effective time signature by carrying forward the last declared timeSignature, defaulting to { numerator: 4, denominator: 4 } if none has been declared. A bar is in mode 2 if it contains at least one DotSlot. For mode-2 bars, the expected slot count is the effective time signature's numerator. Emit a severity: 'warning' Diagnostic if the actual slot count differs from the expected count — both underfilled (slot count < numerator, trailing dots implied but source is ambiguous) and overfilled (slot count > numerator, cannot be corrected by any trailing-dot rule) produce warnings. Mode-1 bars (no DotSlots) are never warned about — the even-split rule is always unambiguous. The Diagnostic range should point at the bar's position; since Peggy location data is not currently stored on AST nodes, use the position of the enclosing row as an approximation for now. semanticChecks is an unexported helper inside validator.ts, keeping validate() as the single public entry point.",
+    "steps": [
+      "Write a test: validate('| (3/4) C . G |') returns [] — 3 slots in 3/4, balanced",
+      "Write a test: validate('| (4/4) C . . . G |') returns [] — 4 slots in 4/4, balanced",
+      "Write a test: validate('| (5/4) C . . G |') returns one Diagnostic with severity 'warning' — 4 slots in 5/4, underfilled",
+      "Write a test: validate('| (4/4) C . . . . . G |') returns one Diagnostic with severity 'warning' — 7 slots in 4/4, overfilled",
+      "Write a test: validate('| C G |') returns [] — mode 1 (no dots), no warning regardless of how many chords",
+      "Write a test: validate('| (4/4) C | (3/4) Am . G |') returns [] — second bar is mode 2 with exactly 3 slots in 3/4",
+      "Write a test: validate('| (3/4) C | Am . G |') returns [] — second bar inherits the (3/4) time signature from the first bar and has 3 slots",
+      "Add an unexported semanticChecks(song: Song): Diagnostic[] function to packages/grigson/src/validator.ts",
+      "Implement beat-balance logic in semanticChecks: iterate sections/rows/bars, carry effective time signature forward, check mode-2 bars",
+      "Update validate() to call semanticChecks(song) after a successful parseSong() and concatenate the results",
+      "Run pnpm build && pnpm test to confirm all new and existing tests pass"
+    ],
+    "passes": false
   }
 ]
