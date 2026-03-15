@@ -1123,7 +1123,7 @@
       "Include '#dot' in the main pattern list, after '#barline' and before '#chord'",
       "Smoke-test by opening a .chart file with a bar like '| C . G |' and confirming '.' gets a colour"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-textmate-time-signature",

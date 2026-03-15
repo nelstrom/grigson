@@ -20,6 +20,9 @@
           "include": "#barline"
         },
         {
+          "include": "#dot"
+        },
+        {
           "include": "#chord"
         }
       ]
@@ -85,6 +88,10 @@
     "barline": {
       "match": "\\|",
       "name": "punctuation.definition.barline.grigson"
+    },
+    "dot": {
+      "match": "(?<=\\||\\s)\\.(?=\\s|\\||$)",
+      "name": "punctuation.separator.beat.grigson"
     },
     "chord": {
       "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7)?(?=\\s|\\||$)",
