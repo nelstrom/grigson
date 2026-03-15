@@ -20,6 +20,9 @@
           "include": "#barline"
         },
         {
+          "include": "#time-signature"
+        },
+        {
           "include": "#dot"
         },
         {
@@ -88,6 +91,26 @@
     "barline": {
       "match": "\\|",
       "name": "punctuation.definition.barline.grigson"
+    },
+    "time-signature": {
+      "match": "(\\()(\\d+)(/)(\\d+)(\\))",
+      "captures": {
+        "1": {
+          "name": "punctuation.section.time-signature.begin.grigson"
+        },
+        "2": {
+          "name": "constant.numeric.grigson"
+        },
+        "3": {
+          "name": "punctuation.separator.grigson"
+        },
+        "4": {
+          "name": "constant.numeric.grigson"
+        },
+        "5": {
+          "name": "punctuation.section.time-signature.end.grigson"
+        }
+      }
     },
     "dot": {
       "match": "(?<=\\||\\s)\\.(?=\\s|\\||$)",

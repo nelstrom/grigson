@@ -203,3 +203,6 @@ Created editor integration documentation for Neovim and Helix in packages/tree-s
 
 ## sync-textmate-dot-beat-slot
 Added a 'dot' repository entry to packages/textmate-grammar/grigson.tmLanguage.json with match `(?<=\||\s)\.(?=\s|\||$)` and scope `punctuation.separator.beat.grigson`. Included `#dot` in the main pattern list after `#barline` and before `#chord`. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. All 246 tests pass.
+
+## sync-textmate-time-signature
+Added a 'time-signature' repository entry to packages/textmate-grammar/grigson.tmLanguage.json with match `(\()(\d+)(/)(\d+)(\))` and five capture groups: opening paren → punctuation.section.time-signature.begin.grigson, numerator → constant.numeric.grigson, slash → punctuation.separator.grigson, denominator → constant.numeric.grigson, closing paren → punctuation.section.time-signature.end.grigson. Included `#time-signature` in the main pattern list after `#barline` and before `#dot`. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. All 246 tests pass.

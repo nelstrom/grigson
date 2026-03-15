@@ -1135,7 +1135,7 @@
       "Include '#time-signature' in the main pattern list, before '#chord'",
       "Smoke-test with a bar like '| (3/4) Am | (6/8) C |' and confirm the token is highlighted"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-beat-slot-list",
