@@ -18,6 +18,10 @@ const NOTE_MAP: Record<string, PitchClass> = {
   'A#': 10,
   Bb: 10,
   B: 11,
+  'B#': 0,
+  Cb: 11,
+  'E#': 5,
+  Fb: 4,
 };
 
 export const ENHARMONIC_PAIRS: Record<string, string> = {

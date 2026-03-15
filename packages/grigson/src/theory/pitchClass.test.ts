@@ -32,6 +32,13 @@ describe('rootToPitchClass', () => {
     expect(rootToPitchClass('A#')).toBe(rootToPitchClass('Bb'));
   });
 
+  it('maps exotic enharmonic spellings to correct pitch classes', () => {
+    expect(rootToPitchClass('E#')).toBe(5);
+    expect(rootToPitchClass('B#')).toBe(0);
+    expect(rootToPitchClass('Cb')).toBe(11);
+    expect(rootToPitchClass('Fb')).toBe(4);
+  });
+
   it('throws for unrecognised input', () => {
     expect(() => rootToPitchClass('X')).toThrow();
   });

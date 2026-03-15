@@ -1183,7 +1183,8 @@
       "Add 'Fb': 4 to NOTE_MAP in pitchClass.ts",
       "Add unit tests in pitchClass or normalise test files: assert rootToPitchClass('E#') === 5, 'B#' === 0, 'Cb' === 11, 'Fb' === 4",
       "Confirm existing normalise tests still pass (pnpm test)"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "minor-keys-add",
