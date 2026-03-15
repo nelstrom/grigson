@@ -12,6 +12,26 @@ Tasks are tracked in `project/prd.json`. Use the provided scripts — do not rea
 ./project/prd-status -v     # + steps
 ```
 
+### Add a task
+
+```bash
+./project/prd-add-task <<'EOF'
+{
+  "id": "my-task",
+  "category": "functional",
+  "description": "Short description",
+  "detail": "Longer explanation...",
+  "steps": ["Step 1", "Step 2"]
+}
+EOF
+```
+
+Required fields: `id`, `category`, `description`. Optional: `detail`, `steps`.
+
+**Always use `prd-add-task` to add tasks — never edit `prd.json` directly.** Direct edits with
+Python's `json` module will corrupt non-ASCII characters (em dashes, arrows, etc.) by escaping
+them to `\uXXXX` sequences. The script uses Node's `JSON.stringify` which preserves them correctly.
+
 ### Mark a task complete
 
 ```bash
@@ -19,8 +39,6 @@ Tasks are tracked in `project/prd.json`. Use the provided scripts — do not rea
 ```
 
 Call this after implementing and testing a task.
-
-**Do not add, remove, or modify tasks in `prd.json` directly.** Only the user adds tasks. The only permitted write is marking a task complete via `prd-done`.
 
 ### Task execution loop
 

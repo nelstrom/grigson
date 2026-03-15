@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+// Appends a task to prd.json.
+//
+// Usage:
+//   ./project/prd-add-task <<'EOF'
+//   {
+//     "id": "my-task",
+//     "category": "functional",
+//     "description": "Short description",
+//     "detail": "Longer explanation...",
+//     "steps": ["Step 1", "Step 2"]
+//   }
+//   EOF
+//
+// Reads a JSON task object from stdin. Required fields: id, category, description.
+// Optional fields: detail, steps. Exits with code 1 if the id already exists.
+
+const fs = require('fs');
+const path = require('path');
+
+const prdPath = path.join(__dirname, 'prd.json');
+
+let input = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => { input += chunk; });
+process.stdin.on('end', () => {
+  let task;
+  try {
+    task = JSON.parse(input.trim());
+  } catch (e) {
+    console.error('Error: invalid JSON —', e.message);
+    process.exit(1);
+  }
+
+  const required = ['id', 'category', 'description'];
+  for (const field of required) {
+    if (!task[field]) {
+      console.error(`Error: missing required field: ${field}`);
+      process.exit(1);
+    }
+  }
+
+  const tasks = JSON.parse(fs.readFileSync(prdPath, 'utf8'));
+
+  if (tasks.find(t => t.id === task.id)) {
+    console.error(`Error: task id already exists: ${task.id}`);
+    process.exit(1);
+  }
+
+  tasks.push(task);
+  fs.writeFileSync(prdPath, JSON.stringify(tasks, null, 2) + '\n');
+  console.log(`Added task: ${task.id}`);
+});
