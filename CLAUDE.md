@@ -33,4 +33,11 @@ Call this after implementing and testing a task. Do not edit `prd.json` by hand.
 - Run tests with `pnpm test` from the repo root.
 - Append task summaries to `project/progress.txt` after completing each task.
 - Commit changes at the end of each task.
-- Add or update `.md` files in the `documentation/` directory when relevant.
+
+## Documentation
+
+Each package has a `README.md` for an overview of that package. Update it when the package's public API or behaviour changes.
+
+Deeper documentation belongs in `packages/grigson/documentation/` when it relates to the core grigson package (parsing, rendering, validation, harmonic analysis, etc.). For other packages, keep additional docs alongside the package — e.g. `packages/language-server/`, `packages/vscode-extension/`.
+
+When completing a task, ask: does this change affect something a user or integrator would need to know? If so, update or create the relevant `.md` file rather than leaving it undocumented.

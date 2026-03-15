@@ -13,7 +13,7 @@ $TASKS
 2. Run pnpm test. Fix any failures before proceeding.
 3. Run ./project/prd-done <task-id> to mark the completed task as done.
 4. Append a summary of what you did to project/progress.txt.
-5. Add or update .md files in the documentation directory.
+5. Update relevant documentation: README.md for the affected package, packages/grigson/documentation/ for core grigson topics, or alongside the package for other packages.
 6. Commit your changes.
 ONLY DO ONE TASK AT A TIME.
 EOF
