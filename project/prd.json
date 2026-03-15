@@ -1249,7 +1249,8 @@
       "Add a keys.test.ts case asserting that diatonicNotes('E dorian') returns the correct set and that 'E dorian' has relative 'D'",
       "Add a test asserting getKeyMode('E dorian') === 'dorian' and getKeyRoot('E dorian') === 'E'",
       "Run pnpm test"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-detection-scoring",

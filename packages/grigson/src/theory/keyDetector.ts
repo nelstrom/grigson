@@ -30,6 +30,8 @@ function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
   const mode = getKeyMode(key);
   const rootName = getKeyRoot(key);
   const rootPC = rootToPitchClass(rootName);
+  // Dorian scoring is not yet implemented; return an empty map so dorian keys score 0.
+  if (mode === 'dorian') return new Map();
   const intervals = mode === 'minor' ? HARMONIC_MINOR_INTERVALS : MAJOR_INTERVALS;
   const qualitySets = mode === 'minor' ? HARMONIC_MINOR_DEGREE_QUALITY_SETS : MAJOR_DEGREE_QUALITY_SETS;
 
@@ -269,7 +271,7 @@ export function detectKey(
           penultimatePC === expectedV7PC &&
           maxScore - score <= 1
         ) {
-          const keyIsMinor = getKeyMode(key) === 'minor';
+          const keyIsMinor = getKeyMode(key) !== 'major';
           const lastIsMinor = lastChord.quality === 'minor';
           if (keyIsMinor === lastIsMinor) {
             bestKey = key;

@@ -47,6 +47,19 @@ export const KEYS: Readonly<Record<string, KeyInfo>> = {
   'G#m': { notes: ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'G'], relative: 'B' },
   Ebm: { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'D'], relative: 'Gb' },
   'D#m': { notes: ['D#', 'E#', 'F#', 'G#', 'A#', 'B', 'D'], relative: 'F#' },
+  // Dorian mode (natural minor with raised 6th; relative = major key a whole step below root)
+  'C dorian': { notes: ['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'], relative: 'Bb' },
+  'D dorian': { notes: ['D', 'E', 'F', 'G', 'A', 'B', 'C'], relative: 'C' },
+  'E dorian': { notes: ['E', 'F#', 'G', 'A', 'B', 'C#', 'D'], relative: 'D' },
+  'F dorian': { notes: ['F', 'G', 'Ab', 'Bb', 'C', 'D', 'Eb'], relative: 'Eb' },
+  'G dorian': { notes: ['G', 'A', 'Bb', 'C', 'D', 'E', 'F'], relative: 'F' },
+  'A dorian': { notes: ['A', 'B', 'C', 'D', 'E', 'F#', 'G'], relative: 'G' },
+  'B dorian': { notes: ['B', 'C#', 'D', 'E', 'F#', 'G#', 'A'], relative: 'A' },
+  'Bb dorian': { notes: ['Bb', 'C', 'Db', 'Eb', 'F', 'G', 'Ab'], relative: 'Ab' },
+  'Eb dorian': { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'C', 'Db'], relative: 'Db' },
+  'F# dorian': { notes: ['F#', 'G#', 'A', 'B', 'C#', 'D#', 'E'], relative: 'E' },
+  'Ab dorian': { notes: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F', 'Gb'], relative: 'Gb' },
+  'C# dorian': { notes: ['C#', 'D#', 'E', 'F#', 'G#', 'A#', 'B'], relative: 'B' },
 };
 
 export function diatonicNotes(key: string): ReadonlySet<string> {
