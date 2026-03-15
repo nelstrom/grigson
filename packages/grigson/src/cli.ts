@@ -58,7 +58,7 @@ Options:
   validate: `Usage: grigson validate [options] [file...]
 
 Validates one or more .chart files (or stdin if no file is given).
-Exits with code 0 if no errors are found, code 1 if any errors are found.
+Exits with code 0 if no diagnostics are found, code 1 if any are found (errors or warnings).
 
 Options:
   --format <fmt>   Output format: text (default) or json
