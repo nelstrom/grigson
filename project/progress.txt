@@ -239,3 +239,6 @@ The circleOfFifthsDistance function in harmonicAnalysis.ts already handled doria
 
 ## dorian-harmonic-key-maps
 Extended buildKeyMaps in harmonicAnalysis.ts to build a dorianByPC: Map<number, string> alongside majorByPC and minorByPC, iterating KEYS entries where getKeyMode === 'dorian'. Exported DORIAN_BY_PC, MAJOR_BY_PC, and MINOR_BY_PC constants. Updated resolveKey to fall back to DORIAN_BY_PC when iChordIsMinor is true but no minor key exists for the tonic pitch class — allowing a 2-5-1 or 5-1 tonicisation to resolve to a dorian centre. Added a test: analyseHarmony([Em, A, D, Em], 'E dorian') returns currentKey 'E dorian' for all chords (all diatonic). All 268 tests pass.
+
+## dorian-plagal-cadence
+Added a 3rd pattern detector to analyseHarmony in harmonicAnalysis.ts: the dorian plagal cadence (IV→i). The pattern fires only when getKeyMode(homeKey) === 'dorian', matches a major chord whose pitch class is (tonicPC + 5) % 12 (the IV) followed by a minor chord at tonicPC (the i), and assigns currentKey = homeKey to both chords. The block is placed after the 5-1 pattern so functional (2-5-1, 5-1) patterns take priority. Added 3 tests: G→Dm in D dorian, A→Em in E dorian, and F→C in C major (gate check — must not fire). All 271 tests pass.

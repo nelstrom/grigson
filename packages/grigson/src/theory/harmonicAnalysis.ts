@@ -199,6 +199,28 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
       }
     }
 
+    // Try dorian plagal cadence: IV (major) → i (minor) — only when homeKey is dorian
+    if (
+      pc !== null &&
+      chord.quality === 'major' &&
+      getKeyMode(homeKey) === 'dorian' &&
+      i + 1 < chords.length
+    ) {
+      const tonicPC = rootToPitchClass(getKeyRoot(homeKey));
+      const ivPC = (tonicPC + 5) % 12;
+
+      if (pc === ivPC) {
+        const iChord = chords[i + 1];
+        const iPC = getPC(iChord);
+        if (iPC !== null && iPC === tonicPC && iChord.quality === 'minor') {
+          result.push(annotate(chord, homeKey, homeKey));
+          result.push(annotate(iChord, homeKey, homeKey));
+          i += 2;
+          continue;
+        }
+      }
+    }
+
     // No pattern matched — check if chord is diatonic to homeKey
     if (pc !== null && !homeNotes.has(chord.root)) {
       // Non-diatonic borrowed chord: find closest key via circle of fifths

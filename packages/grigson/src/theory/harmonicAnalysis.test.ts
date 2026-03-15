@@ -122,6 +122,40 @@ describe('analyseHarmony — tetrad quality support', () => {
   });
 });
 
+describe('analyseHarmony — dorian plagal cadence', () => {
+  it('G→Dm in D dorian: plagal cadence assigns both to D dorian', () => {
+    // G is IV of D dorian (D tonic, IV = G); Dm is the dorian i
+    const result = analyseHarmony(
+      [maj('G'), min('D'), maj('C'), min('D')],
+      'D dorian',
+    );
+    expect(result[0].currentKey).toBe('D dorian'); // G — IV, plagal cadence
+    expect(result[1].currentKey).toBe('D dorian'); // Dm — i, plagal cadence
+    expect(result[2].currentKey).toBe('D dorian'); // C — diatonic homeKey
+    expect(result[3].currentKey).toBe('D dorian'); // Dm — diatonic homeKey
+  });
+
+  it('A→Em in E dorian: plagal cadence assigns both to E dorian', () => {
+    // A is IV of E dorian (E tonic, IV = A); Em is the dorian i
+    const result = analyseHarmony(
+      [maj('A'), min('E'), maj('D'), min('E')],
+      'E dorian',
+    );
+    expect(result[0].currentKey).toBe('E dorian'); // A — IV, plagal cadence
+    expect(result[1].currentKey).toBe('E dorian'); // Em — i, plagal cadence
+    expect(result[2].currentKey).toBe('E dorian'); // D — diatonic homeKey
+    expect(result[3].currentKey).toBe('E dorian'); // Em — diatonic homeKey
+  });
+
+  it('F→C in C major: IV→I does NOT trigger dorian plagal cadence (gate check)', () => {
+    // F→C is diatonic in C major; no dorian pattern should fire
+    const result = analyseHarmony([maj('F'), maj('C'), maj('G')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(result[1].currentKey).toBe('C');
+    expect(result[2].currentKey).toBe('C');
+  });
+});
+
 describe('analyseHarmony — dorian home key', () => {
   it('all diatonic chords in E dorian get currentKey E dorian', () => {
     // E dorian: E F# G A B C# D — Em, A, D, Em are all diatonic

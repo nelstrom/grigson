@@ -1327,6 +1327,7 @@
       "Write test: analyseHarmony([A, Em, D, Em], 'E dorian') — A→Em matches; both get 'E dorian'",
       "Write test: non-dorian homeKey (e.g. 'C') — IV→I (F→C) does NOT trigger the dorian pattern (gate check works)",
       "Run pnpm test"
-    ]
+    ],
+    "passes": true
   }
 ]
