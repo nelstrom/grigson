@@ -1296,7 +1296,8 @@
       "Write a test: circleOfFifthsDistance('E dorian', 'G') === 1 (G is 1 step from D on the COF)",
       "Write a test: circleOfFifthsDistance('E dorian', 'C') === 2",
       "Run pnpm test"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-harmonic-key-maps",

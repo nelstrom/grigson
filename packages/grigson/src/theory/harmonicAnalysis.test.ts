@@ -167,5 +167,9 @@ describe('circle-of-fifths fallback for isolated borrowed chords', () => {
     expect(circleOfFifthsDistance('C', 'Am')).toBe(0); // Am relative of C
     expect(circleOfFifthsDistance('C', 'Dm')).toBe(1); // Dm relative of F
     expect(circleOfFifthsDistance('C', 'Cm')).toBe(3); // Cm relative of Eb
+    // Dorian keys use relative major position (same as minor keys)
+    expect(circleOfFifthsDistance('E dorian', 'D')).toBe(0); // E dorian relative is D
+    expect(circleOfFifthsDistance('E dorian', 'G')).toBe(1); // G is 1 step from D on COF
+    expect(circleOfFifthsDistance('E dorian', 'C')).toBe(2); // C is 2 steps from D on COF
   });
 });
