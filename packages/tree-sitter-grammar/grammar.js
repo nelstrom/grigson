@@ -4,7 +4,12 @@ module.exports = grammar({
   extras: (_$) => [/[ \t]/],
 
   rules: {
-    song: ($) => repeat(choice($.frontmatter, $.row, /\r?\n/)),
+    song: ($) =>
+      seq(optional($.frontmatter), repeat(choice($.section_label, $.row, /\r?\n/))),
+
+    section_label: ($) => seq('[', $.section_name, ']'),
+
+    section_name: (_$) => /[^\]\r\n]+/,
 
     frontmatter: ($) =>
       seq($.frontmatter_delimiter, repeat($.frontmatter_field), $.frontmatter_delimiter),

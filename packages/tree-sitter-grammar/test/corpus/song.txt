@@ -1,0 +1,74 @@
+================================================================================
+Full song combining frontmatter, two section labels, and rows
+================================================================================
+---
+title: My Song
+key: C
+---
+[A]
+| C | Am |
+| F | G |
+
+[B]
+| Dm | G7 |
+| C | C |
+
+--------------------------------------------------------------------------------
+
+(song
+  (frontmatter
+    (frontmatter_delimiter)
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_field
+      (frontmatter_key)
+      (frontmatter_value))
+    (frontmatter_delimiter))
+  (section_label
+    (section_name))
+  (row
+    (barline)
+    (bar_tail
+      (chord
+        (note_letter))
+      (barline))
+    (bar_tail
+      (chord
+        (note_letter)
+        (quality))
+      (barline)))
+  (row
+    (barline)
+    (bar_tail
+      (chord
+        (note_letter))
+      (barline))
+    (bar_tail
+      (chord
+        (note_letter))
+      (barline)))
+  (section_label
+    (section_name))
+  (row
+    (barline)
+    (bar_tail
+      (chord
+        (note_letter)
+        (quality))
+      (barline))
+    (bar_tail
+      (chord
+        (note_letter)
+        (quality))
+      (barline)))
+  (row
+    (barline)
+    (bar_tail
+      (chord
+        (note_letter))
+      (barline))
+    (bar_tail
+      (chord
+        (note_letter))
+      (barline))))

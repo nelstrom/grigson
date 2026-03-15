@@ -1074,7 +1074,7 @@
       "Run tree-sitter test — all corpus tests across all .txt files must pass",
       "Commit updated grammar.js, regenerated src/parser.c, test/corpus/sections.txt, and test/corpus/song.txt"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "tree-sitter-highlight-queries",

@@ -103,6 +103,21 @@
     }
   },
   {
+    "type": "section_label",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "section_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "song",
     "named": true,
     "root": true,
@@ -117,6 +132,10 @@
         },
         {
           "type": "row",
+          "named": true
+        },
+        {
+          "type": "section_label",
           "named": true
         }
       ]
@@ -154,6 +173,14 @@
     "named": false
   },
   {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
     "type": "accidental",
     "named": true
   },
@@ -183,6 +210,10 @@
   },
   {
     "type": "quality",
+    "named": true
+  },
+  {
+    "type": "section_name",
     "named": true
   }
 ]

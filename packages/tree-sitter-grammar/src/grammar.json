@@ -3,24 +3,62 @@
   "name": "grigson",
   "rules": {
     "song": {
-      "type": "REPEAT",
-      "content": {
-        "type": "CHOICE",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "frontmatter"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "row"
-          },
-          {
-            "type": "PATTERN",
-            "value": "\\r?\\n"
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "frontmatter"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "section_label"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "row"
+              },
+              {
+                "type": "PATTERN",
+                "value": "\\r?\\n"
+              }
+            ]
           }
-        ]
-      }
+        }
+      ]
+    },
+    "section_label": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "["
+        },
+        {
+          "type": "SYMBOL",
+          "name": "section_name"
+        },
+        {
+          "type": "STRING",
+          "value": "]"
+        }
+      ]
+    },
+    "section_name": {
+      "type": "PATTERN",
+      "value": "[^\\]\\r\\n]+"
     },
     "frontmatter": {
       "type": "SEQ",
