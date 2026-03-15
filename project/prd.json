@@ -1093,7 +1093,7 @@
       "Verify the highlight output shows captures for all node types with no \"ERROR\" or uncaptured nodes for known constructs",
       "Commit queries/highlights.scm"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "tree-sitter-integration-docs",
