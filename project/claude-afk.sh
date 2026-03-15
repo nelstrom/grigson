@@ -84,9 +84,9 @@ If all tasks are complete, output <promise>COMPLETE</promise>.
 EOF
 )" 2>&1 | tee /dev/stderr)
 
-  if [[ "$result" == *"docker.sock"* ]] || [[ "$result" == *"daemon not ready"* ]]; then
-    echo "--- Sandbox not ready on iteration $i, retrying... ---"
-    sleep 5
+  if [[ "$result" == *"docker.sock"* ]] || [[ "$result" == *"daemon not ready"* ]] || [[ "$result" == *"socket path is empty"* ]] || [[ "$result" == *"failed to start VM"* ]]; then
+    echo "--- Sandbox not ready on iteration $i, retrying in 10s... ---"
+    sleep 10
     ((i--))
     continue
   fi
