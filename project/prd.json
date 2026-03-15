@@ -1152,7 +1152,7 @@
       "Update queries/highlights.scm: add captures for (dot) @punctuation.separator and (beat_slot) if needed",
       "Commit grammar.js, regenerated src/parser.c, updated corpus tests, and updated highlights.scm"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-frontmatter-quoted-value",

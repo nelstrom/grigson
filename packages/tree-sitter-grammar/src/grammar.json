@@ -145,14 +145,34 @@
           ]
         },
         {
-          "type": "SYMBOL",
-          "name": "chord"
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "beat_slot"
+          }
         },
         {
           "type": "SYMBOL",
           "name": "barline"
         }
       ]
+    },
+    "beat_slot": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "chord"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "dot"
+        }
+      ]
+    },
+    "dot": {
+      "type": "STRING",
+      "value": "."
     },
     "barline": {
       "type": "STRING",

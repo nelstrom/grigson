@@ -10,8 +10,9 @@ Natural chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))))
 
 ================================================================================
@@ -26,9 +27,10 @@ Sharp chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (accidental))
+      (beat_slot
+        (chord
+          (note_letter)
+          (accidental)))
       (barline))))
 
 ================================================================================
@@ -43,9 +45,10 @@ Flat chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (accidental))
+      (beat_slot
+        (chord
+          (note_letter)
+          (accidental)))
       (barline))))
 
 ================================================================================
@@ -60,9 +63,10 @@ Minor chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -77,9 +81,10 @@ Dominant seventh chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -94,9 +99,10 @@ Half-diminished chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -111,9 +117,10 @@ Extended chord qualities
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -128,9 +135,10 @@ CM7 quality
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -145,9 +153,10 @@ Minor seventh chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -162,7 +171,8 @@ Diminished seventh chord
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))

@@ -12,11 +12,30 @@
           "named": true
         },
         {
-          "type": "chord",
+          "type": "beat_slot",
           "named": true
         },
         {
           "type": "time_signature",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "beat_slot",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "chord",
+          "named": true
+        },
+        {
+          "type": "dot",
           "named": true
         }
       ]
@@ -186,6 +205,10 @@
   },
   {
     "type": "barline",
+    "named": true
+  },
+  {
+    "type": "dot",
     "named": true
   },
   {

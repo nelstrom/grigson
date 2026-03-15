@@ -25,6 +25,10 @@
 (time_signature
   (integer) @number)
 
+; Beat slots
+(beat_slot
+  (dot) @punctuation.separator)
+
 ; Chords
 (chord
   (note_letter) @constant)

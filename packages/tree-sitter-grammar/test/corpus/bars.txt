@@ -10,8 +10,9 @@ Single-bar row
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))))
 
 ================================================================================
@@ -26,21 +27,25 @@ Four-bar row
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))))
 
 ================================================================================
@@ -58,8 +63,9 @@ Bar with 4/4 time signature
       (time_signature
         (integer)
         (integer))
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))))
 
 ================================================================================
@@ -77,13 +83,15 @@ First bar has time signature, second does not
       (time_signature
         (integer)
         (integer))
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -101,9 +109,10 @@ Bar with 6/8 time signature
       (time_signature
         (integer)
         (integer))
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))))
 
 ================================================================================
@@ -118,22 +127,94 @@ Mixed accidentals and qualities across bars
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (accidental))
+      (beat_slot
+        (chord
+          (note_letter)
+          (accidental)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (accidental))
+      (beat_slot
+        (chord
+          (note_letter)
+          (accidental)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
+      (barline))))
+
+================================================================================
+Bar with multiple chords (beat slots)
+================================================================================
+
+| C Am |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
+      (barline))))
+
+================================================================================
+Bar with chord dot chord
+================================================================================
+
+| C . Am |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (beat_slot
+        (dot))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
+      (barline))))
+
+================================================================================
+Bar with leading time signature and multiple beat slots
+================================================================================
+
+| (3/4) C . . |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (barline)
+    (bar_tail
+      (time_signature
+        (integer)
+        (integer))
+      (beat_slot
+        (chord
+          (note_letter)))
+      (beat_slot
+        (dot))
+      (beat_slot
+        (dot))
       (barline))))

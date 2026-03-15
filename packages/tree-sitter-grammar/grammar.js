@@ -25,7 +25,12 @@ module.exports = grammar({
 
     row: ($) => seq($.barline, repeat1($.bar_tail)),
 
-    bar_tail: ($) => seq(optional($.time_signature), $.chord, $.barline),
+    bar_tail: ($) =>
+      seq(optional($.time_signature), repeat1($.beat_slot), $.barline),
+
+    beat_slot: ($) => choice($.chord, $.dot),
+
+    dot: (_$) => '.',
 
     barline: (_$) => '|',
 

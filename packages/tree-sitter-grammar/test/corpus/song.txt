@@ -30,45 +30,53 @@ key: C
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline)))
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline)))
   (section_label
     (section_name))
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter)
-        (quality))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
       (barline)))
   (row
     (barline)
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))
     (bar_tail
-      (chord
-        (note_letter))
+      (beat_slot
+        (chord
+          (note_letter)))
       (barline))))
