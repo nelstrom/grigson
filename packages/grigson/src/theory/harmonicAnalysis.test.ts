@@ -122,6 +122,28 @@ describe('analyseHarmony — tetrad quality support', () => {
   });
 });
 
+describe('analyseHarmony — dorian home key', () => {
+  it('all diatonic chords in E dorian get currentKey E dorian', () => {
+    // E dorian: E F# G A B C# D — Em, A, D, Em are all diatonic
+    const result = analyseHarmony(
+      [
+        { type: 'chord', root: 'E', quality: 'minor' },
+        { type: 'chord', root: 'A', quality: 'major' },
+        { type: 'chord', root: 'D', quality: 'major' },
+        { type: 'chord', root: 'E', quality: 'minor' },
+      ],
+      'E dorian',
+    );
+    expect(result.map((a) => a.currentKey)).toEqual([
+      'E dorian',
+      'E dorian',
+      'E dorian',
+      'E dorian',
+    ]);
+    expect(result.every((a) => a.homeKey === 'E dorian')).toBe(true);
+  });
+});
+
 describe('circle-of-fifths fallback for isolated borrowed chords', () => {
   it('isolated bVI: Ab in C major gets currentKey from closest key containing Ab', () => {
     // Ab is not diatonic to C major; closest keys by CoF are Eb and Cm (both distance 3).

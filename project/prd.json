@@ -1310,7 +1310,8 @@
       "Update resolveKey: when iChordIsMinor is true, prefer MINOR_BY_PC; if no entry found, fall back to DORIAN_BY_PC (a tonicisation to a dorian centre is better than null)",
       "Write a test: calling analyseHarmony on [Em, A, D, Em] with homeKey 'E dorian' produces currentKey 'E dorian' for all chords (all diatonic)",
       "Run pnpm test"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-plagal-cadence",

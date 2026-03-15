@@ -236,3 +236,6 @@ Added DORIAN_INTERVALS = [0,2,3,5,7,9,10] and DORIAN_DEGREE_QUALITY_SETS to keyD
 
 ## dorian-cof-distance
 The circleOfFifthsDistance function in harmonicAnalysis.ts already handled dorian keys (added as part of dorian-key-helpers) — line 29 checks mode === 'dorian' and maps to the relative major, identical to the minor key handling. Added 3 missing tests to harmonicAnalysis.test.ts: circleOfFifthsDistance('E dorian', 'D') === 0 (E dorian's relative is D), circleOfFifthsDistance('E dorian', 'G') === 1, and circleOfFifthsDistance('E dorian', 'C') === 2. All 267 tests pass.
+
+## dorian-harmonic-key-maps
+Extended buildKeyMaps in harmonicAnalysis.ts to build a dorianByPC: Map<number, string> alongside majorByPC and minorByPC, iterating KEYS entries where getKeyMode === 'dorian'. Exported DORIAN_BY_PC, MAJOR_BY_PC, and MINOR_BY_PC constants. Updated resolveKey to fall back to DORIAN_BY_PC when iChordIsMinor is true but no minor key exists for the tonic pitch class — allowing a 2-5-1 or 5-1 tonicisation to resolve to a dorian centre. Added a test: analyseHarmony([Em, A, D, Em], 'E dorian') returns currentKey 'E dorian' for all chords (all diatonic). All 268 tests pass.

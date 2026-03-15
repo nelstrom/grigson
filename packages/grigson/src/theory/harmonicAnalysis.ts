@@ -53,13 +53,18 @@ export interface AnnotatedChord {
   currentKeyCandidates: string[];
 }
 
-// Build lookup maps: pitch class → key name (major and minor separately)
-function buildKeyMaps(): { majorByPC: Map<number, string>; minorByPC: Map<number, string> } {
+// Build lookup maps: pitch class → key name (major, minor, and dorian separately)
+function buildKeyMaps(): {
+  majorByPC: Map<number, string>;
+  minorByPC: Map<number, string>;
+  dorianByPC: Map<number, string>;
+} {
   const majorByPC = new Map<number, string>();
   const minorByPC = new Map<number, string>();
+  const dorianByPC = new Map<number, string>();
 
   for (const key of Object.keys(KEYS)) {
-    const isMinor = getKeyMode(key) === 'minor';
+    const mode = getKeyMode(key);
     const rootName = getKeyRoot(key);
     let pc: number;
     try {
@@ -67,8 +72,10 @@ function buildKeyMaps(): { majorByPC: Map<number, string>; minorByPC: Map<number
     } catch {
       continue;
     }
-    if (isMinor) {
+    if (mode === 'minor') {
       if (!minorByPC.has(pc)) minorByPC.set(pc, key);
+    } else if (mode === 'dorian') {
+      if (!dorianByPC.has(pc)) dorianByPC.set(pc, key);
     } else {
       if (!majorByPC.has(pc)) {
         majorByPC.set(pc, key);
@@ -78,10 +85,16 @@ function buildKeyMaps(): { majorByPC: Map<number, string>; minorByPC: Map<number
       }
     }
   }
-  return { majorByPC, minorByPC };
+  return { majorByPC, minorByPC, dorianByPC };
 }
 
-const { majorByPC: MAJOR_BY_PC, minorByPC: MINOR_BY_PC } = buildKeyMaps();
+const {
+  majorByPC: MAJOR_BY_PC,
+  minorByPC: MINOR_BY_PC,
+  dorianByPC: DORIAN_BY_PC,
+} = buildKeyMaps();
+
+export { MAJOR_BY_PC, MINOR_BY_PC, DORIAN_BY_PC };
 
 function getPC(chord: Chord): number | null {
   try {
@@ -92,7 +105,10 @@ function getPC(chord: Chord): number | null {
 }
 
 function resolveKey(tonicPC: number, iChordIsMinor: boolean): string | null {
-  return iChordIsMinor ? (MINOR_BY_PC.get(tonicPC) ?? null) : (MAJOR_BY_PC.get(tonicPC) ?? null);
+  if (iChordIsMinor) {
+    return MINOR_BY_PC.get(tonicPC) ?? DORIAN_BY_PC.get(tonicPC) ?? null;
+  }
+  return MAJOR_BY_PC.get(tonicPC) ?? null;
 }
 
 function annotate(
