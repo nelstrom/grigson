@@ -58,7 +58,8 @@ const diagnostics = validate(source);
 - [Harmonic analysis](documentation/harmonic-analysis.md) — 2-5-1 and borrowed chord detection
 - [Transposition](documentation/transpose.md) — `transposeSong`, `transposeSongToKey`
 - [Validator](documentation/validator.md) — `validate()` and the `Diagnostic` interface
-- [Language server](documentation/language-server.md) — LSP server and editor setup
+- [Language server](../language-server/README.md) — LSP server and editor setup
+- [Tree-sitter grammar](../tree-sitter-grammar/README.md) — syntax highlighting and editor integration
 - [Browser bundle](documentation/browser-bundle.md) — IIFE and ESM builds, `<grigson-chart>` custom element
 
 ## Building from source

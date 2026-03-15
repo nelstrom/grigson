@@ -148,4 +148,5 @@ project/
 - [CLI reference](packages/grigson/documentation/cli.md) — `grigson` subcommands and options
 - [Key detection](packages/grigson/documentation/key-detection.md) — how `detectKey` works
 - [Harmonic analysis](packages/grigson/documentation/harmonic-analysis.md) — 2-5-1 and borrowed chord detection
-- [Language server](packages/grigson/documentation/language-server.md) — editor setup for Neovim, Helix, and Emacs
+- [Language server](packages/language-server/README.md) — editor setup for Neovim, Helix, and Emacs
+- [Tree-sitter grammar](packages/tree-sitter-grammar/README.md) — syntax highlighting and editor integration

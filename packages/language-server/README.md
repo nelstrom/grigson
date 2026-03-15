@@ -20,6 +20,14 @@ pnpm --filter grigson-language-server run build
 
 On every file open and every keystroke, the server calls `validate()` from the `grigson` package and sends the resulting diagnostics to the editor via `textDocument/publishDiagnostics`. Valid files produce zero diagnostics; parse errors appear as red squiggles with hover tooltips.
 
+## Diagnostics
+
+The server reports parse errors as LSP errors with:
+- `range` — 0-indexed start/end position of the error
+- `severity` — `Error` (1) for parse errors
+- `message` — the Peggy parse error message
+- `source` — `"grigson"`
+
 ## Editor setup
 
 ### VS Code
@@ -59,4 +67,6 @@ args = ["--stdio"]
              '(grigson-mode . ("grigson-language-server" "--stdio")))
 ```
 
-For full details see [documentation/language-server.md](../grigson/documentation/language-server.md).
+## Tree-sitter integration
+
+The LSP provides diagnostics. For syntax highlighting and structural text objects, pair it with the tree-sitter grammar — see [`packages/tree-sitter-grammar`](../tree-sitter-grammar/README.md) for setup instructions. Both run side-by-side and do not conflict.

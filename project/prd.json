@@ -1111,6 +1111,6 @@
       "Run pnpm test to confirm all existing tests still pass",
       "Commit documentation/tree-sitter.md and the updated documentation/language-server.md"
     ],
-    "passes": false
+    "passes": true
   }
 ]
