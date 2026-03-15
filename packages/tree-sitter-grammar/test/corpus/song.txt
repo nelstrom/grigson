@@ -20,10 +20,12 @@ key: C
     (frontmatter_delimiter)
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_delimiter))
   (section_label
     (section_name))

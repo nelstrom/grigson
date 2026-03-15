@@ -110,8 +110,25 @@
       "value": "[a-zA-Z]+"
     },
     "frontmatter_value": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "quoted_string"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unquoted_value"
+        }
+      ]
+    },
+    "quoted_string": {
       "type": "PATTERN",
-      "value": "[^\\r\\n]+"
+      "value": "\"[^\"]*\""
+    },
+    "unquoted_value": {
+      "type": "PATTERN",
+      "value": "[^\\r\\n\\t \"][^\\r\\n]*"
     },
     "row": {
       "type": "SEQ",

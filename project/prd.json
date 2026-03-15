@@ -1169,6 +1169,6 @@
       "Run 'tree-sitter test' and confirm all tests pass",
       "Commit grammar.js, regenerated src/parser.c, updated corpus tests, and updated highlights.scm"
     ],
-    "passes": false
+    "passes": true
   }
 ]

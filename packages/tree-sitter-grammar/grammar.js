@@ -21,7 +21,11 @@ module.exports = grammar({
 
     frontmatter_key: (_$) => /[a-zA-Z]+/,
 
-    frontmatter_value: (_$) => /[^\r\n]+/,
+    frontmatter_value: ($) => choice($.quoted_string, $.unquoted_value),
+
+    quoted_string: (_$) => /"[^"]*"/,
+
+    unquoted_value: (_$) => /[^\r\n\t "][^\r\n]*/,
 
     row: ($) => seq($.barline, repeat1($.bar_tail)),
 

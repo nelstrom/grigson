@@ -4,8 +4,11 @@
 (frontmatter_field
   (frontmatter_key) @variable.member)
 
-(frontmatter_field
-  (frontmatter_value) @string)
+(frontmatter_value
+  (quoted_string) @string)
+
+(frontmatter_value
+  (unquoted_value) @string)
 
 ; Section labels
 (section_label

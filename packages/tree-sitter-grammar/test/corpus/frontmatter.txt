@@ -12,7 +12,8 @@ title: My Song
     (frontmatter_delimiter)
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_delimiter)))
 
 ================================================================================
@@ -30,10 +31,12 @@ key: C
     (frontmatter_delimiter)
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_delimiter)))
 
 ================================================================================
@@ -50,7 +53,8 @@ title: "All The Things"
     (frontmatter_delimiter)
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (quoted_string)))
     (frontmatter_delimiter)))
 
 ================================================================================
@@ -67,7 +71,8 @@ key: F#
     (frontmatter_delimiter)
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_delimiter)))
 
 ================================================================================
@@ -98,7 +103,8 @@ key: C
     (frontmatter_delimiter)
     (frontmatter_field
       (frontmatter_key)
-      (frontmatter_value))
+      (frontmatter_value
+        (unquoted_value)))
     (frontmatter_delimiter))
   (row
     (barline)
