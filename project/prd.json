@@ -1175,7 +1175,7 @@
     "id": "minor-keys-exotic-note-names",
     "category": "functional",
     "description": "Add E#, B#, Cb, and Fb to the pitchClass NOTE_MAP",
-    "detail": "Several keys in KEYS already include E# (F#m), B# (C#m), and the new Abm/Ebm entries will need Cb and Fb. Currently buildPCToNote silently skips notes not in NOTE_MAP, so those scale degrees become unavailable for normalisation. Adding these single-step enharmonic equivalents to NOTE_MAP allows normalise.ts to spell chords correctly in all affected keys. E# = PC 5, B# = PC 0, Cb = PC 11, Fb = PC 4. Double sharps (F##, C##) are out of scope \u2014 they will be handled via pragmatic substitution in the KEYS entries (task minor-keys-add).",
+    "detail": "Several keys in KEYS already include E# (F#m), B# (C#m), and the new Abm/Ebm entries will need Cb and Fb. Currently buildPCToNote silently skips notes not in NOTE_MAP, so those scale degrees become unavailable for normalisation. Adding these single-step enharmonic equivalents to NOTE_MAP allows normalise.ts to spell chords correctly in all affected keys. E# = PC 5, B# = PC 0, Cb = PC 11, Fb = PC 4. Double sharps (F##, C##) are out of scope — they will be handled via pragmatic substitution in the KEYS entries (task minor-keys-add).",
     "steps": [
       "Add 'E#': 5 to NOTE_MAP in pitchClass.ts",
       "Add 'B#': 0 to NOTE_MAP in pitchClass.ts",
@@ -1189,9 +1189,9 @@
     "id": "minor-keys-add",
     "category": "functional",
     "description": "Add G#m, Abm, D#m, and Ebm to the KEYS table as enharmonic pairs",
-    "detail": "Currently only 10 minor keys are defined. G#m/Abm (5 sharps / 7 flats) and D#m/Ebm (6 sharps / 6 flats) are missing. Both pairs should be supported as enharmonic alternates, mirroring how F#/Gb are handled for major keys. Scale spellings: Abm = [Ab, Bb, Cb, Db, Eb, Fb, G], G#m = [G#, A#, B, C#, D#, E, G] (raised 7th F## replaced by G, the enharmonic natural); Ebm = [Eb, F, Gb, Ab, Bb, Cb, D], D#m = [D#, E#, F#, G#, A#, B, D] (raised 7th C## replaced by D). Relative major: D#m \u2192 F# (already in KEYS), Ebm \u2192 Gb (already in KEYS), G#m \u2192 B (already in KEYS), Abm has no relative in KEYS (Cb major is not defined \u2014 leave relative undefined). Add G#m\u2194Abm and D#m\u2194Ebm to ENHARMONIC_PAIRS in pitchClass.ts. Depends on minor-keys-exotic-note-names for Cb and Fb to be recognised during normalisation.",
+    "detail": "Currently only 10 minor keys are defined. G#m/Abm (5 sharps / 7 flats) and D#m/Ebm (6 sharps / 6 flats) are missing. Both pairs should be supported as enharmonic alternates, mirroring how F#/Gb are handled for major keys. Scale spellings: Abm = [Ab, Bb, Cb, Db, Eb, Fb, G], G#m = [G#, A#, B, C#, D#, E, G] (raised 7th F## replaced by G, the enharmonic natural); Ebm = [Eb, F, Gb, Ab, Bb, Cb, D], D#m = [D#, E#, F#, G#, A#, B, D] (raised 7th C## replaced by D). Relative major: D#m → F# (already in KEYS), Ebm → Gb (already in KEYS), G#m → B (already in KEYS), Abm has no relative in KEYS (Cb major is not defined — leave relative undefined). Add G#m↔Abm and D#m↔Ebm to ENHARMONIC_PAIRS in pitchClass.ts. Depends on minor-keys-exotic-note-names for Cb and Fb to be recognised during normalisation.",
     "steps": [
-      "Add Abm: { notes: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'G'] } to KEYS (no relative \u2014 Cb major not in KEYS)",
+      "Add Abm: { notes: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'G'] } to KEYS (no relative — Cb major not in KEYS)",
       "Add G#m: { notes: ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'G'], relative: 'B' } to KEYS (G is pragmatic substitute for F##)",
       "Add Ebm: { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'D'], relative: 'Gb' } to KEYS",
       "Add D#m: { notes: ['D#', 'E#', 'F#', 'G#', 'A#', 'B', 'D'], relative: 'F#' } to KEYS (D is pragmatic substitute for C##)",
@@ -1215,6 +1215,109 @@
       "Update cli.md --enharmonic option table to document all six accepted values",
       "Update the --help text in cli.ts normalise section to reflect the new --enharmonic values",
       "Run pnpm test and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "dorian-key-helpers",
+    "category": "functional",
+    "description": "Add getKeyMode/getKeyRoot helpers to keys.ts and refactor all call sites",
+    "detail": "Currently the codebase identifies minor keys with key.endsWith('m') and extracts the root with key.slice(0, -1). This pattern cannot handle modal key names like 'E dorian'. Add getKeyMode(key): KeyMode (returning 'major' | 'minor' | 'dorian') and getKeyRoot(key): string to keys.ts, then replace every raw endsWith/slice call across keyDetector.ts, harmonicAnalysis.ts, and transpose.ts. This is a pure refactor — no behaviour changes, all existing tests must continue to pass. It is a prerequisite for all other dorian tasks.",
+    "steps": [
+      "Add type KeyMode = 'major' | 'minor' | 'dorian' to keys.ts",
+      "Add getKeyMode(key: string): KeyMode — returns 'dorian' if key ends with ' dorian', 'minor' if ends with 'm', else 'major'",
+      "Add getKeyRoot(key: string): string — strips ' dorian' (7 chars) or trailing 'm', returns key unchanged for major",
+      "Export both from keys.ts",
+      "In keyDetector.ts replace: line 30 isMinor = key.endsWith('m') → getKeyMode(key) === 'minor'; line 31 rootName slice → getKeyRoot(key); line 71 minor.slice(0,-1) → getKeyRoot(minor); line 168 bestKey.endsWith('m') → getKeyMode(bestKey) === 'minor'; line 204 key.endsWith('m') ? key.slice → getKeyRoot(key); line 218 key.endsWith('m') → getKeyMode(key) === 'minor'",
+      "In harmonicAnalysis.ts replace: lines 28-29 getPosition helper — map minor and dorian to relative major using getKeyMode/getKeyRoot; lines 61-62 buildKeyMaps isMinor → getKeyMode; line 202 !homeKey.endsWith('m') → getKeyMode(homeKey) === 'major'; lines 207/211 !k.endsWith('m') → getKeyMode(k) !== 'minor'",
+      "In transpose.ts replace any homeKey.replace(/m$/, '') fallback with getKeyRoot(homeKey)",
+      "Run pnpm test — all existing tests must pass with no behaviour change"
+    ]
+  },
+  {
+    "id": "dorian-keys-table",
+    "category": "functional",
+    "description": "Add 12 dorian mode entries to the KEYS table in keys.ts",
+    "detail": "Add one KEYS entry per dorian key using the 'X dorian' naming convention. Scale formula: [0,2,3,5,7,9,10] semitones from root (W-H-W-W-W-H-W). The relative field points to the relative major (the major key whose tonic is one whole step below the dorian root, e.g. 'E dorian' → relative: 'D'). This is pure data with no logic changes. Depends on dorian-key-helpers (so getKeyMode/getKeyRoot are available if tests import them). The 12 keys are: C dorian (rel: Bb), D dorian (rel: C), E dorian (rel: D), F dorian (rel: Eb), G dorian (rel: F), A dorian (rel: G), B dorian (rel: A), Bb dorian (rel: Ab), Eb dorian (rel: Db), F# dorian (rel: E), Ab dorian (rel: Gb), C# dorian (rel: B).",
+    "steps": [
+      "Add a '// Dorian mode' comment section to KEYS after the harmonic minor entries",
+      "Add all 12 entries with correct notes arrays (natural-minor scale with raised 6th) and relative fields",
+      "Verify notes by spot-check: E dorian = [E, F#, G, A, B, C#, D] (same notes as D major); B dorian = [B, C#, D, E, F#, G#, A] (same notes as A major)",
+      "Add a keys.test.ts case asserting that diatonicNotes('E dorian') returns the correct set and that 'E dorian' has relative 'D'",
+      "Add a test asserting getKeyMode('E dorian') === 'dorian' and getKeyRoot('E dorian') === 'E'",
+      "Run pnpm test"
+    ]
+  },
+  {
+    "id": "dorian-detection-scoring",
+    "category": "functional",
+    "description": "Add dorian interval/quality tables to keyDetector.ts and update buildKeyScoreMap",
+    "detail": "Key detection scores each key against the chord sequence using interval + quality-set tables. Add DORIAN_INTERVALS = [0,2,3,5,7,9,10] and DORIAN_DEGREE_QUALITY_SETS (i=minor, ii=minor, bIII=major, IV=major+dom7+maj7, v=minor, vi°=dim+halfDim, bVII=major+dom7+maj7). Update buildKeyScoreMap to select dorian tables when getKeyMode(key) === 'dorian'. After this task, detectKey will score dorian keys but the dorian/relative-major tiebreak is not yet wired (that is task dorian-detection-tiebreak). Depends on dorian-key-helpers and dorian-keys-table.",
+    "steps": [
+      "Add DORIAN_INTERVALS = [0, 2, 3, 5, 7, 9, 10] constant",
+      "Add DORIAN_DEGREE_QUALITY_SETS: i=minor/min7, ii=minor/min7, bIII=major/maj7, IV=major/dominant7/maj7, v=minor/min7, vi°=diminished/halfDiminished, bVII=major/dominant7/maj7",
+      "Update buildKeyScoreMap: add a third branch for mode === 'dorian' using DORIAN_INTERVALS and DORIAN_DEGREE_QUALITY_SETS",
+      "Write keyDetector tests: detectKey([Bm, A, E], undefined) should return 'B dorian' (E major scores 2 for B dorian — diatonic root + quality match — and 0 for B harmonic minor which lacks G#; scoring alone distinguishes them)",
+      "Write a test: detectKey([Em, G, D, A], undefined) scores 'E dorian' highly (A major scores 2: diatonic + quality) and 'E harmonic minor' poorly (A has C#, not in E harm. minor)",
+      "Run pnpm test"
+    ]
+  },
+  {
+    "id": "dorian-detection-tiebreak",
+    "category": "functional",
+    "description": "Add breakDorianMajorTie and wire it into detectKey",
+    "detail": "Dorian and its relative major share all seven notes and will score identically for any progression that lacks a V7→I (major) cadence or IV→i (dorian plagal) cadence. Add breakDorianMajorTie(dorian, major, chords) that applies the following tiebreakers in order: (1) V7→I cadence where I is major → relative major; (2) major IV → minor i (dorian plagal cadence) → dorian; (3) quality of last chord (minor tonic → dorian, major tonic → relative major); (4) quality of first chord; (5) default to relative major. Wire it into detectKey after the existing F#/Gb enharmonic block: check if bestKey is dorian and its relative major tied, or if bestKey is major and a dorian on its 2nd degree tied. Depends on dorian-detection-scoring.",
+    "steps": [
+      "Implement breakDorianMajorTie(dorian: string, major: string, chords: Chord[]): string following the priority order in the plan",
+      "In detectKey, after the F#/Gb tiebreak block, add: if getKeyMode(bestKey) === 'dorian', check if KEYS[bestKey].relative scored equally → call breakDorianMajorTie",
+      "Also add: if getKeyMode(bestKey) === 'major', find any dorian key whose relative === bestKey and which tied on score → call breakDorianMajorTie",
+      "Write test: detectKey([Em, G, D, A]) with no declared key → 'E dorian' (A→Em is IV→i dorian plagal cadence)",
+      "Write test: detectKey([C, Em, Am, G]) → 'C' (G→C is V→I in C major; major wins tiebreak)",
+      "Write test: detectKey([Dm, C, G, Dm]) → 'D dorian' (G→Dm is IV→i; last chord is minor Dm)",
+      "Write test: detectKey([Em, G, D, A], 'E dorian') → 'E dorian' (declared key preserved when score > 0, no tiebreak needed)",
+      "Run pnpm test"
+    ]
+  },
+  {
+    "id": "dorian-cof-distance",
+    "category": "functional",
+    "description": "Update circleOfFifthsDistance to handle dorian keys",
+    "detail": "circleOfFifthsDistance maps minor keys to their relative major before computing position. It must do the same for dorian keys — 'E dorian' maps to 'D' (its relative major) for distance computation, giving it COF distance 0 from D major and 0 from B minor (the same family). The change is in the getPosition inner function inside circleOfFifthsDistance. Depends on dorian-key-helpers (so getKeyMode is importable).",
+    "steps": [
+      "In circleOfFifthsDistance, update the getPosition helper: for mode === 'dorian', resolve to KEYS[key].relative (same logic as for minor keys)",
+      "The final fallback for keys with no relative (e.g. Abm, whose relative Cb is not in KEYS) should return -1 as before",
+      "Write a test: circleOfFifthsDistance('E dorian', 'D') === 0",
+      "Write a test: circleOfFifthsDistance('E dorian', 'G') === 1 (G is 1 step from D on the COF)",
+      "Write a test: circleOfFifthsDistance('E dorian', 'C') === 2",
+      "Run pnpm test"
+    ]
+  },
+  {
+    "id": "dorian-harmonic-key-maps",
+    "category": "functional",
+    "description": "Update buildKeyMaps in harmonicAnalysis.ts to include dorian keys",
+    "detail": "buildKeyMaps builds majorByPC and minorByPC lookup maps used by resolveKey to find the canonical key name for a resolved tonic pitch class. Dorian keys need to be included so that if a chord progression tonicises a dorian centre, the correct key name can be returned. Add a dorianByPC map using the same structure. Update resolveKey to accept an optional mode preference or check context; for now, resolveKey(tonicPC, iMinor=true) prefers harmonic minor (preserving current behaviour), but adds dorian as a fallback when no minor key exists for that PC. Depends on dorian-key-helpers and dorian-keys-table.",
+    "steps": [
+      "In buildKeyMaps, add dorianByPC: Map<number, string> — iterate KEYS entries where getKeyMode(key) === 'dorian', map root PC to key name",
+      "Export DORIAN_BY_PC constant alongside MAJOR_BY_PC and MINOR_BY_PC",
+      "Update resolveKey: when iChordIsMinor is true, prefer MINOR_BY_PC; if no entry found, fall back to DORIAN_BY_PC (a tonicisation to a dorian centre is better than null)",
+      "Write a test: calling analyseHarmony on [Em, A, D, Em] with homeKey 'E dorian' produces currentKey 'E dorian' for all chords (all diatonic)",
+      "Run pnpm test"
+    ]
+  },
+  {
+    "id": "dorian-plagal-cadence",
+    "category": "functional",
+    "description": "Recognise the IV→i dorian plagal cadence in analyseHarmony",
+    "detail": "The major IV → minor i motion (e.g. G → Dm in D dorian, A → Em in E dorian) is the most characteristic dorian cadence. Currently analyseHarmony only recognises 2-5-1 and 5-1 functional patterns. Add a 3rd pattern — the dorian plagal cadence — that fires only when homeKey is a dorian mode. Pattern: a major chord whose root is a perfect 4th above the dorian tonic, followed by a minor chord whose root IS the dorian tonic. Assign currentKey = homeKey to both chords. This pattern should be checked after 2-5-1 and 5-1 (it is weaker), and only when homeKey is dorian. Depends on dorian-harmonic-key-maps.",
+    "steps": [
+      "After the 5-1 pattern block in analyseHarmony, add a dorian plagal cadence block gated on getKeyMode(homeKey) === 'dorian'",
+      "Compute tonicPC = rootToPitchClass(getKeyRoot(homeKey)); ivPC = (tonicPC + 5) % 12",
+      "Pattern: chords[i].quality === 'major' && getPC(chords[i]) === ivPC && i+1 < chords.length && chords[i+1].quality === 'minor' && getPC(chords[i+1]) === tonicPC",
+      "On match: push both chords annotated with currentKey = homeKey, advance i by 2",
+      "Write test: analyseHarmony([G, Dm, C, Dm], 'D dorian') — G→Dm matches plagal cadence; both get currentKey 'D dorian'; C and final Dm also get homeKey",
+      "Write test: analyseHarmony([A, Em, D, Em], 'E dorian') — A→Em matches; both get 'E dorian'",
+      "Write test: non-dorian homeKey (e.g. 'C') — IV→I (F→C) does NOT trigger the dorian pattern (gate check works)",
+      "Run pnpm test"
     ]
   }
 ]
