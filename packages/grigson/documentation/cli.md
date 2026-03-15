@@ -38,8 +38,8 @@ echo "| C | F | G | C | C | F | Bb | C | C | A7 | Dm | G7 |" \
 cat file.chart \
   | grigson normalise \
   | grigson transpose --raise 2 \
-  | grigson render --format svg \
-  > output.svg
+  | grigson render \
+  > output.txt
 ```
 
 `normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. `render` is a terminal step that produces a format (SVG, plain text) that cannot be piped back into another `grigson` command.
@@ -109,13 +109,13 @@ cat song.chart | grigson transpose --to Dm    # from stdin
 
 ### `grigson validate`
 
-Validates one or more `.chart` files and reports parse errors. Suitable for CI pipelines and pre-commit hooks.
+Validates one or more `.chart` files and reports parse errors and semantic warnings. Suitable for CI pipelines and pre-commit hooks.
 
 ```
 grigson validate [options] [file...]
 ```
 
-Reads from `file` (or multiple files) if given, otherwise from stdin. Writes diagnostics to stdout. Exits with code 0 if no errors, code 1 if any errors are found.
+Reads from `file` (or multiple files) if given, otherwise from stdin. Writes diagnostics to stdout. Exits with code 0 if no diagnostics are found, code 1 if any are found (errors or warnings).
 
 **Options**
 
@@ -170,13 +170,12 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 | Option              | Description                              |
 | ------------------- | ---------------------------------------- |
-| `--format <format>` | Output format: `text` (default) or `svg` |
+| `--format <format>` | Output format: `text` (default); `svg` is not yet implemented |
 
 **Examples**
 
 ```sh
-grigson render song.chart                      # normalised plain text (default)
-grigson render --format svg song.chart         # SVG output
-grigson render --format svg song.chart > song.svg
-cat song.chart | grigson render --format svg > song.svg
+grigson render song.chart                      # plain text output (default)
+grigson render song.chart > song.txt           # write to a file
+cat song.chart | grigson render                # read from stdin
 ```

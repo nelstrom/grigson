@@ -22,7 +22,7 @@ grigson transpose --raise 2 song.chart
 # Transpose to a target key
 grigson transpose --to G song.chart
 
-# Validate (exits 1 on error)
+# Validate (exits 1 if any diagnostics are found)
 grigson validate song.chart
 grigson validate --format json *.chart
 

@@ -369,16 +369,14 @@ class MyRenderer {
 
   render(song) {
     // Walk the song tree and produce output.
-    // song.meta        — front matter fields (title, artist, key, ...)
+    // song.title       — from front matter, or null
+    // song.key         — from front matter, or null
     // song.sections    — array of Section objects
-    //   section.name   — e.g. "Verse"
-    //   section.key    — key override for this section, if any
+    //   section.label  — e.g. "Verse", or null if unlabelled
     //   section.rows   — array of Row objects
     //     row.bars     — array of Bar objects
-    //       bar.beats  — array of beat slots (chord or hold)
-    //       bar.type   — barline type at start of bar
+    //       bar.slots           — array of BeatSlot (ChordSlot | DotSlot)
+    //       bar.timeSignature   — { numerator, denominator } or undefined
   }
 }
 ```
-
-The song tree API will be documented separately once the parser is implemented.
