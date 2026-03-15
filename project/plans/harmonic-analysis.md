@@ -13,6 +13,9 @@ This plan describes how grigson should handle three related capabilities:
 - Every key contains 7 diatonic notes. Chords built on those notes belong to the key.
 - Chords outside the key are *borrowed* from another key. Their correct spelling depends on which key they're borrowed from.
 - A standalone function that transposes a chord without key context (`transposeChord(chord, semitones)`) is the wrong abstraction. Spelling decisions require context.
+- "Key" means more than major or minor. Dorian (and eventually other modes) are first-class keys
+  with their own diatonic notes and characteristic chord functions. See
+  [`dorian-tonality.md`](./dorian-tonality.md) for the modal extension plan.
 
 ### Files affected
 
@@ -50,6 +53,14 @@ normaliseSong(song: Song): Song   // calls normaliseSection per section
 ### Home key detection: ending key wins
 
 The current `detectKey` gives equal weight to all chords. For normalisation, when a section starts in one key and ends in another, the ending key should be treated as the home key — the opening chords are a tonicisation or approach. This is a tie-breaking adjustment to `detectKey`, not a replacement.
+
+### Modal ambiguity
+
+A dorian key and its relative major share all seven notes and will score identically for any chord
+sequence that doesn't include a V7 → I cadence or a IV → i plagal cadence. The existing
+relative-key tiebreak logic (ending key wins, V7 presence) extends naturally to this case — a V7
+→ I cadence where I is major points to the relative major; a major IV → minor i points to dorian.
+See [`dorian-tonality.md`](./dorian-tonality.md) for the full tiebreak algorithm.
 
 **Test case — ending key wins (Whisper Not A section excerpt):**
 ```
