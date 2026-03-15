@@ -150,6 +150,66 @@ function breakGSharpAbTie(chords: Chord[]): string {
   return 'Abm';
 }
 
+// Tiebreak between a dorian key and its relative major.
+// Priority: (1) V7→I major cadence → major; (2) IV→i plagal cadence → dorian;
+// (3) last-chord quality at tonic; (4) first-chord quality at tonic; (5) default major.
+function breakDorianMajorTie(dorian: string, major: string, chords: Chord[]): string {
+  const dorianRootPC = rootToPitchClass(getKeyRoot(dorian));
+  const majorRootPC = rootToPitchClass(getKeyRoot(major));
+
+  // 1. V7 of the relative major present → major wins
+  const v7OfMajorPC = (majorRootPC + 7) % 12;
+  if (chords.some((c) => c.quality === 'dominant7' && rootToPitchClass(c.root) === v7OfMajorPC)) {
+    return major;
+  }
+
+  // 2. IV→i dorian plagal cadence present → dorian wins
+  const ivOfDorianPC = (dorianRootPC + 5) % 12;
+  for (let i = 0; i < chords.length - 1; i++) {
+    try {
+      const thisPC = rootToPitchClass(chords[i].root);
+      const nextPC = rootToPitchClass(chords[i + 1].root);
+      if (
+        thisPC === ivOfDorianPC &&
+        chords[i].quality === 'major' &&
+        nextPC === dorianRootPC &&
+        chords[i + 1].quality === 'minor'
+      ) {
+        return dorian;
+      }
+    } catch {
+      // skip unrecognised root
+    }
+  }
+
+  // 3. Quality of first chord at its tonic
+  if (chords.length > 0) {
+    const first = chords[0];
+    try {
+      const firstPC = rootToPitchClass(first.root);
+      if (firstPC === dorianRootPC && first.quality === 'minor') return dorian;
+      if (firstPC === majorRootPC && first.quality === 'major') return major;
+    } catch {
+      // skip
+    }
+  }
+
+  // 4. Quality of last chord at its tonic
+  if (chords.length > 0) {
+    const last = chords[chords.length - 1];
+    try {
+      const lastPC = rootToPitchClass(last.root);
+      if (lastPC === dorianRootPC && last.quality === 'minor') return dorian;
+      if (lastPC === majorRootPC && last.quality === 'major') return major;
+    } catch {
+      // skip
+    }
+  }
+
+  // 5. Default to relative major
+  return major;
+}
+
 function breakDSharpEbTie(chords: Chord[]): string {
   // Count sharp-side spellings (D#, A#, G#) vs flat-side spellings (Eb, Bb, Ab)
   const sharpCount = chords.filter((c) => c.root === 'D#' || c.root === 'A#' || c.root === 'G#')
@@ -239,6 +299,24 @@ export function detectKey(
     const otherScore = scores.get(dSharpEbOther) ?? 0;
     if (otherScore === maxScore) {
       bestKey = breakDSharpEbTie(chords);
+    }
+  }
+
+  // Handle dorian/relative-major tiebreak
+  if (getKeyMode(bestKey) === 'dorian') {
+    const dorianRelative = KEYS[bestKey]?.relative;
+    if (dorianRelative && KEYS[dorianRelative]) {
+      const relScore = scores.get(dorianRelative) ?? 0;
+      if (relScore === maxScore) {
+        bestKey = breakDorianMajorTie(bestKey, dorianRelative, chords);
+      }
+    }
+  } else if (getKeyMode(bestKey) === 'major') {
+    for (const [key, score] of scores) {
+      if (getKeyMode(key) === 'dorian' && KEYS[key]?.relative === bestKey && score === maxScore) {
+        bestKey = breakDorianMajorTie(key, bestKey, chords);
+        break;
+      }
     }
   }
 

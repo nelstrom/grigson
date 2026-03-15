@@ -211,6 +211,27 @@ describe('detectKey — D#m/Ebm enharmonic tiebreak', () => {
   });
 });
 
+describe('detectKey — dorian/major tiebreak', () => {
+  it('Em-G-D-A: E dorian wins via first-chord minor tonic (Em = dorian i)', () => {
+    // E dorian and D major both score 8; first chord Em is minor tonic of E dorian
+    expect(detectKey([min('E'), maj('G'), maj('D'), maj('A')])).toBe('E dorian');
+  });
+
+  it('C-Em-Am-G: C major wins via first-chord major tonic (C = I)', () => {
+    // C major and D dorian both score 8; first chord C is major tonic of C major
+    expect(detectKey([maj('C'), min('E'), min('A'), maj('G')])).toBe('C');
+  });
+
+  it('Dm-C-G-Dm: D dorian wins via IV→i plagal cadence (G→Dm)', () => {
+    // D dorian and C major both score 8; G→Dm is IV→i cadence in D dorian
+    expect(detectKey([min('D'), maj('C'), maj('G'), min('D')])).toBe('D dorian');
+  });
+
+  it('Em-G-D-A with declared key E dorian: preserved via declaredKey mechanism', () => {
+    expect(detectKey([min('E'), maj('G'), maj('D'), maj('A')], 'E dorian')).toBe('E dorian');
+  });
+});
+
 describe('detectKey — dorian mode scoring', () => {
   it('Bm-A-E: E major (IV of B dorian) scores well; B dorian beats B harmonic minor', () => {
     // B dorian: i=Bm, IV=E(major), bVII=A(major) — E major scores diatonic+quality in B dorian

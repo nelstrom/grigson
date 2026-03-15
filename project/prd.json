@@ -1281,7 +1281,8 @@
       "Write test: detectKey([Dm, C, G, Dm]) → 'D dorian' (G→Dm is IV→i; last chord is minor Dm)",
       "Write test: detectKey([Em, G, D, A], 'E dorian') → 'E dorian' (declared key preserved when score > 0, no tiebreak needed)",
       "Run pnpm test"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-cof-distance",
