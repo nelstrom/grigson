@@ -18,7 +18,9 @@ Tasks are tracked in `project/prd.json`. Use the provided scripts — do not rea
 ./project/prd-done <task-id>
 ```
 
-Call this after implementing and testing a task. Do not edit `prd.json` by hand.
+Call this after implementing and testing a task.
+
+**Do not add, remove, or modify tasks in `prd.json` directly.** Only the user adds tasks. The only permitted write is marking a task complete via `prd-done`.
 
 ### Task execution loop
 

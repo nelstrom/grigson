@@ -1,27 +1,32 @@
 #!/usr/bin/env node
 // Usage:
-//   prd-status          # short:    id + description
-//   prd-status -d       # detailed: + detail
-//   prd-status -v       # verbose:  + steps
+//   prd-status                   # short:    id + description
+//   prd-status -d                # detailed: + detail
+//   prd-status -v                # verbose:  + steps
+//   prd-status -c <category>     # filter by category (combinable with -d / -v)
 
 const path = require('path');
 const tasks = require(path.join(__dirname, 'prd.json'));
 
-const flag = process.argv[2];
-const mode = flag === '-v' ? 'verbose' : flag === '-d' ? 'detailed' : 'short';
+const args = process.argv.slice(2);
+const mode = args.includes('-v') ? 'verbose' : args.includes('-d') ? 'detailed' : 'short';
+const categoryIndex = args.indexOf('-c');
+const category = categoryIndex !== -1 ? args[categoryIndex + 1] : null;
 
 const tty = process.stdout.isTTY;
 const yellow = s => tty ? `\x1b[33m${s}\x1b[0m` : s;
 const dim    = s => tty ? `\x1b[2m${s}\x1b[0m`  : s;
 
-const incomplete = tasks.filter(t => !t.passes && !t.blocked);
+let incomplete = tasks.filter(t => !t.passes && !t.blocked);
+if (category) incomplete = incomplete.filter(t => t.category === category);
 
 if (incomplete.length === 0) {
-  console.log('All tasks complete.');
+  console.log(category ? `No incomplete tasks in category: ${category}` : 'All tasks complete.');
   process.exit(0);
 }
 
-console.log(dim(`${incomplete.length} incomplete task(s):\n`));
+const label = category ? `${incomplete.length} incomplete task(s) in '${category}':` : `${incomplete.length} incomplete task(s):`;
+console.log(dim(label + '\n'));
 
 for (const t of incomplete) {
   console.log(`${yellow(t.id)}: ${t.description}`);
