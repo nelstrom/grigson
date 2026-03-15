@@ -263,12 +263,15 @@ function peg$parse(input, options) {
   function peg$f3(fields) {
     const meta = Object.fromEntries(fields.map(f => [f.key, f.value]));
 
-    const validKeys = [
-      "C", "C#", "Db", "D", "D#", "Eb", "E",
-      "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
+    const validNotes = [
+      "C#", "Db", "D#", "Eb", "F#", "Gb", "G#", "Ab", "A#", "Bb",
+      "C", "D", "E", "F", "G", "A", "B",
     ];
-    if (meta.key !== undefined && !validKeys.includes(meta.key)) {
-      error(`Invalid key: "${meta.key}". Must be a chromatic note name (e.g. C, F#, Bb).`);
+    const validKeySuffixes = ["m", " dorian", ""];
+    const isValidKey = (k) =>
+      validNotes.some((n) => validKeySuffixes.some((s) => k === n + s));
+    if (meta.key !== undefined && !isValidKey(meta.key)) {
+      error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian).`);
     }
 
     return {

@@ -239,8 +239,14 @@ describe('chord parsing', () => {
       expect(() => parseFrontMatter('---\nkey: H\n---\n')).toThrow();
     });
 
-    it('rejects a key with a mode suffix (Am)', () => {
-      expect(() => parseFrontMatter('---\nkey: Am\n---\n')).toThrow();
+    it('accepts a minor key (Am)', () => {
+      const result = parseFrontMatter('---\nkey: Am\n---\n');
+      expect(result.key).toBe('Am');
+    });
+
+    it('accepts a dorian key (A dorian)', () => {
+      const result = parseFrontMatter('---\nkey: A dorian\n---\n');
+      expect(result.key).toBe('A dorian');
     });
   });
 
