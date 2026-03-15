@@ -82,11 +82,13 @@ $TASKS
 ONLY WORK ON A SINGLE TASK.
 If all tasks are complete, output <promise>COMPLETE</promise>.
 EOF
-)" | tee /dev/stderr)
+)" 2>&1 | tee /dev/stderr)
 
   if [[ "$result" == *"docker.sock"* ]] || [[ "$result" == *"daemon not ready"* ]]; then
-    echo "--- Sandbox crashed during iteration $i. Exiting. ---"
-    exit 1
+    echo "--- Sandbox not ready on iteration $i, retrying... ---"
+    sleep 5
+    ((i--))
+    continue
   fi
 
   if [[ "$result" == *"hit your limit"* ]]; then
