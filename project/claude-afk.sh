@@ -47,11 +47,27 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$DIR/.." && pwd)"
 SANDBOX_NAME="claude-$(basename "$PROJECT_DIR")"
 
+create_sandbox() {
+  if ! docker image inspect claude-with-pnpm:latest &>/dev/null; then
+    echo "Template image missing. Loading from backup..."
+    docker load -i ~/docker-images/claude-with-pnpm.tar
+  fi
+  docker sandbox create -t claude-with-pnpm:latest claude "$PROJECT_DIR"
+}
+
 ensure_sandbox() {
-  if ! docker sandbox list | grep -q "$SANDBOX_NAME"; then
-    echo "Sandbox missing or dead. Recreating..."
-    docker sandbox rm "$SANDBOX_NAME" 2>/dev/null || true
-    docker sandbox create -t claude-with-pnpm:latest claude "$PROJECT_DIR"
+  local listed healthy
+  listed=$(docker sandbox list | grep -c "$SANDBOX_NAME" || true)
+  if [[ "$listed" -gt 0 ]]; then
+    healthy=$(docker sandbox exec "$SANDBOX_NAME" true 2>&1)
+    if [[ "$healthy" == *"socket path is empty"* ]] || [[ "$healthy" == *"failed to start VM"* ]] || [[ "$healthy" == *"docker.sock"* ]]; then
+      echo "Sandbox $SANDBOX_NAME is broken. Recreating..."
+      docker sandbox rm "$SANDBOX_NAME" 2>/dev/null || true
+      create_sandbox
+    fi
+  else
+    echo "Sandbox $SANDBOX_NAME not found. Creating..."
+    create_sandbox
   fi
 }
 
