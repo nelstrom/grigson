@@ -58,11 +58,22 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option                           | Description                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| `--key <key>`                    | Hint or override the detected key (e.g. `--key F`, `--key Am`)                 |
-| `--enharmonic <f-sharp\|g-flat>` | Prefer `F#` or `Gb` when the two are tied (default: `f-sharp`)                 |
-| `-i`, `--in-place`               | Edit the file in place instead of writing to stdout (requires a file argument) |
+| Option                                | Description                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| `--key <key>`                         | Hint or override the detected key (e.g. `--key F`, `--key Am`)                 |
+| `--enharmonic <pref>`                 | Resolve enharmonic ambiguity (see table below)                                 |
+| `-i`, `--in-place`                    | Edit the file in place instead of writing to stdout (requires a file argument) |
+
+**`--enharmonic` values**
+
+| Value       | Effect                                                        |
+| ----------- | ------------------------------------------------------------- |
+| `f-sharp`   | Prefer F# major over Gb major (default when tied)             |
+| `g-flat`    | Prefer Gb major over F# major                                 |
+| `g-sharp`   | Prefer G#m over Abm when tied                                 |
+| `a-flat`    | Prefer Abm over G#m (default when tied)                       |
+| `d-sharp`   | Prefer D#m over Ebm when tied                                 |
+| `e-flat`    | Prefer Ebm over D#m (default when tied)                       |
 
 **Examples**
 

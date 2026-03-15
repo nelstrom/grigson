@@ -1217,7 +1217,8 @@
       "Update cli.md --enharmonic option table to document all six accepted values",
       "Update the --help text in cli.ts normalise section to reflect the new --enharmonic values",
       "Run pnpm test and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-key-helpers",

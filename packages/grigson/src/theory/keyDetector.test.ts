@@ -190,3 +190,44 @@ describe('detectKey — tetrad quality disambiguation', () => {
     expect(detectKey([min7('A'), min7('D'), dim7('G#'), min7('A')])).toBe('Am');
   });
 });
+
+describe('detectKey — G#m/Abm enharmonic tiebreak', () => {
+  it('sharp-spelled roots → G#m', () => {
+    // G#m: V7 = D#7; ii = A#m — using G# spelling to distinguish
+    expect(detectKey([min('G#'), dom7('D#'), min('G#')])).toBe('G#m');
+  });
+
+  it('flat-spelled roots → Abm', () => {
+    expect(detectKey([min('Ab'), dom7('Eb'), min('Ab')])).toBe('Abm');
+  });
+
+  it('config override: g-sharp wins even with flat-spelled chords', () => {
+    const config: DetectKeyConfig = { gSharpOrAFlat: 'g-sharp' };
+    expect(detectKey([min('Ab'), dom7('Eb'), min('Ab')], undefined, config)).toBe('G#m');
+  });
+
+  it('config override: a-flat wins even with sharp-spelled chords', () => {
+    const config: DetectKeyConfig = { gSharpOrAFlat: 'a-flat' };
+    expect(detectKey([min('G#'), dom7('D#'), min('G#')], undefined, config)).toBe('Abm');
+  });
+});
+
+describe('detectKey — D#m/Ebm enharmonic tiebreak', () => {
+  it('sharp-spelled roots → D#m', () => {
+    expect(detectKey([min('D#'), dom7('A#'), min('D#')])).toBe('D#m');
+  });
+
+  it('flat-spelled roots → Ebm', () => {
+    expect(detectKey([min('Eb'), dom7('Bb'), min('Eb')])).toBe('Ebm');
+  });
+
+  it('config override: d-sharp wins even with flat-spelled chords', () => {
+    const config: DetectKeyConfig = { dSharpOrEFlat: 'd-sharp' };
+    expect(detectKey([min('Eb'), dom7('Bb'), min('Eb')], undefined, config)).toBe('D#m');
+  });
+
+  it('config override: e-flat wins even with sharp-spelled chords', () => {
+    const config: DetectKeyConfig = { dSharpOrEFlat: 'e-flat' };
+    expect(detectKey([min('D#'), dom7('A#'), min('D#')], undefined, config)).toBe('Ebm');
+  });
+});

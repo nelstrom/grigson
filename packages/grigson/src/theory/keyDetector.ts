@@ -103,6 +103,8 @@ function breakRelativeTie(major: string, minor: string, chords: Chord[]): string
 
 export interface DetectKeyConfig {
   fSharpOrGFlat?: 'f-sharp' | 'g-flat';
+  gSharpOrAFlat?: 'g-sharp' | 'a-flat';
+  dSharpOrEFlat?: 'd-sharp' | 'e-flat';
   forceKey?: string;
 }
 
@@ -117,6 +119,34 @@ function breakFSharpGbTie(chords: Chord[], config?: DetectKeyConfig): string {
   if (fSharpCount > gbCount) return 'F#';
   // Default to F#
   return 'F#';
+}
+
+function breakGSharpAbTie(chords: Chord[], config?: DetectKeyConfig): string {
+  if (config?.gSharpOrAFlat === 'a-flat') return 'Abm';
+  if (config?.gSharpOrAFlat === 'g-sharp') return 'G#m';
+  // Count sharp-side spellings (G#, A#, D#) vs flat-side spellings (Ab, Bb, Eb)
+  // covering the enharmonic pitch classes shared between G#m and Abm
+  const sharpCount = chords.filter((c) => c.root === 'G#' || c.root === 'A#' || c.root === 'D#')
+    .length;
+  const flatCount = chords.filter((c) => c.root === 'Ab' || c.root === 'Bb' || c.root === 'Eb')
+    .length;
+  if (flatCount > sharpCount) return 'Abm';
+  if (sharpCount > flatCount) return 'G#m';
+  return 'Abm';
+}
+
+function breakDSharpEbTie(chords: Chord[], config?: DetectKeyConfig): string {
+  if (config?.dSharpOrEFlat === 'e-flat') return 'Ebm';
+  if (config?.dSharpOrEFlat === 'd-sharp') return 'D#m';
+  // Count sharp-side spellings (D#, A#, G#) vs flat-side spellings (Eb, Bb, Ab)
+  // covering the enharmonic pitch classes shared between D#m and Ebm
+  const sharpCount = chords.filter((c) => c.root === 'D#' || c.root === 'A#' || c.root === 'G#')
+    .length;
+  const flatCount = chords.filter((c) => c.root === 'Eb' || c.root === 'Bb' || c.root === 'Ab')
+    .length;
+  if (flatCount > sharpCount) return 'Ebm';
+  if (sharpCount > flatCount) return 'D#m';
+  return 'Ebm';
 }
 
 export function detectKey(
@@ -181,6 +211,24 @@ export function detectKey(
     }
   }
 
+  // Handle G#m/Abm enharmonic tiebreak
+  const gSharpAbOther = bestKey === 'G#m' ? 'Abm' : bestKey === 'Abm' ? 'G#m' : null;
+  if (gSharpAbOther !== null) {
+    const otherScore = scores.get(gSharpAbOther) ?? 0;
+    if (otherScore === maxScore) {
+      bestKey = breakGSharpAbTie(chords, config);
+    }
+  }
+
+  // Handle D#m/Ebm enharmonic tiebreak
+  const dSharpEbOther = bestKey === 'D#m' ? 'Ebm' : bestKey === 'Ebm' ? 'D#m' : null;
+  if (dSharpEbOther !== null) {
+    const otherScore = scores.get(dSharpEbOther) ?? 0;
+    if (otherScore === maxScore) {
+      bestKey = breakDSharpEbTie(chords, config);
+    }
+  }
+
   // Ending-key-wins: if the progression ends with a V7→tonic cadence into a candidate
   // key that scored within 1 point of the best, prefer that cadence key. This handles
   // progressions that modulate mid-section and resolve to a new tonic at the end.
@@ -199,8 +247,24 @@ export function detectKey(
       } catch {
         return bestKey;
       }
+      // Enharmonic pairs already resolved above — skip them here
+      const enharmonicOfBest =
+        bestKey === 'F#'
+          ? 'Gb'
+          : bestKey === 'Gb'
+            ? 'F#'
+            : bestKey === 'G#m'
+              ? 'Abm'
+              : bestKey === 'Abm'
+                ? 'G#m'
+                : bestKey === 'D#m'
+                  ? 'Ebm'
+                  : bestKey === 'Ebm'
+                    ? 'D#m'
+                    : null;
       for (const [key, score] of scores) {
         if (key === bestKey) continue;
+        if (key === enharmonicOfBest) continue;
         const keyRoot = key.endsWith('m') ? key.slice(0, -1) : key;
         let keyRootPC: number;
         try {
