@@ -1264,7 +1264,8 @@
       "Write keyDetector tests: detectKey([Bm, A, E], undefined) should return 'B dorian' (E major scores 2 for B dorian — diatonic root + quality match — and 0 for B harmonic minor which lacks G#; scoring alone distinguishes them)",
       "Write a test: detectKey([Em, G, D, A], undefined) scores 'E dorian' highly (A major scores 2: diatonic + quality) and 'E harmonic minor' poorly (A has C#, not in E harm. minor)",
       "Run pnpm test"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-detection-tiebreak",

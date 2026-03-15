@@ -210,3 +210,17 @@ describe('detectKey — D#m/Ebm enharmonic tiebreak', () => {
     expect(detectKey([min('Eb'), dom7('Bb'), min('Eb')])).toBe('Ebm');
   });
 });
+
+describe('detectKey — dorian mode scoring', () => {
+  it('Bm-A-E: E major (IV of B dorian) scores well; B dorian beats B harmonic minor', () => {
+    // B dorian: i=Bm, IV=E(major), bVII=A(major) — E major scores diatonic+quality in B dorian
+    // B harmonic minor lacks G# in A major's quality set; scoring alone distinguishes them
+    expect(detectKey([min('B'), maj('A'), maj('E')], undefined)).toBe('B dorian');
+  });
+
+  it('Em-G-D-A: A major (IV of E dorian) scores 2; E harmonic minor lacks A major as V', () => {
+    // E dorian: i=Em, bIII=G, bVII=D, IV=A — all diatonic+quality matches
+    // E harmonic minor: A is iv (minor), not major; A major gets only diatonic point there
+    expect(detectKey([min('E'), maj('G'), maj('D'), maj('A')], undefined)).toBe('E dorian');
+  });
+});

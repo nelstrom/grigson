@@ -25,15 +25,34 @@ const HARMONIC_MINOR_DEGREE_QUALITY_SETS: Set<Quality>[] = [
 
 const MAJOR_INTERVALS = [0, 2, 4, 5, 7, 9, 11];
 const HARMONIC_MINOR_INTERVALS = [0, 2, 3, 5, 7, 8, 11];
+const DORIAN_INTERVALS = [0, 2, 3, 5, 7, 9, 10];
+
+const DORIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
+  new Set<Quality>(['minor', 'min7']), // i
+  new Set<Quality>(['minor', 'min7']), // ii
+  new Set<Quality>(['major', 'maj7']), // bIII
+  new Set<Quality>(['major', 'maj7']), // IV (dominant7 excluded: would alias major-key V7)
+  new Set<Quality>(['minor', 'min7']), // v
+  new Set<Quality>(['diminished', 'halfDiminished']), // vi°
+  new Set<Quality>(['major', 'maj7']), // bVII (dominant7 excluded: would alias major-key V7)
+];
 
 function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
   const mode = getKeyMode(key);
   const rootName = getKeyRoot(key);
   const rootPC = rootToPitchClass(rootName);
-  // Dorian scoring is not yet implemented; return an empty map so dorian keys score 0.
-  if (mode === 'dorian') return new Map();
-  const intervals = mode === 'minor' ? HARMONIC_MINOR_INTERVALS : MAJOR_INTERVALS;
-  const qualitySets = mode === 'minor' ? HARMONIC_MINOR_DEGREE_QUALITY_SETS : MAJOR_DEGREE_QUALITY_SETS;
+  let intervals: number[];
+  let qualitySets: Set<Quality>[];
+  if (mode === 'dorian') {
+    intervals = DORIAN_INTERVALS;
+    qualitySets = DORIAN_DEGREE_QUALITY_SETS;
+  } else if (mode === 'minor') {
+    intervals = HARMONIC_MINOR_INTERVALS;
+    qualitySets = HARMONIC_MINOR_DEGREE_QUALITY_SETS;
+  } else {
+    intervals = MAJOR_INTERVALS;
+    qualitySets = MAJOR_DEGREE_QUALITY_SETS;
+  }
 
   const map = new Map<number, Set<Quality>>();
   for (let i = 0; i < intervals.length; i++) {
@@ -71,7 +90,7 @@ function computeScore(key: string, chords: Chord[]): number {
 // When a key and its relative major/minor are within 1 point, apply ordered tiebreakers.
 function breakRelativeTie(major: string, minor: string, chords: Chord[]): string {
   const minorRootPC = rootToPitchClass(getKeyRoot(minor));
-  const majorRootPC = rootToPitchClass(major);
+  const majorRootPC = rootToPitchClass(getKeyRoot(major));
 
   // 1. V7 of harmonic minor present → minor wins
   const v7OfMinorPC = (minorRootPC + 7) % 12;
@@ -183,8 +202,10 @@ export function detectKey(
   }
 
   // If the relative major/minor is within 1 point, apply explicit tiebreaking
+  // Dorian keys have a relative major but the tiebreak logic is not yet implemented for dorian;
+  // skip tiebreaking when either key is dorian to avoid misclassifying dorian as its relative major.
   const relative = KEYS[bestKey]?.relative;
-  if (relative && KEYS[relative]) {
+  if (relative && KEYS[relative] && getKeyMode(bestKey) !== 'dorian' && getKeyMode(relative) !== 'dorian') {
     const relativeScore = scores.get(relative) ?? 0;
     if (Math.abs(maxScore - relativeScore) <= 1) {
       const isMinor = getKeyMode(bestKey) === 'minor';
@@ -271,7 +292,7 @@ export function detectKey(
           penultimatePC === expectedV7PC &&
           maxScore - score <= 1
         ) {
-          const keyIsMinor = getKeyMode(key) !== 'major';
+          const keyIsMinor = getKeyMode(key) === 'minor';
           const lastIsMinor = lastChord.quality === 'minor';
           if (keyIsMinor === lastIsMinor) {
             bestKey = key;
