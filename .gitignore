@@ -18,4 +18,5 @@ packages/tree-sitter-grammar/*.dylib
 packages/tree-sitter-grammar/*.so
 
 # Misc
+.vscode/grigson.code-workspace
 .DS_Store
