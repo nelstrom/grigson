@@ -1170,5 +1170,51 @@
       "Commit grammar.js, regenerated src/parser.c, updated corpus tests, and updated highlights.scm"
     ],
     "passes": true
+  },
+  {
+    "id": "minor-keys-exotic-note-names",
+    "category": "functional",
+    "description": "Add E#, B#, Cb, and Fb to the pitchClass NOTE_MAP",
+    "detail": "Several keys in KEYS already include E# (F#m), B# (C#m), and the new Abm/Ebm entries will need Cb and Fb. Currently buildPCToNote silently skips notes not in NOTE_MAP, so those scale degrees become unavailable for normalisation. Adding these single-step enharmonic equivalents to NOTE_MAP allows normalise.ts to spell chords correctly in all affected keys. E# = PC 5, B# = PC 0, Cb = PC 11, Fb = PC 4. Double sharps (F##, C##) are out of scope \u2014 they will be handled via pragmatic substitution in the KEYS entries (task minor-keys-add).",
+    "steps": [
+      "Add 'E#': 5 to NOTE_MAP in pitchClass.ts",
+      "Add 'B#': 0 to NOTE_MAP in pitchClass.ts",
+      "Add 'Cb': 11 to NOTE_MAP in pitchClass.ts",
+      "Add 'Fb': 4 to NOTE_MAP in pitchClass.ts",
+      "Add unit tests in pitchClass or normalise test files: assert rootToPitchClass('E#') === 5, 'B#' === 0, 'Cb' === 11, 'Fb' === 4",
+      "Confirm existing normalise tests still pass (pnpm test)"
+    ]
+  },
+  {
+    "id": "minor-keys-add",
+    "category": "functional",
+    "description": "Add G#m, Abm, D#m, and Ebm to the KEYS table as enharmonic pairs",
+    "detail": "Currently only 10 minor keys are defined. G#m/Abm (5 sharps / 7 flats) and D#m/Ebm (6 sharps / 6 flats) are missing. Both pairs should be supported as enharmonic alternates, mirroring how F#/Gb are handled for major keys. Scale spellings: Abm = [Ab, Bb, Cb, Db, Eb, Fb, G], G#m = [G#, A#, B, C#, D#, E, G] (raised 7th F## replaced by G, the enharmonic natural); Ebm = [Eb, F, Gb, Ab, Bb, Cb, D], D#m = [D#, E#, F#, G#, A#, B, D] (raised 7th C## replaced by D). Relative major: D#m \u2192 F# (already in KEYS), Ebm \u2192 Gb (already in KEYS), G#m \u2192 B (already in KEYS), Abm has no relative in KEYS (Cb major is not defined \u2014 leave relative undefined). Add G#m\u2194Abm and D#m\u2194Ebm to ENHARMONIC_PAIRS in pitchClass.ts. Depends on minor-keys-exotic-note-names for Cb and Fb to be recognised during normalisation.",
+    "steps": [
+      "Add Abm: { notes: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'G'] } to KEYS (no relative \u2014 Cb major not in KEYS)",
+      "Add G#m: { notes: ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'G'], relative: 'B' } to KEYS (G is pragmatic substitute for F##)",
+      "Add Ebm: { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'D'], relative: 'Gb' } to KEYS",
+      "Add D#m: { notes: ['D#', 'E#', 'F#', 'G#', 'A#', 'B', 'D'], relative: 'F#' } to KEYS (D is pragmatic substitute for C##)",
+      "Add 'G#m': 'Abm', 'Abm': 'G#m', 'D#m': 'Ebm', 'Ebm': 'D#m' to ENHARMONIC_PAIRS in pitchClass.ts",
+      "Write normalisation tests: a chart in G#m normalises correctly (e.g. Ab chord spelled as G#); an Abm chart normalises correctly (e.g. G# chord spelled as Ab); same for D#m/Ebm",
+      "Run pnpm test and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "minor-keys-detection",
+    "category": "functional",
+    "description": "Extend key detection and CLI to handle G#m/Abm and D#m/Ebm enharmonic tiebreaks",
+    "detail": "Key detection already handles the F#/Gb enharmonic tiebreak via breakFSharpGbTie, which checks chord-root spelling in the input and falls back to a config preference. The same mechanism must be added for G#m/Abm and D#m/Ebm. The chord-spelling heuristic mirrors breakFSharpGbTie: if more chord roots are spelled with flats (Ab, Eb) prefer the flat key; if more are spelled with sharps (G#, D#) prefer the sharp key. Extend DetectKeyConfig with optional 'gSharpOrAFlat' and 'dSharpOrEFlat' preference fields. Expose these in the CLI: extend the --enharmonic flag to accept 'g-sharp'/'a-flat' and 'd-sharp'/'e-flat', or add new flags. Update cli.md and the normalise --help text to document the new options.",
+    "steps": [
+      "Add breakGSharpAbTie(chords, config) in keyDetector.ts mirroring breakFSharpGbTie: count Ab vs G# chord roots; prefer matching spelling; default to the flat side (Abm) if tied",
+      "Add breakDSharpEbTie(chords, config) similarly: count Eb vs D# chord roots; default to flat side (Ebm) if tied",
+      "Wire both tiebreakers into detectKey: after the F#/Gb tiebreak block, add analogous blocks for G#m/Abm and D#m/Ebm",
+      "Extend DetectKeyConfig: add gSharpOrAFlat?: 'g-sharp' | 'a-flat' and dSharpOrEFlat?: 'd-sharp' | 'e-flat'",
+      "Extend CLI --enharmonic to accept the four new values, mapping them to the new DetectKeyConfig fields (and keeping the existing f-sharp/g-flat handling intact)",
+      "Write key-detection tests: a progression clearly in G#m is detected as G#m; one clearly in Abm is detected as Abm; same for D#m/Ebm",
+      "Update cli.md --enharmonic option table to document all six accepted values",
+      "Update the --help text in cli.ts normalise section to reflect the new --enharmonic values",
+      "Run pnpm test and confirm all tests pass"
+    ]
   }
 ]
