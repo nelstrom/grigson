@@ -1,4 +1,4 @@
-import { KEYS } from './keys.js';
+import { KEYS, getKeyMode, getKeyRoot } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord, Quality } from '../parser/types.js';
 
@@ -27,11 +27,11 @@ const MAJOR_INTERVALS = [0, 2, 4, 5, 7, 9, 11];
 const HARMONIC_MINOR_INTERVALS = [0, 2, 3, 5, 7, 8, 11];
 
 function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
-  const isMinor = key.endsWith('m');
-  const rootName = isMinor ? key.slice(0, -1) : key;
+  const mode = getKeyMode(key);
+  const rootName = getKeyRoot(key);
   const rootPC = rootToPitchClass(rootName);
-  const intervals = isMinor ? HARMONIC_MINOR_INTERVALS : MAJOR_INTERVALS;
-  const qualitySets = isMinor ? HARMONIC_MINOR_DEGREE_QUALITY_SETS : MAJOR_DEGREE_QUALITY_SETS;
+  const intervals = mode === 'minor' ? HARMONIC_MINOR_INTERVALS : MAJOR_INTERVALS;
+  const qualitySets = mode === 'minor' ? HARMONIC_MINOR_DEGREE_QUALITY_SETS : MAJOR_DEGREE_QUALITY_SETS;
 
   const map = new Map<number, Set<Quality>>();
   for (let i = 0; i < intervals.length; i++) {
@@ -68,7 +68,7 @@ function computeScore(key: string, chords: Chord[]): number {
 
 // When a key and its relative major/minor are within 1 point, apply ordered tiebreakers.
 function breakRelativeTie(major: string, minor: string, chords: Chord[]): string {
-  const minorRootPC = rootToPitchClass(minor.slice(0, -1));
+  const minorRootPC = rootToPitchClass(getKeyRoot(minor));
   const majorRootPC = rootToPitchClass(major);
 
   // 1. V7 of harmonic minor present → minor wins
@@ -157,8 +157,8 @@ export function detectKey(
     } else if (score === maxScore && maxScore > 0 && bestKey !== null) {
       // Tie-breaker: prefer tonic match
       const firstPC = rootToPitchClass(chords[0].root);
-      const currentBestPC = rootToPitchClass(bestKey.replace(/m$/, ''));
-      const candidatePC = rootToPitchClass(key.replace(/m$/, ''));
+      const currentBestPC = rootToPitchClass(getKeyRoot(bestKey));
+      const candidatePC = rootToPitchClass(getKeyRoot(key));
       
       if (candidatePC === firstPC && currentBestPC !== firstPC) {
         bestKey = key;
@@ -185,7 +185,7 @@ export function detectKey(
   if (relative && KEYS[relative]) {
     const relativeScore = scores.get(relative) ?? 0;
     if (Math.abs(maxScore - relativeScore) <= 1) {
-      const isMinor = bestKey.endsWith('m');
+      const isMinor = getKeyMode(bestKey) === 'minor';
       const major = isMinor ? relative : bestKey;
       const minor = isMinor ? bestKey : relative;
       bestKey = breakRelativeTie(major, minor, chords);
@@ -255,7 +255,7 @@ export function detectKey(
       for (const [key, score] of scores) {
         if (key === bestKey) continue;
         if (key === enharmonicOfBest) continue;
-        const keyRoot = key.endsWith('m') ? key.slice(0, -1) : key;
+        const keyRoot = getKeyRoot(key);
         let keyRootPC: number;
         try {
           keyRootPC = rootToPitchClass(keyRoot);
@@ -269,7 +269,7 @@ export function detectKey(
           penultimatePC === expectedV7PC &&
           maxScore - score <= 1
         ) {
-          const keyIsMinor = key.endsWith('m');
+          const keyIsMinor = getKeyMode(key) === 'minor';
           const lastIsMinor = lastChord.quality === 'minor';
           if (keyIsMinor === lastIsMinor) {
             bestKey = key;

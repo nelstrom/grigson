@@ -3,6 +3,20 @@ export interface KeyInfo {
   relative?: string;
 }
 
+export type KeyMode = 'major' | 'minor' | 'dorian';
+
+export function getKeyMode(key: string): KeyMode {
+  if (key.endsWith(' dorian')) return 'dorian';
+  if (key.endsWith('m')) return 'minor';
+  return 'major';
+}
+
+export function getKeyRoot(key: string): string {
+  if (key.endsWith(' dorian')) return key.slice(0, -7);
+  if (key.endsWith('m')) return key.slice(0, -1);
+  return key;
+}
+
 export const KEYS: Readonly<Record<string, KeyInfo>> = {
   // Major keys
   C: { notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'], relative: 'Am' },

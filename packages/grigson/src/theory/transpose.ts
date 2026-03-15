@@ -2,7 +2,7 @@ import type { Song, Section, Row, Bar, Chord, ChordSlot } from '../parser/types.
 import { rootToPitchClass } from './pitchClass.js';
 import { normaliseSection } from './normalise.js';
 import { detectKey } from './keyDetector.js';
-import { KEYS } from './keys.js';
+import { KEYS, getKeyRoot } from './keys.js';
 
 // Flat-side chromatic scale used as a neutral intermediate spelling before normalisation
 const PC_TO_FLAT: readonly string[] = [
@@ -88,8 +88,8 @@ export function transposeSongToKey(song: Song, targetKey: string): Song {
     ) ?? [];
   const homeKey = detectKey(firstSectionChords, song.key) ?? 'C';
 
-  const homeTonicNote = KEYS[homeKey]?.notes[0] ?? homeKey.replace(/m$/, '');
-  const targetTonicNote = KEYS[targetKey]?.notes[0] ?? targetKey.replace(/m$/, '');
+  const homeTonicNote = KEYS[homeKey]?.notes[0] ?? getKeyRoot(homeKey);
+  const targetTonicNote = KEYS[targetKey]?.notes[0] ?? getKeyRoot(targetKey);
 
   const homeTonicPC = rootToPitchClass(homeTonicNote);
   const targetTonicPC = rootToPitchClass(targetTonicNote);

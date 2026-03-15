@@ -1234,7 +1234,8 @@
       "In harmonicAnalysis.ts replace: lines 28-29 getPosition helper — map minor and dorian to relative major using getKeyMode/getKeyRoot; lines 61-62 buildKeyMaps isMinor → getKeyMode; line 202 !homeKey.endsWith('m') → getKeyMode(homeKey) === 'major'; lines 207/211 !k.endsWith('m') → getKeyMode(k) !== 'minor'",
       "In transpose.ts replace any homeKey.replace(/m$/, '') fallback with getKeyRoot(homeKey)",
       "Run pnpm test — all existing tests must pass with no behaviour change"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dorian-keys-table",

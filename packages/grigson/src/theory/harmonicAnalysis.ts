@@ -1,4 +1,4 @@
-import { KEYS, diatonicNotes } from './keys.js';
+import { KEYS, diatonicNotes, getKeyMode, getKeyRoot } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord } from '../parser/types.js';
 
@@ -25,8 +25,9 @@ const COF_POSITIONS: Readonly<Record<number, number>> = {
  */
 export function circleOfFifthsDistance(keyA: string, keyB: string): number {
   const getPosition = (key: string): number => {
-    const majorKey = key.endsWith('m') && KEYS[key]?.relative ? KEYS[key].relative! : key;
-    const root = majorKey.endsWith('m') ? majorKey.slice(0, -1) : majorKey;
+    const mode = getKeyMode(key);
+    const majorKey = (mode === 'minor' || mode === 'dorian') && KEYS[key]?.relative ? KEYS[key].relative! : key;
+    const root = getKeyRoot(majorKey);
     let pc: number;
     try {
       pc = rootToPitchClass(root);
@@ -58,8 +59,8 @@ function buildKeyMaps(): { majorByPC: Map<number, string>; minorByPC: Map<number
   const minorByPC = new Map<number, string>();
 
   for (const key of Object.keys(KEYS)) {
-    const isMinor = key.endsWith('m');
-    const rootName = isMinor ? key.slice(0, -1) : key;
+    const isMinor = getKeyMode(key) === 'minor';
+    const rootName = getKeyRoot(key);
     let pc: number;
     try {
       pc = rootToPitchClass(rootName);
@@ -199,16 +200,16 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
         // Prefer the parallel minor of homeKey if it's among the closest candidates,
         // then fall back to preferring major keys over minor keys.
         let pickedKey: string;
-        if (!homeKey.endsWith('m')) {
+        if (getKeyMode(homeKey) === 'major') {
           const parallelMinor = homeKey + 'm';
           if (closestCandidates.includes(parallelMinor)) {
             pickedKey = parallelMinor;
           } else {
-            const majors = closestCandidates.filter((k) => !k.endsWith('m'));
+            const majors = closestCandidates.filter((k) => getKeyMode(k) !== 'minor');
             pickedKey = majors.length > 0 ? majors[0] : closestCandidates[0];
           }
         } else {
-          const majors = closestCandidates.filter((k) => !k.endsWith('m'));
+          const majors = closestCandidates.filter((k) => getKeyMode(k) !== 'minor');
           pickedKey = majors.length > 0 ? majors[0] : closestCandidates[0];
         }
 
