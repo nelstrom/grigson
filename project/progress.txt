@@ -215,3 +215,6 @@ Added `quoted_string` (`/"[^"]*""/`) and `unquoted_value` (`/[^\r\n\t "][^\r\n]*
 
 ## minor-keys-exotic-note-names
 Added 'E#': 5, 'B#': 0, 'Cb': 11, and 'Fb': 4 to NOTE_MAP in src/theory/pitchClass.ts. These enharmonic spellings are needed by the KEYS table entries for G#m (E# as raised 7th is skipped, B as natural — but Cb and Fb appear in Abm and Ebm respectively). Added 4 unit tests in pitchClass.test.ts asserting rootToPitchClass returns the correct pitch class for each new spelling. All 247 tests pass.
+
+## minor-keys-add
+Added Abm, G#m, Ebm, and D#m to the KEYS table in src/theory/keys.ts. Scale spellings: Abm = [Ab, Bb, Cb, Db, Eb, Fb, G] (no relative — Cb major not in KEYS); G#m = [G#, A#, B, C#, D#, E, G] with relative 'B'; Ebm = [Eb, F, Gb, Ab, Bb, Cb, D] with relative 'Gb'; D#m = [D#, E#, F#, G#, A#, B, D] with relative 'F#'. Added 'G#m'↔'Abm' and 'D#m'↔'Ebm' to ENHARMONIC_PAIRS in pitchClass.ts. Updated the KEYS count test from 23 to 27. Added 4 normalisation tests: G#m and D#m tests use V7 progressions that auto-detect correctly; Abm and Ebm tests use forceKey (auto-detection tiebreaking for these enharmonic pairs is handled in the minor-keys-detection task). All 252 tests pass.

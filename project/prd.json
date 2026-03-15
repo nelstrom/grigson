@@ -1199,7 +1199,8 @@
       "Add 'G#m': 'Abm', 'Abm': 'G#m', 'D#m': 'Ebm', 'Ebm': 'D#m' to ENHARMONIC_PAIRS in pitchClass.ts",
       "Write normalisation tests: a chart in G#m normalises correctly (e.g. Ab chord spelled as G#); an Abm chart normalises correctly (e.g. G# chord spelled as Ab); same for D#m/Ebm",
       "Run pnpm test and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "minor-keys-detection",

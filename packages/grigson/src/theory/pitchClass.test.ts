@@ -60,4 +60,11 @@ describe('ENHARMONIC_PAIRS', () => {
     expect(ENHARMONIC_PAIRS['Ab']).toBe('G#');
     expect(ENHARMONIC_PAIRS['Bb']).toBe('A#');
   });
+
+  it('maps enharmonic minor key pairs', () => {
+    expect(ENHARMONIC_PAIRS['G#m']).toBe('Abm');
+    expect(ENHARMONIC_PAIRS['Abm']).toBe('G#m');
+    expect(ENHARMONIC_PAIRS['D#m']).toBe('Ebm');
+    expect(ENHARMONIC_PAIRS['Ebm']).toBe('D#m');
+  });
 });

@@ -247,6 +247,70 @@ describe('normaliseSong — chord-qualities smoke tests', () => {
   });
 });
 
+describe('normaliseSong — exotic minor key normalisation (G#m/Abm and D#m/Ebm)', () => {
+  it('chart in G#m: Ab chord (wrong spelling of G#) rewritten to G#', () => {
+    // G#m = [G#, A#, B, C#, D#, E, G]; V7 = D#7 disambiguates from F# major
+    // Input has 'Ab' (enharmonic G#) which should be normalised to 'G#'
+    const s = song([
+      row(ch('Ab', 'minor'), ch('C#', 'minor'), ch('D#', 'dominant7'), ch('G#', 'minor')),
+    ]);
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G#m');
+    const bars = result.sections[0].rows[0].bars;
+    expect(chordOf(bars[0]).root).toBe('G#'); // Ab → G#
+    expect(chordOf(bars[1]).root).toBe('C#');
+    expect(chordOf(bars[2]).root).toBe('D#');
+    expect(chordOf(bars[3]).root).toBe('G#');
+  });
+
+  it('chart in Abm: G# chord (wrong spelling of Ab) rewritten to Ab', () => {
+    // Abm = [Ab, Bb, Cb, Db, Eb, Fb, G]; forceKey used because G#m/Abm
+    // auto-detection tiebreak is handled in the minor-keys-detection task.
+    // Input has 'G#' (enharmonic Ab) which should be normalised to 'Ab'.
+    const s = song([
+      row(ch('G#', 'minor'), ch('Db', 'minor'), ch('Eb', 'dominant7'), ch('Ab', 'minor')),
+    ]);
+    const result = normaliseSong(s, { forceKey: 'Abm' });
+    expect(result.key).toBe('Abm');
+    const bars = result.sections[0].rows[0].bars;
+    expect(chordOf(bars[0]).root).toBe('Ab'); // G# → Ab
+    expect(chordOf(bars[1]).root).toBe('Db');
+    expect(chordOf(bars[2]).root).toBe('Eb');
+    expect(chordOf(bars[3]).root).toBe('Ab');
+  });
+
+  it('chart in D#m: Eb chord (wrong spelling of D#) rewritten to D#', () => {
+    // D#m = [D#, E#, F#, G#, A#, B, D]; V7 = A#7 disambiguates from F# major
+    // Input has 'Eb' (enharmonic D#) which should be normalised to 'D#'
+    const s = song([
+      row(ch('Eb', 'minor'), ch('G#', 'minor'), ch('A#', 'dominant7'), ch('D#', 'minor')),
+    ]);
+    const result = normaliseSong(s);
+    expect(result.key).toBe('D#m');
+    const bars = result.sections[0].rows[0].bars;
+    expect(chordOf(bars[0]).root).toBe('D#'); // Eb → D#
+    expect(chordOf(bars[1]).root).toBe('G#');
+    expect(chordOf(bars[2]).root).toBe('A#');
+    expect(chordOf(bars[3]).root).toBe('D#');
+  });
+
+  it('chart in Ebm: D# chord (wrong spelling of Eb) rewritten to Eb', () => {
+    // Ebm = [Eb, F, Gb, Ab, Bb, Cb, D]; forceKey used because D#m/Ebm
+    // auto-detection tiebreak is handled in the minor-keys-detection task.
+    // Input has 'D#' (enharmonic Eb) which should be normalised to 'Eb'.
+    const s = song([
+      row(ch('D#', 'minor'), ch('Ab', 'minor'), ch('Bb', 'dominant7'), ch('Eb', 'minor')),
+    ]);
+    const result = normaliseSong(s, { forceKey: 'Ebm' });
+    expect(result.key).toBe('Ebm');
+    const bars = result.sections[0].rows[0].bars;
+    expect(chordOf(bars[0]).root).toBe('Eb'); // D# → Eb
+    expect(chordOf(bars[1]).root).toBe('Ab');
+    expect(chordOf(bars[2]).root).toBe('Bb');
+    expect(chordOf(bars[3]).root).toBe('Eb');
+  });
+});
+
 describe('normaliseSong — per-section key detection', () => {
   it('two-section song: each section normalised independently', () => {
     // Verse: E major (no rewrites needed — E A B E)

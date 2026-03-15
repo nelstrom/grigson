@@ -36,7 +36,7 @@ describe('diatonicNotes', () => {
 });
 
 describe('KEYS', () => {
-  it('contains exactly 23 entries (12 major including Gb + 10 minor)', () => {
-    expect(Object.keys(KEYS)).toHaveLength(23);
+  it('contains exactly 27 entries (12 major including Gb + 14 minor)', () => {
+    expect(Object.keys(KEYS)).toHaveLength(27);
   });
 });

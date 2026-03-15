@@ -29,6 +29,10 @@ export const KEYS: Readonly<Record<string, KeyInfo>> = {
   Cm: { notes: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'B'], relative: 'Eb' },
   Fm: { notes: ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'E'], relative: 'Ab' },
   Bbm: { notes: ['Bb', 'C', 'Db', 'Eb', 'F', 'Gb', 'A'], relative: 'Db' },
+  Abm: { notes: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'G'] },
+  'G#m': { notes: ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'G'], relative: 'B' },
+  Ebm: { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'D'], relative: 'Gb' },
+  'D#m': { notes: ['D#', 'E#', 'F#', 'G#', 'A#', 'B', 'D'], relative: 'F#' },
 };
 
 export function diatonicNotes(key: string): ReadonlySet<string> {

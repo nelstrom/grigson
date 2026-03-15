@@ -35,6 +35,10 @@ export const ENHARMONIC_PAIRS: Record<string, string> = {
   Ab: 'G#',
   'A#': 'Bb',
   Bb: 'A#',
+  'G#m': 'Abm',
+  Abm: 'G#m',
+  'D#m': 'Ebm',
+  Ebm: 'D#m',
 };
 
 export function rootToPitchClass(root: string): PitchClass {
