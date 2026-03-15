@@ -13,5 +13,9 @@ packages/website/_site/
 packages/grigson/src/parser/generated.js
 packages/grigson/src/parser/generated.d.ts
 
+# Tree-sitter build artifacts
+packages/tree-sitter-grammar/*.dylib
+packages/tree-sitter-grammar/*.so
+
 # Misc
 .DS_Store
