@@ -31,10 +31,7 @@ spellings to match the detected key, and writes the result to stdout.
 
 Options:
   --key <key>          Override key detection (e.g. --key Am)
-  --enharmonic <pref>  Enharmonic spelling preference:
-                         f-sharp (default) or g-flat  (F# vs Gb major)
-                         g-sharp or a-flat             (G#m vs Abm)
-                         d-sharp or e-flat             (D#m vs Ebm)
+  --enharmonic <pref>  F#/Gb preference: f-sharp (default) or g-flat
   -i, --in-place       Edit the file in place instead of writing to stdout
   --help, -h           Show this help message and exit`,
 
@@ -90,19 +87,10 @@ function runNormalise(parsed: minimist.ParsedArgs): void {
   const input = readInput(filePath);
   const song = parseSong(input);
 
-  const config: {
-    fSharpOrGFlat?: 'f-sharp' | 'g-flat';
-    gSharpOrAFlat?: 'g-sharp' | 'a-flat';
-    dSharpOrEFlat?: 'd-sharp' | 'e-flat';
-    forceKey?: string;
-  } = {};
+  const config: { fSharpOrGFlat?: 'f-sharp' | 'g-flat'; forceKey?: string } = {};
   if (key) config.forceKey = key;
   if (enharmonic === 'g-flat') config.fSharpOrGFlat = 'g-flat';
   else if (enharmonic === 'f-sharp') config.fSharpOrGFlat = 'f-sharp';
-  else if (enharmonic === 'a-flat') config.gSharpOrAFlat = 'a-flat';
-  else if (enharmonic === 'g-sharp') config.gSharpOrAFlat = 'g-sharp';
-  else if (enharmonic === 'e-flat') config.dSharpOrEFlat = 'e-flat';
-  else if (enharmonic === 'd-sharp') config.dSharpOrEFlat = 'd-sharp';
 
   const normalised = normaliseSong(song, config);
   const renderer = new TextRenderer();

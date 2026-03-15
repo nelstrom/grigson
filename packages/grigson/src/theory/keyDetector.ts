@@ -103,8 +103,6 @@ function breakRelativeTie(major: string, minor: string, chords: Chord[]): string
 
 export interface DetectKeyConfig {
   fSharpOrGFlat?: 'f-sharp' | 'g-flat';
-  gSharpOrAFlat?: 'g-sharp' | 'a-flat';
-  dSharpOrEFlat?: 'd-sharp' | 'e-flat';
   forceKey?: string;
 }
 
@@ -121,30 +119,22 @@ function breakFSharpGbTie(chords: Chord[], config?: DetectKeyConfig): string {
   return 'F#';
 }
 
-function breakGSharpAbTie(chords: Chord[], config?: DetectKeyConfig): string {
-  if (config?.gSharpOrAFlat === 'a-flat') return 'Abm';
-  if (config?.gSharpOrAFlat === 'g-sharp') return 'G#m';
+function breakGSharpAbTie(chords: Chord[]): string {
   // Count sharp-side spellings (G#, A#, D#) vs flat-side spellings (Ab, Bb, Eb)
-  // covering the enharmonic pitch classes shared between G#m and Abm
   const sharpCount = chords.filter((c) => c.root === 'G#' || c.root === 'A#' || c.root === 'D#')
     .length;
   const flatCount = chords.filter((c) => c.root === 'Ab' || c.root === 'Bb' || c.root === 'Eb')
     .length;
-  if (flatCount > sharpCount) return 'Abm';
   if (sharpCount > flatCount) return 'G#m';
   return 'Abm';
 }
 
-function breakDSharpEbTie(chords: Chord[], config?: DetectKeyConfig): string {
-  if (config?.dSharpOrEFlat === 'e-flat') return 'Ebm';
-  if (config?.dSharpOrEFlat === 'd-sharp') return 'D#m';
+function breakDSharpEbTie(chords: Chord[]): string {
   // Count sharp-side spellings (D#, A#, G#) vs flat-side spellings (Eb, Bb, Ab)
-  // covering the enharmonic pitch classes shared between D#m and Ebm
   const sharpCount = chords.filter((c) => c.root === 'D#' || c.root === 'A#' || c.root === 'G#')
     .length;
   const flatCount = chords.filter((c) => c.root === 'Eb' || c.root === 'Bb' || c.root === 'Ab')
     .length;
-  if (flatCount > sharpCount) return 'Ebm';
   if (sharpCount > flatCount) return 'D#m';
   return 'Ebm';
 }
@@ -216,7 +206,7 @@ export function detectKey(
   if (gSharpAbOther !== null) {
     const otherScore = scores.get(gSharpAbOther) ?? 0;
     if (otherScore === maxScore) {
-      bestKey = breakGSharpAbTie(chords, config);
+      bestKey = breakGSharpAbTie(chords);
     }
   }
 
@@ -225,7 +215,7 @@ export function detectKey(
   if (dSharpEbOther !== null) {
     const otherScore = scores.get(dSharpEbOther) ?? 0;
     if (otherScore === maxScore) {
-      bestKey = breakDSharpEbTie(chords, config);
+      bestKey = breakDSharpEbTie(chords);
     }
   }
 
