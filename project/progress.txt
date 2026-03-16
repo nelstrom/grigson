@@ -255,3 +255,4 @@ Replaced the `relative` field in `KeyInfo` with structured `scaleFamily`, `degre
 - Updated tests (25 tests, all pass) and documentation
 
 All 283 tests pass.
+2026-03-16: Added aeolian (degree 6) and mixolydian (degree 5) mode support. 24 new KEYS entries (63 total). New scoring intervals/quality sets for each mode. Tiebreaker functions for aeolian/major and mixolydian/major ambiguity. bVII→i and bVII→I cadence patterns in analyseHarmony. Fixed ending-key-wins to skip modal keys. Updated tests and documentation.

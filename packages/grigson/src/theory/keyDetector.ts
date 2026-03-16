@@ -26,6 +26,8 @@ const HARMONIC_MINOR_DEGREE_QUALITY_SETS: Set<Quality>[] = [
 const MAJOR_INTERVALS = [0, 2, 4, 5, 7, 9, 11];
 const HARMONIC_MINOR_INTERVALS = [0, 2, 3, 5, 7, 8, 11];
 const DORIAN_INTERVALS = [0, 2, 3, 5, 7, 9, 10];
+const AEOLIAN_INTERVALS = [0, 2, 3, 5, 7, 8, 10];
+const MIXOLYDIAN_INTERVALS = [0, 2, 4, 5, 7, 9, 10];
 
 const DORIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
   new Set<Quality>(['minor', 'min7']), // i
@@ -37,6 +39,26 @@ const DORIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
   new Set<Quality>(['major', 'maj7']), // bVII (dominant7 excluded: would alias major-key V7)
 ];
 
+const AEOLIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
+  new Set<Quality>(['minor', 'min7']),              // i
+  new Set<Quality>(['diminished', 'halfDiminished']), // ii°
+  new Set<Quality>(['major', 'maj7']),              // bIII
+  new Set<Quality>(['minor', 'min7']),              // iv  ← distinguishes aeolian from dorian
+  new Set<Quality>(['minor', 'min7']),              // v
+  new Set<Quality>(['major', 'maj7']),              // bVI
+  new Set<Quality>(['major', 'maj7']),              // bVII
+];
+
+const MIXOLYDIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
+  new Set<Quality>(['major', 'maj7']),              // I (dominant7 excluded: aliases major V7)
+  new Set<Quality>(['minor', 'min7']),              // ii
+  new Set<Quality>(['diminished', 'halfDiminished']), // iii°
+  new Set<Quality>(['major', 'maj7']),              // IV (dominant7 excluded)
+  new Set<Quality>(['minor', 'min7']),              // v  ← distinguishes mixolydian from major
+  new Set<Quality>(['minor', 'min7']),              // vi
+  new Set<Quality>(['major', 'maj7']),              // bVII ← distinguishes mixolydian from major
+];
+
 function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
   const mode = getKeyMode(key);
   const rootName = getKeyRoot(key);
@@ -46,6 +68,12 @@ function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
   if (mode === 'dorian') {
     intervals = DORIAN_INTERVALS;
     qualitySets = DORIAN_DEGREE_QUALITY_SETS;
+  } else if (mode === 'aeolian') {
+    intervals = AEOLIAN_INTERVALS;
+    qualitySets = AEOLIAN_DEGREE_QUALITY_SETS;
+  } else if (mode === 'mixolydian') {
+    intervals = MIXOLYDIAN_INTERVALS;
+    qualitySets = MIXOLYDIAN_DEGREE_QUALITY_SETS;
   } else if (mode === 'minor') {
     intervals = HARMONIC_MINOR_INTERVALS;
     qualitySets = HARMONIC_MINOR_DEGREE_QUALITY_SETS;
@@ -210,6 +238,90 @@ function breakDorianMajorTie(dorian: string, major: string, chords: Chord[]): st
   return major;
 }
 
+// Tiebreak between an aeolian key and its parent major.
+// Priority: (1) V7 of parent major present → major wins; (2) first chord is the tonic of one key;
+// (3) last chord is the tonic of one key; (4) default major.
+// Note: bVII→i appears in the parent major as IV→V, so cadence detection is too ambiguous here.
+function breakAeolianMajorTie(aeolian: string, major: string, chords: Chord[]): string {
+  const aeolianRootPC = rootToPitchClass(getKeyRoot(aeolian));
+  const majorRootPC = rootToPitchClass(getKeyRoot(major));
+
+  // 1. V7 of parent major present → major wins (authentic cadence confirms ionian)
+  const v7OfMajorPC = (majorRootPC + 7) % 12;
+  if (chords.some((c) => c.quality === 'dominant7' && rootToPitchClass(c.root) === v7OfMajorPC)) {
+    return major;
+  }
+
+  // 2. First chord quality at tonic → that key wins
+  if (chords.length > 0) {
+    const first = chords[0];
+    try {
+      const firstPC = rootToPitchClass(first.root);
+      if (firstPC === aeolianRootPC && first.quality === 'minor') return aeolian;
+      if (firstPC === majorRootPC && first.quality === 'major') return major;
+    } catch {
+      // skip
+    }
+  }
+
+  // 3. Last chord quality at tonic → that key wins
+  if (chords.length > 0) {
+    const last = chords[chords.length - 1];
+    try {
+      const lastPC = rootToPitchClass(last.root);
+      if (lastPC === aeolianRootPC && last.quality === 'minor') return aeolian;
+      if (lastPC === majorRootPC && last.quality === 'major') return major;
+    } catch {
+      // skip
+    }
+  }
+
+  // 4. Default to parent major
+  return major;
+}
+
+// Tiebreak between a mixolydian key and its parent major.
+// Priority: (1) V7 of parent major present → major wins; (2) first chord is the tonic of one key;
+// (3) last chord is the tonic of one key; (4) default major.
+// Note: bVII→I appears in parent major as IV→V, making cadence detection ambiguous.
+function breakMixolydianMajorTie(mixolydian: string, major: string, chords: Chord[]): string {
+  const mixolydianRootPC = rootToPitchClass(getKeyRoot(mixolydian));
+  const majorRootPC = rootToPitchClass(getKeyRoot(major));
+
+  // 1. V7 of parent major present → major wins (authentic cadence excludes mixolydian which has minor v)
+  const v7OfMajorPC = (majorRootPC + 7) % 12;
+  if (chords.some((c) => c.quality === 'dominant7' && rootToPitchClass(c.root) === v7OfMajorPC)) {
+    return major;
+  }
+
+  // 2. First chord quality at tonic → that key wins
+  if (chords.length > 0) {
+    const first = chords[0];
+    try {
+      const firstPC = rootToPitchClass(first.root);
+      if (firstPC === mixolydianRootPC && first.quality === 'major') return mixolydian;
+      if (firstPC === majorRootPC && first.quality === 'major') return major;
+    } catch {
+      // skip
+    }
+  }
+
+  // 3. Last chord quality at tonic → that key wins
+  if (chords.length > 0) {
+    const last = chords[chords.length - 1];
+    try {
+      const lastPC = rootToPitchClass(last.root);
+      if (lastPC === mixolydianRootPC && last.quality === 'major') return mixolydian;
+      if (lastPC === majorRootPC && last.quality === 'major') return major;
+    } catch {
+      // skip
+    }
+  }
+
+  // 4. Default to parent major
+  return major;
+}
+
 function breakDSharpEbTie(chords: Chord[]): string {
   // Count sharp-side spellings (D#, A#, G#) vs flat-side spellings (Eb, Bb, Ab)
   const sharpCount = chords.filter((c) => c.root === 'D#' || c.root === 'A#' || c.root === 'G#')
@@ -262,9 +374,9 @@ export function detectKey(
   }
 
   // If the relative major/minor is within 1 point, apply explicit tiebreaking.
-  // Dorian keys have a relative major but the tiebreak logic is not yet implemented for dorian;
-  // skip tiebreaking when either key is dorian to avoid misclassifying dorian as its relative major.
-  if (getKeyMode(bestKey) !== 'dorian') {
+  // Only apply the harmonic-minor/relative-major tiebreaker for major and minor keys;
+  // modal keys (dorian, aeolian, mixolydian) have their own dedicated tiebreakers below.
+  if (getKeyMode(bestKey) === 'major' || getKeyMode(bestKey) === 'minor') {
     let relativeKey: string | undefined;
     if (getKeyMode(bestKey) === 'minor') {
       relativeKey = getRelativeMajor(bestKey);
@@ -330,6 +442,36 @@ export function detectKey(
     }
   }
 
+  // Handle aeolian/parent-major tiebreak
+  if (getKeyMode(bestKey) === 'aeolian') {
+    const parentMajor = getRelativeMajor(bestKey);
+    if (parentMajor && KEYS[parentMajor] && (scores.get(parentMajor) ?? 0) === maxScore) {
+      bestKey = breakAeolianMajorTie(bestKey, parentMajor, chords);
+    }
+  } else if (getKeyMode(bestKey) === 'major') {
+    for (const [key, score] of scores) {
+      if (getKeyMode(key) === 'aeolian' && getRelativeMajor(key) === bestKey && score === maxScore) {
+        bestKey = breakAeolianMajorTie(key, bestKey, chords);
+        break;
+      }
+    }
+  }
+
+  // Handle mixolydian/parent-major tiebreak (independent block — bestKey may have changed above)
+  if (getKeyMode(bestKey) === 'mixolydian') {
+    const parentMajor = getRelativeMajor(bestKey);
+    if (parentMajor && KEYS[parentMajor] && (scores.get(parentMajor) ?? 0) === maxScore) {
+      bestKey = breakMixolydianMajorTie(bestKey, parentMajor, chords);
+    }
+  } else if (getKeyMode(bestKey) === 'major') {
+    for (const [key, score] of scores) {
+      if (getKeyMode(key) === 'mixolydian' && getRelativeMajor(key) === bestKey && score === maxScore) {
+        bestKey = breakMixolydianMajorTie(key, bestKey, chords);
+        break;
+      }
+    }
+  }
+
   // Ending-key-wins: if the progression ends with a V7→tonic cadence into a candidate
   // key that scored within 1 point of the best, prefer that cadence key. This handles
   // progressions that modulate mid-section and resolve to a new tonic at the end.
@@ -366,6 +508,8 @@ export function detectKey(
       for (const [key, score] of scores) {
         if (key === bestKey) continue;
         if (key === enharmonicOfBest) continue;
+        // Only apply ending-key-wins to major and minor keys; modal keys have their own tiebreakers
+        if (getKeyMode(key) !== 'major' && getKeyMode(key) !== 'minor') continue;
         const keyRoot = getKeyRoot(key);
         let keyRootPC: number;
         try {

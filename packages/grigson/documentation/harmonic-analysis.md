@@ -53,9 +53,29 @@ E7  Am7    → both get currentKey = 'Am'  (min7 tonic)
 V7  I
 ```
 
+### Aeolian bVII → i cadence
+
+When `homeKey` is aeolian, a major chord at the flat-seventh degree followed by a minor chord at the tonic is recognised as the characteristic aeolian cadence. Both chords are assigned `currentKey = homeKey`.
+
+```
+G  Am   (homeKey = 'A aeolian')
+↑
+G is bVII of A aeolian, Am is tonic → both get currentKey = 'A aeolian'
+```
+
+### Mixolydian bVII → I cadence
+
+When `homeKey` is mixolydian, a major chord at the flat-seventh degree followed by a major chord at the tonic is recognised as the characteristic mixolydian cadence. Both chords are assigned `currentKey = homeKey`.
+
+```
+C  D   (homeKey = 'D mixolydian')
+↑
+C is bVII of D mixolydian, D is tonic → both get currentKey = 'D mixolydian'
+```
+
 ### Circle-of-fifths fallback (isolated borrowed chords)
 
-A chord not captured by any pattern and **not diatonic to homeKey** receives a `currentKey` derived from the circle of fifths. All 39 in-scope keys whose diatonic note set contains the chord's root (by spelling) are collected and ranked by `circleOfFifthsDistance` from `homeKey`. The closest key becomes `currentKey`; all tied candidates are stored in `currentKeyCandidates`.
+A chord not captured by any pattern and **not diatonic to homeKey** receives a `currentKey` derived from the circle of fifths. All 63 in-scope keys whose diatonic note set contains the chord's root (by spelling) are collected and ranked by `circleOfFifthsDistance` from `homeKey`. The closest key becomes `currentKey`; all tied candidates are stored in `currentKeyCandidates`.
 
 Tie-breaking rules:
 1. If the homeKey's **parallel minor** (e.g. `Cm` for homeKey `C`) is among the tied candidates, it is preferred.
@@ -129,4 +149,4 @@ circleOfFifthsDistance('C', 'Am');  // 0  (Am is relative of C)
 circleOfFifthsDistance('C', 'Dm');  // 1  (Dm is relative of F)
 ```
 
-Minor keys are mapped to their relative major before computing the distance, so relative pairs always have distance 0 from each other.
+Minor, dorian, aeolian, and mixolydian keys are all mapped to their relative (parent) major before computing the distance, so keys in the same scale family have distance 0 from each other.

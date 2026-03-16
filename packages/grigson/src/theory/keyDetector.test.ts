@@ -61,16 +61,16 @@ describe('detectKey — Category 3: major/minor disambiguation', () => {
     expect(detectKey([min('A'), min('D'), dom7('E'), min('A')])).toBe('Am');
   });
 
-  it('T3-c: last chord G → C major via last-chord heuristic', () => {
-    expect(detectKey([min('A'), maj('F'), maj('C'), maj('G')])).toBe('C');
+  it('T3-c: Am-F-C-G scores equally for C major and A aeolian; first chord Am tips to A aeolian', () => {
+    expect(detectKey([min('A'), maj('F'), maj('C'), maj('G')])).toBe('A aeolian');
   });
 
   it('T3-d: last chord Am → A minor', () => {
     expect(detectKey([maj('C'), min('A'), maj('F'), min('A')])).toBe('Am');
   });
 
-  it('T3-e: first and last both Am → Am', () => {
-    expect(detectKey([min('A'), maj('F'), maj('C'), min('A')])).toBe('Am');
+  it('T3-e: Am-F-C-Am without raised 7th → A aeolian (natural minor beats harmonic minor)', () => {
+    expect(detectKey([min('A'), maj('F'), maj('C'), min('A')])).toBe('A aeolian');
   });
 
   it('T3-f: first C, last Am — last wins → Am', () => {
@@ -155,8 +155,8 @@ describe('detectKey — ending-key-wins: cadential tonic overrides global winner
     expect(detectKey([min('C'), dom7('D'), min('G'), dom7('A'), min('D')])).toBe('Dm');
   });
 
-  it('last chord G is V, not a tonic match — C major stays', () => {
-    expect(detectKey([min('A'), maj('F'), maj('C'), maj('G')])).toBe('C');
+  it('Am-F-C-G → A aeolian (first-chord Am is aeolian tonic; aeolian scores same as C major)', () => {
+    expect(detectKey([min('A'), maj('F'), maj('C'), maj('G')])).toBe('A aeolian');
   });
 
   it('last chord Am → minor wins over C major', () => {
@@ -243,5 +243,49 @@ describe('detectKey — dorian mode scoring', () => {
     // E dorian: i=Em, bIII=G, bVII=D, IV=A — all diatonic+quality matches
     // E harmonic minor: A is iv (minor), not major; A major gets only diatonic point there
     expect(detectKey([min('E'), maj('G'), maj('D'), maj('A')], undefined)).toBe('E dorian');
+  });
+});
+
+describe('detectKey — aeolian mode', () => {
+  it('Em-D-G-Bm → E aeolian (first chord minor tonic Em)', () => {
+    // E aeolian: i=Em, bVII=D, bIII=G, v=Bm — all quality matches (score 8)
+    // G major: vi=Em, V=D, I=G, III=Bm — also scores 8; first-chord Em is aeolian i → E aeolian wins
+    expect(detectKey([min('E'), maj('D'), maj('G'), min('B')])).toBe('E aeolian');
+  });
+
+  it('Am-Dm-C-Em → A aeolian (iv is minor, distinguishes from A dorian)', () => {
+    // A aeolian: iv=Dm (minor) scores quality match; A dorian: IV=D (major) would not match Dm
+    expect(detectKey([min('A'), min('D'), maj('C'), min('E')])).toBe('A aeolian');
+  });
+
+  it('declared key E aeolian is preserved', () => {
+    expect(detectKey([min('E'), maj('D'), maj('G'), min('B')], 'E aeolian')).toBe('E aeolian');
+  });
+
+  it('G7 V7 of C major present → C major wins over A aeolian', () => {
+    // G7 is V7 of C; C major wins via tiebreaker even if A aeolian ties on score
+    expect(detectKey([maj('C'), dom7('G'), maj('C')])).toBe('C');
+  });
+});
+
+describe('detectKey — mixolydian mode', () => {
+  it('D-C-G → D mixolydian (first chord major tonic D)', () => {
+    // D mixolydian: I=D, bVII=C, IV=G — all quality matches (score 6)
+    // G major: V=D, IV=C, I=G — also scores 6; first chord D is mixolydian I → D mixolydian wins
+    expect(detectKey([maj('D'), maj('C'), maj('G')])).toBe('D mixolydian');
+  });
+
+  it('declared key D mixolydian is preserved', () => {
+    expect(detectKey([maj('D'), maj('C'), maj('G')], 'D mixolydian')).toBe('D mixolydian');
+  });
+
+  it('G7 V7 of C major present → C major wins over G mixolydian', () => {
+    // G7 is V7 of C; C major wins over G mixolydian via tiebreaker
+    expect(detectKey([maj('C'), dom7('G'), maj('C')])).toBe('C');
+  });
+
+  it('A-G-D → A mixolydian (first chord major tonic A)', () => {
+    // A mixolydian: I=A, bVII=G, IV=D — all match; D major also scores well but first chord A wins
+    expect(detectKey([maj('A'), maj('G'), maj('D')])).toBe('A mixolydian');
   });
 });

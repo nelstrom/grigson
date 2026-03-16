@@ -122,6 +122,48 @@ describe('analyseHarmony — tetrad quality support', () => {
   });
 });
 
+describe('analyseHarmony — aeolian bVII → i cadence', () => {
+  it('D→Em in E aeolian: assigns both to E aeolian', () => {
+    const result = analyseHarmony([maj('D'), min('E')], 'E aeolian');
+    expect(result[0].currentKey).toBe('E aeolian'); // D — bVII, cadence
+    expect(result[1].currentKey).toBe('E aeolian'); // Em — i, cadence
+  });
+
+  it('G→Am in A aeolian: assigns both to A aeolian', () => {
+    const result = analyseHarmony([maj('G'), min('A')], 'A aeolian');
+    expect(result[0].currentKey).toBe('A aeolian'); // G — bVII
+    expect(result[1].currentKey).toBe('A aeolian'); // Am — i
+  });
+
+  it('F→C in C major: IV→I does NOT trigger aeolian cadence (gate check)', () => {
+    const result = analyseHarmony([maj('F'), maj('C'), maj('G')], 'C');
+    expect(result[0].currentKey).toBe('C');
+    expect(result[1].currentKey).toBe('C');
+    expect(result[2].currentKey).toBe('C');
+  });
+});
+
+describe('analyseHarmony — mixolydian bVII → I cadence', () => {
+  it('C→D in D mixolydian: assigns both to D mixolydian', () => {
+    const result = analyseHarmony([maj('C'), maj('D')], 'D mixolydian');
+    expect(result[0].currentKey).toBe('D mixolydian'); // C — bVII
+    expect(result[1].currentKey).toBe('D mixolydian'); // D — I
+  });
+
+  it('F→G in G mixolydian: assigns both to G mixolydian', () => {
+    const result = analyseHarmony([maj('F'), maj('G')], 'G mixolydian');
+    expect(result[0].currentKey).toBe('G mixolydian'); // F — bVII
+    expect(result[1].currentKey).toBe('G mixolydian'); // G — I
+  });
+
+  it('F→Gm does NOT trigger mixolydian bVII→I (tonic must be major)', () => {
+    // In G mixolydian, I is major; Gm should not trigger the pattern
+    const result = analyseHarmony([maj('F'), min('G')], 'G mixolydian');
+    expect(result[0].currentKey).toBe('G mixolydian'); // F is diatonic to G mixolydian
+    expect(result[1].currentKey).toBe('G mixolydian'); // Gm is diatonic to G mixolydian
+  });
+});
+
 describe('analyseHarmony — dorian plagal cadence', () => {
   it('G→Dm in D dorian: plagal cadence assigns both to D dorian', () => {
     // G is IV of D dorian (D tonic, IV = G); Dm is the dorian i

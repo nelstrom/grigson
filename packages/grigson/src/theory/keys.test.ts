@@ -36,8 +36,8 @@ describe('diatonicNotes', () => {
 });
 
 describe('KEYS', () => {
-  it('contains exactly 39 entries (13 major + 14 minor + 12 dorian)', () => {
-    expect(Object.keys(KEYS)).toHaveLength(39);
+  it('contains exactly 63 entries (13 major + 14 minor + 12 dorian + 12 aeolian + 12 mixolydian)', () => {
+    expect(Object.keys(KEYS)).toHaveLength(63);
   });
 
   it('all entries have scaleFamily, degree, and parent fields', () => {
@@ -66,6 +66,20 @@ describe('KEYS', () => {
     expect(KEYS['A dorian']).toMatchObject({ scaleFamily: 'major', degree: 2, parent: 'G' });
     expect(KEYS['Bb dorian']).toMatchObject({ scaleFamily: 'major', degree: 2, parent: 'Ab' });
   });
+
+  it('aeolian keys have scaleFamily=major, degree=6, parent=major key 3 semitones above', () => {
+    expect(KEYS['E aeolian']).toMatchObject({ scaleFamily: 'major', degree: 6, parent: 'G' });
+    expect(KEYS['A aeolian']).toMatchObject({ scaleFamily: 'major', degree: 6, parent: 'C' });
+    expect(KEYS['D aeolian']).toMatchObject({ scaleFamily: 'major', degree: 6, parent: 'F' });
+    expect(KEYS['Bb aeolian']).toMatchObject({ scaleFamily: 'major', degree: 6, parent: 'Db' });
+  });
+
+  it('mixolydian keys have scaleFamily=major, degree=5, parent=major key 5 semitones above', () => {
+    expect(KEYS['D mixolydian']).toMatchObject({ scaleFamily: 'major', degree: 5, parent: 'G' });
+    expect(KEYS['G mixolydian']).toMatchObject({ scaleFamily: 'major', degree: 5, parent: 'C' });
+    expect(KEYS['C mixolydian']).toMatchObject({ scaleFamily: 'major', degree: 5, parent: 'F' });
+    expect(KEYS['Ab mixolydian']).toMatchObject({ scaleFamily: 'major', degree: 5, parent: 'Db' });
+  });
 });
 
 describe('dorian keys', () => {
@@ -88,15 +102,67 @@ describe('dorian keys', () => {
   });
 });
 
-describe('getSiblingModes', () => {
-  it('returns only currently defined siblings for D dorian (C and D dorian)', () => {
-    const siblings = getSiblingModes('D dorian');
-    expect(siblings.sort()).toEqual(['C', 'D dorian'].sort());
+describe('aeolian keys', () => {
+  it('diatonicNotes returns correct set for E aeolian', () => {
+    expect(diatonicNotes('E aeolian')).toEqual(new Set(['E', 'F#', 'G', 'A', 'B', 'C', 'D']));
   });
 
-  it('returns only C for the C major key (no other major-family siblings defined yet)', () => {
+  it('diatonicNotes returns correct set for A aeolian', () => {
+    expect(diatonicNotes('A aeolian')).toEqual(new Set(['A', 'B', 'C', 'D', 'E', 'F', 'G']));
+  });
+
+  it('getKeyMode returns aeolian for aeolian keys', () => {
+    expect(getKeyMode('E aeolian')).toBe('aeolian');
+    expect(getKeyMode('Bb aeolian')).toBe('aeolian');
+  });
+
+  it('getKeyRoot returns root note for aeolian keys', () => {
+    expect(getKeyRoot('E aeolian')).toBe('E');
+    expect(getKeyRoot('F# aeolian')).toBe('F#');
+    expect(getKeyRoot('Bb aeolian')).toBe('Bb');
+  });
+});
+
+describe('mixolydian keys', () => {
+  it('diatonicNotes returns correct set for D mixolydian', () => {
+    expect(diatonicNotes('D mixolydian')).toEqual(new Set(['D', 'E', 'F#', 'G', 'A', 'B', 'C']));
+  });
+
+  it('diatonicNotes returns correct set for G mixolydian', () => {
+    expect(diatonicNotes('G mixolydian')).toEqual(new Set(['G', 'A', 'B', 'C', 'D', 'E', 'F']));
+  });
+
+  it('getKeyMode returns mixolydian for mixolydian keys', () => {
+    expect(getKeyMode('D mixolydian')).toBe('mixolydian');
+    expect(getKeyMode('Ab mixolydian')).toBe('mixolydian');
+  });
+
+  it('getKeyRoot returns root note for mixolydian keys', () => {
+    expect(getKeyRoot('D mixolydian')).toBe('D');
+    expect(getKeyRoot('F# mixolydian')).toBe('F#');
+    expect(getKeyRoot('Bb mixolydian')).toBe('Bb');
+  });
+});
+
+describe('getSiblingModes', () => {
+  it('returns all C-major-family siblings for D dorian', () => {
+    const siblings = getSiblingModes('D dorian');
+    expect(siblings.sort()).toEqual(['A aeolian', 'C', 'D dorian', 'G mixolydian'].sort());
+  });
+
+  it('returns all C-major-family siblings for C major', () => {
     const siblings = getSiblingModes('C');
-    expect(siblings.sort()).toEqual(['C', 'D dorian'].sort());
+    expect(siblings.sort()).toEqual(['A aeolian', 'C', 'D dorian', 'G mixolydian'].sort());
+  });
+
+  it('returns all C-major-family siblings for A aeolian', () => {
+    const siblings = getSiblingModes('A aeolian');
+    expect(siblings.sort()).toEqual(['A aeolian', 'C', 'D dorian', 'G mixolydian'].sort());
+  });
+
+  it('returns all C-major-family siblings for G mixolydian', () => {
+    const siblings = getSiblingModes('G mixolydian');
+    expect(siblings.sort()).toEqual(['A aeolian', 'C', 'D dorian', 'G mixolydian'].sort());
   });
 
   it('returns only Am for the Am key (no other harmonic_minor A-family siblings defined)', () => {
@@ -140,6 +206,20 @@ describe('getRelativeMajor', () => {
     expect(getRelativeMajor('B dorian')).toBe('A');
     expect(getRelativeMajor('Bb dorian')).toBe('Ab');
     expect(getRelativeMajor('F# dorian')).toBe('E');
+  });
+
+  it('aeolian key returns its parent major (3 semitones above)', () => {
+    expect(getRelativeMajor('E aeolian')).toBe('G');
+    expect(getRelativeMajor('A aeolian')).toBe('C');
+    expect(getRelativeMajor('D aeolian')).toBe('F');
+    expect(getRelativeMajor('Bb aeolian')).toBe('Db');
+  });
+
+  it('mixolydian key returns its parent major (5 semitones above)', () => {
+    expect(getRelativeMajor('D mixolydian')).toBe('G');
+    expect(getRelativeMajor('G mixolydian')).toBe('C');
+    expect(getRelativeMajor('C mixolydian')).toBe('F');
+    expect(getRelativeMajor('Ab mixolydian')).toBe('Db');
   });
 
   it('returns undefined for unknown key', () => {

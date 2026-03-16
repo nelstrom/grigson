@@ -53,15 +53,19 @@ export interface AnnotatedChord {
   currentKeyCandidates: string[];
 }
 
-// Build lookup maps: pitch class → key name (major, minor, and dorian separately)
+// Build lookup maps: pitch class → key name (major, minor, dorian, aeolian, mixolydian separately)
 function buildKeyMaps(): {
   majorByPC: Map<number, string>;
   minorByPC: Map<number, string>;
   dorianByPC: Map<number, string>;
+  aeolianByPC: Map<number, string>;
+  mixolydianByPC: Map<number, string>;
 } {
   const majorByPC = new Map<number, string>();
   const minorByPC = new Map<number, string>();
   const dorianByPC = new Map<number, string>();
+  const aeolianByPC = new Map<number, string>();
+  const mixolydianByPC = new Map<number, string>();
 
   for (const key of Object.keys(KEYS)) {
     const mode = getKeyMode(key);
@@ -76,6 +80,10 @@ function buildKeyMaps(): {
       if (!minorByPC.has(pc)) minorByPC.set(pc, key);
     } else if (mode === 'dorian') {
       if (!dorianByPC.has(pc)) dorianByPC.set(pc, key);
+    } else if (mode === 'aeolian') {
+      if (!aeolianByPC.has(pc)) aeolianByPC.set(pc, key);
+    } else if (mode === 'mixolydian') {
+      if (!mixolydianByPC.has(pc)) mixolydianByPC.set(pc, key);
     } else {
       if (!majorByPC.has(pc)) {
         majorByPC.set(pc, key);
@@ -85,16 +93,18 @@ function buildKeyMaps(): {
       }
     }
   }
-  return { majorByPC, minorByPC, dorianByPC };
+  return { majorByPC, minorByPC, dorianByPC, aeolianByPC, mixolydianByPC };
 }
 
 const {
   majorByPC: MAJOR_BY_PC,
   minorByPC: MINOR_BY_PC,
   dorianByPC: DORIAN_BY_PC,
+  aeolianByPC: AEOLIAN_BY_PC,
+  mixolydianByPC: MIXOLYDIAN_BY_PC,
 } = buildKeyMaps();
 
-export { MAJOR_BY_PC, MINOR_BY_PC, DORIAN_BY_PC };
+export { MAJOR_BY_PC, MINOR_BY_PC, DORIAN_BY_PC, AEOLIAN_BY_PC, MIXOLYDIAN_BY_PC };
 
 function getPC(chord: Chord): number | null {
   try {
@@ -213,6 +223,50 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
         const iChord = chords[i + 1];
         const iPC = getPC(iChord);
         if (iPC !== null && iPC === tonicPC && iChord.quality === 'minor') {
+          result.push(annotate(chord, homeKey, homeKey));
+          result.push(annotate(iChord, homeKey, homeKey));
+          i += 2;
+          continue;
+        }
+      }
+    }
+
+    // Try aeolian bVII → i cadence: bVII (major) → i (minor) — only when homeKey is aeolian
+    if (
+      pc !== null &&
+      chord.quality === 'major' &&
+      getKeyMode(homeKey) === 'aeolian' &&
+      i + 1 < chords.length
+    ) {
+      const tonicPC = rootToPitchClass(getKeyRoot(homeKey));
+      const bVIIPC = (tonicPC + 10) % 12;
+
+      if (pc === bVIIPC) {
+        const iChord = chords[i + 1];
+        const iPC = getPC(iChord);
+        if (iPC !== null && iPC === tonicPC && iChord.quality === 'minor') {
+          result.push(annotate(chord, homeKey, homeKey));
+          result.push(annotate(iChord, homeKey, homeKey));
+          i += 2;
+          continue;
+        }
+      }
+    }
+
+    // Try mixolydian bVII → I cadence: bVII (major) → I (major) — only when homeKey is mixolydian
+    if (
+      pc !== null &&
+      chord.quality === 'major' &&
+      getKeyMode(homeKey) === 'mixolydian' &&
+      i + 1 < chords.length
+    ) {
+      const tonicPC = rootToPitchClass(getKeyRoot(homeKey));
+      const bVIIPC = (tonicPC + 10) % 12;
+
+      if (pc === bVIIPC) {
+        const iChord = chords[i + 1];
+        const iPC = getPC(iChord);
+        if (iPC !== null && iPC === tonicPC && iChord.quality === 'major') {
           result.push(annotate(chord, homeKey, homeKey));
           result.push(annotate(iChord, homeKey, homeKey));
           i += 2;

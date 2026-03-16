@@ -9,16 +9,20 @@ export interface KeyInfo {
   parent: string; // root note of the scale family (e.g. 'C' for C-major family)
 }
 
-export type KeyMode = 'major' | 'minor' | 'dorian';
+export type KeyMode = 'major' | 'minor' | 'dorian' | 'aeolian' | 'mixolydian';
 
 export function getKeyMode(key: string): KeyMode {
   if (key.endsWith(' dorian')) return 'dorian';
+  if (key.endsWith(' aeolian')) return 'aeolian';
+  if (key.endsWith(' mixolydian')) return 'mixolydian';
   if (key.endsWith('m')) return 'minor';
   return 'major';
 }
 
 export function getKeyRoot(key: string): string {
   if (key.endsWith(' dorian')) return key.slice(0, -7);
+  if (key.endsWith(' aeolian')) return key.slice(0, -8);
+  if (key.endsWith(' mixolydian')) return key.slice(0, -11);
   if (key.endsWith('m')) return key.slice(0, -1);
   return key;
 }
@@ -53,6 +57,32 @@ export const KEYS: Readonly<Record<string, KeyInfo>> = {
   'G#m': { notes: ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'G'],      scaleFamily: 'harmonic_minor', degree: 1, parent: 'G#' },
   Ebm:  { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'D'],      scaleFamily: 'harmonic_minor', degree: 1, parent: 'Eb' },
   'D#m': { notes: ['D#', 'E#', 'F#', 'G#', 'A#', 'B', 'D'],     scaleFamily: 'harmonic_minor', degree: 1, parent: 'D#' },
+  // Aeolian mode (scaleFamily: 'major', degree: 6, parent = major key 3 semitones above root)
+  'A aeolian':  { notes: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],           scaleFamily: 'major', degree: 6, parent: 'C' },
+  'E aeolian':  { notes: ['E', 'F#', 'G', 'A', 'B', 'C', 'D'],          scaleFamily: 'major', degree: 6, parent: 'G' },
+  'B aeolian':  { notes: ['B', 'C#', 'D', 'E', 'F#', 'G', 'A'],         scaleFamily: 'major', degree: 6, parent: 'D' },
+  'F# aeolian': { notes: ['F#', 'G#', 'A', 'B', 'C#', 'D', 'E'],        scaleFamily: 'major', degree: 6, parent: 'A' },
+  'C# aeolian': { notes: ['C#', 'D#', 'E', 'F#', 'G#', 'A', 'B'],       scaleFamily: 'major', degree: 6, parent: 'E' },
+  'G# aeolian': { notes: ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'F#'],      scaleFamily: 'major', degree: 6, parent: 'B' },
+  'D aeolian':  { notes: ['D', 'E', 'F', 'G', 'A', 'Bb', 'C'],          scaleFamily: 'major', degree: 6, parent: 'F' },
+  'G aeolian':  { notes: ['G', 'A', 'Bb', 'C', 'D', 'Eb', 'F'],         scaleFamily: 'major', degree: 6, parent: 'Bb' },
+  'C aeolian':  { notes: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb'],        scaleFamily: 'major', degree: 6, parent: 'Eb' },
+  'F aeolian':  { notes: ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'Eb'],       scaleFamily: 'major', degree: 6, parent: 'Ab' },
+  'Bb aeolian': { notes: ['Bb', 'C', 'Db', 'Eb', 'F', 'Gb', 'Ab'],      scaleFamily: 'major', degree: 6, parent: 'Db' },
+  'Eb aeolian': { notes: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'Db'],     scaleFamily: 'major', degree: 6, parent: 'Gb' },
+  // Mixolydian mode (scaleFamily: 'major', degree: 5, parent = major key 5 semitones above root)
+  'G mixolydian':  { notes: ['G', 'A', 'B', 'C', 'D', 'E', 'F'],        scaleFamily: 'major', degree: 5, parent: 'C' },
+  'D mixolydian':  { notes: ['D', 'E', 'F#', 'G', 'A', 'B', 'C'],       scaleFamily: 'major', degree: 5, parent: 'G' },
+  'A mixolydian':  { notes: ['A', 'B', 'C#', 'D', 'E', 'F#', 'G'],      scaleFamily: 'major', degree: 5, parent: 'D' },
+  'E mixolydian':  { notes: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D'],     scaleFamily: 'major', degree: 5, parent: 'A' },
+  'B mixolydian':  { notes: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A'],    scaleFamily: 'major', degree: 5, parent: 'E' },
+  'F# mixolydian': { notes: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E'],   scaleFamily: 'major', degree: 5, parent: 'B' },
+  'C mixolydian':  { notes: ['C', 'D', 'E', 'F', 'G', 'A', 'Bb'],       scaleFamily: 'major', degree: 5, parent: 'F' },
+  'F mixolydian':  { notes: ['F', 'G', 'A', 'Bb', 'C', 'D', 'Eb'],      scaleFamily: 'major', degree: 5, parent: 'Bb' },
+  'Bb mixolydian': { notes: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'Ab'],     scaleFamily: 'major', degree: 5, parent: 'Eb' },
+  'Eb mixolydian': { notes: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'Db'],    scaleFamily: 'major', degree: 5, parent: 'Ab' },
+  'Ab mixolydian': { notes: ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'Gb'],   scaleFamily: 'major', degree: 5, parent: 'Db' },
+  'Db mixolydian': { notes: ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb'],  scaleFamily: 'major', degree: 5, parent: 'Gb' },
   // Dorian mode (scaleFamily: 'major', degree: 2, parent = major key a whole step below root)
   'C dorian':  { notes: ['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'],      scaleFamily: 'major', degree: 2, parent: 'Bb' },
   'D dorian':  { notes: ['D', 'E', 'F', 'G', 'A', 'B', 'C'],         scaleFamily: 'major', degree: 2, parent: 'C' },
