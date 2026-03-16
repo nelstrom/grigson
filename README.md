@@ -56,6 +56,18 @@ pnpm turbo watch build
 
 This re-runs only the affected package(s) and their dependents whenever a source file changes.
 
+## Developing the website
+
+```sh
+# Terminal 1 — rebuild grigson whenever its source changes
+pnpm turbo watch build --filter=grigson
+
+# Terminal 2 — serve the website with live reload
+pnpm --filter grigson-website serve
+```
+
+Eleventy watches `packages/grigson/dist/` for changes, so when Turbo rebuilds the library the site rebuilds automatically and the browser live-reloads. No server restart needed.
+
 ---
 
 ## Using the VS Code extension (developer install)
