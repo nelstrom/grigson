@@ -191,22 +191,22 @@ describe('chord parsing', () => {
   describe('front matter parsing', () => {
     it('parses title and key', () => {
       const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: 'Autumn Leaves', key: 'G' });
+      expect(fm).toEqual({ type: 'frontMatter', title: 'Autumn Leaves', key: 'G', meter: null });
     });
 
     it('parses title without key', () => {
       const fm = parseFrontMatter('---\ntitle: "My Song"\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: 'My Song', key: null });
+      expect(fm).toEqual({ type: 'frontMatter', title: 'My Song', key: null, meter: null });
     });
 
     it('parses key without title', () => {
       const fm = parseFrontMatter('---\nkey: Bb\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: null, key: 'Bb' });
+      expect(fm).toEqual({ type: 'frontMatter', title: null, key: 'Bb', meter: null });
     });
 
     it('parses empty front matter', () => {
       const fm = parseFrontMatter('---\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: null, key: null });
+      expect(fm).toEqual({ type: 'frontMatter', title: null, key: null, meter: null });
     });
 
     it('accepts all 17 valid key spellings', () => {
@@ -257,6 +257,35 @@ describe('chord parsing', () => {
     it('accepts a mixolydian key (D mixolydian)', () => {
       const result = parseFrontMatter('---\nkey: D mixolydian\n---\n');
       expect(result.key).toBe('D mixolydian');
+    });
+
+    it('parses meter: 2/4', () => {
+      const fm = parseFrontMatter('---\nmeter: 2/4\n---\n');
+      expect(fm.meter).toBe('2/4');
+    });
+
+    it('parses meter: mixed', () => {
+      const fm = parseFrontMatter('---\nmeter: mixed\n---\n');
+      expect(fm.meter).toBe('mixed');
+    });
+
+    it('parses meter: 6/8', () => {
+      const fm = parseFrontMatter('---\nmeter: 6/8\n---\n');
+      expect(fm.meter).toBe('6/8');
+    });
+
+    it('rejects an invalid meter', () => {
+      expect(() => parseFrontMatter('---\nmeter: waltz\n---\n')).toThrow();
+    });
+
+    it('propagates meter to Song', () => {
+      const song = parseSong('---\nmeter: 3/4\n---\n| C | Am |\n');
+      expect(song.meter).toBe('3/4');
+    });
+
+    it('song with no meter field has meter: null', () => {
+      const song = parseSong('| C | Am |\n');
+      expect(song.meter).toBeNull();
     });
   });
 

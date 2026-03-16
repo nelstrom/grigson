@@ -19,7 +19,7 @@ function section(rows: Row[], label: string | null = null): Section {
 }
 
 function song(rows: Row[], key: string | null = null): Song {
-  return { type: 'song', title: null, key, sections: [section(rows)] };
+  return { type: 'song', title: null, key, meter: null, sections: [section(rows)] };
 }
 
 function getRoots(result: Song): string[] {

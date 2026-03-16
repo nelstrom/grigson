@@ -231,6 +231,7 @@ function peg$parse(input, options) {
       type: "song",
       title: frontMatter?.title ?? null,
       key: frontMatter?.key ?? null,
+      meter: frontMatter?.meter ?? null,
       sections,
     };
   }
@@ -274,10 +275,16 @@ function peg$parse(input, options) {
       error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian).`);
     }
 
+    const isValidMeter = (m) => m === 'mixed' || /^[0-9]+\/[0-9]+$/.test(m);
+    if (meta.meter !== undefined && !isValidMeter(meta.meter)) {
+      error(`Invalid meter: "${meta.meter}". Must be a time signature like 2/4, 4/4, 3/4, 6/8, or "mixed".`);
+    }
+
     return {
       type: "frontMatter",
       title: meta.title ?? null,
       key: meta.key ?? null,
+      meter: meta.meter ?? null,
     };
   }
   function peg$f4(key, value) {

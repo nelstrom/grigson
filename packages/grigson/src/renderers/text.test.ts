@@ -18,6 +18,22 @@ describe('text renderer', () => {
       const out = render('| C | Am |\n');
       expect(out).not.toContain('---');
     });
+
+    it('renders meter in front matter', () => {
+      const out = render('---\nmeter: 3/4\n---\n| C | Am |\n');
+      expect(out).toContain('meter: 3/4');
+    });
+
+    it('renders front matter block when only meter is present', () => {
+      const out = render('---\nmeter: 2/4\n---\n| C | Am |\n');
+      expect(out).toContain('---');
+      expect(out).toContain('meter: 2/4');
+    });
+
+    it('omits meter line when meter is null', () => {
+      const out = render('---\ntitle: "My Song"\n---\n| C | Am |\n');
+      expect(out).not.toContain('meter');
+    });
   });
 
   describe('bars and rows', () => {

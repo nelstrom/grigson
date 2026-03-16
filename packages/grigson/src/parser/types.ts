@@ -2,6 +2,7 @@ export interface FrontMatter {
   type: 'frontMatter';
   title: string | null;
   key: string | null;
+  meter: string | null;
 }
 
 export type Quality =
@@ -57,5 +58,6 @@ export interface Song {
   type: 'song';
   title: string | null;
   key: string | null;
+  meter: string | null;
   sections: Section[];
 }

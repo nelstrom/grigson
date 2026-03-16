@@ -256,3 +256,13 @@ Replaced the `relative` field in `KeyInfo` with structured `scaleFamily`, `degre
 
 All 283 tests pass.
 2026-03-16: Added aeolian (degree 6) and mixolydian (degree 5) mode support. 24 new KEYS entries (63 total). New scoring intervals/quality sets for each mode. Tiebreaker functions for aeolian/major and mixolydian/major ambiguity. bVII→i and bVII→I cadence patterns in analyseHarmony. Fixed ending-key-wins to skip modal keys. Updated tests and documentation.
+
+## feat(meter): front-matter meter field with normalisation hoisting
+
+- Added `meter: string | null` to FrontMatter and Song types
+- Grammar: parse and validate meter (time signature pattern or "mixed")
+- Normalise: hoist uniform inline meter to front-matter, strip inline tokens; mixed meter → "mixed" preserved inline
+- TextRenderer: render meter in front-matter block
+- 326 tests passing
+- Commit: 0dcd69f
+

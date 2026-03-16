@@ -6,12 +6,18 @@ function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
   return { type: 'chord', root, quality };
 }
 
-function bar(c: Chord): Bar {
-  return { type: 'bar', slots: [{ type: 'chord', chord: c }] };
+function bar(c: Chord, timeSignature?: { numerator: number; denominator: number }): Bar {
+  const b: Bar = { type: 'bar', slots: [{ type: 'chord', chord: c }] };
+  if (timeSignature) b.timeSignature = timeSignature;
+  return b;
+}
+
+function barWithTS(c: Chord, numerator: number, denominator: number): Bar {
+  return bar(c, { numerator, denominator });
 }
 
 function row(...chords: Chord[]): Row {
-  return { type: 'row', bars: chords.map(bar) };
+  return { type: 'row', bars: chords.map((c) => bar(c)) };
 }
 
 function section(rows: Row[], label: string | null = null): Section {
@@ -19,7 +25,7 @@ function section(rows: Row[], label: string | null = null): Section {
 }
 
 function song(rows: Row[], key: string | null = null, title: string | null = null): Song {
-  return { type: 'song', title, key, sections: [section(rows)] };
+  return { type: 'song', title, key, meter: null, sections: [section(rows)] };
 }
 
 function chordOf(b: Bar): Chord {
@@ -317,7 +323,7 @@ describe('normaliseSong — per-section key detection', () => {
     // Chorus: Bb major with wrong enharmonics (A# D# F A#)
     const verse = section([row(ch('E'), ch('A'), ch('B'), ch('E'))], 'Verse');
     const chorus = section([row(ch('A#'), ch('D#'), ch('F'), ch('A#'))], 'Chorus');
-    const s: Song = { type: 'song', title: null, key: null, sections: [verse, chorus] };
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [verse, chorus] };
     const result = normaliseSong(s);
     // Verse stays in E major
     expect(chordOf(result.sections[0].rows[0].bars[0]).root).toBe('E');
@@ -337,7 +343,7 @@ describe('normaliseSong — per-section key detection', () => {
   it('front-matter key is set to home key of first section', () => {
     const verse = section([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))], 'Verse');
     const chorus = section([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'Chorus');
-    const s: Song = { type: 'song', title: null, key: null, sections: [verse, chorus] };
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [verse, chorus] };
     const result = normaliseSong(s);
     expect(result.key).toBe('G'); // first section is G major
   });
@@ -348,5 +354,47 @@ describe('normaliseSong — per-section key detection', () => {
     expect(homeKey).toBe('Bb');
     expect(out[0].root).toBe('Bb'); // A# → Bb
     expect(out[1].root).toBe('Eb'); // D# → Eb
+  });
+});
+
+describe('normaliseSong — meter hoisting', () => {
+  it('uniform inline meter is hoisted to front-matter and stripped from bars', () => {
+    const r: Row = {
+      type: 'row',
+      bars: [barWithTS(ch('C'), 2, 4), barWithTS(ch('Am'), 2, 4)],
+    };
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
+    const result = normaliseSong(s);
+    expect(result.meter).toBe('2/4');
+    // Inline time signatures stripped
+    for (const bar of result.sections[0].rows[0].bars) {
+      expect(bar.timeSignature).toBeUndefined();
+    }
+  });
+
+  it('mixed inline meters result in meter: "mixed" with inline tokens preserved', () => {
+    const r: Row = {
+      type: 'row',
+      bars: [barWithTS(ch('C'), 3, 4), barWithTS(ch('Am'), 4, 4)],
+    };
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
+    const result = normaliseSong(s);
+    expect(result.meter).toBe('mixed');
+    // Inline time signatures preserved
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 3, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[1].timeSignature).toEqual({ numerator: 4, denominator: 4 });
+  });
+
+  it('song with no inline time signatures and no front-matter meter stays meter: null', () => {
+    const s = song([row(ch('C'), ch('Am'), ch('F'), ch('G'))]);
+    const result = normaliseSong(s);
+    expect(result.meter).toBeNull();
+  });
+
+  it('song with front-matter meter and no inline TS preserves the front-matter meter', () => {
+    const r: Row = { type: 'row', bars: [bar(ch('C')), bar(ch('G'))] };
+    const s: Song = { type: 'song', title: null, key: null, meter: '3/4', sections: [section([r])] };
+    const result = normaliseSong(s);
+    expect(result.meter).toBe('3/4');
   });
 });

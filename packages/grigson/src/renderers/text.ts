@@ -70,10 +70,11 @@ function renderRow(row: Row, config: TextRendererConfig): string {
   return '| ' + row.bars.map((bar) => renderBar(bar, config)).join(' | ') + ' |';
 }
 
-function renderFrontMatter(title: string | null, key: string | null): string {
+function renderFrontMatter(title: string | null, key: string | null, meter: string | null): string {
   const lines: string[] = ['---'];
   if (title !== null) lines.push(`title: "${title}"`);
   if (key !== null) lines.push(`key: ${key}`);
+  if (meter !== null) lines.push(`meter: ${meter}`);
   lines.push('---');
   return lines.join('\n') + '\n';
 }
@@ -84,8 +85,8 @@ export class TextRenderer {
   render(song: Song): string {
     const parts: string[] = [];
 
-    if (song.title !== null || song.key !== null) {
-      parts.push(renderFrontMatter(song.title, song.key));
+    if (song.title !== null || song.key !== null || song.meter !== null) {
+      parts.push(renderFrontMatter(song.title, song.key, song.meter));
     }
 
     for (const section of song.sections) {

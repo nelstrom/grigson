@@ -93,5 +93,33 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
   const firstSectionKey = sectionResults[0]?.homeKey ?? song.key;
   const newSections = sectionResults.map((r) => r.section);
 
-  return { ...song, key: firstSectionKey, sections: newSections };
+  // Collect all bars that carry an explicit time signature
+  const allBars = newSections.flatMap((s) => s.rows.flatMap((r) => r.bars));
+  const barsWithTS = allBars.filter((b) => b.timeSignature !== undefined);
+
+  let newMeter: string | null = song.meter;
+  let finalSections = newSections;
+
+  if (barsWithTS.length > 0) {
+    const uniqueMeters = new Set(
+      barsWithTS.map((b) => `${b.timeSignature!.numerator}/${b.timeSignature!.denominator}`),
+    );
+
+    if (uniqueMeters.size === 1) {
+      // Uniform — hoist to front-matter, strip inline tokens
+      newMeter = [...uniqueMeters][0];
+      finalSections = newSections.map((sec) => ({
+        ...sec,
+        rows: sec.rows.map((row) => ({
+          ...row,
+          bars: row.bars.map(({ timeSignature: _ts, ...rest }) => rest as Bar),
+        })),
+      }));
+    } else {
+      // Mixed meter
+      newMeter = 'mixed';
+    }
+  }
+
+  return { ...song, key: firstSectionKey, meter: newMeter, sections: finalSections };
 }
