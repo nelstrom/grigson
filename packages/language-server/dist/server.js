@@ -37,17 +37,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("vscode-languageserver/node");
 const vscode_languageserver_textdocument_1 = require("vscode-languageserver-textdocument");
 let validate;
+let parseSong;
+let normaliseSong;
+let TextRenderer;
 async function loadGrigson() {
     const grigson = await Promise.resolve().then(() => __importStar(require('grigson')));
     validate = grigson.validate;
+    parseSong = grigson.parseSong;
+    normaliseSong = grigson.normaliseSong;
+    TextRenderer = grigson.TextRenderer;
 }
 const connection = (0, node_1.createConnection)(node_1.ProposedFeatures.all);
 const documents = new node_1.TextDocuments(vscode_languageserver_textdocument_1.TextDocument);
 connection.onInitialize(() => ({
     capabilities: {
         textDocumentSync: node_1.TextDocumentSyncKind.Incremental,
+        documentFormattingProvider: true,
     },
 }));
+connection.onDocumentFormatting((params) => {
+    if (!parseSong || !normaliseSong || !TextRenderer)
+        return [];
+    const document = documents.get(params.textDocument.uri);
+    if (!document)
+        return [];
+    const text = document.getText();
+    try {
+        const song = parseSong(text);
+        const normalised = normaliseSong(song);
+        const output = new TextRenderer().render(normalised);
+        if (output === text)
+            return [];
+        const lastLine = document.lineCount - 1;
+        const lastChar = document.getText().split('\n').at(-1).length;
+        return [node_1.TextEdit.replace(node_1.Range.create(0, 0, lastLine, lastChar), output)];
+    }
+    catch {
+        return [];
+    }
+});
 function validateDocument(document) {
     if (!validate)
         return;

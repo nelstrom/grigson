@@ -18,15 +18,19 @@ pnpm --filter grigson-language-server run build
 
 ## What it does
 
+### Diagnostics
+
 On every file open and every keystroke, the server calls `validate()` from the `grigson` package and sends the resulting diagnostics to the editor via `textDocument/publishDiagnostics`. Valid files produce zero diagnostics; parse errors appear as red squiggles with hover tooltips.
 
-## Diagnostics
-
-The server reports parse errors as LSP errors with:
+Diagnostics include:
 - `range` — 0-indexed start/end position of the error
 - `severity` — `Error` (1) for parse errors
 - `message` — the Peggy parse error message
 - `source` — `"grigson"`
+
+### Formatting
+
+The server advertises `documentFormattingProvider` and handles `textDocument/formatting` requests. On a format request it runs `parseSong` → `normaliseSong` → `TextRenderer.render` and returns a single `TextEdit` replacing the entire document with the normalised output. If the file cannot be parsed, or if the normalised output is identical to the current content, the server returns an empty edit list (no change).
 
 ## Editor setup
 

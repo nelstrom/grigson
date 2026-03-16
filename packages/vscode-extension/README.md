@@ -6,7 +6,20 @@ VS Code extension for Grigson `.chart` files. Provides syntax highlighting and l
 
 - Syntax highlighting for front matter, barlines, chord roots, accidentals, and all quality suffixes
 - Live parse error diagnostics: red squiggles, hover tooltips, Problems panel integration
+- Document formatting: normalises chord spellings to match the detected key (see below)
 - Powered by the [`grigson-language-server`](../language-server/README.md)
+
+## Formatting
+
+The extension registers a document formatter for `.chart` files backed by `grigson normalise`. Invoking **Format Document** (`⇧⌥F` on macOS, `Shift+Alt+F` on Windows/Linux) parses the file, normalises chord spellings to match the detected key, and rewrites the document in place. If the file already matches the normalised form, the document is left unchanged.
+
+The formatter is available via:
+- **Format Document** in the command palette
+- The right-click context menu → **Format Document**
+- The **Format Document with…** picker (select *Grigson Language Server*)
+- On save, if `editor.formatOnSave` is enabled in settings
+
+No user configuration is required.
 
 ## Developer install
 
@@ -26,4 +39,9 @@ pnpm --filter vscode-grigson run build
 
 ## How it works
 
-The extension is a thin LSP client. On activation (`onLanguage:grigson`), it spawns the language server at `packages/language-server/dist/server.js` via IPC and proxies LSP messages to VS Code. The server calls `validate()` from the `grigson` package on every file change and sends diagnostics back. No additional VS Code API calls are required — `connection.sendDiagnostics()` in the server drives all editor feedback.
+The extension is a thin LSP client. On activation (`onLanguage:grigson`), it spawns the language server at `packages/language-server/dist/server.js` via IPC and proxies LSP messages to VS Code. The server handles two capabilities:
+
+- **Diagnostics** — calls `validate()` on every file change and sends parse errors via `textDocument/publishDiagnostics`.
+- **Formatting** — handles `textDocument/formatting` by running `parseSong` → `normaliseSong` → `TextRenderer.render` and returning a single full-document `TextEdit`. Returns no edits if the file is unparseable or already normalised.
+
+No additional VS Code API calls are required in the extension itself — everything flows through the LSP connection.
