@@ -42,11 +42,19 @@ This is a pnpm monorepo. Each package lives under `packages/`.
 # Install all workspace dependencies
 pnpm install
 
-# Build every package
-pnpm --filter grigson run build
-pnpm --filter grigson-language-server run build
-pnpm --filter vscode-grigson run build
+# Build every package (in dependency order, with caching)
+pnpm build
 ```
+
+Builds are orchestrated by [Turborepo](https://turbo.build). Packages are built in dependency order — `grigson` first, then `language-server` and `website` in parallel, then `vscode-extension`. Unchanged packages are skipped on subsequent runs thanks to Turbo's local cache.
+
+To rebuild continuously while developing:
+
+```sh
+pnpm turbo watch build
+```
+
+This re-runs only the affected package(s) and their dependents whenever a source file changes.
 
 ---
 
@@ -66,7 +74,7 @@ This is the standard way to run an extension from source during development. It 
 3. A new **Extension Development Host** window opens with the extension active.
 4. Open any `.chart` file in that window. You should see syntax highlighting and, if the language server is built, live diagnostics.
 
-To rebuild after making changes: stop the host (`Shift+F5`), run `pnpm build` in `packages/vscode-extension`, and press `F5` again.
+To rebuild after making changes: stop the host (`Shift+F5`), run `pnpm build` from the repo root, and press `F5` again.
 
 ### Option 2 — Install from VSIX
 
@@ -75,10 +83,8 @@ Package the extension into a `.vsix` file and install it permanently into your V
 **Prerequisites:** `@vscode/vsce` — install it once with `npm install -g @vscode/vsce`.
 
 ```sh
-# Build the extension and language server
-pnpm --filter grigson run build
-pnpm --filter grigson-language-server run build
-pnpm --filter vscode-grigson run build
+# Build all packages (grigson → language-server → extension, in order)
+pnpm build
 
 # Package into a .vsix
 cd packages/vscode-extension

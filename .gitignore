@@ -17,6 +17,10 @@ packages/grigson/src/parser/generated.d.ts
 packages/tree-sitter-grammar/*.dylib
 packages/tree-sitter-grammar/*.so
 
+# Turborepo
+.turbo/
+**/.turbo/
+
 # Misc
 .vscode/grigson.code-workspace
 .DS_Store
