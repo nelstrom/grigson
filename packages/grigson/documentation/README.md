@@ -48,14 +48,13 @@ key: Ab
 
 Front matter is written in YAML. All fields are optional.
 
-| Field    | Type    | Description                                       |
-| -------- | ------- | ------------------------------------------------- |
-| `title`  | string  | Title of the song                                 |
-| `artist` | string  | Composer or artist name                           |
-| `key`    | string  | Global key (see Key Notation below)               |
-| `meter`  | string  | Time signature (see Time Signatures below)        |
-| `tempo`  | integer | Tempo in BPM                                      |
-| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"`             |
+| Field    | Type    | Description                                             |
+| -------- | ------- | ------------------------------------------------------- |
+| `title`  | string  | Title of the song                                       |
+| `artist` | string  | Composer or artist name                                 |
+| `key`    | string  | Global key (see Key Notation below)                     |
+| `meter`  | string  | Time signature; default 4/4 (see Time Signatures below) |
+| `tempo`  | integer | Tempo in BPM                                            |
 
 ---
 
@@ -115,7 +114,7 @@ meter: 2/4
 | A | E | A | A |
 ```
 
-The `meter` value must be a time signature like `2/4`, `4/4`, `3/4`, `6/8`, or the special value `mixed` (see below). The default when `meter` is absent is 4/4 (implied, not written).
+The `meter` value must be a time signature like `2/4`, `4/4`, `3/4`, `6/8`, or the special value `mixed` (see below). When omitted, 4/4 is assumed.
 
 ### Normalisation and hoisting
 
@@ -287,7 +286,6 @@ Here is a short jazz-style chart demonstrating several features:
 ---
 title: "Blues in F"
 key: F
-feel: "swing"
 ---
 
 [Head]
