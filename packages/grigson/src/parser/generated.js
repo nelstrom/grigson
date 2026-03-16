@@ -267,11 +267,11 @@ function peg$parse(input, options) {
       "C#", "Db", "D#", "Eb", "F#", "Gb", "G#", "Ab", "A#", "Bb",
       "C", "D", "E", "F", "G", "A", "B",
     ];
-    const validKeySuffixes = ["m", " dorian", ""];
+    const validKeySuffixes = ["m", " dorian", " aeolian", " mixolydian", ""];
     const isValidKey = (k) =>
       validNotes.some((n) => validKeySuffixes.some((s) => k === n + s));
     if (meta.key !== undefined && !isValidKey(meta.key)) {
-      error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian).`);
+      error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian).`);
     }
 
     return {

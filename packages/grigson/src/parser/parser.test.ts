@@ -248,6 +248,16 @@ describe('chord parsing', () => {
       const result = parseFrontMatter('---\nkey: A dorian\n---\n');
       expect(result.key).toBe('A dorian');
     });
+
+    it('accepts an aeolian key (E aeolian)', () => {
+      const result = parseFrontMatter('---\nkey: E aeolian\n---\n');
+      expect(result.key).toBe('E aeolian');
+    });
+
+    it('accepts a mixolydian key (D mixolydian)', () => {
+      const result = parseFrontMatter('---\nkey: D mixolydian\n---\n');
+      expect(result.key).toBe('D mixolydian');
+    });
   });
 
   describe('row parsing', () => {
