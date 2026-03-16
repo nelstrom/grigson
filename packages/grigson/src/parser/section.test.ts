@@ -51,8 +51,9 @@ describe('section parsing', () => {
     const lines = output.trim().split('\n');
     expect(lines[0]).toBe('[Verse]');
     expect(lines[1]).toBe('| C | Am |');
-    expect(lines[2]).toBe('[Chorus]');
-    expect(lines[3]).toBe('| F | G |');
+    expect(lines[2]).toBe('');
+    expect(lines[3]).toBe('[Chorus]');
+    expect(lines[4]).toBe('| F | G |');
   });
 
   it('TextRenderer omits label line when label is null', () => {

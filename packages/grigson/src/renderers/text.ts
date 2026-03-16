@@ -83,21 +83,25 @@ export class TextRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
-    const parts: string[] = [];
+    const blocks: string[] = [];
 
     if (song.title !== null || song.key !== null || song.meter !== null) {
-      parts.push(renderFrontMatter(song.title, song.key, song.meter));
+      blocks.push(renderFrontMatter(song.title, song.key, song.meter));
     }
 
     for (const section of song.sections) {
+      const lines: string[] = [];
       if (section.label !== null) {
-        parts.push(`[${section.label}]`);
+        lines.push(`[${section.label}]`);
       }
       for (const row of section.rows) {
-        parts.push(renderRow(row, this.config));
+        lines.push(renderRow(row, this.config));
+      }
+      if (lines.length > 0) {
+        blocks.push(lines.join('\n'));
       }
     }
 
-    return parts.join('\n') + (parts.length > 0 ? '\n' : '');
+    return blocks.join('\n\n') + (blocks.length > 0 ? '\n' : '');
   }
 }
