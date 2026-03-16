@@ -34,6 +34,7 @@ export default async function (eleventyConfig) {
   );
 
   eleventyConfig.addWatchTarget('charts/');
+  eleventyConfig.addWatchTarget('../grigson/dist/');
 
   eleventyConfig.setServerOptions({
     headers: {
