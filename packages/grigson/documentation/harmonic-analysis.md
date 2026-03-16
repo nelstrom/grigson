@@ -55,7 +55,7 @@ V7  I
 
 ### Circle-of-fifths fallback (isolated borrowed chords)
 
-A chord not captured by any pattern and **not diatonic to homeKey** receives a `currentKey` derived from the circle of fifths. All 22 in-scope keys whose diatonic note set contains the chord's root (by spelling) are collected and ranked by `circleOfFifthsDistance` from `homeKey`. The closest key becomes `currentKey`; all tied candidates are stored in `currentKeyCandidates`.
+A chord not captured by any pattern and **not diatonic to homeKey** receives a `currentKey` derived from the circle of fifths. All 39 in-scope keys whose diatonic note set contains the chord's root (by spelling) are collected and ranked by `circleOfFifthsDistance` from `homeKey`. The closest key becomes `currentKey`; all tied candidates are stored in `currentKeyCandidates`.
 
 Tie-breaking rules:
 1. If the homeKey's **parallel minor** (e.g. `Cm` for homeKey `C`) is among the tied candidates, it is preferred.

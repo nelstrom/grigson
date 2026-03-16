@@ -4,7 +4,7 @@ The `detectKey` function in `src/theory/keyDetector.ts` infers the tonic key fro
 
 ## Scoring
 
-Each of the 22 in-scope keys (12 major + 10 harmonic minor) is scored against the chord sequence:
+Each of the 39 in-scope keys (13 major + 14 harmonic minor + 12 dorian) is scored against the chord sequence:
 
 - **+1** for each chord whose root is diatonic to the key
 - **+1** quality bonus when the chord quality matches the expected scale-degree quality (e.g. a minor chord on the VI degree of a major key)

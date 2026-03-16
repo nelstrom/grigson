@@ -1,4 +1,4 @@
-import { KEYS, diatonicNotes, getKeyMode, getKeyRoot } from './keys.js';
+import { KEYS, diatonicNotes, getKeyMode, getKeyRoot, getRelativeMajor } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord } from '../parser/types.js';
 
@@ -26,7 +26,7 @@ const COF_POSITIONS: Readonly<Record<number, number>> = {
 export function circleOfFifthsDistance(keyA: string, keyB: string): number {
   const getPosition = (key: string): number => {
     const mode = getKeyMode(key);
-    const majorKey = (mode === 'minor' || mode === 'dorian') && KEYS[key]?.relative ? KEYS[key].relative! : key;
+    const majorKey = getRelativeMajor(key) ?? key;
     const root = getKeyRoot(majorKey);
     let pc: number;
     try {

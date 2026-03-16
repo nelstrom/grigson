@@ -242,3 +242,16 @@ Extended buildKeyMaps in harmonicAnalysis.ts to build a dorianByPC: Map<number, 
 
 ## dorian-plagal-cadence
 Added a 3rd pattern detector to analyseHarmony in harmonicAnalysis.ts: the dorian plagal cadence (IV→i). The pattern fires only when getKeyMode(homeKey) === 'dorian', matches a major chord whose pitch class is (tonicPC + 5) % 12 (the IV) followed by a minor chord at tonicPC (the i), and assigns currentKey = homeKey to both chords. The block is placed after the 5-1 pattern so functional (2-5-1, 5-1) patterns take priority. Added 3 tests: G→Dm in D dorian, A→Em in E dorian, and F→C in C major (gate check — must not fire). All 271 tests pass.
+## Richer Key Relationship Modeling
+
+Replaced the `relative` field in `KeyInfo` with structured `scaleFamily`, `degree`, and `parent` fields that encode modal family membership explicitly.
+
+- Added `ScaleFamily` type (`'major' | 'harmonic_minor'`), `degree` (1–7), and `parent` (scale family root) to `KeyInfo`; removed `relative`
+- Updated all 39 KEYS entries with new structural fields
+- Added `getSiblingModes(key)` — returns all KEYS entries in the same scale family
+- Added `getRelativeMajor(key)` — maps any key to its ionian sibling; replaces all `KEYS[k].relative` lookups
+- Migrated `harmonicAnalysis.ts` and `keyDetector.ts` callers to `getRelativeMajor`
+- Exported `ScaleFamily`, `getSiblingModes`, `getRelativeMajor` from public API
+- Updated tests (25 tests, all pass) and documentation
+
+All 283 tests pass.

@@ -1,4 +1,4 @@
-import { KEYS, getKeyMode, getKeyRoot } from './keys.js';
+import { KEYS, getKeyMode, getKeyRoot, getRelativeMajor } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord, Quality } from '../parser/types.js';
 
@@ -261,17 +261,27 @@ export function detectKey(
     }
   }
 
-  // If the relative major/minor is within 1 point, apply explicit tiebreaking
+  // If the relative major/minor is within 1 point, apply explicit tiebreaking.
   // Dorian keys have a relative major but the tiebreak logic is not yet implemented for dorian;
   // skip tiebreaking when either key is dorian to avoid misclassifying dorian as its relative major.
-  const relative = KEYS[bestKey]?.relative;
-  if (relative && KEYS[relative] && getKeyMode(bestKey) !== 'dorian' && getKeyMode(relative) !== 'dorian') {
-    const relativeScore = scores.get(relative) ?? 0;
-    if (Math.abs(maxScore - relativeScore) <= 1) {
-      const isMinor = getKeyMode(bestKey) === 'minor';
-      const major = isMinor ? relative : bestKey;
-      const minor = isMinor ? bestKey : relative;
-      bestKey = breakRelativeTie(major, minor, chords);
+  if (getKeyMode(bestKey) !== 'dorian') {
+    let relativeKey: string | undefined;
+    if (getKeyMode(bestKey) === 'minor') {
+      relativeKey = getRelativeMajor(bestKey);
+    } else if (getKeyMode(bestKey) === 'major') {
+      // Relative minor: find the harmonic minor key whose relative major is bestKey
+      relativeKey = Object.keys(KEYS).find(
+        (k) => getKeyMode(k) === 'minor' && getRelativeMajor(k) === bestKey,
+      );
+    }
+    if (relativeKey && KEYS[relativeKey] && getKeyMode(relativeKey) !== 'dorian') {
+      const relativeScore = scores.get(relativeKey) ?? 0;
+      if (Math.abs(maxScore - relativeScore) <= 1) {
+        const isMinor = getKeyMode(bestKey) === 'minor';
+        const major = isMinor ? relativeKey : bestKey;
+        const minor = isMinor ? bestKey : relativeKey;
+        bestKey = breakRelativeTie(major, minor, chords);
+      }
     }
   }
 
@@ -304,7 +314,7 @@ export function detectKey(
 
   // Handle dorian/relative-major tiebreak
   if (getKeyMode(bestKey) === 'dorian') {
-    const dorianRelative = KEYS[bestKey]?.relative;
+    const dorianRelative = getRelativeMajor(bestKey);
     if (dorianRelative && KEYS[dorianRelative]) {
       const relScore = scores.get(dorianRelative) ?? 0;
       if (relScore === maxScore) {
@@ -313,7 +323,7 @@ export function detectKey(
     }
   } else if (getKeyMode(bestKey) === 'major') {
     for (const [key, score] of scores) {
-      if (getKeyMode(key) === 'dorian' && KEYS[key]?.relative === bestKey && score === maxScore) {
+      if (getKeyMode(key) === 'dorian' && getRelativeMajor(key) === bestKey && score === maxScore) {
         bestKey = breakDorianMajorTie(key, bestKey, chords);
         break;
       }
