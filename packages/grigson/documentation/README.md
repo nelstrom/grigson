@@ -48,13 +48,14 @@ key: Ab
 
 Front matter is written in YAML. All fields are optional.
 
-| Field    | Type    | Description                          |
-| -------- | ------- | ------------------------------------ |
-| `title`  | string  | Title of the song                    |
-| `artist` | string  | Composer or artist name              |
-| `key`    | string  | Global key (see Key Notation below)  |
-| `tempo`  | integer | Tempo in BPM                         |
-| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"` |
+| Field    | Type    | Description                                       |
+| -------- | ------- | ------------------------------------------------- |
+| `title`  | string  | Title of the song                                 |
+| `artist` | string  | Composer or artist name                           |
+| `key`    | string  | Global key (see Key Notation below)               |
+| `meter`  | string  | Time signature (see Time Signatures below)        |
+| `tempo`  | integer | Tempo in BPM                                      |
+| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"`             |
 
 ---
 
@@ -100,6 +101,29 @@ A time signature appears immediately after the first barline it applies to, and 
 | (4/4) Cm | F7 | Bb | Bb |
 | Cm | (2/4) G7 | (4/4) Cm | Cm |
 ```
+
+### Declaring meter in front matter
+
+For songs with a single uniform meter, declare it once in front matter rather than repeating an inline token on every row:
+
+```
+---
+title: "Tennessee Whiskey"
+key: A
+meter: 2/4
+---
+| A | E | A | A |
+```
+
+The `meter` value must be a time signature like `2/4`, `4/4`, `3/4`, `6/8`, or the special value `mixed` (see below). The default when `meter` is absent is 4/4 (implied, not written).
+
+### Normalisation and hoisting
+
+When a song is normalised (via `normaliseSong`), inline time signature tokens are automatically hoisted:
+
+- **Uniform meter** — if every bar that carries an inline time signature uses the same value, that value is written to `song.meter` and the inline tokens are stripped. The rendered output will have `meter: 2/4` in front matter instead of `(2/4)` on the first bar of each row.
+- **Mixed meter** — if bars carry different time signatures, `song.meter` is set to `"mixed"` and the inline tokens are preserved exactly as written.
+- **No inline time signatures** — `song.meter` is left unchanged (either the value declared in front matter, or `null` if none was declared).
 
 ---
 
