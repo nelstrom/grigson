@@ -284,3 +284,6 @@ Added `%` simile mark support to the parser and renderer. In grammar.pegjs, adde
 
 ## parser-examples-regression-test
 Created src/parser/examples.test.ts that uses readdirSync to enumerate all *.chart files in packages/grigson/documentation/examples/ and parses each with parseSong() inside an individual it() block. Added 16 tests (one per example file). All 407 tests pass.
+
+## sync-textmate-qualities-7b5-dash
+Updated the chord quality alternation in the 'chord' repository entry regex in packages/textmate-grammar/grigson.tmLanguage.json from 'm7b5|maj7|M7|dim7|m7|dim|m|7' to 'm7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-', placing '7b5' before '7' (to avoid premature matching) and '-' at the end (Cm7 written as C-). Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added two new chords (G7b5, F#7b5, C-, Bb-) to packages/grigson/documentation/examples/syntax-test.chart. All 407 tests pass.

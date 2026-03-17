@@ -1437,7 +1437,7 @@
       "Sync the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
       "Add syntax-test.chart entries for G7b5 and C- and confirm they highlight correctly"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-textmate-extended-barlines",
