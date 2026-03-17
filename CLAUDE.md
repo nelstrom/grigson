@@ -50,6 +50,7 @@ Call this after implementing and testing a task.
 
 ## General conventions
 
+- Build all packages with `pnpm build` from the repo root (uses Turborepo — builds in dependency order, caches unchanged packages).
 - Run tests with `pnpm test` from the repo root.
 - Append task summaries to `project/progress.txt` after completing each task.
 - Commit changes at the end of each task.
