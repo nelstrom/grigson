@@ -27,16 +27,19 @@ module.exports = grammar({
 
     unquoted_value: (_$) => /[^\r\n\t "][^\r\n]*/,
 
-    row: ($) => seq($.barline, repeat1($.bar_tail)),
+    row: ($) => seq($.open_barline, repeat1($.bar_tail)),
 
     bar_tail: ($) =>
-      seq(optional($.time_signature), repeat1($.beat_slot), $.barline),
+      seq(optional($.time_signature), repeat1($.beat_slot), $.close_barline),
 
     beat_slot: ($) => choice($.chord, $.dot),
 
     dot: (_$) => '.',
 
-    barline: (_$) => '|',
+    open_barline: (_$) => token(choice(':||:', ':||', '||:', '||', '|')),
+
+    close_barline: (_$) =>
+      token(choice(/:\|\|x\d+:/, /:\|\|x\d+/, ':||:', ':||', '||:', '||.', '||', '|')),
 
     time_signature: ($) => seq('(', $.integer, '/', $.integer, ')'),
 

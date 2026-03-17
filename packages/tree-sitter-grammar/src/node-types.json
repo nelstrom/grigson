@@ -8,11 +8,11 @@
       "required": true,
       "types": [
         {
-          "type": "barline",
+          "type": "beat_slot",
           "named": true
         },
         {
-          "type": "beat_slot",
+          "type": "close_barline",
           "named": true
         },
         {
@@ -134,7 +134,7 @@
           "named": true
         },
         {
-          "type": "barline",
+          "type": "open_barline",
           "named": true
         }
       ]
@@ -223,7 +223,7 @@
     "named": true
   },
   {
-    "type": "barline",
+    "type": "close_barline",
     "named": true
   },
   {
@@ -244,6 +244,10 @@
   },
   {
     "type": "note_letter",
+    "named": true
+  },
+  {
+    "type": "open_barline",
     "named": true
   },
   {

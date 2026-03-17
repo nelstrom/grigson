@@ -8,12 +8,12 @@ Single-bar row
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Four-bar row
@@ -25,28 +25,28 @@ Four-bar row
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Bar with 4/4 time signature
@@ -58,7 +58,7 @@ Bar with 4/4 time signature
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (time_signature
         (integer)
@@ -66,7 +66,7 @@ Bar with 4/4 time signature
       (beat_slot
         (chord
           (note_letter)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 First bar has time signature, second does not
@@ -78,7 +78,7 @@ First bar has time signature, second does not
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (time_signature
         (integer)
@@ -86,13 +86,13 @@ First bar has time signature, second does not
       (beat_slot
         (chord
           (note_letter)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Bar with 6/8 time signature
@@ -104,7 +104,7 @@ Bar with 6/8 time signature
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (time_signature
         (integer)
@@ -113,7 +113,7 @@ Bar with 6/8 time signature
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Mixed accidentals and qualities across bars
@@ -125,31 +125,31 @@ Mixed accidentals and qualities across bars
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (accidental)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (accidental)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))
+      (close_barline))
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Bar with multiple chords (beat slots)
@@ -161,7 +161,7 @@ Bar with multiple chords (beat slots)
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
@@ -170,7 +170,7 @@ Bar with multiple chords (beat slots)
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Bar with chord dot chord
@@ -182,7 +182,7 @@ Bar with chord dot chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
@@ -193,7 +193,7 @@ Bar with chord dot chord
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Bar with leading time signature and multiple beat slots
@@ -205,7 +205,7 @@ Bar with leading time signature and multiple beat slots
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (time_signature
         (integer)
@@ -217,4 +217,162 @@ Bar with leading time signature and multiple beat slots
         (dot))
       (beat_slot
         (dot))
-      (barline))))
+      (close_barline))))
+
+================================================================================
+Double barline open
+================================================================================
+
+|| C |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Double final barline close
+================================================================================
+
+| C ||
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Double dotted barline close
+================================================================================
+
+| C ||.
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Start repeat open barline
+================================================================================
+
+||: C |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+End repeat close barline
+================================================================================
+
+| C :||
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+End repeat with count close barline
+================================================================================
+
+| C :||x2
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+End and start repeat barline
+================================================================================
+
+| C :||:
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+End repeat with count and start repeat barline
+================================================================================
+
+| C :||x2:
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Start repeat open with end repeat close
+================================================================================
+
+||: C | F :||
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))

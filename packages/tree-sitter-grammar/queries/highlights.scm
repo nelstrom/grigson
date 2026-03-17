@@ -17,7 +17,8 @@
   "]" @punctuation.bracket)
 
 ; Barlines
-(barline) @punctuation.delimiter
+(open_barline) @punctuation.delimiter
+(close_barline) @punctuation.delimiter
 
 ; Time signatures
 (time_signature

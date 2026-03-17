@@ -1518,7 +1518,7 @@
       "Update queries/highlights.scm to scope open_barline and close_barline",
       "Run tree-sitter test to confirm all corpus tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-simile-mark",

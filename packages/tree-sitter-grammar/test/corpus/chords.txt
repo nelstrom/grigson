@@ -8,12 +8,12 @@ Natural chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Sharp chord
@@ -25,13 +25,13 @@ Sharp chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (accidental)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Flat chord
@@ -43,13 +43,13 @@ Flat chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (accidental)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Minor chord
@@ -61,13 +61,13 @@ Minor chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Dominant seventh chord
@@ -79,13 +79,13 @@ Dominant seventh chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Half-diminished chord
@@ -97,13 +97,13 @@ Half-diminished chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Extended chord qualities
@@ -115,13 +115,13 @@ Extended chord qualities
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 CM7 quality
@@ -133,13 +133,13 @@ CM7 quality
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Minor seventh chord
@@ -151,13 +151,13 @@ Minor seventh chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Diminished seventh chord
@@ -169,13 +169,13 @@ Diminished seventh chord
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Dominant seventh flat five chord (7b5)
@@ -187,13 +187,13 @@ Dominant seventh flat five chord (7b5)
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))
 
 ================================================================================
 Dash minor seventh chord (-)
@@ -205,10 +205,10 @@ Dash minor seventh chord (-)
 
 (song
   (row
-    (barline)
+    (open_barline)
     (bar_tail
       (beat_slot
         (chord
           (note_letter)
           (quality)))
-      (barline))))
+      (close_barline))))

@@ -135,7 +135,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "barline"
+          "name": "open_barline"
         },
         {
           "type": "REPEAT1",
@@ -170,7 +170,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "barline"
+          "name": "close_barline"
         }
       ]
     },
@@ -191,9 +191,73 @@
       "type": "STRING",
       "value": "."
     },
-    "barline": {
-      "type": "STRING",
-      "value": "|"
+    "open_barline": {
+      "type": "TOKEN",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "STRING",
+            "value": ":||:"
+          },
+          {
+            "type": "STRING",
+            "value": ":||"
+          },
+          {
+            "type": "STRING",
+            "value": "||:"
+          },
+          {
+            "type": "STRING",
+            "value": "||"
+          },
+          {
+            "type": "STRING",
+            "value": "|"
+          }
+        ]
+      }
+    },
+    "close_barline": {
+      "type": "TOKEN",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": ":\\|\\|x\\d+:"
+          },
+          {
+            "type": "PATTERN",
+            "value": ":\\|\\|x\\d+"
+          },
+          {
+            "type": "STRING",
+            "value": ":||:"
+          },
+          {
+            "type": "STRING",
+            "value": ":||"
+          },
+          {
+            "type": "STRING",
+            "value": "||:"
+          },
+          {
+            "type": "STRING",
+            "value": "||."
+          },
+          {
+            "type": "STRING",
+            "value": "||"
+          },
+          {
+            "type": "STRING",
+            "value": "|"
+          }
+        ]
+      }
     },
     "time_signature": {
       "type": "SEQ",
