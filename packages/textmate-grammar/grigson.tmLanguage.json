@@ -11,6 +11,9 @@
     "main": {
       "patterns": [
         {
+          "include": "#comment"
+        },
+        {
           "include": "#frontmatter"
         },
         {
@@ -32,6 +35,10 @@
           "include": "#chord"
         }
       ]
+    },
+    "comment": {
+      "match": "^#.*$",
+      "name": "comment.line.number-sign.grigson"
     },
     "frontmatter": {
       "begin": "^---$",

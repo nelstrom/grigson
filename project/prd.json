@@ -1488,7 +1488,7 @@
       "Sync to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
       "Add comment lines to syntax-test.chart and verify they render as comments"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-qualities-7b5-dash",

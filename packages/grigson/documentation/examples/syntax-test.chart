@@ -3,6 +3,7 @@ title: "Syntax Highlighting Test"
 key: F#
 ---
 
+# This is a comment line
 | F# | B | C#7 | D#m |
 | G#m | C#7 | F# | Bm7b5 |
 | A | Bb | C7 | Dm |
@@ -16,3 +17,4 @@ key: F#
 || F | C ||.
 | C | % | % | F |
 | F/C | Am/E | C-/Bb | G/B |
+# Another comment at the end
