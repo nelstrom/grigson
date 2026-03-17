@@ -124,7 +124,7 @@
       "name": "keyword.operator.simile.grigson"
     },
     "chord": {
-      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?(?=\\s|\\||$)",
+      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?(?:(/)([A-G])([#b])?)?(?=\\s|\\||$)",
       "captures": {
         "1": {
           "name": "constant.other.chord.root.grigson"
@@ -134,6 +134,15 @@
         },
         "3": {
           "name": "keyword.other.chord.quality.grigson"
+        },
+        "4": {
+          "name": "punctuation.separator.slash.grigson"
+        },
+        "5": {
+          "name": "constant.other.chord.bass.grigson"
+        },
+        "6": {
+          "name": "constant.other.chord.accidental.grigson"
         }
       }
     }

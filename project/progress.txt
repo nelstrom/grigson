@@ -293,3 +293,6 @@ Replaced the single-character `\\|` match in the 'barline' repository entry with
 
 ## sync-textmate-simile-mark
 Added a 'simile' repository entry to packages/textmate-grammar/grigson.tmLanguage.json with match `(?<=\\||\\s)%(?=\\s|\\||$)` and scope `keyword.operator.simile.grigson`. Included `#simile` in the main pattern list after `#dot`. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added a `| C | % | % | F |` row to syntax-test.chart. All 407 tests pass.
+
+## sync-textmate-slash-chords
+Extended the 'chord' repository entry match regex in packages/textmate-grammar/grigson.tmLanguage.json to include an optional slash-bass group: `(?:(/)([A-G])([#b])?)?` appended before the lookahead. Added capture entries for group 4 (slash `/` → punctuation.separator.slash.grigson), group 5 (bass note letter → constant.other.chord.bass.grigson), and group 6 (bass accidental → constant.other.chord.accidental.grigson). Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added `| F/C | Am/E | C-/Bb | G/B |` to syntax-test.chart. All 407 tests pass.
