@@ -1502,7 +1502,7 @@
       "Run tree-sitter test to confirm all corpus tests pass",
       "Update queries/highlights.scm if the new quality tokens need separate highlight captures"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-extended-barlines",

@@ -299,3 +299,6 @@ Extended the 'chord' repository entry match regex in packages/textmate-grammar/g
 
 ## sync-textmate-comment-lines
 Added a 'comment' repository entry to packages/textmate-grammar/grigson.tmLanguage.json with match `^#.*$` and scope `comment.line.number-sign.grigson`. Included `#comment` at the top of the main pattern list (before `#frontmatter`) so it matches first. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added `# This is a comment line` and `# Another comment at the end` to syntax-test.chart. All 407 tests pass.
+
+## sync-tree-sitter-qualities-7b5-dash
+Added '7b5' (before '7') and '-' (after 'm') to the quality rule choice in packages/tree-sitter-grammar/grammar.js, maintaining longest-match-first ordering. Regenerated the C parser with tree-sitter generate. Added 2 corpus tests to test/corpus/chords.txt: "Dominant seventh flat five chord (7b5)" (G7b5) and "Dash minor seventh chord (-)" (C-). No highlights.scm changes needed — the existing (quality) @keyword capture covers all quality alternatives. All 32 tree-sitter corpus tests pass; all 407 Vitest tests pass.

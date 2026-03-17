@@ -51,7 +51,7 @@ module.exports = grammar({
 
     quality: (_$) =>
       token.immediate(
-        choice('m7b5', 'maj7', 'M7', 'dim7', 'm7', 'dim', 'm', '7'),
+        choice('m7b5', 'maj7', 'M7', 'dim7', 'm7', 'dim', 'm', '7b5', '7', '-'),
       ),
   },
 });

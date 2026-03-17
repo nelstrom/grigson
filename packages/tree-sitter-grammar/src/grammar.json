@@ -303,7 +303,15 @@
           },
           {
             "type": "STRING",
+            "value": "7b5"
+          },
+          {
+            "type": "STRING",
             "value": "7"
+          },
+          {
+            "type": "STRING",
+            "value": "-"
           }
         ]
       }
