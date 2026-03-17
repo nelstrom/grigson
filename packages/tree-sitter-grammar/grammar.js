@@ -51,7 +51,9 @@ module.exports = grammar({
     integer: (_$) => /[0-9]+/,
 
     chord: ($) =>
-      seq($.note_letter, optional($.accidental), optional($.quality)),
+      seq($.note_letter, optional($.accidental), optional($.quality), optional($.slash_bass)),
+
+    slash_bass: ($) => seq('/', $.note_letter, optional($.accidental)),
 
     note_letter: (_$) => /[A-G]/,
 

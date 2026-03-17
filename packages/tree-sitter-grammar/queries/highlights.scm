@@ -45,3 +45,13 @@
 
 (chord
   (quality) @keyword)
+
+; Slash bass
+(slash_bass
+  "/" @punctuation.separator)
+
+(slash_bass
+  (note_letter) @constant)
+
+(slash_bass
+  (accidental) @operator)

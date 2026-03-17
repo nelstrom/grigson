@@ -64,6 +64,10 @@
         {
           "type": "quality",
           "named": true
+        },
+        {
+          "type": "slash_bass",
+          "named": true
         }
       ]
     }
@@ -154,6 +158,25 @@
       "types": [
         {
           "type": "section_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "slash_bass",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "accidental",
+          "named": true
+        },
+        {
+          "type": "note_letter",
           "named": true
         }
       ]

@@ -1548,7 +1548,7 @@
       "Update queries/highlights.scm to scope slash_bass parts appropriately",
       "Run tree-sitter test to confirm all corpus tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-comment-lines",
