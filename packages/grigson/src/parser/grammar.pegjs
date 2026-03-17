@@ -14,7 +14,7 @@ Song
     }
 
 SongBody
-  = items:(Newline / SectionLabel / Row)* {
+  = items:(Comment / Newline / SectionLabel / Row)* {
       const sections = [];
       let pendingLabel = null;
       let currentRows = [];
@@ -153,6 +153,8 @@ Quality
   / "m"    { return "minor"; }
   / "7"    { return "dominant7"; }
   / ""     { return "major"; }
+
+Comment = "#" $[^\n\r]* Newline { return null; }
 
 Newline = "\r\n" / "\n"
 

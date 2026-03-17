@@ -346,6 +346,28 @@ describe('chord parsing', () => {
     });
   });
 
+  describe('comment lines', () => {
+    it('ignores a single comment line', () => {
+      const source = '# This is a comment\n| C | Am |\n';
+      const song = parseSong(source);
+      expect(song.sections[0].rows).toHaveLength(1);
+    });
+
+    it('ignores a comment line before a section label', () => {
+      const source = '# intro\n[Verse]\n| C | Am |\n';
+      const song = parseSong(source);
+      expect(song.sections).toHaveLength(1);
+      expect(song.sections[0].label).toBe('Verse');
+      expect(song.sections[0].rows).toHaveLength(1);
+    });
+
+    it('ignores a comment line between rows', () => {
+      const source = '| C | Am |\n# between rows\n| F | G |\n';
+      const song = parseSong(source);
+      expect(song.sections[0].rows).toHaveLength(2);
+    });
+  });
+
   describe('unsupported qualities are rejected', () => {
     it('rejects Csus4', () => {
       expect(() => parseChord('Csus4')).toThrow();

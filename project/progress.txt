@@ -266,3 +266,6 @@ All 283 tests pass.
 - 326 tests passing
 - Commit: 0dcd69f
 
+
+## parser-comment-lines
+Added a Comment rule to grammar.pegjs that matches lines beginning with `#` outside front matter and discards them (returns null). Added Comment as the first alternative in SongBody alongside Newline/SectionLabel/Row. The existing null-filtering logic in the SongBody action (`typeof item !== 'object'` check) already handles null returns, so no action code changes were needed. Added 3 parser tests: single comment line, comment before section label, comment between rows. All 332 tests pass.

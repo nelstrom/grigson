@@ -1342,7 +1342,8 @@
       "Run `pnpm build` to regenerate generated.js",
       "Add parser tests for a song with comment lines (single comment, comment before section, comment between rows)",
       "Run `pnpm test` and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "parser-chord-qualities-dash-7b5",
