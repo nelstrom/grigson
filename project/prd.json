@@ -1564,5 +1564,59 @@
       "Run tree-sitter test to confirm all corpus tests pass"
     ],
     "passes": true
+  },
+  {
+    "id": "section-key-parse",
+    "category": "functional",
+    "description": "Parse optional key annotation on section labels",
+    "detail": "Add `key: string | null` to the `Section` interface in `src/parser/types.ts`. Update the `SectionLabel` rule in `grammar.pegjs` to capture an optional ` key: VALUE` suffix after the closing `]` using the existing `FrontMatterValue` rule and the same `isValidKey` predicate used in `FrontMatter`. Store the raw value without applying `normalizeKey` — section.key must be in KEYS-table format (e.g. `'A'`, `'Am'`, `'F# dorian'`) because `detectKey`'s `scores` Map is keyed by `Object.keys(KEYS)`. Update the `SongBody` action to track `pendingKey` alongside `pendingLabel` and include `key: pendingKey` in every section push. Rebuild the generated parser with `pnpm build:grammar`. See project/plans/section-keys.md for full context.",
+    "steps": [
+      "Add `key: string | null` field to the `Section` interface in `src/parser/types.ts`",
+      "Update `SectionLabel` in `grammar.pegjs` to match optional `key: VALUE` after `]`, validate with `isValidKey`, and return `{ type: 'sectionLabel', label, key }`",
+      "Update `SongBody` action to initialise `pendingKey = null`, set it from `item.key` when a sectionLabel is seen, and include `key: pendingKey` in every `sections.push()`",
+      "Run `pnpm build:grammar` to regenerate `generated.js`",
+      "Run `pnpm test` — all existing tests should pass (sections without annotations get `key: null`)"
+    ]
+  },
+  {
+    "id": "section-key-normalise",
+    "category": "functional",
+    "description": "Thread section.key into normaliseSection as the declared key",
+    "detail": "Update `normaliseSection` in `src/theory/normalise.ts` to accept an optional third parameter `declaredKey?: string | null` and pass it to `detectKey` as the second argument (replacing the hardcoded `null`). In `normaliseSong`, update the call site to pass `sec.key` as the third argument. This lets a section with `[Chorus] key: A` drive enharmonic normalisation toward A major instead of auto-detecting. Depends on section-key-parse (Section.key must exist). See project/plans/section-keys.md for full context.",
+    "steps": [
+      "Add optional `declaredKey?: string | null` parameter to `normaliseSection`",
+      "Change `detectKey(chords, null, config)` inside `normaliseSection` to `detectKey(chords, declaredKey ?? null, config)`",
+      "In `normaliseSong`, update the `normaliseSection` call to pass `sec.key` as the third argument",
+      "Run `pnpm test` — all existing tests should pass"
+    ]
+  },
+  {
+    "id": "section-key-render",
+    "category": "functional",
+    "description": "Render section key annotations in TextRenderer and HtmlRenderer",
+    "detail": "Update `TextRenderer.render()` in `src/renderers/text.ts` to emit `[Label] key: X` instead of `[Label]` when `section.key` is non-null. Update `HtmlRenderer` in `src/renderers/html.ts` to include a `<span part=\"section-key\">` inside the section-label div when `section.key` is non-null. Depends on section-key-parse. See project/plans/section-keys.md for full context.",
+    "steps": [
+      "In `text.ts` render(), change the section label line to append ` key: ${section.key}` when `section.key !== null`",
+      "In `html.ts`, add a `<span part=\"section-key\">` containing the key annotation to the section-label div when `section.key !== null`",
+      "Run `pnpm test` — existing tests should pass; round-trip tests will now emit and re-parse the key annotation"
+    ]
+  },
+  {
+    "id": "section-key-tests",
+    "category": "functional",
+    "description": "Add acceptance tests for section key annotation parsing, rendering, and normalisation",
+    "detail": "Add tests to `src/parser/section.test.ts` covering the full section key feature. Depends on section-key-parse, section-key-normalise, and section-key-render all being complete. Also update `documentation/examples/kodachrome.chart` to add `[Chorus] key: A` and `[Outro] key: A` annotations (chorus and outro are tonally centred on A major). See project/plans/section-keys.md for full context.",
+    "steps": [
+      "Add parser test: `[Verse] key: E` → `section.key === 'E'`",
+      "Add parser test: `[Chorus] key: Am` → `section.key === 'Am'`",
+      "Add parser test: `[Bridge] key: F# dorian` → `section.key === 'F# dorian'`",
+      "Add parser test: label with no annotation → `section.key === null`",
+      "Add parser test: `[Section] key: H` → throws a parse error",
+      "Add renderer test: section with `key: 'Am'` renders as `[Chorus] key: Am`",
+      "Add round-trip test: parse → render → parse produces equal AST (with key annotation present)",
+      "Add normaliser test: song with `[Chorus] key: Db` containing `C#m7` chord → normalised root is `Db` (or confirm spelling is preserved as expected from Db major's note set)",
+      "Update `documentation/examples/kodachrome.chart` to add `key: A` annotations on [Chorus] and [Outro]",
+      "Run `pnpm test` — all tests pass"
+    ]
   }
 ]
