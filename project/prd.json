@@ -1329,5 +1329,96 @@
       "Run pnpm test"
     ],
     "passes": true
+  },
+  {
+    "id": "parser-comment-lines",
+    "category": "functional",
+    "description": "Silently ignore `#` comment lines in song body",
+    "detail": "Add a Comment rule to the PEG grammar so that lines beginning with `#` outside front matter are parsed and discarded. No type or renderer changes needed. See project/plans/parser-next-steps.md for full context.",
+    "steps": [
+      "Add `Comment = \"#\" $[^\\n\\r]* Newline { return null; }` rule to grammar.pegjs",
+      "Add `Comment` as an alternative in SongBody alongside Newline/SectionLabel/Row",
+      "Confirm null values are already filtered in the SongBody action (they are, via the `typeof item !== 'object'` check)",
+      "Run `pnpm build` to regenerate generated.js",
+      "Add parser tests for a song with comment lines (single comment, comment before section, comment between rows)",
+      "Run `pnpm test` and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "parser-chord-qualities-dash-7b5",
+    "category": "functional",
+    "description": "Add `-` (min7) and `7b5` (dom7flat5) chord quality suffixes",
+    "detail": "Extend the Quality rule in the PEG grammar with two new alternatives, add `dom7flat5` to the Quality union type in types.ts, and add a renderer case for it in text.ts. The `-` suffix maps to `min7` (C- = Cm7). The `7b5` suffix maps to a new `dom7flat5` quality. See project/plans/parser-next-steps.md for full context.",
+    "steps": [
+      "Add `\"7b5\" { return \"dom7flat5\"; }` to Quality rule in grammar.pegjs, before the `\"7\"` alternative",
+      "Add `\"-\" { return \"min7\"; }` to Quality rule in grammar.pegjs, before the `\"m\"` alternative",
+      "Add `'dom7flat5'` to the Quality union type in types.ts",
+      "Add `case 'dom7flat5': suffix = '7b5'; break;` to renderChord in text.ts",
+      "Run `pnpm build` to regenerate generated.js",
+      "Add parser tests: `C-` parses as min7, `G7b5` parses as dom7flat5, round-trip for each",
+      "Add renderer tests: `dom7flat5` renders as `7b5`",
+      "Run `pnpm test` and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "parser-slash-chords",
+    "category": "functional",
+    "description": "Support slash chords with explicit bass notes (e.g. F/C, F#/A#, C-/Bb)",
+    "detail": "Add an optional `bass` field to the Chord interface, add a SlashBass rule to the grammar, and update the renderer to emit the `/bass` suffix when present. See project/plans/parser-next-steps.md for full context.",
+    "steps": [
+      "Add `bass?: string` to the Chord interface in types.ts",
+      "Add `SlashBass = \"/\" bass:Root { return bass; }` rule to grammar.pegjs",
+      "Update the Chord rule to capture `bass:SlashBass?` and include it in the returned object when non-null",
+      "Run `pnpm build` to regenerate generated.js",
+      "Update renderChord in text.ts to append `'/' + chord.bass` when bass is present",
+      "Add parser tests: `F/C`, `F#/A#`, `C-/Bb` (requires Task 2 for the `-` quality)",
+      "Add renderer tests and round-trip tests for slash chords",
+      "Run `pnpm test` and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "parser-extended-barlines",
+    "category": "functional",
+    "description": "Support repeat and multi-barline types: `||`, `||.`, `||:`, `:||`, `:||xN`, `:||:`",
+    "detail": "Replace the hardcoded `|` tokens in Row and BarTail with OpenBarline/CloseBarline rules. Add BarlineKind and Barline types to types.ts, and update Bar to carry a closeBarline and Row to carry an openBarline. Update the renderer to emit the correct symbols. Existing parser and renderer tests will need updating to match the new AST shape. See project/plans/parser-next-steps.md for full context.",
+    "steps": [
+      "Add `BarlineKind`, `Barline`, and update `Bar` and `Row` interfaces in types.ts",
+      "Add `OpenBarline` and `CloseBarline` rules to grammar.pegjs covering all barline variants",
+      "Update `Row` rule to use `OpenBarline` and store result as `openBarline`",
+      "Update `BarTail` rule to use `CloseBarline` and store result as `closeBarline` on the bar",
+      "Remove the now-unused `Bar` rule from grammar.pegjs",
+      "Run `pnpm build` to regenerate generated.js",
+      "Update existing parser tests (parseRow, parseBar, parseSong) to include openBarline/closeBarline in expected AST",
+      "Add `barlineSymbol` helper and update `renderRow` in text.ts to emit correct barline symbols",
+      "Update existing renderer tests to expect new barline-aware output",
+      "Add tests for each new barline kind (double, final, startRepeat, endRepeat, endRepeatStartRepeat, with repeatCount)",
+      "Run `pnpm test` and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "parser-simile-mark",
+    "category": "functional",
+    "description": "Support `%` simile marks that resolve to the previous bar's content at parse time",
+    "detail": "Add a simile alternative to BarTail in the grammar that stores a temporary marker, then resolve it in the Row action by copying the previous bar's slots. The resolved AST contains only BeatSlot[] with no trace of `%`. Optionally add a `simile` config flag to the renderer to re-emit `%` for consecutive identical bars. See project/plans/parser-next-steps.md for full context.",
+    "steps": [
+      "Add simile alternative to `BarTail` in grammar.pegjs: `\"%\" _ close:CloseBarline _ { return { type: \"bar\", simile: true, slots: [], closeBarline: close }; }`",
+      "In the Row action, after building the bars array, loop through and replace simile bars with a copy of the previous bar's slots",
+      "Run `pnpm build` to regenerate generated.js",
+      "Add parser tests: single `%`, multiple consecutive `%`, `%` with non-single barlines",
+      "Verify that a simile bar's slots equal the preceding bar's slots in the AST",
+      "Optionally add `simile?: boolean` config to TextRendererConfig and implement detection in the renderer",
+      "Run `pnpm test` and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "parser-examples-regression-test",
+    "category": "quality",
+    "description": "Add a regression test that parses every example .chart file and asserts no errors",
+    "detail": "Create packages/grigson/src/parser/examples.test.ts that uses globSync to find all *.chart files in the documentation/examples directory and asserts each one parses without throwing. This test should be added last, after all feature tasks complete, so it passes from the start. See project/plans/parser-next-steps.md for full context.",
+    "steps": [
+      "Create `packages/grigson/src/parser/examples.test.ts` using globSync to enumerate all *.chart files",
+      "For each file, call `parseSong(readFileSync(path, 'utf8'))` inside an `it` block and expect it not to throw",
+      "Run `pnpm test` and confirm all example charts parse cleanly"
+    ]
   }
 ]
