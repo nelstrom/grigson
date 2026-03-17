@@ -58,6 +58,25 @@ permalink: /playground/
   require.config({ paths: { 'vs': '/js/monaco/vs' } });
 
   require(['vs/editor/editor.main'], async function() {
+    // lz-string's CJS shim detects define.amd and takes the AMD path, leaving
+    // module.exports empty. Hide the global define temporarily so it falls back
+    // to CommonJS and the named exports are populated correctly.
+    const _amd = window.define;
+    window.define = undefined;
+    const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = await import('https://esm.sh/lz-string@1.5.0');
+    window.define = _amd;
+
+    const DEFAULT_VALUE = '---\ntitle: Playground Example\nkey: F\n---\n| F | A# | F | C7 |\n|F|Bb|C|F|\n';
+
+    function readHash() {
+      const hash = location.hash;
+      if (hash.startsWith('#code/')) {
+        const encoded = hash.slice('#code/'.length);
+        return decompressFromEncodedURIComponent(encoded) ?? DEFAULT_VALUE;
+      }
+      return DEFAULT_VALUE;
+    }
+
     const outputElement = document.getElementById('playground-output');
 
     // 1. Initialize vscode-oniguruma
@@ -134,7 +153,7 @@ permalink: /playground/
     });
 
     const editor = monaco.editor.create(document.getElementById('input-editor'), {
-      value: '---\ntitle: Playground Example\nkey: F\n---\n| F | A# | F | C7 |\n|F|Bb|C|F|\n',
+      value: readHash(),
       language: 'grigson',
       theme: 'grigson-theme',
       minimap: { enabled: false },
@@ -143,7 +162,17 @@ permalink: /playground/
       fontFamily: 'monospace',
     });
 
+    let hashTimer;
+    function updateHash() {
+      clearTimeout(hashTimer);
+      hashTimer = setTimeout(() => {
+        const compressed = compressToEncodedURIComponent(editor.getValue());
+        history.replaceState(null, '', '#code/' + compressed);
+      }, 500);
+    }
+
     function update() {
+      updateHash();
       const value = editor.getValue();
       let template = outputElement.querySelector('template');
       if (!template) {

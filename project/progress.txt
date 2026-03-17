@@ -314,3 +314,6 @@ Added `slash_bass` rule (`seq('/', $.note_letter, optional($.accidental))`) to p
 
 ## sync-tree-sitter-comment-lines
 Added `comment` rule (`/#[^\r\n]*/`) to packages/tree-sitter-grammar/grammar.js. Updated `song` to include `$.comment` as the first alternative in the body's `repeat(choice(...))`. The regex avoids using `$` assertions (unsupported by tree-sitter's RE2 engine) — the trailing newline is left to be consumed by the existing `/\r?\n/` alternative. Regenerated the C parser with `tree-sitter generate`. Created test/corpus/comments.txt with 3 corpus tests: standalone comment line, comment before a section label, and comment between rows. Updated queries/highlights.scm to scope `(comment)` as `@comment`. All 50 tree-sitter corpus tests pass; all 407 Vitest tests pass.
+
+## URL-encoded playground state (2026-03-17)
+Added lz-string URL hash encoding to the playground. Editor content is compressed with LZString and stored in the #code/... URL fragment. Loads from hash on page open; updates hash on every edit (500ms debounce, replaceState). Falls back to default example for empty/invalid hashes.
