@@ -287,3 +287,6 @@ Created src/parser/examples.test.ts that uses readdirSync to enumerate all *.cha
 
 ## sync-textmate-qualities-7b5-dash
 Updated the chord quality alternation in the 'chord' repository entry regex in packages/textmate-grammar/grigson.tmLanguage.json from 'm7b5|maj7|M7|dim7|m7|dim|m|7' to 'm7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-', placing '7b5' before '7' (to avoid premature matching) and '-' at the end (Cm7 written as C-). Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added two new chords (G7b5, F#7b5, C-, Bb-) to packages/grigson/documentation/examples/syntax-test.chart. All 407 tests pass.
+
+## sync-textmate-extended-barlines
+Replaced the single-character `\\|` match in the 'barline' repository entry with a regex covering all eight barline variants in longest-first order: `:\\|\\|x\\d+:|:\\|\\|x\\d+|:\\|\\|:|:\\|\\||\\|\\|:|\\|\\|\\.|\\|\\||\\|`. This ensures :||x3:, :||x3, :||:, :||, ||:, ||., ||, and | are all matched as barline tokens. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added four rows to syntax-test.chart exercising ||:, :||, :||x2, :||:, ||, and ||. All 407 tests pass.

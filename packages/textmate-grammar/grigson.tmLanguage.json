@@ -89,7 +89,7 @@
       }
     },
     "barline": {
-      "match": "\\|",
+      "match": ":\\|\\|x\\d+:|:\\|\\|x\\d+|:\\|\\|:|:\\|\\||\\|\\|:|\\|\\|\\.|\\|\\||\\|",
       "name": "punctuation.definition.barline.grigson"
     },
     "time-signature": {

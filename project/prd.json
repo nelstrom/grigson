@@ -1449,7 +1449,7 @@
       "Sync the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
       "Add syntax-test.chart rows exercising ||, ||., ||:, :||, :||x2, :||: and verify highlighting"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-textmate-simile-mark",
