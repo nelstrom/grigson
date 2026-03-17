@@ -52,6 +52,9 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
     case 'dim7':
       suffix = 'dim7';
       break;
+    case 'dom7flat5':
+      suffix = '7b5';
+      break;
     default:
       suffix = '';
   }

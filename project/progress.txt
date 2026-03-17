@@ -269,3 +269,6 @@ All 283 tests pass.
 
 ## parser-comment-lines
 Added a Comment rule to grammar.pegjs that matches lines beginning with `#` outside front matter and discards them (returns null). Added Comment as the first alternative in SongBody alongside Newline/SectionLabel/Row. The existing null-filtering logic in the SongBody action (`typeof item !== 'object'` check) already handles null returns, so no action code changes were needed. Added 3 parser tests: single comment line, comment before section label, comment between rows. All 332 tests pass.
+
+## parser-chord-qualities-dash-7b5
+Added two new chord quality suffixes. Added `"7b5" { return "dom7flat5"; }` to the Quality rule in grammar.pegjs before `"7"`, and `"-" { return "min7"; }` before the empty fallback. Added `'dom7flat5'` to the Quality union type in types.ts. Added `case 'dom7flat5': suffix = '7b5'; break;` to renderChord in text.ts. Rebuilt with pnpm build. Added 5 parser tests (G7b5, F#7b5 → dom7flat5; C-, F#-, Bb- → min7) and 4 renderer tests (dom7flat5 renders as '7b5', C- renders as 'Cm7', plus round-trips for each). All 341 tests pass.

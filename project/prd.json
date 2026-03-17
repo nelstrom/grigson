@@ -1359,7 +1359,8 @@
       "Add parser tests: `C-` parses as min7, `G7b5` parses as dom7flat5, round-trip for each",
       "Add renderer tests: `dom7flat5` renders as `7b5`",
       "Run `pnpm test` and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "parser-slash-chords",

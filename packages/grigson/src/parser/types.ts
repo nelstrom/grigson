@@ -13,7 +13,8 @@ export type Quality =
   | 'diminished'
   | 'maj7'
   | 'min7'
-  | 'dim7';
+  | 'dim7'
+  | 'dom7flat5';
 
 export interface Chord {
   type: 'chord';

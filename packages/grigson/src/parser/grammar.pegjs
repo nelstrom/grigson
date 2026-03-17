@@ -151,7 +151,9 @@ Quality
   / "m7"   { return "min7"; }
   / "dim"  { return "diminished"; }
   / "m"    { return "minor"; }
+  / "7b5"  { return "dom7flat5"; }
   / "7"    { return "dominant7"; }
+  / "-"    { return "min7"; }
   / ""     { return "major"; }
 
 Comment = "#" $[^\n\r]* Newline { return null; }

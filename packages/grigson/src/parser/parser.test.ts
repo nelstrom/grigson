@@ -92,6 +92,30 @@ describe('chord parsing', () => {
     });
   });
 
+  describe('dom7flat5 chords', () => {
+    it('parses G7b5', () => {
+      expect(parseChord('G7b5')).toEqual({ type: 'chord', root: 'G', quality: 'dom7flat5' });
+    });
+
+    it('parses F#7b5', () => {
+      expect(parseChord('F#7b5')).toEqual({ type: 'chord', root: 'F#', quality: 'dom7flat5' });
+    });
+  });
+
+  describe('dash minor chords', () => {
+    it('parses C- as min7', () => {
+      expect(parseChord('C-')).toEqual({ type: 'chord', root: 'C', quality: 'min7' });
+    });
+
+    it('parses F#- as min7', () => {
+      expect(parseChord('F#-')).toEqual({ type: 'chord', root: 'F#', quality: 'min7' });
+    });
+
+    it('parses Bb- as min7', () => {
+      expect(parseChord('Bb-')).toEqual({ type: 'chord', root: 'Bb', quality: 'min7' });
+    });
+  });
+
   describe('bar parsing', () => {
     const cMajor = { type: 'chord', root: 'C', quality: 'major' };
     const aMinor = { type: 'chord', root: 'A', quality: 'minor' };

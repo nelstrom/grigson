@@ -115,6 +115,28 @@ describe('text renderer', () => {
       const source = '| Bdim7 |\n';
       expect(parseSong(render(source))).toEqual(parseSong(source));
     });
+
+    it('renders dom7flat5 chord with 7b5 suffix', () => {
+      const out = render('| G7b5 |\n');
+      expect(out).toContain('| G7b5 |');
+    });
+
+    it('round-trips dom7flat5', () => {
+      const source = '| G7b5 |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+
+    it('renders C- as m7 (dash min7)', () => {
+      const out = render('| C- |\n');
+      expect(out).toContain('| Cm7 |');
+    });
+
+    it('round-trips dash minor via m7 canonical form', () => {
+      // C- parses to min7, which renders as Cm7, which parses to the same AST
+      const ast1 = parseSong('| C- |\n');
+      const ast2 = parseSong(render('| C- |\n'));
+      expect(ast2).toEqual(ast1);
+    });
   });
 
   describe('round-trip', () => {
