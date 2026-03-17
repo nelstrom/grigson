@@ -1,0 +1,67 @@
+================================================================================
+Single simile mark
+================================================================================
+
+| C | % |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))
+    (bar_tail
+      (simile_mark)
+      (close_barline))))
+
+================================================================================
+Multiple consecutive simile marks
+================================================================================
+
+| C | % | % | F |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))
+    (bar_tail
+      (simile_mark)
+      (close_barline))
+    (bar_tail
+      (simile_mark)
+      (close_barline))
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Simile mark with non-single close barline
+================================================================================
+
+| C | % :||
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))
+    (bar_tail
+      (simile_mark)
+      (close_barline))))

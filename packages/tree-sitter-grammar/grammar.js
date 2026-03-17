@@ -30,7 +30,12 @@ module.exports = grammar({
     row: ($) => seq($.open_barline, repeat1($.bar_tail)),
 
     bar_tail: ($) =>
-      seq(optional($.time_signature), repeat1($.beat_slot), $.close_barline),
+      choice(
+        seq(optional($.time_signature), repeat1($.beat_slot), $.close_barline),
+        seq($.simile_mark, $.close_barline),
+      ),
+
+    simile_mark: (_$) => '%',
 
     beat_slot: ($) => choice($.chord, $.dot),
 

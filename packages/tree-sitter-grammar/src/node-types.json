@@ -16,6 +16,10 @@
           "named": true
         },
         {
+          "type": "simile_mark",
+          "named": true
+        },
+        {
           "type": "time_signature",
           "named": true
         }
@@ -260,6 +264,10 @@
   },
   {
     "type": "section_name",
+    "named": true
+  },
+  {
+    "type": "simile_mark",
     "named": true
   },
   {

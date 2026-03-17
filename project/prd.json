@@ -1533,7 +1533,7 @@
       "Update queries/highlights.scm to scope (simile_mark) as @keyword.operator",
       "Run tree-sitter test to confirm all corpus tests pass"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-slash-chords",

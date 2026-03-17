@@ -147,32 +147,54 @@
       ]
     },
     "bar_tail": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
-          "type": "CHOICE",
+          "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "time_signature"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "time_signature"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
-              "type": "BLANK"
+              "type": "REPEAT1",
+              "content": {
+                "type": "SYMBOL",
+                "name": "beat_slot"
+              }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "close_barline"
             }
           ]
         },
         {
-          "type": "REPEAT1",
-          "content": {
-            "type": "SYMBOL",
-            "name": "beat_slot"
-          }
-        },
-        {
-          "type": "SYMBOL",
-          "name": "close_barline"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "simile_mark"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "close_barline"
+            }
+          ]
         }
       ]
+    },
+    "simile_mark": {
+      "type": "STRING",
+      "value": "%"
     },
     "beat_slot": {
       "type": "CHOICE",

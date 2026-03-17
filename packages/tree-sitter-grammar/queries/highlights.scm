@@ -29,6 +29,9 @@
 (time_signature
   (integer) @number)
 
+; Simile mark
+(simile_mark) @keyword.operator
+
 ; Beat slots
 (beat_slot
   (dot) @punctuation.separator)
