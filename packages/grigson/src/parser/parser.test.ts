@@ -120,11 +120,13 @@ describe('chord parsing', () => {
     const cMajor = { type: 'chord', root: 'C', quality: 'major' };
     const aMinor = { type: 'chord', root: 'A', quality: 'minor' };
     const g7 = { type: 'chord', root: 'G', quality: 'dominant7' };
+    const single = { kind: 'single' };
 
     it('parses | C |', () => {
       expect(parseBar('| C |')).toEqual({
         type: 'bar',
         slots: [{ type: 'chord', chord: cMajor }],
+        closeBarline: single,
       });
     });
 
@@ -132,6 +134,7 @@ describe('chord parsing', () => {
       expect(parseBar('| Am |')).toEqual({
         type: 'bar',
         slots: [{ type: 'chord', chord: aMinor }],
+        closeBarline: single,
       });
     });
 
@@ -139,6 +142,7 @@ describe('chord parsing', () => {
       expect(parseBar('|C|')).toEqual({
         type: 'bar',
         slots: [{ type: 'chord', chord: cMajor }],
+        closeBarline: single,
       });
     });
 
@@ -146,6 +150,7 @@ describe('chord parsing', () => {
       expect(parseBar('|  G7  |')).toEqual({
         type: 'bar',
         slots: [{ type: 'chord', chord: g7 }],
+        closeBarline: single,
       });
     });
 
@@ -166,8 +171,13 @@ describe('chord parsing', () => {
     const bar = (root: string, quality: string) => ({
       type: 'bar',
       slots: [{ type: 'chord', chord: chord(root, quality) }],
+      closeBarline: { kind: 'single' },
     });
-    const row = (...bars: ReturnType<typeof bar>[]) => ({ type: 'row', bars });
+    const row = (...bars: ReturnType<typeof bar>[]) => ({
+      type: 'row',
+      openBarline: { kind: 'single' },
+      bars,
+    });
 
     it('parses a minimal song with no front matter', () => {
       const song = parseSong('| C | Am | F | G |\n');
@@ -316,11 +326,13 @@ describe('chord parsing', () => {
     const bar = (root: string, quality: string) => ({
       type: 'bar',
       slots: [{ type: 'chord', chord: { type: 'chord', root, quality } }],
+      closeBarline: { kind: 'single' },
     });
 
     it('parses a four-bar row', () => {
       const row = parseRow('| C | Am | F | G |');
       expect(row.type).toBe('row');
+      expect(row.openBarline).toEqual({ kind: 'single' });
       expect(row.bars).toHaveLength(4);
       expect(row.bars[0]).toEqual(bar('C', 'major'));
       expect(row.bars[1]).toEqual(bar('A', 'minor'));
@@ -331,6 +343,7 @@ describe('chord parsing', () => {
     it('parses a single-bar row', () => {
       const row = parseRow('| C |');
       expect(row.type).toBe('row');
+      expect(row.openBarline).toEqual({ kind: 'single' });
       expect(row.bars).toHaveLength(1);
       expect(row.bars[0]).toEqual(bar('C', 'major'));
     });

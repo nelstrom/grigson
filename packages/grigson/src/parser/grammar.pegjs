@@ -87,31 +87,50 @@ FrontMatterValue
   / value:$[^\n\r]+ { return value.trim(); }
 
 Row
-  = "|" _ bars:BarTail+ {
-      return { type: "row", bars };
+  = open:OpenBarline _ bars:BarTail+ {
+      return { type: "row", openBarline: open, bars };
     }
 
 // A bar's content plus its closing barline.
 // The opening barline is consumed by Row (or the previous BarTail).
 BarTail
-  = ts:TimeSignatureToken? slots:BeatSlotList "|" _ {
+  = ts:TimeSignatureToken? slots:BeatSlotList close:CloseBarline _ {
       if (!slots.some(s => s.type === "chord")) {
         error("A bar must contain at least one chord");
       }
-      const bar = { type: "bar", slots };
+      const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
       return bar;
     }
 
 Bar
-  = "|" _ ts:TimeSignatureToken? slots:BeatSlotList "|" {
+  = open:OpenBarline _ ts:TimeSignatureToken? slots:BeatSlotList close:CloseBarline {
       if (!slots.some(s => s.type === "chord")) {
         error("A bar must contain at least one chord");
       }
-      const bar = { type: "bar", slots };
+      const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
       return bar;
     }
+
+// A barline that can open a row (longest alternatives first)
+OpenBarline
+  = ":||:" { return { kind: "endRepeatStartRepeat" }; }
+  / ":||"  { return { kind: "endRepeat" }; }
+  / "||:"  { return { kind: "startRepeat" }; }
+  / "||"   { return { kind: "double" }; }
+  / "|"    { return { kind: "single" }; }
+
+// A barline that closes a bar (longest alternatives first)
+CloseBarline
+  = ":||x" n:$[0-9]+ ":" { return { kind: "endRepeatStartRepeat", repeatCount: parseInt(n, 10) }; }
+  / ":||:"                { return { kind: "endRepeatStartRepeat" }; }
+  / ":||x" n:$[0-9]+     { return { kind: "endRepeat", repeatCount: parseInt(n, 10) }; }
+  / ":||"                 { return { kind: "endRepeat" }; }
+  / "||:"                 { return { kind: "startRepeat" }; }
+  / "||."                 { return { kind: "final" }; }
+  / "||"                  { return { kind: "double" }; }
+  / "|"                   { return { kind: "single" }; }
 
 BeatSlotList
   = first:(_ BeatSlot) rest:(_ BeatSlot)* _ {

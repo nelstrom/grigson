@@ -7,11 +7,11 @@ function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
 }
 
 function bar(c: Chord): Bar {
-  return { type: 'bar', slots: [{ type: 'chord', chord: c }] };
+  return { type: 'bar', slots: [{ type: 'chord', chord: c }], closeBarline: { kind: 'single' } };
 }
 
 function row(...chords: Chord[]): Row {
-  return { type: 'row', bars: chords.map(bar) };
+  return { type: 'row', openBarline: { kind: 'single' }, bars: chords.map(bar) };
 }
 
 function section(rows: Row[], label: string | null = null): Section {

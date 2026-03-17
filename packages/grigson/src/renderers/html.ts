@@ -1,4 +1,4 @@
-import type { Song, Row, Bar, Chord } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline } from '../parser/types.js';
 import { type TextRendererConfig } from './text.js';
 
 const DEFAULT_NOTATION = {
@@ -43,15 +43,31 @@ function renderBar(bar: Bar, config: TextRendererConfig): string {
     .join(' ');
 }
 
+function barlineSymbol(b: Barline): string {
+  const suffix = b.repeatCount && b.repeatCount > 2 ? `x${b.repeatCount}` : '';
+  switch (b.kind) {
+    case 'single':
+      return '|';
+    case 'double':
+      return '||';
+    case 'final':
+      return '||.';
+    case 'startRepeat':
+      return '||:';
+    case 'endRepeat':
+      return ':||' + suffix;
+    case 'endRepeatStartRepeat':
+      return ':||:' + suffix;
+  }
+}
+
 function renderRow(row: Row, config: TextRendererConfig): string {
-  const barline = '<span part="barline">|</span>';
+  const bl = (b: Barline) => `<span part="barline">${barlineSymbol(b)}</span>`;
   return (
     `<div part="row">` +
-    barline +
+    bl(row.openBarline) +
     ' ' +
-    row.bars.map((bar) => renderBar(bar, config)).join(` ${barline} `) +
-    ' ' +
-    barline +
+    row.bars.map((bar) => renderBar(bar, config) + ` ${bl(bar.closeBarline)}`).join(' ') +
     `</div>`
   );
 }

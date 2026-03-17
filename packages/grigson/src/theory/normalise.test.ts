@@ -7,7 +7,7 @@ function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
 }
 
 function bar(c: Chord, timeSignature?: { numerator: number; denominator: number }): Bar {
-  const b: Bar = { type: 'bar', slots: [{ type: 'chord', chord: c }] };
+  const b: Bar = { type: 'bar', slots: [{ type: 'chord', chord: c }], closeBarline: { kind: 'single' } };
   if (timeSignature) b.timeSignature = timeSignature;
   return b;
 }
@@ -17,7 +17,7 @@ function barWithTS(c: Chord, numerator: number, denominator: number): Bar {
 }
 
 function row(...chords: Chord[]): Row {
-  return { type: 'row', bars: chords.map((c) => bar(c)) };
+  return { type: 'row', openBarline: { kind: 'single' }, bars: chords.map((c) => bar(c)) };
 }
 
 function section(rows: Row[], label: string | null = null): Section {
@@ -361,6 +361,7 @@ describe('normaliseSong — meter hoisting', () => {
   it('uniform inline meter is hoisted to front-matter and stripped from bars', () => {
     const r: Row = {
       type: 'row',
+      openBarline: { kind: 'single' },
       bars: [barWithTS(ch('C'), 2, 4), barWithTS(ch('Am'), 2, 4)],
     };
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
@@ -375,6 +376,7 @@ describe('normaliseSong — meter hoisting', () => {
   it('mixed inline meters result in meter: "mixed" with inline tokens preserved', () => {
     const r: Row = {
       type: 'row',
+      openBarline: { kind: 'single' },
       bars: [barWithTS(ch('C'), 3, 4), barWithTS(ch('Am'), 4, 4)],
     };
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
@@ -392,7 +394,7 @@ describe('normaliseSong — meter hoisting', () => {
   });
 
   it('song with front-matter meter and no inline TS preserves the front-matter meter', () => {
-    const r: Row = { type: 'row', bars: [bar(ch('C')), bar(ch('G'))] };
+    const r: Row = { type: 'row', openBarline: { kind: 'single' }, bars: [bar(ch('C')), bar(ch('G'))] };
     const s: Song = { type: 'song', title: null, key: null, meter: '3/4', sections: [section([r])] };
     const result = normaliseSong(s);
     expect(result.meter).toBe('3/4');

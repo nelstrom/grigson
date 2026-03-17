@@ -1396,7 +1396,8 @@
       "Update existing renderer tests to expect new barline-aware output",
       "Add tests for each new barline kind (double, final, startRepeat, endRepeat, endRepeatStartRepeat, with repeatCount)",
       "Run `pnpm test` and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "parser-simile-mark",

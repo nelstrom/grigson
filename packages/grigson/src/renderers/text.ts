@@ -1,4 +1,4 @@
-import type { Song, Row, Bar, Chord } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline } from '../parser/types.js';
 
 export interface TextRendererConfig {
   notation?: {
@@ -69,8 +69,28 @@ function renderBar(bar: Bar, config: TextRendererConfig): string {
   return ts + slotsText;
 }
 
+function barlineSymbol(b: Barline): string {
+  const suffix = b.repeatCount && b.repeatCount > 2 ? `x${b.repeatCount}` : '';
+  switch (b.kind) {
+    case 'single':
+      return '|';
+    case 'double':
+      return '||';
+    case 'final':
+      return '||.';
+    case 'startRepeat':
+      return '||:';
+    case 'endRepeat':
+      return ':||' + suffix;
+    case 'endRepeatStartRepeat':
+      return ':||:' + suffix;
+  }
+}
+
 function renderRow(row: Row, config: TextRendererConfig): string {
-  return '| ' + row.bars.map((bar) => renderBar(bar, config)).join(' | ') + ' |';
+  const open = barlineSymbol(row.openBarline);
+  const bars = row.bars.map((bar) => renderBar(bar, config) + ' ' + barlineSymbol(bar.closeBarline)).join(' ');
+  return open + ' ' + bars;
 }
 
 function renderFrontMatter(title: string | null, key: string | null, meter: string | null): string {

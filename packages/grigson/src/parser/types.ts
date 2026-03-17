@@ -39,14 +39,29 @@ export interface DotSlot {
 
 export type BeatSlot = ChordSlot | DotSlot;
 
+export type BarlineKind =
+  | 'single'
+  | 'double'
+  | 'final'
+  | 'startRepeat'
+  | 'endRepeat'
+  | 'endRepeatStartRepeat';
+
+export interface Barline {
+  kind: BarlineKind;
+  repeatCount?: number;
+}
+
 export interface Bar {
   type: 'bar';
   slots: BeatSlot[];
   timeSignature?: TimeSignature;
+  closeBarline: Barline;
 }
 
 export interface Row {
   type: 'row';
+  openBarline: Barline;
   bars: Bar[];
 }
 
