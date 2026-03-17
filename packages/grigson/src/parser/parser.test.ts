@@ -392,6 +392,33 @@ describe('chord parsing', () => {
     });
   });
 
+  describe('slash chords', () => {
+    it('parses F/C', () => {
+      expect(parseChord('F/C')).toEqual({ type: 'chord', root: 'F', quality: 'major', bass: 'C' });
+    });
+
+    it('parses F#/A#', () => {
+      expect(parseChord('F#/A#')).toEqual({ type: 'chord', root: 'F#', quality: 'major', bass: 'A#' });
+    });
+
+    it('parses C-/Bb (dash minor with slash bass)', () => {
+      expect(parseChord('C-/Bb')).toEqual({ type: 'chord', root: 'C', quality: 'min7', bass: 'Bb' });
+    });
+
+    it('parses G7/B', () => {
+      expect(parseChord('G7/B')).toEqual({ type: 'chord', root: 'G', quality: 'dominant7', bass: 'B' });
+    });
+
+    it('parses Am/C', () => {
+      expect(parseChord('Am/C')).toEqual({ type: 'chord', root: 'A', quality: 'minor', bass: 'C' });
+    });
+
+    it('does not include bass field for plain chords', () => {
+      const chord = parseChord('C');
+      expect(chord).not.toHaveProperty('bass');
+    });
+  });
+
   describe('unsupported qualities are rejected', () => {
     it('rejects Csus4', () => {
       expect(() => parseChord('Csus4')).toThrow();

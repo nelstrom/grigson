@@ -139,6 +139,38 @@ describe('text renderer', () => {
     });
   });
 
+  describe('slash chords', () => {
+    it('renders F/C', () => {
+      const out = render('| F/C |\n');
+      expect(out).toContain('| F/C |');
+    });
+
+    it('renders F#/A#', () => {
+      const out = render('| F#/A# |\n');
+      expect(out).toContain('| F#/A# |');
+    });
+
+    it('renders C-/Bb as Cm7/Bb', () => {
+      const out = render('| C-/Bb |\n');
+      expect(out).toContain('| Cm7/Bb |');
+    });
+
+    it('round-trips F/C', () => {
+      const source = '| F/C |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+
+    it('round-trips F#/A#', () => {
+      const source = '| F#/A# |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+
+    it('round-trips G7/B', () => {
+      const source = '| G7/B |\n';
+      expect(parseSong(render(source))).toEqual(parseSong(source));
+    });
+  });
+
   describe('round-trip', () => {
     it('parse → render → parse produces an equal AST', () => {
       const source =

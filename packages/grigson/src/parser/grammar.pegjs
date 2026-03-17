@@ -128,9 +128,14 @@ TimeSignatureToken
     }
 
 Chord
-  = root:Root quality:Quality {
-      return { type: "chord", root, quality };
+  = root:Root quality:Quality bass:SlashBass? {
+      const chord = { type: "chord", root, quality };
+      if (bass !== null) chord.bass = bass;
+      return chord;
     }
+
+SlashBass
+  = "/" bass:Root { return bass; }
 
 Root
   = note:NoteLetter accidental:Accidental? {

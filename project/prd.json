@@ -1376,7 +1376,8 @@
       "Add parser tests: `F/C`, `F#/A#`, `C-/Bb` (requires Task 2 for the `-` quality)",
       "Add renderer tests and round-trip tests for slash chords",
       "Run `pnpm test` and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "parser-extended-barlines",

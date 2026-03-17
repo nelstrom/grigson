@@ -20,6 +20,7 @@ export interface Chord {
   type: 'chord';
   root: string;
   quality: Quality;
+  bass?: string;
 }
 
 export interface TimeSignature {

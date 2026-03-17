@@ -58,7 +58,7 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
     default:
       suffix = '';
   }
-  return chord.root + suffix;
+  return chord.root + suffix + (chord.bass ? '/' + chord.bass : '');
 }
 
 function renderBar(bar: Bar, config: TextRendererConfig): string {

@@ -272,3 +272,6 @@ Added a Comment rule to grammar.pegjs that matches lines beginning with `#` outs
 
 ## parser-chord-qualities-dash-7b5
 Added two new chord quality suffixes. Added `"7b5" { return "dom7flat5"; }` to the Quality rule in grammar.pegjs before `"7"`, and `"-" { return "min7"; }` before the empty fallback. Added `'dom7flat5'` to the Quality union type in types.ts. Added `case 'dom7flat5': suffix = '7b5'; break;` to renderChord in text.ts. Rebuilt with pnpm build. Added 5 parser tests (G7b5, F#7b5 → dom7flat5; C-, F#-, Bb- → min7) and 4 renderer tests (dom7flat5 renders as '7b5', C- renders as 'Cm7', plus round-trips for each). All 341 tests pass.
+
+## parser-slash-chords
+Added slash chord support (e.g. F/C, F#/A#, C-/Bb) to the parser, types, and renderer. Added `bass?: string` to the Chord interface in types.ts. Added a SlashBass rule to grammar.pegjs that matches "/" followed by a Root, and updated the Chord rule to capture an optional bass and include it in the returned object. Regenerated the parser with `pnpm build`. Updated renderChord in text.ts to append `'/' + chord.bass` when bass is present. Added 5 parser tests and 6 renderer/round-trip tests. All 353 tests pass.
