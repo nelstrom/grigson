@@ -1,4 +1,4 @@
-import type { Song, Row, Bar, Chord, Barline } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline, BeatSlot } from '../parser/types.js';
 
 export interface TextRendererConfig {
   notation?: {
@@ -6,6 +6,9 @@ export interface TextRendererConfig {
     minor?: string;
     dominant7?: string;
     halfDim?: string;
+  };
+  simile?: {
+    output?: 'shorthand' | 'longhand';
   };
 }
 
@@ -87,10 +90,32 @@ function barlineSymbol(b: Barline): string {
   }
 }
 
+function slotsEqual(a: BeatSlot[], b: BeatSlot[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((slot, i) => {
+    const other = b[i];
+    if (slot.type !== other.type) return false;
+    if (slot.type === 'chord' && other.type === 'chord') {
+      const ca = slot.chord;
+      const cb = other.chord;
+      return ca.root === cb.root && ca.quality === cb.quality && ca.bass === cb.bass;
+    }
+    return true; // both dots
+  });
+}
+
 function renderRow(row: Row, config: TextRendererConfig): string {
   const open = barlineSymbol(row.openBarline);
-  const bars = row.bars.map((bar) => renderBar(bar, config) + ' ' + barlineSymbol(bar.closeBarline)).join(' ');
-  return open + ' ' + bars;
+  const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
+  let prevSlots: BeatSlot[] | null = null;
+  const parts: string[] = [];
+  for (const bar of row.bars) {
+    const isSimile = useShorthand && prevSlots !== null && slotsEqual(bar.slots, prevSlots);
+    const barText = isSimile ? '%' : renderBar(bar, config);
+    parts.push(barText + ' ' + barlineSymbol(bar.closeBarline));
+    prevSlots = bar.slots;
+  }
+  return open + ' ' + parts.join(' ');
 }
 
 function renderFrontMatter(title: string | null, key: string | null, meter: string | null): string {

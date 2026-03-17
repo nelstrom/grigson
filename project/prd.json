@@ -1412,7 +1412,8 @@
       "Verify that a simile bar's slots equal the preceding bar's slots in the AST",
       "Optionally add `simile?: boolean` config to TextRendererConfig and implement detection in the renderer",
       "Run `pnpm test` and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "parser-examples-regression-test",

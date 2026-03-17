@@ -88,6 +88,16 @@ FrontMatterValue
 
 Row
   = open:OpenBarline _ bars:BarTail+ {
+      // Resolve simile bars left-to-right: each % copies the preceding bar's slots
+      let lastSlots = [];
+      for (const bar of bars) {
+        if (bar.simile) {
+          bar.slots = lastSlots.map(s => ({ ...s }));
+          delete bar.simile;
+        } else {
+          lastSlots = bar.slots;
+        }
+      }
       return { type: "row", openBarline: open, bars };
     }
 
@@ -101,6 +111,10 @@ BarTail
       const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
       return bar;
+    }
+  / "%" _ close:CloseBarline _ {
+      // Simile mark — slots resolved by the Row action above
+      return { type: "bar", simile: true, slots: [], closeBarline: close };
     }
 
 Bar
