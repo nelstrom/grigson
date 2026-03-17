@@ -1426,5 +1426,143 @@
       "Run `pnpm test` and confirm all example charts parse cleanly"
     ],
     "passes": true
+  },
+  {
+    "id": "sync-textmate-qualities-7b5-dash",
+    "category": "grammar-sync",
+    "description": "Add 7b5 and - chord quality suffixes to TextMate grammar",
+    "detail": "The Peggy grammar supports two quality suffixes missing from the TextMate chord pattern: '7b5' (dom7flat5) and '-' (min7, i.e. C- means Cm7). The current alternation in the chord match regex is 'm7b5|maj7|M7|dim7|m7|dim|m|7'. It must become 'm7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-' with 7b5 before 7 to avoid premature matching. Sync the update to both packages/textmate-grammar/grigson.tmLanguage.json and packages/vscode-extension/syntaxes/grigson.tmLanguage.json.",
+    "steps": [
+      "In the 'chord' repository entry, update the quality capture group regex from 'm7b5|maj7|M7|dim7|m7|dim|m|7' to 'm7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-'",
+      "Sync the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Add syntax-test.chart entries for G7b5 and C- and confirm they highlight correctly"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-textmate-extended-barlines",
+    "category": "grammar-sync",
+    "description": "Add extended barline variants to TextMate grammar",
+    "detail": "The Peggy grammar supports eight barline kinds: | || ||. ||: :|| :||xN :||: :||xN: The TextMate 'barline' repository entry only matches the literal '|'. All multi-character barlines are invisible to the highlighter. Update the match to cover all variants, longest alternatives first, so that :||x3: is not partially matched as :|| or |.",
+    "steps": [
+      "Replace the single-character '\\\\|' match in the 'barline' repository entry with a regex that matches all variants in longest-first order: :||x\\d+:|:||x\\d+|:||:|:|||\\|\\|\\.|\\|\\|:|\\|\\|(?![:.])|\\| — adjust as needed for JSON regex escaping",
+      "Sync the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Add syntax-test.chart rows exercising ||, ||., ||:, :||, :||x2, :||: and verify highlighting"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-textmate-simile-mark",
+    "category": "grammar-sync",
+    "description": "Add simile mark (%) pattern to TextMate grammar",
+    "detail": "The Peggy grammar supports a % simile mark inside a bar (e.g. | C | % | % |) which copies the previous bar's content. The TextMate grammar has no pattern for %. It should be highlighted similarly to the dot beat-slot, as a punctuation or operator token. Add a 'simile' repository entry and include it in the main pattern list.",
+    "steps": [
+      "Add a 'simile' repository entry with a match regex similar to the dot: (?<=\\\\||\\\\s)%(?=\\\\s|\\\\||$) and scope 'keyword.operator.simile.grigson'",
+      "Include '#simile' in the main pattern list (after '#dot')",
+      "Sync to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Add syntax-test.chart entries with % bars and verify highlighting"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-textmate-slash-chords",
+    "category": "grammar-sync",
+    "description": "Add slash chord bass note highlighting to TextMate grammar",
+    "detail": "The Peggy grammar supports slash chords such as F/C, Am/E, and C-/Bb, where the text after '/' is a bass note (a Root: note letter + optional accidental). The TextMate chord pattern lookahead (?=\\\\s|\\\\||$) stops before the slash, so the '/C' part receives no scope. Extend the chord pattern to optionally match a slash bass, capturing the '/', the bass note letter, and the optional bass accidental in separate capture groups.",
+    "steps": [
+      "Extend the 'chord' match regex to include an optional slash-bass group: (/([A-G])([#b])?) — append after the quality capture and before the lookahead",
+      "Add capture entries for groups 4 (/), 5 (bass note letter), and 6 (bass accidental) with appropriate scopes (e.g. punctuation.separator.slash.grigson, constant.other.chord.bass.grigson, constant.other.chord.accidental.grigson)",
+      "Sync to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Add syntax-test.chart entries for F/C, Am/E, C-/Bb and verify all parts highlight"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-textmate-comment-lines",
+    "category": "grammar-sync",
+    "description": "Add comment line (#) pattern to TextMate grammar",
+    "detail": "The Peggy grammar supports comment lines that begin with # outside front matter (e.g. '# This is a comment'). These lines are silently ignored by the parser. The TextMate grammar has no pattern for comment lines, so they receive no highlighting. Add a 'comment' repository entry matching lines starting with # and give them a comment scope so editors show them greyed out.",
+    "steps": [
+      "Add a 'comment' repository entry with a match of '^#.*$' and name 'comment.line.number-sign.grigson'",
+      "Include '#comment' at the top of the main pattern list (before '#frontmatter') so it matches first",
+      "Sync to packages/vscode-extension/syntaxes/grigson.tmLanguage.json",
+      "Add comment lines to syntax-test.chart and verify they render as comments"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-qualities-7b5-dash",
+    "category": "grammar-sync",
+    "description": "Add 7b5 and - chord quality tokens to tree-sitter grammar",
+    "detail": "The Peggy grammar supports two quality suffixes missing from the tree-sitter quality rule: '7b5' (dom7flat5) and '-' (min7, written as C- meaning Cm7). The current tree-sitter quality choice is ('m7b5', 'maj7', 'M7', 'dim7', 'm7', 'dim', 'm', '7'). Add '7b5' before '7' and '-' after 'm' to maintain longest-match-first ordering.",
+    "steps": [
+      "In grammar.js, update the quality rule choice to include '7b5' (before '7') and '-' (after 'm')",
+      "Run tree-sitter generate",
+      "Add corpus tests in test/corpus/chords.txt for G7b5 (→ dom7flat5) and C- (→ min7 via dash)",
+      "Run tree-sitter test to confirm all corpus tests pass",
+      "Update queries/highlights.scm if the new quality tokens need separate highlight captures"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-extended-barlines",
+    "category": "grammar-sync",
+    "description": "Add extended barline variants to tree-sitter grammar",
+    "detail": "The Peggy grammar supports eight barline kinds (|, ||, ||., ||:, :||, :||xN, :||:, :||xN:) for both open and close positions. The tree-sitter grammar's barline rule is just the literal '|'. All multi-character barlines would produce ERROR nodes. Replace the single barline rule with open_barline and close_barline rules (or a unified barline rule with all alternatives in longest-first order), update row and bar_tail to use the appropriate rule, and add corpus tests for each barline kind.",
+    "steps": [
+      "Add open_barline rule covering :||:, :||, ||:, ||, | in longest-first order",
+      "Add close_barline rule covering :||x\\d+:, :||:, :||x\\d+, :||, ||:, ||., ||, | in longest-first order",
+      "Update row to use open_barline and bar_tail to use close_barline",
+      "Run tree-sitter generate",
+      "Add corpus tests in test/corpus/bars.txt for ||, ||., ||:, :||, :||x2, :||: open and close positions",
+      "Update queries/highlights.scm to scope open_barline and close_barline",
+      "Run tree-sitter test to confirm all corpus tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-simile-mark",
+    "category": "grammar-sync",
+    "description": "Add simile mark (%) alternative to tree-sitter bar_tail rule",
+    "detail": "The Peggy grammar supports a % simile mark as an alternative to a full beat slot list inside a bar (e.g. | C | % | % |). The tree-sitter bar_tail rule only handles seq(optional($.time_signature), repeat1($.beat_slot), $.barline). A % in the input would produce an ERROR node. Add a simile_mark rule ('.' is the tree-sitter way — use '%') and a simile_bar_tail alternative, or add choice to bar_tail to handle % as its content.",
+    "steps": [
+      "Add a simile_mark rule: (_$) => '%'",
+      "Update bar_tail to be choice(seq(optional($.time_signature), repeat1($.beat_slot), $.barline), seq($.simile_mark, $.barline))",
+      "Run tree-sitter generate",
+      "Add corpus tests in a new test/corpus/simile.txt covering: single %, multiple consecutive %, % with non-single close barline",
+      "Update queries/highlights.scm to scope (simile_mark) as @keyword.operator",
+      "Run tree-sitter test to confirm all corpus tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-slash-chords",
+    "category": "grammar-sync",
+    "description": "Add slash chord bass note to tree-sitter chord rule",
+    "detail": "The Peggy grammar supports slash chords (e.g. F/C, Am/E, C-/Bb) where a '/' followed by a bass Root is optionally appended to a chord. The tree-sitter chord rule is seq($.note_letter, optional($.accidental), optional($.quality)) with no slash bass. F/C would parse only 'F' as a chord and leave '/C' as an ERROR. Add a slash_bass rule and make it optional in chord.",
+    "steps": [
+      "Add a slash_bass rule: ($) => seq('/', $.note_letter, optional($.accidental))",
+      "Update chord to seq($.note_letter, optional($.accidental), optional($.quality), optional($.slash_bass))",
+      "Run tree-sitter generate",
+      "Add corpus tests in test/corpus/chords.txt for F/C, Am/E, C-/Bb",
+      "Update queries/highlights.scm to scope slash_bass parts appropriately",
+      "Run tree-sitter test to confirm all corpus tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-comment-lines",
+    "category": "grammar-sync",
+    "description": "Add comment line (#) rule to tree-sitter grammar",
+    "detail": "The Peggy grammar silently ignores lines beginning with # outside front matter. The tree-sitter grammar has no comment rule, so any # line in the song body would produce ERROR nodes. Add a comment rule and include it as an alternative at the top level of the song body.",
+    "steps": [
+      "Add a comment rule: (_$) => /#[^\\n]*(\\n|$)/ (or use token with optional newline)",
+      "Update song to include $.comment as an alternative: repeat(choice($.section_label, $.comment, $.row, /\\r?\\n/))",
+      "Run tree-sitter generate",
+      "Add corpus tests in a new test/corpus/comments.txt covering: standalone comment, comment before a section label, comment between rows",
+      "Update queries/highlights.scm to scope (comment) as @comment",
+      "Run tree-sitter test to confirm all corpus tests pass"
+    ],
+    "passes": false
   }
 ]
