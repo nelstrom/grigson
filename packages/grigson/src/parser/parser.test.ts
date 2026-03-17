@@ -171,7 +171,7 @@ describe('chord parsing', () => {
 
       const song = parseSong(source);
       expect(song.title).toBe('My Song');
-      expect(song.key).toBe('G');
+      expect(song.key).toBe('G major');
       expect(song.sections[0].rows).toHaveLength(2);
     });
 
@@ -191,7 +191,7 @@ describe('chord parsing', () => {
   describe('front matter parsing', () => {
     it('parses title and key', () => {
       const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: 'Autumn Leaves', key: 'G', meter: null });
+      expect(fm).toEqual({ type: 'frontMatter', title: 'Autumn Leaves', key: 'G major', meter: null });
     });
 
     it('parses title without key', () => {
@@ -201,7 +201,7 @@ describe('chord parsing', () => {
 
     it('parses key without title', () => {
       const fm = parseFrontMatter('---\nkey: Bb\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: null, key: 'Bb', meter: null });
+      expect(fm).toEqual({ type: 'frontMatter', title: null, key: 'Bb major', meter: null });
     });
 
     it('parses empty front matter', () => {
@@ -209,29 +209,13 @@ describe('chord parsing', () => {
       expect(fm).toEqual({ type: 'frontMatter', title: null, key: null, meter: null });
     });
 
-    it('accepts all 17 valid key spellings', () => {
+    it('accepts all 17 valid key spellings and normalizes to canonical form', () => {
       const validKeys = [
-        'C',
-        'C#',
-        'Db',
-        'D',
-        'D#',
-        'Eb',
-        'E',
-        'F',
-        'F#',
-        'Gb',
-        'G',
-        'G#',
-        'Ab',
-        'A',
-        'A#',
-        'Bb',
-        'B',
+        'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
       ];
       for (const key of validKeys) {
         const fm = parseFrontMatter(`---\nkey: ${key}\n---\n`);
-        expect(fm.key).toBe(key);
+        expect(fm.key).toBe(key + ' major');
       }
     });
 
@@ -239,9 +223,9 @@ describe('chord parsing', () => {
       expect(() => parseFrontMatter('---\nkey: H\n---\n')).toThrow();
     });
 
-    it('accepts a minor key (Am)', () => {
+    it('accepts a minor key (Am) and normalizes to "A minor"', () => {
       const result = parseFrontMatter('---\nkey: Am\n---\n');
-      expect(result.key).toBe('Am');
+      expect(result.key).toBe('A minor');
     });
 
     it('accepts a dorian key (A dorian)', () => {
@@ -257,6 +241,21 @@ describe('chord parsing', () => {
     it('accepts a mixolydian key (D mixolydian)', () => {
       const result = parseFrontMatter('---\nkey: D mixolydian\n---\n');
       expect(result.key).toBe('D mixolydian');
+    });
+
+    it('accepts "C major" and keeps it as-is', () => {
+      const result = parseFrontMatter('---\nkey: C major\n---\n');
+      expect(result.key).toBe('C major');
+    });
+
+    it('accepts "A minor" and keeps it as-is', () => {
+      const result = parseFrontMatter('---\nkey: A minor\n---\n');
+      expect(result.key).toBe('A minor');
+    });
+
+    it('accepts "C ionian" and normalizes to "C major"', () => {
+      const result = parseFrontMatter('---\nkey: C ionian\n---\n');
+      expect(result.key).toBe('C major');
     });
 
     it('parses meter: 2/4', () => {

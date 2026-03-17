@@ -17,7 +17,7 @@ export { transposeSong, transposeSongToKey, transposeSection } from './theory/tr
 
 // Theory utilities
 export { detectKey } from './theory/keyDetector.js';
-export { diatonicNotes, getKeyMode, getKeyRoot, getSiblingModes, getRelativeMajor } from './theory/keys.js';
+export { diatonicNotes, getKeyMode, getKeyRoot, getSiblingModes, getRelativeMajor, resolveKey } from './theory/keys.js';
 export type { KeyMode, ScaleFamily } from './theory/keys.js';
 export { rootToPitchClass, ENHARMONIC_PAIRS } from './theory/pitchClass.js';
 export { analyseHarmony, circleOfFifthsDistance } from './theory/harmonicAnalysis.js';

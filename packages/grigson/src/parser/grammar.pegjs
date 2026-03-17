@@ -51,12 +51,18 @@ FrontMatter
         "C#", "Db", "D#", "Eb", "F#", "Gb", "G#", "Ab", "A#", "Bb",
         "C", "D", "E", "F", "G", "A", "B",
       ];
-      const validKeySuffixes = ["m", " dorian", " aeolian", " mixolydian", ""];
+      const validKeySuffixes = ["m", " dorian", " aeolian", " mixolydian", " major", " minor", " ionian", ""];
       const isValidKey = (k) =>
         validNotes.some((n) => validKeySuffixes.some((s) => k === n + s));
       if (meta.key !== undefined && !isValidKey(meta.key)) {
-        error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian).`);
+        error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian, C major, A minor).`);
       }
+      const normalizeKey = (k) => {
+        if (k.endsWith(' ionian')) return k.slice(0, -7) + ' major';
+        if (k.includes(' ')) return k; // dorian/aeolian/mixolydian/major/minor — already canonical
+        if (k.endsWith('m')) return k.slice(0, -1) + ' minor';
+        return k + ' major';
+      };
 
       const isValidMeter = (m) => m === 'mixed' || /^[0-9]+\/[0-9]+$/.test(m);
       if (meta.meter !== undefined && !isValidMeter(meta.meter)) {
@@ -66,7 +72,7 @@ FrontMatter
       return {
         type: "frontMatter",
         title: meta.title ?? null,
-        key: meta.key ?? null,
+        key: meta.key !== undefined ? normalizeKey(meta.key) : null,
         meter: meta.meter ?? null,
       };
     }

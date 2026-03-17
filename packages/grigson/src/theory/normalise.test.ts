@@ -177,7 +177,7 @@ describe('normaliseSong — Category 5: front matter key field read and write', 
   it('T5-a: correct key: F preserved; no chord changes', () => {
     const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'F');
     const result = normaliseSong(s);
-    expect(result.key).toBe('F');
+    expect(result.key).toBe('F major');
     expect(chordOf(result.sections[0].rows[0].bars[0]).root).toBe('F');
     expect(chordOf(result.sections[0].rows[0].bars[1]).root).toBe('Bb');
   });
@@ -185,19 +185,19 @@ describe('normaliseSong — Category 5: front matter key field read and write', 
   it('T5-b: wrong key: G corrected to F', () => {
     const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'G');
     const result = normaliseSong(s);
-    expect(result.key).toBe('F');
+    expect(result.key).toBe('F major');
   });
 
   it('T5-c: no key in front matter; key: G added', () => {
     const s = song([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))]);
     const result = normaliseSong(s);
-    expect(result.key).toBe('G');
+    expect(result.key).toBe('G major');
   });
 
   it('T5-d: wrong key: C corrected to F (Bb and Gm not diatonic to C)', () => {
     const s = song([row(ch('Bb'), ch('F'), ch('C'), ch('Gm', 'minor'))], 'C');
     const result = normaliseSong(s);
-    expect(result.key).toBe('F');
+    expect(result.key).toBe('F major');
   });
 });
 
@@ -212,7 +212,7 @@ describe('normaliseSong — chord-qualities smoke tests', () => {
     expect(chordOf(bars[1]).quality).toBe('dominant7');
     expect(chordOf(bars[2]).root).toBe('C');
     expect(chordOf(bars[2]).quality).toBe('maj7');
-    expect(result.key).toBe('C');
+    expect(result.key).toBe('C major');
   });
 
   it('D#m7 G#7 C#maj7: detected key Db, roots rewritten to Ebm7 Ab7 Dbmaj7', () => {
@@ -225,7 +225,7 @@ describe('normaliseSong — chord-qualities smoke tests', () => {
     expect(chordOf(bars[1]).quality).toBe('dominant7');
     expect(chordOf(bars[2]).root).toBe('Db');
     expect(chordOf(bars[2]).quality).toBe('maj7');
-    expect(result.key).toBe('Db');
+    expect(result.key).toBe('Db major');
   });
 
   it('Bm7b5 E7 Am7: identifies Am, all roots unchanged', () => {
@@ -235,7 +235,7 @@ describe('normaliseSong — chord-qualities smoke tests', () => {
     expect(chordOf(bars[0]).root).toBe('B');
     expect(chordOf(bars[1]).root).toBe('E');
     expect(chordOf(bars[2]).root).toBe('A');
-    expect(result.key).toBe('Am');
+    expect(result.key).toBe('A minor');
   });
 
   it('Am7 Dm7 G#dim7 Am7: identifies Am, G# (raised VII) preserved as G#', () => {
@@ -249,7 +249,7 @@ describe('normaliseSong — chord-qualities smoke tests', () => {
     expect(chordOf(bars[2]).root).toBe('G#');
     expect(chordOf(bars[2]).quality).toBe('dim7');
     expect(chordOf(bars[3]).root).toBe('A');
-    expect(result.key).toBe('Am');
+    expect(result.key).toBe('A minor');
   });
 });
 
@@ -261,7 +261,7 @@ describe('normaliseSong — exotic minor key normalisation (G#m/Abm and D#m/Ebm)
       row(ch('Ab', 'minor'), ch('C#', 'minor'), ch('D#', 'dominant7'), ch('G#', 'minor')),
     ]);
     const result = normaliseSong(s);
-    expect(result.key).toBe('G#m');
+    expect(result.key).toBe('G# minor');
     const bars = result.sections[0].rows[0].bars;
     expect(chordOf(bars[0]).root).toBe('G#'); // Ab → G#
     expect(chordOf(bars[1]).root).toBe('C#');
@@ -277,7 +277,7 @@ describe('normaliseSong — exotic minor key normalisation (G#m/Abm and D#m/Ebm)
       row(ch('G#', 'minor'), ch('Db', 'minor'), ch('Eb', 'dominant7'), ch('Ab', 'minor')),
     ]);
     const result = normaliseSong(s, { forceKey: 'Abm' });
-    expect(result.key).toBe('Abm');
+    expect(result.key).toBe('Ab minor');
     const bars = result.sections[0].rows[0].bars;
     expect(chordOf(bars[0]).root).toBe('Ab'); // G# → Ab
     expect(chordOf(bars[1]).root).toBe('Db');
@@ -292,7 +292,7 @@ describe('normaliseSong — exotic minor key normalisation (G#m/Abm and D#m/Ebm)
       row(ch('Eb', 'minor'), ch('G#', 'minor'), ch('A#', 'dominant7'), ch('D#', 'minor')),
     ]);
     const result = normaliseSong(s);
-    expect(result.key).toBe('D#m');
+    expect(result.key).toBe('D# minor');
     const bars = result.sections[0].rows[0].bars;
     expect(chordOf(bars[0]).root).toBe('D#'); // Eb → D#
     expect(chordOf(bars[1]).root).toBe('G#');
@@ -308,7 +308,7 @@ describe('normaliseSong — exotic minor key normalisation (G#m/Abm and D#m/Ebm)
       row(ch('D#', 'minor'), ch('Ab', 'minor'), ch('Bb', 'dominant7'), ch('Eb', 'minor')),
     ]);
     const result = normaliseSong(s, { forceKey: 'Ebm' });
-    expect(result.key).toBe('Ebm');
+    expect(result.key).toBe('Eb minor');
     const bars = result.sections[0].rows[0].bars;
     expect(chordOf(bars[0]).root).toBe('Eb'); // D# → Eb
     expect(chordOf(bars[1]).root).toBe('Ab');
@@ -345,7 +345,7 @@ describe('normaliseSong — per-section key detection', () => {
     const chorus = section([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'Chorus');
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [verse, chorus] };
     const result = normaliseSong(s);
-    expect(result.key).toBe('G'); // first section is G major
+    expect(result.key).toBe('G major'); // first section is G major
   });
 
   it('normaliseSection returns homeKey and normalised chords', () => {

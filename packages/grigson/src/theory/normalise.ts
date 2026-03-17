@@ -1,12 +1,19 @@
 import type { Song, Section, Row, Bar, Chord, ChordSlot } from '../parser/types.js';
 import { detectKey, type DetectKeyConfig } from './keyDetector.js';
-import { KEYS } from './keys.js';
+import { KEYS, resolveKey } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import { analyseHarmony } from './harmonicAnalysis.js';
 
+function toCanonicalKey(key: string | null): string | null {
+  if (key === null) return null;
+  if (key.includes(' ')) return key; // already has a mode suffix (dorian/aeolian/mixolydian/major/minor)
+  if (key.endsWith('m')) return key.slice(0, -1) + ' minor';
+  return key + ' major';
+}
+
 function buildPCToNote(key: string): Map<number, string> {
   const map = new Map<number, string>();
-  for (const note of KEYS[key]?.notes ?? []) {
+  for (const note of KEYS[resolveKey(key)]?.notes ?? []) {
     try {
       map.set(rootToPitchClass(note), note);
     } catch {
@@ -121,5 +128,5 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     }
   }
 
-  return { ...song, key: firstSectionKey, meter: newMeter, sections: finalSections };
+  return { ...song, key: toCanonicalKey(firstSectionKey), meter: newMeter, sections: finalSections };
 }

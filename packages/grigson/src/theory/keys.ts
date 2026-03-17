@@ -15,6 +15,8 @@ export function getKeyMode(key: string): KeyMode {
   if (key.endsWith(' dorian')) return 'dorian';
   if (key.endsWith(' aeolian')) return 'aeolian';
   if (key.endsWith(' mixolydian')) return 'mixolydian';
+  if (key.endsWith(' major')) return 'major';
+  if (key.endsWith(' minor')) return 'minor';
   if (key.endsWith('m')) return 'minor';
   return 'major';
 }
@@ -23,7 +25,20 @@ export function getKeyRoot(key: string): string {
   if (key.endsWith(' dorian')) return key.slice(0, -7);
   if (key.endsWith(' aeolian')) return key.slice(0, -8);
   if (key.endsWith(' mixolydian')) return key.slice(0, -11);
+  if (key.endsWith(' major')) return key.slice(0, -6);
+  if (key.endsWith(' minor')) return key.slice(0, -6);
   if (key.endsWith('m')) return key.slice(0, -1);
+  return key;
+}
+
+/**
+ * Converts a canonical key string (e.g. 'C major', 'A minor') to the
+ * short KEYS-object key (e.g. 'C', 'Am'). Leaves modal keys unchanged.
+ * Safe to call with already-short keys.
+ */
+export function resolveKey(key: string): string {
+  if (key.endsWith(' major')) return key.slice(0, -6);
+  if (key.endsWith(' minor')) return key.slice(0, -6) + 'm';
   return key;
 }
 
@@ -99,7 +114,7 @@ export const KEYS: Readonly<Record<string, KeyInfo>> = {
 };
 
 export function diatonicNotes(key: string): ReadonlySet<string> {
-  const info = KEYS[key];
+  const info = KEYS[resolveKey(key)];
   if (!info) {
     throw new Error(`Unknown key: ${key}`);
   }
@@ -111,7 +126,7 @@ export function diatonicNotes(key: string): ReadonlySet<string> {
  * (same parent root + same scaleFamily).
  */
 export function getSiblingModes(key: string): string[] {
-  const info = KEYS[key];
+  const info = KEYS[resolveKey(key)];
   if (!info) return [];
   return Object.keys(KEYS).filter(
     (k) => KEYS[k].parent === info.parent && KEYS[k].scaleFamily === info.scaleFamily,
@@ -125,7 +140,7 @@ export function getSiblingModes(key: string): string[] {
  * - harmonic_minor: returns the major key whose root is a minor third (3 semitones) above
  */
 export function getRelativeMajor(key: string): string | undefined {
-  const info = KEYS[key];
+  const info = KEYS[resolveKey(key)];
   if (!info) return undefined;
 
   if (info.scaleFamily === 'major') {

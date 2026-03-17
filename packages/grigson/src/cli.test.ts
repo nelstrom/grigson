@@ -108,7 +108,7 @@ describe('CLI normalise subcommand', () => {
     runCli(['normalise', '--key', 'Am', tmpFile]);
 
     const output = stdoutSpy.mock.calls[0][0] as string;
-    expect(output).toContain('key: Am');
+    expect(output).toContain('key: A minor');
     fs.unlinkSync(tmpFile);
   });
 
