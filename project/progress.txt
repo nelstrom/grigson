@@ -290,3 +290,6 @@ Updated the chord quality alternation in the 'chord' repository entry regex in p
 
 ## sync-textmate-extended-barlines
 Replaced the single-character `\\|` match in the 'barline' repository entry with a regex covering all eight barline variants in longest-first order: `:\\|\\|x\\d+:|:\\|\\|x\\d+|:\\|\\|:|:\\|\\||\\|\\|:|\\|\\|\\.|\\|\\||\\|`. This ensures :||x3:, :||x3, :||:, :||, ||:, ||., ||, and | are all matched as barline tokens. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added four rows to syntax-test.chart exercising ||:, :||, :||x2, :||:, ||, and ||. All 407 tests pass.
+
+## sync-textmate-simile-mark
+Added a 'simile' repository entry to packages/textmate-grammar/grigson.tmLanguage.json with match `(?<=\\||\\s)%(?=\\s|\\||$)` and scope `keyword.operator.simile.grigson`. Included `#simile` in the main pattern list after `#dot`. Synced the same change to packages/vscode-extension/syntaxes/grigson.tmLanguage.json. Added a `| C | % | % | F |` row to syntax-test.chart. All 407 tests pass.

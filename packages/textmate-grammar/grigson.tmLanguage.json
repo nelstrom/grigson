@@ -26,6 +26,9 @@
           "include": "#dot"
         },
         {
+          "include": "#simile"
+        },
+        {
           "include": "#chord"
         }
       ]
@@ -115,6 +118,10 @@
     "dot": {
       "match": "(?<=\\||\\s)\\.(?=\\s|\\||$)",
       "name": "punctuation.separator.beat.grigson"
+    },
+    "simile": {
+      "match": "(?<=\\||\\s)%(?=\\s|\\||$)",
+      "name": "keyword.operator.simile.grigson"
     },
     "chord": {
       "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?(?=\\s|\\||$)",
