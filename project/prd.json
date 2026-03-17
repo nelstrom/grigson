@@ -1424,6 +1424,7 @@
       "Create `packages/grigson/src/parser/examples.test.ts` using globSync to enumerate all *.chart files",
       "For each file, call `parseSong(readFileSync(path, 'utf8'))` inside an `it` block and expect it not to throw",
       "Run `pnpm test` and confirm all example charts parse cleanly"
-    ]
+    ],
+    "passes": true
   }
 ]
