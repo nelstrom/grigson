@@ -192,6 +192,10 @@
       "required": false,
       "types": [
         {
+          "type": "comment",
+          "named": true
+        },
+        {
           "type": "frontmatter",
           "named": true
         },
@@ -251,6 +255,10 @@
   },
   {
     "type": "close_barline",
+    "named": true
+  },
+  {
+    "type": "comment",
     "named": true
   },
   {

@@ -5,7 +5,9 @@ module.exports = grammar({
 
   rules: {
     song: ($) =>
-      seq(optional($.frontmatter), repeat(choice($.section_label, $.row, /\r?\n/))),
+      seq(optional($.frontmatter), repeat(choice($.comment, $.section_label, $.row, /\r?\n/))),
+
+    comment: (_$) => /#[^\r\n]*/,
 
     section_label: ($) => seq('[', $.section_name, ']'),
 

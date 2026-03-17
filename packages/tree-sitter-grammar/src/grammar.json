@@ -24,6 +24,10 @@
             "members": [
               {
                 "type": "SYMBOL",
+                "name": "comment"
+              },
+              {
+                "type": "SYMBOL",
                 "name": "section_label"
               },
               {
@@ -38,6 +42,10 @@
           }
         }
       ]
+    },
+    "comment": {
+      "type": "PATTERN",
+      "value": "#[^\\r\\n]*"
     },
     "section_label": {
       "type": "SEQ",

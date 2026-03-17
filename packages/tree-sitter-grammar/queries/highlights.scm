@@ -1,3 +1,6 @@
+; Comments
+(comment) @comment
+
 ; Frontmatter
 (frontmatter_delimiter) @punctuation.special
 

@@ -1563,6 +1563,6 @@
       "Update queries/highlights.scm to scope (comment) as @comment",
       "Run tree-sitter test to confirm all corpus tests pass"
     ],
-    "passes": false
+    "passes": true
   }
 ]
