@@ -65,10 +65,19 @@ export interface Row {
   bars: Bar[];
 }
 
+export interface CommentLine {
+  type: 'comment';
+  text: string;
+}
+
+export type SectionItem = Row | CommentLine;
+
 export interface Section {
   type: 'section';
   label: string | null;
   rows: Row[];
+  preamble?: CommentLine[];  // comment lines appearing before the section label
+  content?: SectionItem[];   // rows and inline comments appearing after the label
 }
 
 export interface Song {

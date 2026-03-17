@@ -384,24 +384,37 @@ describe('chord parsing', () => {
   });
 
   describe('comment lines', () => {
-    it('ignores a single comment line', () => {
+    it('stores a comment before the first row in preamble', () => {
       const source = '# This is a comment\n| C | Am |\n';
       const song = parseSong(source);
       expect(song.sections[0].rows).toHaveLength(1);
+      expect(song.sections[0].preamble).toEqual([{ type: 'comment', text: '# This is a comment' }]);
+      expect(song.sections[0].content).toHaveLength(1); // only the row
     });
 
-    it('ignores a comment line before a section label', () => {
+    it('stores a comment before a section label in that section\'s preamble', () => {
       const source = '# intro\n[Verse]\n| C | Am |\n';
       const song = parseSong(source);
       expect(song.sections).toHaveLength(1);
       expect(song.sections[0].label).toBe('Verse');
       expect(song.sections[0].rows).toHaveLength(1);
+      expect(song.sections[0].preamble).toEqual([{ type: 'comment', text: '# intro' }]);
     });
 
-    it('ignores a comment line between rows', () => {
+    it('stores a comment after a section label in content, not preamble', () => {
+      const source = '[Verse]\n# after label\n| C | Am |\n';
+      const song = parseSong(source);
+      expect(song.sections[0].preamble).toEqual([]);
+      expect(song.sections[0].content).toHaveLength(2);
+      expect(song.sections[0].content![0]).toEqual({ type: 'comment', text: '# after label' });
+    });
+
+    it('preserves comment ordering between rows in content', () => {
       const source = '| C | Am |\n# between rows\n| F | G |\n';
       const song = parseSong(source);
       expect(song.sections[0].rows).toHaveLength(2);
+      expect(song.sections[0].content).toHaveLength(3);
+      expect(song.sections[0].content![1]).toEqual({ type: 'comment', text: '# between rows' });
     });
   });
 

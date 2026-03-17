@@ -1,6 +1,6 @@
 // Browser entry point — no CLI imports
 export { parseSong, parseChord } from './parser/parser.js';
-export type { Song, Section, Row, Bar, Chord, Quality, FrontMatter, TimeSignature, ChordSlot, DotSlot, BeatSlot, BarlineKind, Barline } from './parser/parser.js';
+export type { Song, Section, Row, Bar, Chord, Quality, FrontMatter, TimeSignature, ChordSlot, DotSlot, BeatSlot, BarlineKind, Barline, CommentLine, SectionItem } from './parser/parser.js';
 
 export { TextRenderer } from './renderers/text.js';
 export { HtmlRenderer } from './renderers/html.js';

@@ -93,7 +93,12 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
         ),
       }));
 
-      return { homeKey, section: { ...sec, rows: newRows } };
+      let rowIdx = 0;
+      const newContent = (sec.content ?? sec.rows).map((item) =>
+        item.type === 'row' ? newRows[rowIdx++] : item,
+      );
+
+      return { homeKey, section: { ...sec, rows: newRows, content: newContent } };
     },
   );
 
@@ -115,13 +120,17 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     if (uniqueMeters.size === 1) {
       // Uniform — hoist to front-matter, strip inline tokens
       newMeter = [...uniqueMeters][0];
-      finalSections = newSections.map((sec) => ({
-        ...sec,
-        rows: sec.rows.map((row) => ({
+      finalSections = newSections.map((sec) => {
+        const strippedRows = sec.rows.map((row) => ({
           ...row,
           bars: row.bars.map(({ timeSignature: _ts, ...rest }) => rest as Bar),
-        })),
-      }));
+        }));
+        let rowIdx = 0;
+        const strippedContent = (sec.content ?? sec.rows).map((item) =>
+          item.type === 'row' ? strippedRows[rowIdx++] : item,
+        );
+        return { ...sec, rows: strippedRows, content: strippedContent };
+      });
     } else {
       // Mixed meter
       newMeter = 'mixed';

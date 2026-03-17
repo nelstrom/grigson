@@ -96,11 +96,18 @@ export class HtmlRenderer {
 
     for (const section of song.sections) {
       html += '<div part="section">';
+      for (const comment of (section.preamble ?? [])) {
+        html += `<div part="comment">${comment.text}</div>`;
+      }
       if (section.label !== null) {
         html += `<div part="section-label">[${section.label}]</div>`;
       }
-      for (const row of section.rows) {
-        html += renderRow(row, this.config);
+      for (const item of (section.content ?? section.rows)) {
+        if (item.type === 'comment') {
+          html += `<div part="comment">${item.text}</div>`;
+        } else {
+          html += renderRow(item, this.config);
+        }
       }
       html += '</div>';
     }

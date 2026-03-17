@@ -258,24 +258,39 @@ function peg$parse(input, options) {
   function peg$f1(items) {
     const sections = [];
     let pendingLabel = null;
+    let pendingPreamble = [];  // comments before the current label
     let currentRows = [];
+    let currentContent = [];
+    let labelSeen = false;
 
     for (const item of items) {
       // Skip newlines (strings) and nulls
       if (typeof item !== "object" || item === null) continue;
       if (item.type === "sectionLabel") {
         if (currentRows.length > 0) {
-          sections.push({ type: "section", label: pendingLabel, rows: currentRows });
+          sections.push({ type: "section", label: pendingLabel, preamble: pendingPreamble, rows: currentRows, content: currentContent });
           currentRows = [];
+          currentContent = [];
+          pendingPreamble = [];
+          labelSeen = false;
         }
         pendingLabel = item.label;
+        labelSeen = true;
       } else if (item.type === "row") {
+        labelSeen = true;
         currentRows.push(item);
+        currentContent.push(item);
+      } else if (item.type === "comment") {
+        if (!labelSeen) {
+          pendingPreamble.push(item);
+        } else {
+          currentContent.push(item);
+        }
       }
     }
 
     // Always push the final section (ensures at least one section exists)
-    sections.push({ type: "section", label: pendingLabel, rows: currentRows });
+    sections.push({ type: "section", label: pendingLabel, preamble: pendingPreamble, rows: currentRows, content: currentContent });
     return sections;
   }
   function peg$f2(label) {
@@ -392,7 +407,7 @@ function peg$parse(input, options) {
   function peg$f39() {    return "dominant7";  }
   function peg$f40() {    return "min7";  }
   function peg$f41() {    return "major";  }
-  function peg$f42() {    return null;  }
+  function peg$f42(text) {    return { type: "comment", text: "#" + text };  }
   let peg$currPos = options.peg$currPos | 0;
   let peg$savedPos = peg$currPos;
   const peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -1846,7 +1861,7 @@ function peg$parse(input, options) {
       s3 = peg$parseNewline();
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
-        s0 = peg$f42();
+        s0 = peg$f42(s2);
       } else {
         peg$currPos = s0;
         s0 = peg$FAILED;

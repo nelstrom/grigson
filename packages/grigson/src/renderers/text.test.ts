@@ -186,5 +186,17 @@ describe('text renderer', () => {
       const ast2 = parseSong(render(source));
       expect(ast2).toEqual(ast1);
     });
+
+    it('preserves comment lines through render', () => {
+      const source = '# intro comment\n[Verse]\n| C | Am |\n# between rows\n| F | G |\n';
+      const rendered = render(source);
+      // preamble comment should appear before the section label
+      expect(rendered.indexOf('# intro comment')).toBeLessThan(rendered.indexOf('[Verse]'));
+      // inline comment should appear between the two rows
+      expect(rendered).toContain('# between rows');
+      const ast1 = parseSong(source);
+      const ast2 = parseSong(rendered);
+      expect(ast2).toEqual(ast1);
+    });
   });
 });

@@ -73,7 +73,12 @@ export function transposeSong(song: Song, semitones: number): Song {
       ),
     }));
 
-    return { ...sec, rows: newRows };
+    let rowIdx = 0;
+    const newContent = (sec.content ?? sec.rows).map((item) =>
+      item.type === 'row' ? newRows[rowIdx++] : item,
+    );
+
+    return { ...sec, rows: newRows, content: newContent };
   });
 
   return { ...song, key: firstSectionKey, sections: newSections };

@@ -139,11 +139,18 @@ export class TextRenderer {
 
     for (const section of song.sections) {
       const lines: string[] = [];
+      for (const comment of (section.preamble ?? [])) {
+        lines.push(comment.text);
+      }
       if (section.label !== null) {
         lines.push(`[${section.label}]`);
       }
-      for (const row of section.rows) {
-        lines.push(renderRow(row, this.config));
+      for (const item of (section.content ?? section.rows)) {
+        if (item.type === 'comment') {
+          lines.push(item.text);
+        } else {
+          lines.push(renderRow(item, this.config));
+        }
       }
       if (lines.length > 0) {
         blocks.push(lines.join('\n'));

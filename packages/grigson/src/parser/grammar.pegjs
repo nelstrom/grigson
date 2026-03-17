@@ -17,24 +17,39 @@ SongBody
   = items:(Comment / Newline / SectionLabel / Row)* {
       const sections = [];
       let pendingLabel = null;
+      let pendingPreamble = [];  // comments before the current label
       let currentRows = [];
+      let currentContent = [];
+      let labelSeen = false;
 
       for (const item of items) {
         // Skip newlines (strings) and nulls
         if (typeof item !== "object" || item === null) continue;
         if (item.type === "sectionLabel") {
           if (currentRows.length > 0) {
-            sections.push({ type: "section", label: pendingLabel, rows: currentRows });
+            sections.push({ type: "section", label: pendingLabel, preamble: pendingPreamble, rows: currentRows, content: currentContent });
             currentRows = [];
+            currentContent = [];
+            pendingPreamble = [];
+            labelSeen = false;
           }
           pendingLabel = item.label;
+          labelSeen = true;
         } else if (item.type === "row") {
+          labelSeen = true;
           currentRows.push(item);
+          currentContent.push(item);
+        } else if (item.type === "comment") {
+          if (!labelSeen) {
+            pendingPreamble.push(item);
+          } else {
+            currentContent.push(item);
+          }
         }
       }
 
       // Always push the final section (ensures at least one section exists)
-      sections.push({ type: "section", label: pendingLabel, rows: currentRows });
+      sections.push({ type: "section", label: pendingLabel, preamble: pendingPreamble, rows: currentRows, content: currentContent });
       return sections;
     }
 
@@ -194,7 +209,7 @@ Quality
   / "-"    { return "min7"; }
   / ""     { return "major"; }
 
-Comment = "#" $[^\n\r]* Newline { return null; }
+Comment = "#" text:$[^\n\r]* Newline { return { type: "comment", text: "#" + text }; }
 
 Newline = "\r\n" / "\n"
 
