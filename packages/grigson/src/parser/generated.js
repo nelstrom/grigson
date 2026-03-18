@@ -366,11 +366,28 @@ function peg$parse(input, options) {
     }
     const bar = { type: "bar", slots, closeBarline: close };
     if (ts) bar.timeSignature = ts;
+    const loc = location();
+    Object.defineProperty(bar, '_sourceRange', {
+      value: {
+        start: { line: loc.start.line - 1, character: loc.start.column - 1 },
+        end:   { line: loc.end.line - 1,   character: loc.end.column - 1   },
+      },
+      enumerable: false, writable: false, configurable: false,
+    });
     return bar;
   }
   function peg$f10(close) {
     // Simile mark — slots resolved by the Row action above
-    return { type: "bar", simile: true, slots: [], closeBarline: close };
+    const bar = { type: "bar", simile: true, slots: [], closeBarline: close };
+    const loc = location();
+    Object.defineProperty(bar, '_sourceRange', {
+      value: {
+        start: { line: loc.start.line - 1, character: loc.start.column - 1 },
+        end:   { line: loc.end.line - 1,   character: loc.end.column - 1   },
+      },
+      enumerable: false, writable: false, configurable: false,
+    });
+    return bar;
   }
   function peg$f11(open, ts, slots, close) {
     if (!slots.some(s => s.type === "chord")) {

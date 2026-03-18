@@ -1648,7 +1648,8 @@
       "Apply the same Object.defineProperty block to BarTail alternative 2 (the simile % branch), on the bar object before returning it",
       "Run cd packages/grigson && pnpm build:grammar to regenerate generated.js",
       "Run pnpm test — all existing tests pass (non-enumerable property is invisible to toEqual)"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "validate-bar-location-range",
