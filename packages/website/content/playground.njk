@@ -129,6 +129,18 @@ permalink: /playground/
       }
       template.innerHTML = value;
       outputElement.update();
+
+      const diagnostics = grigson.validate(value);
+      monaco.editor.setModelMarkers(editor.getModel(), 'grigson', diagnostics.map(d => ({
+        startLineNumber: d.range.start.line + 1,
+        startColumn:     d.range.start.character + 1,
+        endLineNumber:   d.range.end.line + 1,
+        endColumn:       d.range.end.character + 1,
+        severity:        d.severity === 'error'
+                           ? monaco.MarkerSeverity.Error
+                           : monaco.MarkerSeverity.Warning,
+        message:         d.message,
+      })));
     }
 
     editor.onDidChangeModelContent(update);

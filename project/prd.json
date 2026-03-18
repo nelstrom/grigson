@@ -1676,7 +1676,8 @@
       "Add: export { validate } from './validator.js';",
       "Add: export type { Diagnostic, DiagnosticRange } from './validator.js';",
       "Run pnpm build from the repo root and confirm no build errors"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "playground-monaco-diagnostics",
@@ -1689,6 +1690,7 @@
       "Inside the update() function, after outputElement.update(), call grigson.validate(value) and map each diagnostic to a Monaco marker object (add 1 to all line/column values)",
       "Pass the markers array to monaco.editor.setModelMarkers(editor.getModel(), 'grigson', markers)",
       "Build and open /playground/ in a browser; verify red squiggles appear for parse errors and yellow squiggles for beat-balance warnings, and disappear when the chart is fixed"
-    ]
+    ],
+    "passes": true
   }
 ]

@@ -329,3 +329,9 @@ Modified both `BarTail` alternatives in `grammar.pegjs` to capture Peggy's `loca
 
 ## validate-bar-location-range
 Wired up `_sourceRange` non-enumerable property (attached to bars by grammar in the previous task) in `validator.ts`. Added `barRange(bar: Bar): DiagnosticRange` helper that reads the property via `Object.getOwnPropertyDescriptor` and falls back to `zeroRange()`. Replaced `range: zeroRange()` with `range: barRange(bar)` in the `diagnostics.push` call inside `semanticChecks`. Added 3 new tests: line-1 attribution for a bad bar on the second source line, line-0 attribution for a bad bar on the first line, and character > 0 (bar content starts after opening barline). All 422 tests pass.
+
+## browser-bundle-validate-export
+Added `export { validate } from './validator.js'` and `export type { Diagnostic, DiagnosticRange } from './validator.js'` to `packages/grigson/src/index.browser.ts`. The validator has no Node.js-specific imports so it is safe to include in the browser IIFE build. After rebuilding, `window.grigson.validate` is available to browser consumers. All 422 tests pass.
+
+## playground-monaco-diagnostics
+Extended the `update()` function in `packages/website/content/playground.njk` to call `grigson.validate(value)` after each content change. Maps each diagnostic to a Monaco marker object (converting 0-indexed LSP line/column to 1-indexed Monaco coordinates, and mapping severity 'error'/'warning' to `monaco.MarkerSeverity.Error`/`Warning`). Passes the markers array to `monaco.editor.setModelMarkers()` with owner `'grigson'`. Red squiggles now appear for parse errors and yellow squiggles for beat-balance warnings; both clear automatically when the chart is fixed. All 422 tests pass.
