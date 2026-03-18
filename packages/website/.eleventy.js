@@ -49,6 +49,7 @@ export default async function (eleventyConfig) {
     '../textmate-grammar/grigson.tmLanguage.json': 'js/grigson.tmLanguage.json',
     'node_modules/monaco-editor/min/vs': 'js/monaco/vs',
     'node_modules/vscode-oniguruma/release/onig.wasm': 'js/onig.wasm',
+    'node_modules/lz-string/libs/lz-string.min.js': 'js/lz-string.min.js',
   });
 
   return {

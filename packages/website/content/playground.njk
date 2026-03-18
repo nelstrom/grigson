@@ -50,22 +50,17 @@ permalink: /playground/
   </div>
 </div>
 
+<script src="/js/lz-string.min.js"></script>
+<script src="/assets/js/grigson-monarch.js"></script>
 <script src="/js/monaco/vs/loader.js"></script>
 <script type="module">
-  import { loadWASM, createOnigScanner, createOnigString } from 'https://esm.sh/vscode-oniguruma@2.0.1';
-  import { Registry, INITIAL } from 'https://esm.sh/monaco-textmate@3.0.1';
+  // lz-string.min.js is loaded as a plain script before Monaco's AMD loader,
+  // so it initialises as window.LZString without AMD interference.
+  const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = LZString;
 
   require.config({ paths: { 'vs': '/js/monaco/vs' } });
 
-  require(['vs/editor/editor.main'], async function() {
-    // lz-string's CJS shim detects define.amd and takes the AMD path, leaving
-    // module.exports empty. Hide the global define temporarily so it falls back
-    // to CommonJS and the named exports are populated correctly.
-    const _amd = window.define;
-    window.define = undefined;
-    const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = await import('https://esm.sh/lz-string@1.5.0');
-    window.define = _amd;
-
+  require(['vs/editor/editor.main'], function () {
     const DEFAULT_VALUE = '---\ntitle: Playground Example\nkey: F\n---\n| F | A# | F | C7 |\n|F|Bb|C|F|\n';
 
     function readHash() {
@@ -79,60 +74,13 @@ permalink: /playground/
 
     const outputElement = document.getElementById('playground-output');
 
-    // 1. Initialize vscode-oniguruma
-    try {
-      const wasmResponse = await fetch('/js/onig.wasm');
-      const wasmBinary = await wasmResponse.arrayBuffer();
-      await loadWASM(wasmBinary);
-    } catch (e) {
-      console.error('Failed to initialize oniguruma:', e);
-    }
-
-    // 2. Load grammar
-    let grammar;
-    try {
-      const response = await fetch('/js/grigson.tmLanguage.json');
-      grammar = await response.json();
-    } catch (e) {
-      console.error('Failed to load grammar:', e);
-      return;
-    }
-
-    // 3. Setup Monaco TextMate
-    const registry = new Registry({
-      getOnigLib: async () => ({
-        createOnigScanner: (sources) => createOnigScanner(sources),
-        createOnigString: (str) => createOnigString(str),
-      }),
-      getGrammarDefinition: async (scopeName) => {
-        if (scopeName === 'source.grigson') {
-          return {
-            format: 'json',
-            content: grammar
-          };
-        }
-        return null;
-      }
-    });
-
+    // Register language and define Monarch tokenizer.
+    // (Monaco's Monarch is built into the AMD bundle — no external oniguruma needed.)
     monaco.languages.register({ id: 'grigson' });
-    const monacoGrammar = await registry.loadGrammar('source.grigson');
 
-    monaco.languages.setTokensProvider('grigson', {
-      getInitialState: () => INITIAL,
-      tokenize: (line, state) => {
-        const result = monacoGrammar.tokenizeLine(line, state);
-        return {
-          tokens: result.tokens.map(token => ({
-            startIndex: token.startIndex,
-            scopes: token.scopes[token.scopes.length - 1]
-          })),
-          endState: result.ruleStack
-        };
-      }
-    });
+    monaco.languages.setMonarchTokensProvider('grigson', window.grigsonMonarchTokens);
 
-    // 4. Define theme
+    // Define theme
     monaco.editor.defineTheme('grigson-theme', {
       base: 'vs',
       inherit: true,
