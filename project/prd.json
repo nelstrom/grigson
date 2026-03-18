@@ -1665,5 +1665,30 @@
       "Run pnpm test — all existing tests pass plus the 3 new ones"
     ],
     "passes": true
+  },
+  {
+    "id": "browser-bundle-validate-export",
+    "category": "functional",
+    "description": "Export validate() and its types from the grigson browser bundle",
+    "detail": "Add exports for validate, Diagnostic, and DiagnosticRange to packages/grigson/src/index.browser.ts so the function is available as window.grigson.validate in the IIFE build. The validator has no Node.js-specific imports, so it is safe to include in the browser bundle. See project/plans/playground-diagnostics.md for full context.",
+    "steps": [
+      "Open packages/grigson/src/index.browser.ts",
+      "Add: export { validate } from './validator.js';",
+      "Add: export type { Diagnostic, DiagnosticRange } from './validator.js';",
+      "Run pnpm build from the repo root and confirm no build errors"
+    ]
+  },
+  {
+    "id": "playground-monaco-diagnostics",
+    "category": "functional",
+    "description": "Show validator errors and warnings as inline Monaco squiggles in the playground",
+    "detail": "In packages/website/content/playground.njk, extend the update() function to call window.grigson.validate(value) after each content change and pass the results to monaco.editor.setModelMarkers(). Convert LSP-style 0-indexed ranges to Monaco's 1-indexed startLineNumber/startColumn/endLineNumber/endColumn, and map severity 'error'/'warning' to monaco.MarkerSeverity.Error/Warning. Depends on task browser-bundle-validate-export. See project/plans/playground-diagnostics.md for full context.",
+    "steps": [
+      "Confirm window.grigson.validate is available after the browser-bundle-validate-export task is complete",
+      "Open packages/website/content/playground.njk",
+      "Inside the update() function, after outputElement.update(), call grigson.validate(value) and map each diagnostic to a Monaco marker object (add 1 to all line/column values)",
+      "Pass the markers array to monaco.editor.setModelMarkers(editor.getModel(), 'grigson', markers)",
+      "Build and open /playground/ in a browser; verify red squiggles appear for parse errors and yellow squiggles for beat-balance warnings, and disappear when the chart is fixed"
+    ]
   }
 ]
