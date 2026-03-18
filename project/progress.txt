@@ -326,3 +326,6 @@ Added `parseMeterString(meter: string | null): TimeSignature | null` helper to `
 
 ## validate-bar-location-grammar
 Modified both `BarTail` alternatives in `grammar.pegjs` to capture Peggy's `location()` and attach it as a non-enumerable `_sourceRange` property on each bar object via `Object.defineProperty` (enumerable: false, writable: false, configurable: false). The range values are converted from Peggy's 1-indexed line/column to 0-indexed LSP-style values (subtracting 1 from each). Using non-enumerable ensures the property is invisible to vitest's `toEqual` and `JSON.stringify`, so all existing round-trip tests remain unaffected. Rebuilt the generated parser with `pnpm build:grammar`. All 419 tests pass.
+
+## validate-bar-location-range
+Wired up `_sourceRange` non-enumerable property (attached to bars by grammar in the previous task) in `validator.ts`. Added `barRange(bar: Bar): DiagnosticRange` helper that reads the property via `Object.getOwnPropertyDescriptor` and falls back to `zeroRange()`. Replaced `range: zeroRange()` with `range: barRange(bar)` in the `diagnostics.push` call inside `semanticChecks`. Added 3 new tests: line-1 attribution for a bad bar on the second source line, line-0 attribution for a bad bar on the first line, and character > 0 (bar content starts after opening barline). All 422 tests pass.

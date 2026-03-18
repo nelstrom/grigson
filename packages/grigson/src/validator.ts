@@ -1,5 +1,5 @@
 import { parseSong } from './parser/parser.js';
-import { Song, TimeSignature, DotSlot } from './parser/types.js';
+import { Song, Bar, TimeSignature, DotSlot } from './parser/types.js';
 
 export interface DiagnosticRange {
   start: { line: number; character: number };
@@ -35,6 +35,11 @@ function zeroRange(): DiagnosticRange {
   return { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
 }
 
+function barRange(bar: Bar): DiagnosticRange {
+  const desc = Object.getOwnPropertyDescriptor(bar, '_sourceRange');
+  return (desc?.value as DiagnosticRange | undefined) ?? zeroRange();
+}
+
 function parseMeterString(meter: string | null): TimeSignature | null {
   if (!meter || meter === 'mixed') return null;
   const match = /^(\d+)\/(\d+)$/.exec(meter);
@@ -58,7 +63,7 @@ function semanticChecks(song: Song): Diagnostic[] {
           const expected = effectiveTimeSig.numerator;
           if (slotCount !== expected) {
             diagnostics.push({
-              range: zeroRange(),
+              range: barRange(bar),
               severity: 'warning',
               message: `Bar has ${slotCount} slot${slotCount === 1 ? '' : 's'} but time signature is ${effectiveTimeSig.numerator}/${effectiveTimeSig.denominator} (expected ${expected})`,
               source: 'grigson',

@@ -49,6 +49,27 @@ describe('validate — beat balance', () => {
     const rendered = new TextRenderer().render(normalised);
     expect(validate(rendered)).toEqual([]);
   });
+
+  it('warning range.start.line is 1 when the bad bar is on the second line', () => {
+    const source = '| C . . G |\n| (5/4) C . G |';
+    const result = validate(source);
+    expect(result).toHaveLength(1);
+    expect(result[0].range.start.line).toBe(1);
+  });
+
+  it('warning range.start.line is 0 when the bad bar is on the first line', () => {
+    const source = '| (5/4) C . G |';
+    const result = validate(source);
+    expect(result).toHaveLength(1);
+    expect(result[0].range.start.line).toBe(0);
+  });
+
+  it('warning range.start.character is > 0 (bar content starts after opening barline)', () => {
+    const source = '| (5/4) C . G |';
+    const result = validate(source);
+    expect(result).toHaveLength(1);
+    expect(result[0].range.start.character).toBeGreaterThan(0);
+  });
 });
 
 describe('validate', () => {

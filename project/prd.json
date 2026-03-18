@@ -1663,6 +1663,7 @@
       "Add test: 'warning range.start.line is 0 when the bad bar is on the first line' using source '| (5/4) C . G |'",
       "Add test: 'warning range.start.character is > 0 (bar content starts after opening barline)'",
       "Run pnpm test — all existing tests pass plus the 3 new ones"
-    ]
+    ],
+    "passes": true
   }
 ]
