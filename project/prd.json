@@ -1622,5 +1622,46 @@
       "Run `pnpm test` — all tests pass"
     ],
     "passes": true
+  },
+  {
+    "id": "validate-meter-frontmatter",
+    "category": "bugfix",
+    "description": "Fix semanticChecks ignoring song.meter when computing the effective time signature",
+    "detail": "The validator's semanticChecks function initialises effectiveTimeSig to 4/4 and only updates it from bar.timeSignature fields. After normaliseSong hoists a uniform inline meter (e.g. (6/8)) to song.meter and strips bar.timeSignature, the validator defaults to 4/4 and emits spurious warnings. Fix by adding a parseMeterString helper that parses a 'N/D' string into a TimeSignature, then initialising effectiveTimeSig from song.meter (falling back to 4/4 when song.meter is null or 'mixed'). Also add two tests to validator.test.ts: one for a front-matter-only meter chart, and one round-trip that normalises a 6/8 chart, renders it, and validates the rendered string. See project/plans/validate-dot-slots.md for full context.",
+    "steps": [
+      "In packages/grigson/src/validator.ts, add parseMeterString(meter: string | null): TimeSignature | null above semanticChecks",
+      "Change the effectiveTimeSig initialisation in semanticChecks to: parseMeterString(song.meter) ?? { numerator: 4, denominator: 4 }",
+      "Add import of parseSong, normaliseSong, TextRenderer at the top of packages/grigson/src/validator.test.ts",
+      "Add test: 'returns [] for a chart with front-matter meter \"6/8\" and 6-slot bars'",
+      "Add test: 'returns [] when validating the rendered output of a normalised 6/8 chart'",
+      "Run pnpm test — all existing tests pass plus the 2 new ones"
+    ],
+    "passes": true
+  },
+  {
+    "id": "validate-bar-location-grammar",
+    "category": "bugfix",
+    "description": "Capture bar source location in the BarTail grammar rule as a non-enumerable property",
+    "detail": "Beat-balance warnings always point to line 0:0 because Bar AST nodes carry no location. Fix by capturing Peggy's location() in both BarTail alternatives (the normal bar and the simile % bar) and attaching it to the bar object via Object.defineProperty with enumerable: false. Non-enumerable properties are invisible to vitest's toEqual and JSON.stringify, so existing round-trip tests remain unaffected. After editing the grammar, rebuild the generated parser with pnpm build:grammar. See project/plans/validate-dot-slots.md for full context.",
+    "steps": [
+      "In packages/grigson/src/parser/grammar.pegjs, in BarTail alternative 1 (normal bar), add: const loc = location(); then Object.defineProperty(bar, '_sourceRange', { value: { start: { line: loc.start.line - 1, character: loc.start.column - 1 }, end: { line: loc.end.line - 1, character: loc.end.column - 1 } }, enumerable: false, writable: false, configurable: false }); before return bar",
+      "Apply the same Object.defineProperty block to BarTail alternative 2 (the simile % branch), on the bar object before returning it",
+      "Run cd packages/grigson && pnpm build:grammar to regenerate generated.js",
+      "Run pnpm test — all existing tests pass (non-enumerable property is invisible to toEqual)"
+    ]
+  },
+  {
+    "id": "validate-bar-location-range",
+    "category": "bugfix",
+    "description": "Use the _sourceRange non-enumerable property in semanticChecks to report warnings at the correct bar location",
+    "detail": "After validate-bar-location-grammar attaches _sourceRange to bars, wire it up in validator.ts. Add a barRange(bar) helper that reads the non-enumerable _sourceRange via Object.getOwnPropertyDescriptor and falls back to zeroRange(). Replace the zeroRange() call in the diagnostics.push inside semanticChecks with barRange(bar). Add three tests covering line-number attribution: bad bar on line 1 reports range.start.line === 1, bad bar on line 0 reports range.start.line === 0, and character is > 0 (bar content starts after the opening barline). Depends on validate-bar-location-grammar. See project/plans/validate-dot-slots.md for full context.",
+    "steps": [
+      "In packages/grigson/src/validator.ts, add barRange(bar: Bar): DiagnosticRange below zeroRange(), using Object.getOwnPropertyDescriptor(bar, '_sourceRange')?.value ?? zeroRange()",
+      "Replace range: zeroRange() with range: barRange(bar) in the diagnostics.push call inside semanticChecks",
+      "Add test: 'warning range.start.line is 1 when the bad bar is on the second line' using source '| C . . G |\\n| (5/4) C . G |'",
+      "Add test: 'warning range.start.line is 0 when the bad bar is on the first line' using source '| (5/4) C . G |'",
+      "Add test: 'warning range.start.character is > 0 (bar content starts after opening barline)'",
+      "Run pnpm test — all existing tests pass plus the 3 new ones"
+    ]
   }
 ]

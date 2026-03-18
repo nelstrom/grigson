@@ -35,9 +35,16 @@ function zeroRange(): DiagnosticRange {
   return { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
 }
 
+function parseMeterString(meter: string | null): TimeSignature | null {
+  if (!meter || meter === 'mixed') return null;
+  const match = /^(\d+)\/(\d+)$/.exec(meter);
+  if (!match) return null;
+  return { numerator: parseInt(match[1], 10), denominator: parseInt(match[2], 10) };
+}
+
 function semanticChecks(song: Song): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
-  let effectiveTimeSig: TimeSignature = { numerator: 4, denominator: 4 };
+  let effectiveTimeSig: TimeSignature = parseMeterString(song.meter) ?? { numerator: 4, denominator: 4 };
 
   for (const section of song.sections) {
     for (const row of section.rows) {

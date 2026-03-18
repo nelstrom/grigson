@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { validate } from './validator.js';
+import { parseSong } from './parser/parser.js';
+import { normaliseSong } from './theory/normalise.js';
+import { TextRenderer } from './renderers/text.js';
 
 describe('validate — beat balance', () => {
   it('returns [] for 3 slots in 3/4 (balanced)', () => {
@@ -33,6 +36,18 @@ describe('validate — beat balance', () => {
 
   it('returns [] when second bar inherits 3/4 and has 3 slots', () => {
     expect(validate('| (3/4) C | Am . G |')).toEqual([]);
+  });
+
+  it('returns [] for a chart with front-matter meter "6/8" and 6-slot bars', () => {
+    const source = '---\nmeter: 6/8\n---\n| C . . . . G |';
+    expect(validate(source)).toEqual([]);
+  });
+
+  it('returns [] when validating the rendered output of a normalised 6/8 chart', () => {
+    const source = '| (6/8) C . . . . G |';
+    const normalised = normaliseSong(parseSong(source));
+    const rendered = new TextRenderer().render(normalised);
+    expect(validate(rendered)).toEqual([]);
   });
 });
 
