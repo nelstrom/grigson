@@ -143,7 +143,8 @@ export class TextRenderer {
         lines.push(comment.text);
       }
       if (section.label !== null) {
-        lines.push(`[${section.label}]`);
+        const keyPart = section.key !== null ? ` key: ${section.key}` : '';
+        lines.push(`[${section.label}]${keyPart}`);
       }
       for (const item of (section.content ?? section.rows)) {
         if (item.type === 'comment') {

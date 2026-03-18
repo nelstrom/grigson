@@ -1576,7 +1576,8 @@
       "Update `SongBody` action to initialise `pendingKey = null`, set it from `item.key` when a sectionLabel is seen, and include `key: pendingKey` in every `sections.push()`",
       "Run `pnpm build:grammar` to regenerate `generated.js`",
       "Run `pnpm test` — all existing tests should pass (sections without annotations get `key: null`)"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "section-key-normalise",
@@ -1588,7 +1589,8 @@
       "Change `detectKey(chords, null, config)` inside `normaliseSection` to `detectKey(chords, declaredKey ?? null, config)`",
       "In `normaliseSong`, update the `normaliseSection` call to pass `sec.key` as the third argument",
       "Run `pnpm test` — all existing tests should pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "section-key-render",
@@ -1599,7 +1601,8 @@
       "In `text.ts` render(), change the section label line to append ` key: ${section.key}` when `section.key !== null`",
       "In `html.ts`, add a `<span part=\"section-key\">` containing the key annotation to the section-label div when `section.key !== null`",
       "Run `pnpm test` — existing tests should pass; round-trip tests will now emit and re-parse the key annotation"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "section-key-tests",
@@ -1617,6 +1620,7 @@
       "Add normaliser test: song with `[Chorus] key: Db` containing `C#m7` chord → normalised root is `Db` (or confirm spelling is preserved as expected from Db major's note set)",
       "Update `documentation/examples/kodachrome.chart` to add `key: A` annotations on [Chorus] and [Outro]",
       "Run `pnpm test` — all tests pass"
-    ]
+    ],
+    "passes": true
   }
 ]

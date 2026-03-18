@@ -100,7 +100,8 @@ export class HtmlRenderer {
         html += `<div part="comment">${comment.text}</div>`;
       }
       if (section.label !== null) {
-        html += `<div part="section-label">[${section.label}]</div>`;
+        const keySpan = section.key !== null ? ` <span part="section-key">${section.key}</span>` : '';
+        html += `<div part="section-label">[${section.label}]${keySpan}</div>`;
       }
       for (const item of (section.content ?? section.rows)) {
         if (item.type === 'comment') {

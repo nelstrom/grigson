@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseSong } from './parser.js';
 import { TextRenderer } from '../renderers/text.js';
+import { normaliseSong } from '../theory/normalise.js';
 
 const renderer = new TextRenderer();
 
@@ -70,5 +71,55 @@ describe('section parsing', () => {
     const rendered = renderer.render(ast1);
     const ast2 = parseSong(rendered);
     expect(ast2).toEqual(ast1);
+  });
+});
+
+describe('section key annotation', () => {
+  it('[Verse] key: E → section.key === "E"', () => {
+    const song = parseSong('[Verse] key: E\n| E | A |\n');
+    expect(song.sections[0].key).toBe('E');
+  });
+
+  it('[Chorus] key: Am → section.key === "Am"', () => {
+    const song = parseSong('[Chorus] key: Am\n| Am | F |\n');
+    expect(song.sections[0].key).toBe('Am');
+  });
+
+  it('[Bridge] key: F# dorian → section.key === "F# dorian"', () => {
+    const song = parseSong('[Bridge] key: F# dorian\n| F#m | B |\n');
+    expect(song.sections[0].key).toBe('F# dorian');
+  });
+
+  it('label with no annotation → section.key === null', () => {
+    const song = parseSong('[Verse]\n| C | G |\n');
+    expect(song.sections[0].key).toBeNull();
+  });
+
+  it('[Section] key: H → throws a parse error', () => {
+    expect(() => parseSong('[Section] key: H\n| C | G |\n')).toThrow();
+  });
+
+  it('TextRenderer emits "[Chorus] key: Am" when key is present', () => {
+    const song = parseSong('[Chorus] key: Am\n| Am | F | C | G |\n');
+    const output = renderer.render(song);
+    const lines = output.trim().split('\n');
+    expect(lines[0]).toBe('[Chorus] key: Am');
+  });
+
+  it('round-trip with key annotation: parse → render → parse produces equal AST', () => {
+    const source = '[Verse] key: E\n| E | A | B | E |\n[Chorus] key: Am\n| Am | F | C | G |\n';
+    const ast1 = parseSong(source);
+    const rendered = renderer.render(ast1);
+    const ast2 = parseSong(rendered);
+    expect(ast2).toEqual(ast1);
+  });
+
+  it('normaliser uses declared key: [Chorus] key: Db with C#m7 → root normalised to Db', () => {
+    // C# and Db are enharmonic; Db major's note set uses Db not C#
+    const source = '[Chorus] key: Db\n| C#m7 | Ab7 | Db |\n';
+    const song = parseSong(source);
+    const normalised = normaliseSong(song);
+    const slot = normalised.sections[0].rows[0].bars[0].slots[0];
+    expect(slot.type === 'chord' && slot.chord.root).toBe('Db');
   });
 });

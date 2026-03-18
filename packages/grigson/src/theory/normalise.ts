@@ -53,8 +53,9 @@ function normaliseChord(
 export function normaliseSection(
   chords: Chord[],
   config?: DetectKeyConfig,
+  declaredKey?: string | null,
 ): { homeKey: string | null; chords: Chord[] } {
-  const detectedKey = config?.forceKey ?? detectKey(chords, null, config);
+  const detectedKey = config?.forceKey ?? detectKey(chords, declaredKey ?? null, config);
   const homePCToNote = detectedKey !== null ? buildPCToNote(detectedKey) : new Map<number, string>();
   const annotated = detectedKey !== null ? analyseHarmony(chords, detectedKey) : null;
 
@@ -76,7 +77,7 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
           bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
         ),
       );
-      const { homeKey, chords: normalisedChords } = normaliseSection(chords, config);
+      const { homeKey, chords: normalisedChords } = normaliseSection(chords, config, sec.key);
 
       let chordIndex = 0;
       const newRows: Row[] = sec.rows.map((row) => ({

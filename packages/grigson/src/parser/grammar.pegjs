@@ -17,6 +17,7 @@ SongBody
   = items:(Comment / Newline / SectionLabel / Row)* {
       const sections = [];
       let pendingLabel = null;
+      let pendingKey = null;
       let pendingPreamble = [];  // comments before the current label
       let currentRows = [];
       let currentContent = [];
@@ -27,13 +28,15 @@ SongBody
         if (typeof item !== "object" || item === null) continue;
         if (item.type === "sectionLabel") {
           if (currentRows.length > 0) {
-            sections.push({ type: "section", label: pendingLabel, preamble: pendingPreamble, rows: currentRows, content: currentContent });
+            sections.push({ type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent });
             currentRows = [];
             currentContent = [];
             pendingPreamble = [];
+            pendingKey = null;
             labelSeen = false;
           }
           pendingLabel = item.label;
+          pendingKey = item.key;
           labelSeen = true;
         } else if (item.type === "row") {
           labelSeen = true;
@@ -49,13 +52,21 @@ SongBody
       }
 
       // Always push the final section (ensures at least one section exists)
-      sections.push({ type: "section", label: pendingLabel, preamble: pendingPreamble, rows: currentRows, content: currentContent });
+      sections.push({ type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent });
       return sections;
     }
 
 SectionLabel
-  = "[" label:$[^\]\r\n]+ "]" _ Newline? {
-      return { type: "sectionLabel", label: label.trim() };
+  = "[" label:$[^\]\r\n]+ "]" _ key:("key" _ ":" _ value:FrontMatterValue { return value; })? _ Newline? {
+      if (key !== null) {
+        const validNotes = ["C#","Db","D#","Eb","F#","Gb","G#","Ab","A#","Bb","C","D","E","F","G","A","B"];
+        const validKeySuffixes = ["m"," dorian"," aeolian"," mixolydian"," major"," minor"," ionian",""];
+        const isValidKey = (k) => validNotes.some((n) => validKeySuffixes.some((s) => k === n + s));
+        if (!isValidKey(key)) {
+          error(`Invalid key: "${key}".`);
+        }
+      }
+      return { type: "sectionLabel", label: label.trim(), key: key ?? null };
     }
 
 FrontMatter

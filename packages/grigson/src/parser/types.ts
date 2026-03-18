@@ -75,6 +75,7 @@ export type SectionItem = Row | CommentLine;
 export interface Section {
   type: 'section';
   label: string | null;
+  key: string | null;
   rows: Row[];
   preamble?: CommentLine[];  // comment lines appearing before the section label
   content?: SectionItem[];   // rows and inline comments appearing after the label
