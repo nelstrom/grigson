@@ -712,19 +712,6 @@
     "passes": true
   },
   {
-    "id": "custom-element-child-config",
-    "category": "functional",
-    "description": "Enable declarative configuration via child elements",
-    "detail": "Allow configuration using child elements like <grigson-transpose> and use a MutationObserver to react to changes.",
-    "blocked": true,
-    "steps": [
-      "Implement a MutationObserver in GrigsonChart to watch for additions/removals/changes to child config elements",
-      "Implement logic to harvest config from <grigson-transpose>, <grigson-notation>, etc.",
-      "Verify that adding or modifying child elements triggers a re-render with the new configuration"
-    ],
-    "passes": false
-  },
-  {
     "id": "custom-element-styling",
     "category": "functional",
     "description": "Implement a CSS API with Custom Properties, Parts, and Theme Support",
@@ -1692,5 +1679,149 @@
       "Build and open /playground/ in a browser; verify red squiggles appear for parse errors and yellow squiggles for beat-balance warnings, and disappear when the chart is fixed"
     ],
     "passes": true
+  },
+  {
+    "id": "custom-element-contract",
+    "category": "functional",
+    "description": "Define and export the extensibility contract types for third-party renderers",
+    "detail": "Create the TypeScript interface and event classes that form the public contract for renderer elements. Export them from the main browser entry point so third parties can import them. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Create src/renderers/contract.ts exporting the GrigsonRendererElement interface (extends HTMLElement, renderChart(song: Song): Element)",
+      "Create src/events.ts exporting GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, and GrigsonRenderErrorEvent as Event subclasses with typed properties",
+      "Export all new types from src/index.browser.ts and src/index.ts"
+    ]
+  },
+  {
+    "id": "grigson-html-renderer-element",
+    "category": "functional",
+    "description": "Create the GrigsonHtmlRenderer custom element class",
+    "detail": "Extract rendering and styles out of GrigsonChart into a new GrigsonHtmlRenderer class that implements GrigsonRendererElement. It renders a Song to an HTML Element using the existing HtmlRenderer JS class, manages its own shadow DOM and styles, exposes CSS custom properties and shadow parts, and dispatches GrigsonRendererUpdateEvent when its attributes change. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Create src/renderers/html-element.ts with GrigsonHtmlRenderer extending HTMLElement",
+      "Implement renderChart(song: Song): Element — delegate to HtmlRenderer, inject styles and rendered HTML into a wrapper element using setHTML()/setHTMLUnsafe(), return the wrapper",
+      "Move all styles from GrigsonChart._getStyles() into GrigsonHtmlRenderer, including CSS custom properties and dark mode support",
+      "Add attributeChangedCallback that dispatches GrigsonRendererUpdateEvent when the element's own attributes change",
+      "Export GrigsonHtmlRenderer from src/index.browser.ts"
+    ]
+  },
+  {
+    "id": "grigson-chart-renderer-discovery",
+    "category": "functional",
+    "description": "Refactor GrigsonChart to discover and delegate to a child renderer element",
+    "detail": "Update GrigsonChart.update() to scan light DOM children for the first element implementing the GrigsonRendererElement contract (duck-typed via typeof el.renderChart === 'function'). If none is found, fall back to instantiating GrigsonHtmlRenderer directly as a class. Replace all innerHTML usage with setHTML()/setHTMLUnsafe(). Remove the notation-preset observed attribute and all related logic. Remove _getStyles() since styles now belong to GrigsonHtmlRenderer. The shadow root should contain only :host { display: block }. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Remove notation-preset from observedAttributes and remove related config logic from update()",
+      "Remove _getStyles() method and the style injection from update()",
+      "Add renderer discovery: find first child with typeof renderChart === 'function', falling back to new GrigsonHtmlRenderer()",
+      "Call renderer.renderChart(song) and use this._root.replaceChildren() with the returned Element",
+      "Replace any remaining innerHTML usage with setHTML()/setHTMLUnsafe()",
+      "Update shadow root initialisation to inject only :host { display: block } styles"
+    ]
+  },
+  {
+    "id": "grigson-chart-external-template",
+    "category": "functional",
+    "description": "Add support for referencing an external template element via the template attribute",
+    "detail": "Extend GrigsonChart's source resolution to support a template attribute containing the ID of a <template> element elsewhere in the document. The inline child <template> takes precedence when both are present. If the referenced ID does not exist, render nothing without throwing. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Add 'template' to observedAttributes",
+      "Refactor source resolution in update() into a helper: check for inline <template> child first, then fall back to document.getElementById(this.getAttribute('template')) cast as HTMLTemplateElement",
+      "If neither source is found, clear the shadow root and return early",
+      "Ensure the template attribute changing (pointing to a different ID) triggers a re-render via attributeChangedCallback"
+    ]
+  },
+  {
+    "id": "grigson-chart-observers",
+    "category": "functional",
+    "description": "Add MutationObservers and event listeners to GrigsonChart for reactive re-rendering",
+    "detail": "GrigsonChart must re-render in response to structural DOM changes and renderer config changes. Add a MutationObserver on the element's light DOM children (childList: true) to detect renderer elements or inline templates being added or removed. Add a second MutationObserver on the active template's .content DocumentFragment (childList, subtree, characterData) to detect source edits. Listen for the grigson:renderer-update event bubbling up from child renderers. Disconnect all observers and listeners in disconnectedCallback. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Add a MutationObserver on the element itself with { childList: true } that calls update(); connect it in connectedCallback",
+      "After resolving the active template in update(), attach a MutationObserver to template.content with { childList: true, subtree: true, characterData: true }; disconnect any previous template observer first",
+      "Add an event listener for grigson:renderer-update on the element that calls update()",
+      "Implement disconnectedCallback to disconnect both MutationObservers and remove the event listener"
+    ]
+  },
+  {
+    "id": "grigson-chart-error-events",
+    "category": "functional",
+    "description": "Dispatch typed error events and render a fallback element on parse or render failure",
+    "detail": "Replace the current error handling in GrigsonChart.update() with typed event dispatching. On parse failure dispatch GrigsonParseErrorEvent; on render failure dispatch GrigsonRenderErrorEvent. In both cases also render a fallback <div> whose message is set via textContent (never innerHTML or any HTML-setting API). See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Wrap parseSong() in a try/catch; on failure create a fallback div, set its textContent to the error message, call this._root.replaceChildren(div), then dispatch new GrigsonParseErrorEvent(error)",
+      "Wrap the renderer.renderChart() call in a separate try/catch; on failure create a fallback div, set its textContent, call replaceChildren, then dispatch new GrigsonRenderErrorEvent(error)",
+      "Ensure the fallback div is created via document.createElement and message is set via textContent — never via innerHTML or setHTMLUnsafe"
+    ]
+  },
+  {
+    "id": "update-register-and-exports",
+    "category": "functional",
+    "description": "Update register.ts and index.browser.ts to include GrigsonHtmlRenderer",
+    "detail": "The register bundle must register both custom elements so that auto-register users get a fully working setup from a single script tag. The browser entry point must export GrigsonHtmlRenderer alongside GrigsonChart. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Update src/register.ts to import GrigsonHtmlRenderer and call customElements.define('grigson-html-renderer', GrigsonHtmlRenderer) alongside the existing grigson-chart registration",
+      "Confirm src/index.browser.ts exports GrigsonHtmlRenderer, GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent, and the GrigsonRendererElement interface"
+    ]
+  },
+  {
+    "id": "grigson-text-renderer-package",
+    "category": "functional",
+    "description": "Create the grigson-text-renderer monorepo package as a reference implementation",
+    "detail": "Add a new packages/grigson-text-renderer package that demonstrates the extensibility pattern — a fully functional renderer implemented entirely outside the core grigson package. It wraps the existing TextRenderer JS class and returns its output in a <pre> element. Follows the same side-effect-free class / register.ts split as the core package. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Create packages/grigson-text-renderer/ with package.json (name: grigson-text-renderer, dependency on grigson), tsconfig.json, and vite.config.ts mirroring the core package build setup",
+      "Add the package to pnpm-workspace.yaml and turbo.json",
+      "Create src/element.ts with GrigsonTextRenderer extending HTMLElement, implementing GrigsonRendererElement — renderChart() calls TextRenderer.render(song) and wraps the result in a <pre> element returned as an Element",
+      "Add attributeChangedCallback that dispatches GrigsonRendererUpdateEvent on config changes",
+      "Create src/register.ts that calls customElements.define('grigson-text-renderer', GrigsonTextRenderer)",
+      "Export GrigsonTextRenderer from src/index.ts and src/index.browser.ts",
+      "Build and verify the package compiles cleanly"
+    ]
+  },
+  {
+    "id": "grigson-svg-renderer-package",
+    "category": "functional",
+    "description": "Create the grigson-svg-renderer monorepo package as a stub for future SVG rendering",
+    "detail": "Add a new packages/grigson-svg-renderer package that establishes the package structure, build pipeline, and custom element scaffolding for an SVG renderer. The renderChart() implementation returns a stub <svg> element containing the text 'Under construction'. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Create packages/grigson-svg-renderer/ with package.json (name: grigson-svg-renderer, dependency on grigson), tsconfig.json, and vite.config.ts",
+      "Add the package to pnpm-workspace.yaml and turbo.json",
+      "Create src/element.ts with GrigsonSvgRenderer extending HTMLElement, implementing GrigsonRendererElement — renderChart() creates and returns an <svg> element containing a <text> element with the content 'Under construction'",
+      "Create src/register.ts that calls customElements.define('grigson-svg-renderer', GrigsonSvgRenderer)",
+      "Export GrigsonSvgRenderer from src/index.ts",
+      "Build and verify the package compiles cleanly"
+    ]
+  },
+  {
+    "id": "custom-element-tests",
+    "category": "testing",
+    "description": "Write unit tests for GrigsonChart and GrigsonHtmlRenderer using happy-dom",
+    "detail": "Add vitest unit tests covering the custom element behaviour. Tests should exercise the renderer contract, error event dispatching, external template resolution, and re-render triggers. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Confirm happy-dom is configured as the vitest environment (add to vitest.config.ts if not already present)",
+      "Test GrigsonChart with an inline template: verify the shadow root contains rendered output",
+      "Test GrigsonChart with an external template referenced by ID",
+      "Test renderer discovery: a child element with a renderChart() method is used instead of the fallback",
+      "Test first-wins rule: when two children implement renderChart(), the first is used",
+      "Test GrigsonParseErrorEvent is dispatched and fallback div is rendered on invalid chart source",
+      "Test GrigsonRenderErrorEvent is dispatched and fallback div is rendered when renderChart() throws",
+      "Test that modifying template.content triggers a re-render",
+      "Test that a grigson:renderer-update event from a child triggers a re-render",
+      "Test GrigsonHtmlRenderer.renderChart() returns an Element containing the expected shadow parts"
+    ]
+  },
+  {
+    "id": "custom-element-demo-page",
+    "category": "documentation",
+    "description": "Add a demo page to the website showcasing custom element usage patterns",
+    "detail": "Create a demo page in the website package that demonstrates the full range of grigson-chart usage: inline template, external template with multi-key transposition (concert pitch, Bb instruments, Eb instruments), an explicit grigson-html-renderer child, and a grigson-text-renderer child from the separate package. See project/plans/custom-element-design.md for full context.",
+    "steps": [
+      "Create a new page in packages/website/content/ for the custom element demo",
+      "Add an inline template example with a simple four-bar chart",
+      "Add an external template example showing the same chart transposed for concert pitch, Bb instruments (+2 semitones), and Eb instruments (+9 semitones)",
+      "Add an example with an explicit <grigson-html-renderer> child to show renderer configuration",
+      "Add an example using <grigson-text-renderer> from the grigson-text-renderer package",
+      "Link the demo page from the website navigation"
+    ]
   }
 ]
