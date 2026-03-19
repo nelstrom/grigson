@@ -5,6 +5,7 @@ export { parseSong, parseChord, parseBar, parseRow, parseFrontMatter } from './p
 export type { Song, Section, Row, Bar, Chord, Quality, FrontMatter, TimeSignature, ChordSlot, DotSlot, BeatSlot, BarlineKind, Barline, CommentLine, SectionItem } from './parser/parser.js';
 
 // Renderer
+export type { GrigsonRenderer } from './renderers/text.js';
 export { TextRenderer } from './renderers/text.js';
 export { HtmlRenderer } from './renderers/html.js';
 

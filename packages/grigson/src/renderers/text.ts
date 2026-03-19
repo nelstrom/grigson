@@ -1,5 +1,9 @@
 import type { Song, Row, Bar, Chord, Barline, BeatSlot } from '../parser/types.js';
 
+export interface GrigsonRenderer {
+  render(song: Song): string;
+}
+
 export interface TextRendererConfig {
   notation?: {
     preset?: 'jazz' | 'pop' | 'symbolic';
@@ -127,7 +131,7 @@ function renderFrontMatter(title: string | null, key: string | null, meter: stri
   return lines.join('\n') + '\n';
 }
 
-export class TextRenderer {
+export class TextRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {

@@ -1,5 +1,5 @@
 import type { Song, Row, Bar, Chord, Barline } from '../parser/types.js';
-import { type TextRendererConfig } from './text.js';
+import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
 
 const DEFAULT_NOTATION = {
   preset: 'jazz',
@@ -84,7 +84,7 @@ function renderFrontMatter(title: string | null, key: string | null): string {
   return html;
 }
 
-export class HtmlRenderer {
+export class HtmlRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
