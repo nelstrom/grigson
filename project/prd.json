@@ -1744,7 +1744,8 @@
       "After resolving the active template in update(), attach a MutationObserver to template.content with { childList: true, subtree: true, characterData: true }; disconnect any previous template observer first",
       "Add an event listener for grigson:renderer-update on the element that calls update()",
       "Implement disconnectedCallback to disconnect both MutationObservers and remove the event listener"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-chart-error-events",

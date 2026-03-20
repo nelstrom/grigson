@@ -354,3 +354,11 @@ Added external template support to GrigsonChart via a `template` attribute conta
 
 ## update-register-and-exports
 Verified that `register.ts` already registers both `grigson-html-renderer` and `grigson-chart`, and that `index.browser.ts` already exports `GrigsonHtmlRenderer`, `GrigsonRendererUpdateEvent`, `GrigsonParseErrorEvent`, `GrigsonRenderErrorEvent`, and the `GrigsonRendererElement` interface. No code changes required; marked complete.
+
+## grigson-chart-observers
+Added reactive re-rendering to GrigsonChart in packages/grigson/src/element.ts:
+- _childObserver (MutationObserver { childList: true } on the element) — started in connectedCallback, triggers update() when light DOM children change
+- _templateObserver (MutationObserver { childList, subtree, characterData } on template.content) — attached per-update() call after resolving the active template, replaces previous observer each time
+- grigson:renderer-update event listener — calls update() when a child renderer dispatches a config change event
+- disconnectedCallback — disconnects both observers and removes the event listener
+All 426 tests pass.
