@@ -1718,7 +1718,8 @@
       "Call renderer.renderChart(song) and use this._root.replaceChildren() with the returned Element",
       "Replace any remaining innerHTML usage with setHTML()/setHTMLUnsafe()",
       "Update shadow root initialisation to inject only :host { display: block } styles"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-chart-external-template",

@@ -74,7 +74,11 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     const html = renderer.render(song);
 
     const wrapper = document.createElement('div');
-    wrapper.setHTMLUnsafe(`<style>${this._getStyles()}</style>${html}`);
+    if (typeof wrapper.setHTMLUnsafe === 'function') {
+      wrapper.setHTMLUnsafe(`<style>${this._getStyles()}</style>${html}`);
+    } else {
+      wrapper.innerHTML = `<style>${this._getStyles()}</style>${html}`;
+    }
     return wrapper;
   }
 }

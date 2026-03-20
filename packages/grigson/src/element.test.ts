@@ -35,17 +35,18 @@ describe('GrigsonChart', () => {
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    expect(shadowRoot.innerHTML).toBe('');
+    // Only the style element should remain
+    expect(shadowRoot.querySelector('[part="song"]')).toBeNull();
   });
 
-  it('shows an error if no template is found', async () => {
+  it('renders nothing if no template is found', async () => {
     document.body.innerHTML = `
       <grigson-chart></grigson-chart>
     `;
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    expect(shadowRoot.innerHTML).toContain('Error: No &lt;template&gt; found');
+    expect(shadowRoot.querySelector('[part="song"]')).toBeNull();
   });
 
   it('shows an error if parsing fails', async () => {
@@ -59,7 +60,9 @@ describe('GrigsonChart', () => {
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    expect(shadowRoot.innerHTML).toContain('Parse Error:');
+    const errorDiv = shadowRoot.querySelector('div');
+    expect(errorDiv).not.toBeNull();
+    expect(errorDiv!.textContent).toBeTruthy();
   });
 
   it('updates when update() is called manually', async () => {
@@ -74,56 +77,13 @@ describe('GrigsonChart', () => {
     const element = document.querySelector('grigson-chart') as GrigsonChart;
     const shadowRoot = element.shadowRoot!;
     const template = element.querySelector('template')!;
-    
+
     expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
-    
+
     template.innerHTML = '| G |';
     element.update();
-    
+
     expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| G |');
-  });
-
-  it('updates when notation-preset attribute changes', async () => {
-    document.body.innerHTML = `
-      <grigson-chart>
-        <template>
-          | Am | Bm7b5 |
-        </template>
-      </grigson-chart>
-    `;
-    await wait();
-    const element = document.querySelector('grigson-chart')!;
-    const shadowRoot = element.shadowRoot!;
-    
-    // Default (jazz)
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
-    
-    // Change to symbolic
-    element.setAttribute('notation-preset', 'symbolic');
-    await wait();
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| A- | Bø |');
-    
-    // Change back to jazz
-    element.setAttribute('notation-preset', 'jazz');
-    await wait();
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| Am | Bm7b5 |');
-  });
-
-  it('reacts to multiple attribute changes', async () => {
-    document.body.innerHTML = `
-      <grigson-chart>
-        <template>| Am |</template>
-      </grigson-chart>
-    `;
-    await wait();
-    const element = document.querySelector('grigson-chart')!;
-    const shadowRoot = element.shadowRoot!;
-
-    element.setAttribute('notation-preset', 'symbolic');
-    await wait();
-
-    const text = shadowRoot.querySelector('[part="song"]')!.textContent!.trim();
-    expect(text).toContain('| A- |');
   });
 
   it('normalises chords when the normalise attribute is present', async () => {
@@ -137,7 +97,7 @@ describe('GrigsonChart', () => {
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    
+
     // A# in F major (or Bb major) should be normalised to Bb
     const row = shadowRoot.querySelector('[part="row"]')!;
     expect(row.textContent!.trim()).toBe('| F | Bb |');
@@ -152,7 +112,7 @@ describe('GrigsonChart', () => {
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    
+
     expect(shadowRoot.querySelector('[part="row"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="barline"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="chord"]')).not.toBeNull();
@@ -173,7 +133,7 @@ key: C
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    
+
     expect(shadowRoot.querySelector('[part="frontmatter"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="frontmatter-value"]')).not.toBeNull();
   });
@@ -191,9 +151,68 @@ key: C
     `;
     await wait();
     const element = document.querySelector('grigson-chart')!;
-    
+
     // Note: getComputedStyle might not work perfectly with happy-dom but we can check if it's applied to the element.
     const style = window.getComputedStyle(element);
     expect(style.getPropertyValue('--grigson-color').trim()).toBe('red');
+  });
+
+  it('uses a child renderer element that implements renderChart', async () => {
+    // Register a mock renderer
+    class MockRenderer extends HTMLElement {
+      renderChart() {
+        const div = document.createElement('div');
+        div.setAttribute('data-mock', 'true');
+        div.textContent = 'mock-output';
+        return div;
+      }
+    }
+    if (!customElements.get('mock-renderer')) {
+      customElements.define('mock-renderer', MockRenderer);
+    }
+
+    document.body.innerHTML = `
+      <grigson-chart>
+        <mock-renderer></mock-renderer>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    expect(shadowRoot.querySelector('[data-mock="true"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[data-mock="true"]')!.textContent).toBe('mock-output');
+  });
+
+  it('uses the first child renderer when multiple implement renderChart', async () => {
+    class RendererA extends HTMLElement {
+      renderChart() {
+        const div = document.createElement('div');
+        div.setAttribute('data-renderer', 'a');
+        return div;
+      }
+    }
+    class RendererB extends HTMLElement {
+      renderChart() {
+        const div = document.createElement('div');
+        div.setAttribute('data-renderer', 'b');
+        return div;
+      }
+    }
+    if (!customElements.get('renderer-a')) customElements.define('renderer-a', RendererA);
+    if (!customElements.get('renderer-b')) customElements.define('renderer-b', RendererB);
+
+    document.body.innerHTML = `
+      <grigson-chart>
+        <renderer-a></renderer-a>
+        <renderer-b></renderer-b>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    expect(shadowRoot.querySelector('[data-renderer="a"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[data-renderer="b"]')).toBeNull();
   });
 });

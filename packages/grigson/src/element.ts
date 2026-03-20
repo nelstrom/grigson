@@ -1,20 +1,24 @@
 import { parseSong } from './parser/parser.js';
-import { HtmlRenderer } from './renderers/html.js';
-import { type TextRendererConfig } from './renderers/text.js';
+import { GrigsonHtmlRenderer } from './renderers/html-element.js';
+import type { GrigsonRendererElement } from './renderers/contract.js';
 import { normaliseSong } from './theory/normalise.js';
 import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
-    return ['renderer', 'transpose-key', 'transpose-semitones', 'notation-preset', 'normalise'];
+    return ['transpose-key', 'transpose-semitones', 'normalise'];
   }
 
   private _root: ShadowRoot;
+  private _style: HTMLStyleElement;
   private _isInitialized = false;
 
   constructor() {
     super();
     this._root = this.attachShadow({ mode: 'open' });
+    this._style = document.createElement('style');
+    this._style.textContent = ':host { display: block }';
+    this._root.appendChild(this._style);
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
@@ -30,75 +34,29 @@ export class GrigsonChart extends HTMLElement {
     setTimeout(() => this.update(), 0);
   }
 
-  private _getStyles() {
-    return `
-      :host {
-        display: block;
-        font-family: var(--grigson-font-family, monospace);
-        color: var(--grigson-color, inherit);
-        background: var(--grigson-background, transparent);
-        line-height: var(--grigson-line-height, 1.5);
-        --grigson-barline-color: var(--grigson-color, inherit);
-        --grigson-chord-root-color: var(--grigson-color, inherit);
-        --grigson-chord-suffix-color: var(--grigson-color, inherit);
-        --grigson-frontmatter-color: #888;
+  private _findRenderer(): GrigsonRendererElement {
+    for (const child of this.children) {
+      if (typeof (child as unknown as GrigsonRendererElement).renderChart === 'function') {
+        return child as unknown as GrigsonRendererElement;
       }
-
-      @media (prefers-color-scheme: dark) {
-        :host {
-          --grigson-frontmatter-color: #aaa;
-        }
-      }
-
-      [part="song"] {
-        white-space: pre-wrap;
-      }
-
-      [part="frontmatter"] {
-        color: var(--grigson-frontmatter-color);
-        margin-bottom: 1em;
-      }
-
-      [part="row"] {
-        margin-bottom: 0.5em;
-      }
-
-      [part="barline"] {
-        color: var(--grigson-barline-color);
-        font-weight: bold;
-      }
-
-      [part="chord-root"] {
-        color: var(--grigson-chord-root-color);
-        font-weight: bold;
-      }
-
-      [part="chord-suffix"] {
-        color: var(--grigson-chord-suffix-color);
-      }
-    `;
+    }
+    return new GrigsonHtmlRenderer();
   }
 
   update() {
     const template = this.querySelector('template');
     if (!template) {
-      this._root.innerHTML = `<style>${this._getStyles()}</style><div class="error">Error: No &lt;template&gt; found inside &lt;grigson-chart&gt;.</div>`;
+      this._root.replaceChildren(this._style);
       return;
     }
 
     const content = template.innerHTML.trim();
     if (!content) {
-      this._root.innerHTML = '';
+      this._root.replaceChildren(this._style);
       return;
     }
 
-    const config: TextRendererConfig = {};
-    const notationPreset = this.getAttribute('notation-preset') as TextRendererConfig['notation'] extends { preset?: infer P } ? P : never;
-    if (notationPreset) {
-      config.notation = { preset: notationPreset };
-    }
-
-    const renderer = new HtmlRenderer(config);
+    const renderer = this._findRenderer();
 
     try {
       let song = parseSong(content);
@@ -115,11 +73,22 @@ export class GrigsonChart extends HTMLElement {
           song = transposeSong(song, semitones);
         }
       }
-      const rendered = renderer.render(song);
-      this._root.innerHTML = `<style>${this._getStyles()}</style>${rendered}`;
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      this._root.innerHTML = `<style>${this._getStyles()}</style><div class="error">Parse Error: ${message}</div>`;
+
+      let rendered: Element;
+      try {
+        rendered = renderer.renderChart(song);
+      } catch (renderError) {
+        const div = document.createElement('div');
+        div.textContent = renderError instanceof Error ? renderError.message : String(renderError);
+        this._root.replaceChildren(this._style, div);
+        return;
+      }
+
+      this._root.replaceChildren(this._style, rendered);
+    } catch (parseError) {
+      const div = document.createElement('div');
+      div.textContent = parseError instanceof Error ? parseError.message : String(parseError);
+      this._root.replaceChildren(this._style, div);
     }
   }
 }

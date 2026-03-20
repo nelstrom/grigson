@@ -45,16 +45,42 @@ The `<grigson-chart>` element supports the following attributes for configuratio
 
 | Attribute             | Description                                                                 |
 | --------------------- | --------------------------------------------------------------------------- |
-| `notation-preset`     | Set the chord notation style: `jazz` (default), `pop`, or `symbolic`.       |
 | `transpose-key`       | Target key for transposition (e.g., `A`).                                   |
 | `transpose-semitones` | Number of semitones to transpose (e.g., `2` for a whole step up).           |
-| `renderer`            | Choose the renderer type: `text` (default) or `html`.                      |
+| `normalise`           | Presence attribute — normalise enharmonic spellings before rendering.       |
 
-Changing these attributes via the DOM (e.g., `element.setAttribute('notation-preset', 'symbolic')`) will automatically re-render the chart.
+Changing these attributes via the DOM will automatically re-render the chart.
+
+### Renderer discovery
+
+`<grigson-chart>` scans its light DOM children for the first element that implements the renderer contract (`typeof el.renderChart === 'function'`). If no child renderer is found, it falls back to `GrigsonHtmlRenderer` automatically.
+
+```html
+<!-- Implicit fallback renderer (GrigsonHtmlRenderer) -->
+<grigson-chart>
+  <template>| C | Am | F | G |</template>
+</grigson-chart>
+
+<!-- Explicit renderer child (same result, but configurable) -->
+<grigson-chart>
+  <grigson-html-renderer notation-preset="symbolic"></grigson-html-renderer>
+  <template>| C | Am | F | G |</template>
+</grigson-chart>
+```
+
+### `<grigson-html-renderer>`
+
+The built-in renderer element. Accepts:
+
+| Attribute         | Description                                                      |
+| ----------------- | ---------------------------------------------------------------- |
+| `notation-preset` | Chord notation style: `jazz` (default), `pop`, or `symbolic`.   |
+
+When `notation-preset` changes, `<grigson-html-renderer>` dispatches a `grigson:renderer-update` event which causes `<grigson-chart>` to re-render.
 
 ### CSS API
 
-The `<grigson-chart>` element uses a Shadow DOM and exposes several CSS Custom Properties and Parts for styling:
+CSS Custom Properties and Shadow Parts belong to the **renderer element** (`<grigson-html-renderer>` or a custom renderer), not to `<grigson-chart>` itself. The rendered output is placed in `<grigson-chart>`'s shadow root, so parts can be styled via the `<grigson-chart>` host.
 
 #### Custom Properties
 
@@ -97,7 +123,7 @@ grigson-chart {
 }
 ```
 
-The `grigson-register` bundle is separate from the core `grigson` bundle to allow for side-effect-free imports of the library when the custom element is not needed.
+The `grigson-register` bundle registers both `grigson-chart` and `grigson-html-renderer` and is separate from the core `grigson` bundle to allow for side-effect-free imports when the custom element is not needed.
 
 ## Using the IIFE bundle
 
