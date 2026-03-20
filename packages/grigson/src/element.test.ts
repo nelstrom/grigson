@@ -26,7 +26,7 @@ describe('GrigsonChart', () => {
     const shadowRoot = element.shadowRoot!;
     const song = shadowRoot.querySelector('[part="song"]');
     expect(song).not.toBeNull();
-    expect(song!.textContent!.trim()).toBe('| C |');
+    expect(song!.querySelector('[part="chord-root"]')!.textContent).toBe('C');
   });
 
   it('handles empty templates gracefully', async () => {
@@ -81,12 +81,12 @@ describe('GrigsonChart', () => {
     const shadowRoot = element.shadowRoot!;
     const template = element.querySelector('template')!;
 
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
+    expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('C');
 
     template.innerHTML = '| G |';
     element.update();
 
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| G |');
+    expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('G');
   });
 
   it('normalises chords when the normalise attribute is present', async () => {
@@ -101,15 +101,17 @@ describe('GrigsonChart', () => {
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
 
-    // A# in F major (or Bb major) should be normalised to Bb
-    const row = shadowRoot.querySelector('[part="row"]')!;
-    expect(row.textContent!.trim()).toBe('| F | Bb |');
+    // A# in F major (or Bb major) should be normalised to Bb (rendered as B♭)
+    const chordRoots = [...shadowRoot.querySelectorAll('[part="chord-root"]')];
+    expect(chordRoots).toHaveLength(2);
+    expect(chordRoots[0].textContent).toBe('F');
+    expect(chordRoots[1].textContent).toBe('B♭');
   });
 
   it('renders with part attributes for styling', async () => {
     document.body.innerHTML = `
       <grigson-chart>
-        <template>| C |</template>
+        <template>| Cm |</template>
       </grigson-chart>
     `;
     await wait();
@@ -117,10 +119,10 @@ describe('GrigsonChart', () => {
     const shadowRoot = element.shadowRoot!;
 
     expect(shadowRoot.querySelector('[part="row"]')).not.toBeNull();
-    expect(shadowRoot.querySelector('[part="barline"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part~="barline"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="chord"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="chord-root"]')).not.toBeNull();
-    expect(shadowRoot.querySelector('[part="chord-suffix"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="chord-quality"]')).not.toBeNull();
   });
 
   it('renders front matter with part attributes', async () => {
@@ -137,8 +139,8 @@ key: C
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
 
-    expect(shadowRoot.querySelector('[part="frontmatter"]')).not.toBeNull();
-    expect(shadowRoot.querySelector('[part="frontmatter-value"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="song-header"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part="song-title"]')).not.toBeNull();
   });
 
   it('allows styling via CSS Custom Properties', async () => {
@@ -197,7 +199,7 @@ key: C
     const shadowRoot = element.shadowRoot!;
     const song = shadowRoot.querySelector('[part="song"]');
     expect(song).not.toBeNull();
-    expect(song!.textContent!.trim()).toBe('| Am |');
+    expect(song!.querySelector('[part="chord-root"]')!.textContent).toBe('A');
   });
 
   it('prefers inline template over external template', async () => {
@@ -211,7 +213,7 @@ key: C
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
     const song = shadowRoot.querySelector('[part="song"]');
-    expect(song!.textContent!.trim()).toBe('| C |');
+    expect(song!.querySelector('[part="chord-root"]')!.textContent).toBe('C');
   });
 
   it('renders nothing when external template ID does not exist', async () => {
@@ -234,12 +236,12 @@ key: C
     const element = document.querySelector('grigson-chart') as GrigsonChart;
     const shadowRoot = element.shadowRoot!;
 
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
+    expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('C');
 
     element.setAttribute('template', 'tmpl-g');
     await wait();
 
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| G |');
+    expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('G');
   });
 
   it('uses the first child renderer when multiple implement renderChart', async () => {
@@ -334,13 +336,13 @@ key: C
     await wait();
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
+    expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('C');
 
     const template = element.querySelector('template')!;
     template.innerHTML = '| Dm |';
     await wait();
 
-    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| Dm |');
+    expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('D');
   });
 
   it('re-renders when a grigson:renderer-update event bubbles from a child', async () => {
@@ -391,10 +393,10 @@ describe('GrigsonHtmlRenderer', () => {
     expect(result).toBeInstanceOf(Element);
     expect(result.querySelector('[part="song"]')).not.toBeNull();
     expect(result.querySelector('[part="row"]')).not.toBeNull();
-    expect(result.querySelector('[part="barline"]')).not.toBeNull();
+    expect(result.querySelector('[part~="barline"]')).not.toBeNull();
     expect(result.querySelector('[part="chord"]')).not.toBeNull();
     expect(result.querySelector('[part="chord-root"]')).not.toBeNull();
-    expect(result.querySelector('[part="chord-suffix"]')).not.toBeNull();
+    expect(result.querySelector('[part="chord-quality"]')).not.toBeNull();
   });
 
   it('renderChart() includes frontmatter parts when the song has front matter', () => {
@@ -402,7 +404,7 @@ describe('GrigsonHtmlRenderer', () => {
     const renderer = new GrigsonHtmlRenderer();
     const result = renderer.renderChart(song);
 
-    expect(result.querySelector('[part="frontmatter"]')).not.toBeNull();
-    expect(result.querySelector('[part="frontmatter-value"]')).not.toBeNull();
+    expect(result.querySelector('[part="song-header"]')).not.toBeNull();
+    expect(result.querySelector('[part="song-title"]')).not.toBeNull();
   });
 });

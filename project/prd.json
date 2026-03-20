@@ -1880,7 +1880,8 @@
       "Emit barline kind as second part token; add barline-repeat-count child when repeatCount > 2",
       "Run pnpm test and fix any failures",
       "Commit the change"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "html-element-css",

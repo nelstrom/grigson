@@ -1,4 +1,4 @@
-import type { Song, Row, Bar, Chord, Barline, TimeSignature, Section } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline, TimeSignature, Section, BeatSlot } from '../parser/types.js';
 import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
 
 // ---------------------------------------------------------------------------
@@ -111,120 +111,204 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
 }
 
 // ---------------------------------------------------------------------------
+// Chord rendering
+// ---------------------------------------------------------------------------
 
-const DEFAULT_NOTATION = {
-  preset: 'jazz',
+function normalizeAccidentals(text: string): string {
+  return text.replace(/b/g, '♭').replace(/#/g, '♯');
+}
+
+function renderChordRoot(root: string): string {
+  // Root is like "C", "Bb", "F#", "Ab"
+  // Split into note letter(s) and accidental
+  const match = root.match(/^([A-G])(b+|#+)?$/);
+  if (!match) {
+    // Fallback: just output with accidental normalization
+    return `<span part="chord-root">${normalizeAccidentals(root)}</span>`;
+  }
+  const note = match[1];
+  const acc = match[2] ?? '';
+  if (acc === '') {
+    return `<span part="chord-root">${note}</span>`;
+  }
+  const unicodeAcc = normalizeAccidentals(acc);
+  return `<span part="chord-root">${note}<span part="chord-accidental">${unicodeAcc}</span></span>`;
+}
+
+const QUALITY_SYMBOL: Record<string, string> = {
+  major: '',
   minor: 'm',
   dominant7: '7',
-  halfDim: 'm7b5',
+  halfDiminished: 'ø',
+  diminished: '°',
+  maj7: '△',
+  min7: 'm7',
+  dim7: '°7',
+  dom7flat5: '7♭5',
 };
 
-const PRESETS: Record<string, Partial<NonNullable<TextRendererConfig['notation']>>> = {
-  jazz: { minor: 'm', halfDim: 'm7b5' },
-  pop: { minor: 'm', halfDim: 'm7b5' },
-  symbolic: { minor: '-', halfDim: 'ø' },
-};
-
-function renderChord(chord: Chord, config: TextRendererConfig): string {
-  const notation = {
-    ...DEFAULT_NOTATION,
-    ...PRESETS[config.notation?.preset ?? 'jazz'],
-    ...config.notation,
-  };
-
-  const suffix =
-    chord.quality === 'minor'
-      ? notation.minor
-      : chord.quality === 'dominant7'
-        ? notation.dominant7
-        : chord.quality === 'halfDiminished'
-          ? notation.halfDim
-          : '';
-
-  return `<span part="chord"><span part="chord-root">${chord.root}</span><span part="chord-suffix">${suffix}</span></span>`;
+function renderChordInner(chord: Chord): string {
+  const rootHtml = renderChordRoot(chord.root);
+  const qualitySymbol = QUALITY_SYMBOL[chord.quality] ?? '';
+  const qualityHtml = qualitySymbol
+    ? `<span part="chord-quality">${qualitySymbol}</span>`
+    : '';
+  return rootHtml + qualityHtml;
 }
 
-function renderBar(bar: Bar, config: TextRendererConfig): string {
-  return bar.slots
-    .map((slot) =>
-      slot.type === 'chord'
-        ? renderChord(slot.chord, config)
-        : '<span part="dot">.</span>',
-    )
-    .join(' ');
-}
-
-function barlineSymbol(b: Barline): string {
-  const suffix = b.repeatCount && b.repeatCount > 2 ? `x${b.repeatCount}` : '';
-  switch (b.kind) {
-    case 'single':
-      return '|';
-    case 'double':
-      return '||';
-    case 'final':
-      return '||.';
-    case 'startRepeat':
-      return '||:';
-    case 'endRepeat':
-      return ':||' + suffix;
-    case 'endRepeatStartRepeat':
-      return ':||:' + suffix;
+function renderChord(chord: Chord): string {
+  if (chord.bass) {
+    const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
+    let bassHtml: string;
+    if (bassMatch) {
+      const bassNote = bassMatch[1];
+      const bassAcc = bassMatch[2] ?? '';
+      if (bassAcc === '') {
+        bassHtml = bassNote;
+      } else {
+        bassHtml = `${bassNote}<span part="chord-accidental">${normalizeAccidentals(bassAcc)}</span>`;
+      }
+    } else {
+      bassHtml = normalizeAccidentals(chord.bass);
+    }
+    return (
+      `<span part="chord chord-slash">` +
+      `<span part="chord-top">${renderChordInner(chord)}</span>` +
+      `<span part="chord-fraction-line"></span>` +
+      `<span part="chord-bass">${bassHtml}</span>` +
+      `</span>`
+    );
   }
+  return `<span part="chord">${renderChordInner(chord)}</span>`;
 }
 
-function renderRow(row: Row, config: TextRendererConfig): string {
-  const bl = (b: Barline) => `<span part="barline">${barlineSymbol(b)}</span>`;
+// ---------------------------------------------------------------------------
+// Barline rendering
+// ---------------------------------------------------------------------------
+
+function renderBarline(barline: Barline, col: number): string {
+  const kindPart = `barline-${barline.kind}`;
+  const style = `style="grid-column: ${col}"`;
+  const repeatCountHtml =
+    barline.repeatCount !== undefined && barline.repeatCount > 2
+      ? `<span part="barline-repeat-count">×${barline.repeatCount}</span>`
+      : '';
+  return `<span part="barline ${kindPart}" ${style}>${repeatCountHtml}</span>`;
+}
+
+// ---------------------------------------------------------------------------
+// Time signature rendering
+// ---------------------------------------------------------------------------
+
+function renderTimeSig(ts: TimeSignature): string {
   return (
-    `<div part="row">` +
-    bl(row.openBarline) +
-    ' ' +
-    row.bars.map((bar) => renderBar(bar, config) + ` ${bl(bar.closeBarline)}`).join(' ') +
-    `</div>`
+    `<span part="time-sig">` +
+    `<span part="time-sig-num">${ts.numerator}</span>` +
+    `<span part="time-sig-den">${ts.denominator}</span>` +
+    `</span>`
   );
 }
 
-function renderFrontMatter(title: string | null, key: string | null): string {
-  let html = '<div part="frontmatter">---\n';
-  if (title !== null) {
-    html += `title: <span part="frontmatter-value">"${title}"</span>\n`;
+// ---------------------------------------------------------------------------
+// Row rendering
+// ---------------------------------------------------------------------------
+
+function renderRow(row: Row, rowLayout: RowLayout): string {
+  let html = `<div part="row">`;
+
+  // Open barline
+  html += renderBarline(row.openBarline, rowLayout.openBarlineCol);
+
+  // Bars
+  for (let barIdx = 0; barIdx < row.bars.length; barIdx++) {
+    const bar: Bar = row.bars[barIdx];
+    const barLayout = rowLayout.bars[barIdx];
+
+    for (let slotIdx = 0; slotIdx < bar.slots.length; slotIdx++) {
+      const slot: BeatSlot = bar.slots[slotIdx];
+      const slotLayout = barLayout.slots[slotIdx];
+      const { col, span } = slotLayout;
+
+      if (slot.type === 'dot') {
+        html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;
+      } else {
+        // chord slot
+        let slotContent = '';
+        if (slotLayout.showTimeSig) {
+          slotContent += renderTimeSig(slotLayout.showTimeSig);
+        }
+        slotContent += renderChord(slot.chord);
+        html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
+      }
+    }
+
+    // Close barline
+    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol);
   }
-  if (key !== null) {
-    html += `key: <span part="frontmatter-value">${key}</span>\n`;
-  }
-  html += '---</div>';
+
+  html += `</div>`;
   return html;
 }
+
+// ---------------------------------------------------------------------------
+// Front matter rendering
+// ---------------------------------------------------------------------------
+
+function normalizeKey(key: string): string {
+  return normalizeAccidentals(key);
+}
+
+function renderFrontMatter(song: Song): string {
+  let html = `<header part="song-header">`;
+  if (song.title !== null) {
+    html += `<h1 part="song-title">${song.title}</h1>`;
+  }
+  if (song.key !== null) {
+    html += `<p part="song-key">${normalizeKey(song.key)}</p>`;
+  }
+  html += `</header>`;
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// Main renderer
+// ---------------------------------------------------------------------------
 
 export class HtmlRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
-    let html = '<div part="song">';
+    const layout = computeGlobalLayout(song);
+    const { beatCols, minBeatWidth } = layout;
+
+    let html = `<div part="song" style="--beat-cols: ${beatCols}; --min-beat-width: ${minBeatWidth}">`;
 
     if (song.title !== null || song.key !== null) {
-      html += renderFrontMatter(song.title, song.key);
+      html += renderFrontMatter(song);
     }
+
+    html += `<div part="song-grid">`;
 
     for (const section of song.sections) {
-      html += '<div part="section">';
-      for (const comment of (section.preamble ?? [])) {
-        html += `<div part="comment">${comment.text}</div>`;
-      }
+      html += `<section part="section" style="display: contents">`;
+
       if (section.label !== null) {
-        const keySpan = section.key !== null ? ` <span part="section-key">${section.key}</span>` : '';
-        html += `<div part="section-label">[${section.label}]${keySpan}</div>`;
+        html += `<h2 part="section-label">${section.label}</h2>`;
       }
+
       for (const item of (section.content ?? section.rows)) {
-        if (item.type === 'comment') {
-          html += `<div part="comment">${item.text}</div>`;
-        } else {
-          html += renderRow(item, this.config);
+        if (item.type === 'row') {
+          const rowLayout = layout.rows.get(item)!;
+          html += renderRow(item, rowLayout);
         }
+        // comments are intentionally omitted
       }
-      html += '</div>';
+
+      html += `</section>`;
     }
 
-    html += '</div>';
+    html += `</div>`;
+    html += `</div>`;
     return html;
   }
 }
