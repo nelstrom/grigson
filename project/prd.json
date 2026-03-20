@@ -1731,7 +1731,8 @@
       "Refactor source resolution in update() into a helper: check for inline <template> child first, then fall back to document.getElementById(this.getAttribute('template')) cast as HTMLTemplateElement",
       "If neither source is found, clear the shadow root and return early",
       "Ensure the template attribute changing (pointing to a different ID) triggers a re-render via attributeChangedCallback"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-chart-observers",
@@ -1764,7 +1765,8 @@
     "steps": [
       "Update src/register.ts to import GrigsonHtmlRenderer and call customElements.define('grigson-html-renderer', GrigsonHtmlRenderer) alongside the existing grigson-chart registration",
       "Confirm src/index.browser.ts exports GrigsonHtmlRenderer, GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent, and the GrigsonRendererElement interface"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-text-renderer-package",

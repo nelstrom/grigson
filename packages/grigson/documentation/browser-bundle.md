@@ -45,11 +45,31 @@ The `<grigson-chart>` element supports the following attributes for configuratio
 
 | Attribute             | Description                                                                 |
 | --------------------- | --------------------------------------------------------------------------- |
+| `template`            | ID of an external `<template>` element to use as the chart source. Ignored when an inline `<template>` child is present. |
 | `transpose-key`       | Target key for transposition (e.g., `A`).                                   |
 | `transpose-semitones` | Number of semitones to transpose (e.g., `2` for a whole step up).           |
 | `normalise`           | Presence attribute — normalise enharmonic spellings before rendering.       |
 
 Changing these attributes via the DOM will automatically re-render the chart.
+
+### External template
+
+The `template` attribute lets multiple `<grigson-chart>` elements share one `<template>` definition. An inline `<template>` child always takes precedence when both are present; if the referenced ID does not exist the chart renders nothing.
+
+```html
+<template id="my-chart">
+  | C | Am | F | G |
+</template>
+
+<!-- Concert pitch -->
+<grigson-chart template="my-chart"></grigson-chart>
+
+<!-- Transposed for Bb instruments -->
+<grigson-chart template="my-chart" transpose-semitones="2"></grigson-chart>
+
+<!-- Transposed for Eb instruments -->
+<grigson-chart template="my-chart" transpose-semitones="9"></grigson-chart>
+```
 
 ### Renderer discovery
 

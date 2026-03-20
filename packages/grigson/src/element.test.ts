@@ -184,6 +184,61 @@ key: C
     expect(shadowRoot.querySelector('[data-mock="true"]')!.textContent).toBe('mock-output');
   });
 
+  it('renders a chart from an external template referenced by ID', async () => {
+    document.body.innerHTML = `
+      <template id="ext-tmpl">| Am |</template>
+      <grigson-chart template="ext-tmpl"></grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    const song = shadowRoot.querySelector('[part="song"]');
+    expect(song).not.toBeNull();
+    expect(song!.textContent!.trim()).toBe('| Am |');
+  });
+
+  it('prefers inline template over external template', async () => {
+    document.body.innerHTML = `
+      <template id="ext-tmpl">| G |</template>
+      <grigson-chart template="ext-tmpl">
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    const song = shadowRoot.querySelector('[part="song"]');
+    expect(song!.textContent!.trim()).toBe('| C |');
+  });
+
+  it('renders nothing when external template ID does not exist', async () => {
+    document.body.innerHTML = `
+      <grigson-chart template="nonexistent-id"></grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    expect(shadowRoot.querySelector('[part="song"]')).toBeNull();
+  });
+
+  it('re-renders when the template attribute changes to a different ID', async () => {
+    document.body.innerHTML = `
+      <template id="tmpl-c">| C |</template>
+      <template id="tmpl-g">| G |</template>
+      <grigson-chart template="tmpl-c"></grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart') as GrigsonChart;
+    const shadowRoot = element.shadowRoot!;
+
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
+
+    element.setAttribute('template', 'tmpl-g');
+    await wait();
+
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| G |');
+  });
+
   it('uses the first child renderer when multiple implement renderChart', async () => {
     class RendererA extends HTMLElement {
       renderChart() {

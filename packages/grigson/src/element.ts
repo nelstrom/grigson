@@ -6,7 +6,7 @@ import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
-    return ['transpose-key', 'transpose-semitones', 'normalise'];
+    return ['transpose-key', 'transpose-semitones', 'normalise', 'template'];
   }
 
   private _root: ShadowRoot;
@@ -43,8 +43,21 @@ export class GrigsonChart extends HTMLElement {
     return new GrigsonHtmlRenderer();
   }
 
+  private _resolveTemplate(): HTMLTemplateElement | null {
+    const inline = this.querySelector('template');
+    if (inline) return inline as HTMLTemplateElement;
+
+    const refId = this.getAttribute('template');
+    if (refId) {
+      const external = document.getElementById(refId);
+      if (external instanceof HTMLTemplateElement) return external;
+    }
+
+    return null;
+  }
+
   update() {
-    const template = this.querySelector('template');
+    const template = this._resolveTemplate();
     if (!template) {
       this._root.replaceChildren(this._style);
       return;
