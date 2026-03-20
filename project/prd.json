@@ -1918,7 +1918,8 @@
       "Add test for each Unicode symbol (♭ ♯ △ ° ø)",
       "Run pnpm test and confirm all tests pass",
       "Commit the change"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "html-renderer-docs",

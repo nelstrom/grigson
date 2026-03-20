@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseSong } from '../parser/parser.js';
-import { computeGlobalLayout } from './html.js';
+import { computeGlobalLayout, HtmlRenderer } from './html.js';
 
 describe('computeGlobalLayout', () => {
   describe('globalMaxBeats', () => {
@@ -178,6 +178,147 @@ describe('computeGlobalLayout', () => {
       const song = parseSong('---\nmeter: 4/4\n---\n| C |\n');
       const { minBeatWidth } = computeGlobalLayout(song);
       expect(parseFloat(minBeatWidth)).toBeGreaterThanOrEqual(1.0);
+    });
+
+    it('multi-section song: globalMaxBeats and globalMinBeatWidth computed across all sections', () => {
+      // Verse: 4 bars of 4/4 = 16 beats; Chorus: 2 bars of 4/4 = 8 beats
+      // Longest chord in verse is "Am" (2 chars), chorus has "Bbmaj7" (3 effective chars)
+      const song = parseSong(
+        '[Verse]\n| C | Am | F | G |\n[Chorus]\n| (4/4) Bbmaj7 Bbmaj7 Bbmaj7 Bbmaj7 |\n',
+      );
+      const { beatCols, minBeatWidth } = computeGlobalLayout(song);
+      // globalMaxBeats = max(16, 4) = 16
+      expect(beatCols).toBe(16);
+      // minBeatWidth driven by Bbmaj7 in chorus
+      expect(parseFloat(minBeatWidth)).toBeGreaterThan(1.0);
+    });
+  });
+});
+
+describe('HtmlRenderer', () => {
+  const renderer = new HtmlRenderer();
+
+  describe('Unicode notation', () => {
+    it('renders flat accidental as ♭', () => {
+      const html = renderer.render(parseSong('| Bb |\n'));
+      expect(html).toContain('♭');
+      expect(html).not.toContain('<span part="chord-accidental">b</span>');
+    });
+
+    it('renders sharp accidental as ♯', () => {
+      const html = renderer.render(parseSong('| F# |\n'));
+      expect(html).toContain('♯');
+      expect(html).not.toContain('<span part="chord-accidental">#</span>');
+    });
+
+    it('renders major7 quality as △', () => {
+      const html = renderer.render(parseSong('| Cmaj7 |\n'));
+      expect(html).toContain('△');
+    });
+
+    it('renders diminished quality as °', () => {
+      const html = renderer.render(parseSong('| Cdim |\n'));
+      expect(html).toContain('°');
+    });
+
+    it('renders half-diminished quality as ø', () => {
+      const html = renderer.render(parseSong('| Cm7b5 |\n'));
+      expect(html).toContain('ø');
+    });
+  });
+
+  describe('slash chord', () => {
+    it('renders slash chord with chord-top, chord-fraction-line, and chord-bass parts', () => {
+      const html = renderer.render(parseSong('| G/B |\n'));
+      expect(html).toContain('part="chord chord-slash"');
+      expect(html).toContain('part="chord-top"');
+      expect(html).toContain('part="chord-fraction-line"');
+      expect(html).toContain('part="chord-bass"');
+    });
+
+    it('renders bass note inside chord-bass', () => {
+      const html = renderer.render(parseSong('| G/B |\n'));
+      // chord-bass should contain "B"
+      expect(html).toMatch(/part="chord-bass">B</);
+    });
+
+    it('renders bass accidental in chord-bass for flat bass', () => {
+      const html = renderer.render(parseSong('| C/Bb |\n'));
+      expect(html).toContain('♭');
+      expect(html).toMatch(/part="chord-bass"/);
+    });
+  });
+
+  describe('dot slot', () => {
+    it('renders dot slot as <span part="dot"> containing "/"', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n'));
+      expect(html).toContain('part="dot"');
+      // dot content is "/"
+      expect(html).toMatch(/part="dot"[^>]*>\/</);
+    });
+
+    it('dot slot has correct grid-column (col 2 for second slot)', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n'));
+      // Second slot is a dot at col 2
+      const dotMatches = [...html.matchAll(/part="dot" style="grid-column: (\d+)/g)];
+      expect(dotMatches.length).toBeGreaterThan(0);
+      expect(dotMatches[0][1]).toBe('2');
+    });
+  });
+
+  describe('time signature annotation', () => {
+    it('shows time-sig block on first slot when bar.timeSignature is set', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
+      expect(html).toContain('part="time-sig"');
+      expect(html).toContain('part="time-sig-num"');
+      expect(html).toContain('part="time-sig-den"');
+    });
+
+    it('time-sig-num and time-sig-den contain the correct digits', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
+      expect(html).toMatch(/part="time-sig-num">2</);
+      expect(html).toMatch(/part="time-sig-den">4</);
+    });
+
+    it('does not show time-sig on bars without bar.timeSignature', () => {
+      // Plain 4/4 song with no inline time sig — no annotation
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | Am |\n'));
+      expect(html).not.toContain('part="time-sig"');
+    });
+  });
+
+  describe('section structure', () => {
+    it('section element has part="section" and display:contents style', () => {
+      const html = renderer.render(parseSong('[Verse]\n| C |\n'));
+      expect(html).toContain('part="section"');
+      expect(html).toContain('display: contents');
+    });
+
+    it('section label is rendered inside section element', () => {
+      const html = renderer.render(parseSong('[Verse]\n| C |\n'));
+      expect(html).toContain('part="section-label"');
+      expect(html).toContain('Verse');
+    });
+  });
+
+  describe('song wrapper', () => {
+    it('outer div has --beat-cols and --min-beat-width CSS variables', () => {
+      const html = renderer.render(parseSong('| C |\n'));
+      expect(html).toMatch(/--beat-cols: \d+/);
+      expect(html).toMatch(/--min-beat-width: \d+\.\d+em/);
+    });
+
+    it('song-grid div is present', () => {
+      const html = renderer.render(parseSong('| C |\n'));
+      expect(html).toContain('part="song-grid"');
+    });
+
+    it('renders song title and key in header when present', () => {
+      const html = renderer.render(parseSong('---\ntitle: My Song\nkey: C\n---\n| C |\n'));
+      expect(html).toContain('part="song-header"');
+      expect(html).toContain('part="song-title"');
+      expect(html).toContain('My Song');
+      expect(html).toContain('part="song-key"');
     });
   });
 });
