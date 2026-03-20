@@ -1689,7 +1689,8 @@
       "Create src/renderers/contract.ts exporting the GrigsonRendererElement interface (extends HTMLElement, renderChart(song: Song): Element)",
       "Create src/events.ts exporting GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, and GrigsonRenderErrorEvent as Event subclasses with typed properties",
       "Export all new types from src/index.browser.ts and src/index.ts"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-html-renderer-element",

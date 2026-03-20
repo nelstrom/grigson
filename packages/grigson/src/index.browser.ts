@@ -8,6 +8,9 @@ export { HtmlRenderer } from './renderers/html.js';
 
 export { GrigsonChart } from './element.js';
 
+export type { GrigsonRendererElement } from './renderers/contract.js';
+export { GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent } from './events.js';
+
 export { normaliseSong, normaliseSection } from './theory/normalise.js';
 export type { DetectKeyConfig } from './theory/keyDetector.js';
 

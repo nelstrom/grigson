@@ -27,3 +27,7 @@ export type { AnnotatedChord } from './theory/harmonicAnalysis.js';
 // Validator
 export { validate } from './validator.js';
 export type { Diagnostic, DiagnosticRange } from './validator.js';
+
+// Custom element contract
+export type { GrigsonRendererElement } from './renderers/contract.js';
+export { GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent } from './events.js';

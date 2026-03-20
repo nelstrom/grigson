@@ -335,3 +335,10 @@ Added `export { validate } from './validator.js'` and `export type { Diagnostic,
 
 ## playground-monaco-diagnostics
 Extended the `update()` function in `packages/website/content/playground.njk` to call `grigson.validate(value)` after each content change. Maps each diagnostic to a Monaco marker object (converting 0-indexed LSP line/column to 1-indexed Monaco coordinates, and mapping severity 'error'/'warning' to `monaco.MarkerSeverity.Error`/`Warning`). Passes the markers array to `monaco.editor.setModelMarkers()` with owner `'grigson'`. Red squiggles now appear for parse errors and yellow squiggles for beat-balance warnings; both clear automatically when the chart is fixed. All 422 tests pass.
+
+## custom-element-contract
+
+Created the public extensibility contract types for third-party renderer elements:
+- `src/renderers/contract.ts`: `GrigsonRendererElement` interface (extends HTMLElement, `renderChart(song: Song): Element`)
+- `src/events.ts`: `GrigsonRendererUpdateEvent`, `GrigsonParseErrorEvent`, `GrigsonRenderErrorEvent` as typed Event subclasses
+- Exported all new types from `src/index.browser.ts` and `src/index.ts`
