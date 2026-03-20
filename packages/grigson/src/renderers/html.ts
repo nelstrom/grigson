@@ -1,5 +1,116 @@
-import type { Song, Row, Bar, Chord, Barline } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline, TimeSignature, Section } from '../parser/types.js';
 import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
+
+// ---------------------------------------------------------------------------
+// Global layout calculation
+// ---------------------------------------------------------------------------
+
+export interface SlotLayout {
+  col: number;
+  span: number;
+  showTimeSig?: TimeSignature;
+}
+
+export interface RowLayout {
+  openBarlineCol: number;
+  bars: Array<{
+    slots: SlotLayout[];
+    closeBarlineCol: number;
+  }>;
+}
+
+export interface GlobalLayout {
+  rows: Map<Row, RowLayout>;
+  beatCols: number;
+  minBeatWidth: string;
+}
+
+const EM_PER_CHAR = 0.55;
+
+const QUALITY_CHARS: Record<string, number> = {
+  major: 0,
+  minor: 1,       // "m"
+  dominant7: 1,   // "7"
+  halfDiminished: 1, // "ø"
+  diminished: 1,  // "°"
+  maj7: 1,        // "△"
+  min7: 2,        // "m7"
+  dim7: 2,        // "°7"
+  dom7flat5: 3,   // "7b5"
+};
+
+function estimateChordDisplayWidthEm(chord: Chord): number {
+  const rootChars = chord.root.length; // b and # are each 1 char (Unicode accidentals)
+  const qualityChars = QUALITY_CHARS[chord.quality] ?? 0;
+  const topChars = rootChars + qualityChars;
+  if (chord.bass) {
+    return Math.max(topChars, chord.bass.length) * EM_PER_CHAR;
+  }
+  return topChars * EM_PER_CHAR;
+}
+
+function rowsOfSection(section: Section): Row[] {
+  if (section.content) {
+    return section.content.filter((item): item is Row => item.type === 'row');
+  }
+  return section.rows;
+}
+
+export function computeGlobalLayout(song: Song): GlobalLayout {
+  let activeTSig: TimeSignature = { numerator: 4, denominator: 4 };
+  const rowLayouts = new Map<Row, RowLayout>();
+  let globalMaxBeats = 0;
+  let globalMinBeatWidthEm = 0;
+
+  for (const section of song.sections) {
+    for (const row of rowsOfSection(section)) {
+      const rowLayout: RowLayout = { openBarlineCol: 1, bars: [] };
+      let beatOffset = 0;
+
+      for (const bar of row.bars) {
+        if (bar.timeSignature) {
+          activeTSig = bar.timeSignature;
+        }
+
+        const isMode2 = bar.slots.some((s) => s.type === 'dot');
+        const beatsPerSlot = isMode2 ? 1 : activeTSig.numerator / bar.slots.length;
+
+        const slots: SlotLayout[] = [];
+        let isFirstSlot = true;
+
+        for (const slot of bar.slots) {
+          slots.push({
+            col: beatOffset + 1,
+            span: beatsPerSlot,
+            showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
+          });
+
+          if (slot.type === 'chord') {
+            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / beatsPerSlot;
+            if (widthPerBeatEm > globalMinBeatWidthEm) {
+              globalMinBeatWidthEm = widthPerBeatEm;
+            }
+          }
+
+          beatOffset += beatsPerSlot;
+          isFirstSlot = false;
+        }
+
+        rowLayout.bars.push({ slots, closeBarlineCol: beatOffset + 1 });
+      }
+
+      rowLayouts.set(row, rowLayout);
+      if (beatOffset > globalMaxBeats) {
+        globalMaxBeats = beatOffset;
+      }
+    }
+  }
+
+  const minBeatWidth = `${Math.max(globalMinBeatWidthEm, 1.0).toFixed(2)}em`;
+  return { rows: rowLayouts, beatCols: globalMaxBeats, minBeatWidth };
+}
+
+// ---------------------------------------------------------------------------
 
 const DEFAULT_NOTATION = {
   preset: 'jazz',

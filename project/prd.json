@@ -1860,7 +1860,8 @@
       "Add unit tests for computeGlobalLayout: verify globalMaxBeats and correct col/span values for a multi-section song with mixed time signatures and dot slots",
       "Run pnpm test and confirm all tests pass",
       "Commit the change"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "html-renderer-rewrite",
