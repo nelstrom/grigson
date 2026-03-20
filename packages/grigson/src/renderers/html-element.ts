@@ -86,7 +86,12 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         grid-column: 1 / -1;
         display: grid;
         grid-template-columns: subgrid;
+        grid-template-rows: 1fr;
         align-items: center;
+      }
+
+      [part="row"] > * {
+        grid-row: 1;
       }
 
       [part~="barline"] {
