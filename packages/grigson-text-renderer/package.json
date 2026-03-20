@@ -1,0 +1,26 @@
+{
+  "name": "grigson-text-renderer",
+  "version": "1.0.0",
+  "description": "A plain-text renderer custom element for grigson-chart",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm run build:ts && pnpm run build:browser && pnpm run build:browser:register",
+    "build:browser": "vite build",
+    "build:browser:register": "VITE_BUILD_REGISTER=true vite build",
+    "build:ts": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "grigson": "workspace:*"
+  }
+}

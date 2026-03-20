@@ -1756,7 +1756,8 @@
       "Wrap parseSong() in a try/catch; on failure create a fallback div, set its textContent to the error message, call this._root.replaceChildren(div), then dispatch new GrigsonParseErrorEvent(error)",
       "Wrap the renderer.renderChart() call in a separate try/catch; on failure create a fallback div, set its textContent, call replaceChildren, then dispatch new GrigsonRenderErrorEvent(error)",
       "Ensure the fallback div is created via document.createElement and message is set via textContent — never via innerHTML or setHTMLUnsafe"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "update-register-and-exports",
@@ -1782,7 +1783,8 @@
       "Create src/register.ts that calls customElements.define('grigson-text-renderer', GrigsonTextRenderer)",
       "Export GrigsonTextRenderer from src/index.ts and src/index.browser.ts",
       "Build and verify the package compiles cleanly"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-svg-renderer-package",

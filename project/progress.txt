@@ -362,3 +362,9 @@ Added reactive re-rendering to GrigsonChart in packages/grigson/src/element.ts:
 - grigson:renderer-update event listener — calls update() when a child renderer dispatches a config change event
 - disconnectedCallback — disconnects both observers and removes the event listener
 All 426 tests pass.
+
+## grigson-chart-error-events
+Added typed error event dispatching to GrigsonChart.update(). Imported GrigsonParseErrorEvent and GrigsonRenderErrorEvent from events.ts. In the parse error catch block, dispatch new GrigsonParseErrorEvent(parseError) after rendering the fallback div. In the render error catch block, dispatch new GrigsonRenderErrorEvent(renderError) after rendering the fallback div. All 426 tests pass.
+
+## grigson-text-renderer-package
+Created packages/grigson-text-renderer as a reference renderer implementation outside the core grigson package. The package includes: GrigsonTextRenderer extending HTMLElement and implementing GrigsonRendererElement — renderChart() calls TextRenderer.render(song) and returns the output wrapped in a <pre> element; a side-effect-free element.ts; register.ts calling customElements.define; index.ts and index.browser.ts exports; package.json with workspace dependency on grigson; tsconfig.json and vite.config.ts mirroring the core package build setup; vitest.config.ts with passWithNoTests; and README.md. All four build outputs (ESM + IIFE for both browser and register bundles) compile cleanly. Full test suite passes (426 tests across the monorepo).

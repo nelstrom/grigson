@@ -5,6 +5,8 @@ node_modules/
 
 # Package outputs
 packages/grigson/dist/
+packages/grigson-text-renderer/dist/
+packages/grigson-svg-renderer/dist/
 packages/language-server/dist/
 packages/vscode-extension/dist/
 packages/website/_site/
