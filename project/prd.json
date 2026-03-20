@@ -1834,5 +1834,101 @@
       "Link the demo page from the website navigation"
     ],
     "passes": true
+  },
+  {
+    "id": "normalizer-first-bar-time-sig",
+    "category": "functional",
+    "description": "Normalizer sets bar.timeSignature on the first bar of uniform-meter songs",
+    "detail": "Currently, for uniform-meter songs, the normalizer hoists the inline time signature token to song.meter and strips it from the bars. The HTML renderer relies on bar.timeSignature being present to know whether to display a time signature annotation — including at the very start of the chart. The normalizer must be updated to explicitly set bar.timeSignature on the first bar of a song when the song has a declared meter (song.meter is not null). For meter: mixed, the normalizer already preserves inline time sig tokens on each section's first bar, so no change is needed for that case. See project/plans/default-html-renderer.md for full context.",
+    "steps": [
+      "Read the normalizer source to understand how uniform-meter songs are currently processed",
+      "After hoisting song.meter, set bar.timeSignature on the first bar of the first section (if not already set)",
+      "Add or update normalizer unit tests to assert that bar.timeSignature is populated on the first bar for uniform-meter songs",
+      "Run pnpm test and confirm all tests pass",
+      "Commit the change"
+    ]
+  },
+  {
+    "id": "html-renderer-layout-calc",
+    "category": "functional",
+    "description": "Add computeGlobalLayout() to html.ts that computes CSS Grid column assignments for all rows",
+    "detail": "Before rendering, a single pre-pass over the entire song must compute the global CSS Grid layout. Add a pure function computeGlobalLayout(song) to html.ts that: (1) walks all sections → rows → bars, tracking the active time signature (default 4/4, updated when bar.timeSignature is set); (2) detects Mode 1 (no dot slots → beatsPerSlot = numerator / slots.length) vs Mode 2 (any dot slot → beatsPerSlot = 1 per slot) per bar; (3) builds a per-row layout array giving { col, span } for each barline and slot position; (4) computes globalMaxBeats (maximum row beat total across the song, used as --beat-cols) and globalMinBeatWidth (max of estimatedChordWidth / beatsPerSlot across all chord slots, in em, using ~0.55em per character; slash chords use max(topWidth, bassWidth)). The function returns the layout map and { beatCols, minBeatWidth }. Row beat total = sum of slot counts × beatsPerSlot across all bars, plus 1 for the final barline anchor column. See project/plans/default-html-renderer.md for full context.",
+    "steps": [
+      "Read packages/grigson/src/renderers/html.ts and the Song/Row/Bar AST types to understand the data shapes",
+      "Add the computeGlobalLayout(song) function (no changes to rendering yet)",
+      "Add unit tests for computeGlobalLayout: verify globalMaxBeats and correct col/span values for a multi-section song with mixed time signatures and dot slots",
+      "Run pnpm test and confirm all tests pass",
+      "Commit the change"
+    ]
+  },
+  {
+    "id": "html-renderer-rewrite",
+    "category": "functional",
+    "description": "Rewrite html.ts to emit CSS Grid HTML with Unicode chord typography and full musical structure",
+    "detail": "Rewrite the HTML emission in html.ts using the layout data from computeGlobalLayout(). This covers all rendering changes in one pass of the file: (1) render() calls computeGlobalLayout first and emits --beat-cols and --min-beat-width on part=\"song\"; (2) renderRow() uses the layout map to emit style=\"grid-column: C\" on barlines and style=\"grid-column: C / span S\" on slots; (3) renderChord() is rewritten to split the root into note + accidental (wrapping ♭/♯ in a chord-accidental span), map quality to Unicode symbols (△ °  ø), wrap quality in a chord-quality span, and handle chord.bass as fraction layout with chord-top / chord-fraction-line / chord-bass; (4) dot slots emit <span part=\"dot\" style=\"grid-column: C / span 1\">/</span>; (5) the first slot of a bar emits a time-sig block when bar.timeSignature is set; (6) renderFrontMatter() becomes <header part=\"song-header\"> with h1/p elements for title, artist (if present), key in normalised form (if present); (7) sections wrap in <section part=\"section\" style=\"display: contents\"> with <h2 part=\"section-label\"> (omitted when label is null); (8) barlines carry their kind as an additional part token (e.g. part=\"barline barline-single\") and emit a barline-repeat-count child span when repeatCount > 2; (9) comment rendering is removed entirely. See project/plans/default-html-renderer.md for full context.",
+    "steps": [
+      "Read the current html.ts and the plan file for the exact HTML structure expected",
+      "Update render() to call computeGlobalLayout and emit CSS variable inline styles on part=\"song\"",
+      "Rewrite renderFrontMatter() as the new <header part=\"song-header\"> structure",
+      "Update section rendering: <section part=\"section\" style=\"display: contents\">, h2 section-label (omit when null), remove comment rendering",
+      "Rewrite renderRow() to iterate the layout map, emitting barlines and slots with grid-column styles",
+      "Emit time-sig block in the first slot of each bar when bar.timeSignature is set",
+      "Emit dot slots as <span part=\"dot\" style=\"grid-column: ...\"> with / content",
+      "Rewrite renderChord(): accidentals → chord-accidental with ♭/♯; quality → Unicode symbol in chord-quality span; slash chord → fraction layout",
+      "Emit barline kind as second part token; add barline-repeat-count child when repeatCount > 2",
+      "Run pnpm test and fix any failures",
+      "Commit the change"
+    ]
+  },
+  {
+    "id": "html-element-css",
+    "category": "functional",
+    "description": "Rewrite CSS in html-element.ts for CSS Grid layout and full musical typography",
+    "detail": "Replace the existing monospace/pre-wrap styles in html-element.ts with a complete CSS Grid implementation. Changes: (1) update :host custom properties to the new set (--grigson-font-family, --grigson-row-gap, --grigson-section-gap, --grigson-barline-width, --grigson-barline-color, --grigson-repeat-dot-size, --grigson-title-font-size, --grigson-section-label-font-size, --grigson-time-sig-font-size); (2) style part=\"song-grid\" as a CSS Grid with repeat(var(--beat-cols), minmax(var(--min-beat-width), 1fr)) plus a trailing 0fr column for the final barline anchor; (3) part=\"section\" → display: contents; (4) part=\"section-label\" → grid-column: 1 / -1, margin-top: var(--grigson-section-gap), with first-child margin reset to 0; (5) part=\"row\" → grid-column: 1 / -1, display: grid, grid-template-columns: subgrid; (6) barline styles: width 0, border-left, align-self: stretch; barline-double box-shadow; barline-final thick border; startRepeat/endRepeat pseudo-element dot pairs; endRepeatStartRepeat combined; barline-repeat-count positioned above; (7) chord-quality: font-size 0.75em, vertical-align 0.25em; chord-accidental: font-size 0.8em, vertical-align 0.15em; (8) slash chord: chord-slash inline-flex column, chord-fraction-line 1px bar, chord-bass 0.85em; (9) time-sig: inline-flex column, bold, 0.7em; (10) change default font to Georgia serif; (11) update dark mode. See project/plans/default-html-renderer.md for full context.",
+    "steps": [
+      "Read packages/grigson/src/renderers/html-element.ts to understand the current CSS structure",
+      "Replace the :host custom properties block with the new set from the plan",
+      "Add song-grid CSS Grid styles (global grid with beat columns + trailing 0fr barline anchor column)",
+      "Add section (display: contents), section-label (full-width + section-gap), and row (subgrid) styles",
+      "Add all barline variant styles (single, double, final, startRepeat, endRepeat, endRepeatStartRepeat, repeat-count)",
+      "Add chord-quality, chord-accidental, chord-slash fraction layout, and time-sig styles",
+      "Update font to Georgia serif and update dark mode styles",
+      "Remove old monospace/pre-wrap styles that no longer apply",
+      "Run pnpm test and confirm all tests pass",
+      "Commit the change"
+    ]
+  },
+  {
+    "id": "html-renderer-tests",
+    "category": "test",
+    "description": "Update and extend HTML renderer unit tests to cover the new CSS Grid layout and typography",
+    "detail": "Update the existing HTML renderer tests to match the new HTML structure, and add new tests for all the behaviours introduced by the rewrite. New tests to add: (1) computeGlobalLayout returns correct globalMaxBeats and globalMinBeatWidth from a multi-section song; (2) grid column assignment for rows with mixed beat counts (e.g. A Man's A Man chorus rows of 16/10/12 beats); (3) slash chord renders as fraction layout with chord-top / chord-fraction-line / chord-bass parts; (4) dot slot renders as <span part=\"dot\"> with / content and correct grid-column; (5) time signature annotation appears in first slot when bar.timeSignature is set; (6) Unicode symbol output — ♭ and ♯ accidentals, △ for major7, ° for diminished, ø for half-diminished; (7) section elements carry display:contents via the part=\"section\" attribute. Update any existing snapshot or structure tests that break due to the new HTML. See project/plans/default-html-renderer.md for full context.",
+    "steps": [
+      "Find and read the existing HTML renderer test file(s)",
+      "Update existing tests that assert on the old HTML structure to match the new structure",
+      "Add test for computeGlobalLayout: globalMaxBeats and globalMinBeatWidth computation",
+      "Add test for grid column assignment across rows with mixed time signatures",
+      "Add test for slash chord fraction HTML structure",
+      "Add test for dot slot HTML (part=\"dot\", / content, grid-column)",
+      "Add test for time signature block appearing when bar.timeSignature is set",
+      "Add test for each Unicode symbol (♭ ♯ △ ° ø)",
+      "Run pnpm test and confirm all tests pass",
+      "Commit the change"
+    ]
+  },
+  {
+    "id": "html-renderer-docs",
+    "category": "documentation",
+    "description": "Update renderer.md with the new HTML Grid structure, part names, and CSS custom properties",
+    "detail": "Update packages/grigson/documentation/renderer.md to document the redesigned HTML renderer. Changes: (1) document the new HTML structure (song → song-header → song-grid → section[display:contents] → row[subgrid] hierarchy); (2) provide a reference table of all part attribute values and what they represent; (3) document all CSS custom properties (--grigson-font-family, --grigson-row-gap, --grigson-section-gap, --grigson-barline-width, --grigson-barline-color, --grigson-repeat-dot-size, --grigson-title-font-size, --grigson-section-label-font-size, --grigson-time-sig-font-size, --beat-cols, --min-beat-width); (4) note that the HTML renderer uses Unicode notation by default (♭ ♯ △ ° ø); (5) note that font-size adjustment via --grigson-font-size is the mechanism for handling narrow containers (no auto-scaling). Also add a note in the normalizer documentation (or a short note in renderer.md) that bar.timeSignature must be set on the first bar for time signature annotations to appear. See project/plans/default-html-renderer.md for full context.",
+    "steps": [
+      "Read packages/grigson/documentation/renderer.md to understand the current content",
+      "Update or add an HTML renderer section describing the new HTML structure with an annotated example",
+      "Add a part names reference table listing all part values and their purpose",
+      "Add a CSS custom properties reference table",
+      "Document Unicode notation defaults and the font-size scaling approach",
+      "Add a note about the normalizer requirement (bar.timeSignature on first bar)",
+      "Commit the change"
+    ]
   }
 ]
