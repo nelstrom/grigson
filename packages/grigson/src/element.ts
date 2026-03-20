@@ -3,7 +3,7 @@ import { GrigsonHtmlRenderer } from './renderers/html-element.js';
 import type { GrigsonRendererElement } from './renderers/contract.js';
 import { normaliseSong } from './theory/normalise.js';
 import { transposeSong, transposeSongToKey } from './theory/transpose.js';
-import { GrigsonRendererUpdateEvent } from './events.js';
+import { GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent } from './events.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
@@ -121,6 +121,7 @@ export class GrigsonChart extends HTMLElement {
         const div = document.createElement('div');
         div.textContent = renderError instanceof Error ? renderError.message : String(renderError);
         this._root.replaceChildren(this._style, div);
+        this.dispatchEvent(new GrigsonRenderErrorEvent(renderError));
         return;
       }
 
@@ -129,6 +130,7 @@ export class GrigsonChart extends HTMLElement {
       const div = document.createElement('div');
       div.textContent = parseError instanceof Error ? parseError.message : String(parseError);
       this._root.replaceChildren(this._style, div);
+      this.dispatchEvent(new GrigsonParseErrorEvent(parseError));
     }
   }
 }
