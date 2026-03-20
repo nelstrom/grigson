@@ -1934,6 +1934,7 @@
       "Document Unicode notation defaults and the font-size scaling approach",
       "Add a note about the normalizer requirement (bar.timeSignature on first bar)",
       "Commit the change"
-    ]
+    ],
+    "passes": true
   }
 ]

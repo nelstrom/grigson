@@ -43,7 +43,7 @@ The plain text renderer supports notation presets (`jazz`, `pop`, `symbolic`) to
 
 ## The HTML Renderer
 
-The HTML renderer produces an HTML string with `part` attributes, designed for use in the `<grigson-chart>` custom element or any scenario where semantic styling of chart elements is required.
+The HTML renderer produces an HTML string using CSS Grid for layout. It is the default renderer used by the `<grigson-chart>` custom element. Beats are equally spaced, barlines align vertically across all rows in the song, and musical Unicode symbols are used throughout.
 
 ```javascript
 import { parseSong } from 'grigson';
@@ -52,28 +52,179 @@ import { HtmlRenderer } from 'grigson/renderers/html';
 const song = parseSong('| C | Am |');
 const renderer = new HtmlRenderer({ notation: { preset: 'symbolic' } });
 const html = renderer.render(song);
-
-// Resulting HTML structure:
-// <div part="song">
-//   <div part="section">
-//     <div part="row">
-//       <span part="barline">|</span>
-//       <span part="chord"><span part="chord-root">C</span><span part="chord-suffix"></span></span>
-//       <span part="barline">|</span>
-//       <span part="chord"><span part="chord-root">A</span><span part="chord-suffix">-</span></span>
-//       <span part="barline">|</span>
-//     </div>
-//   </div>
-// </div>
-//
-// When section labels are present, each section includes a label element:
-// <div part="section">
-//   <div part="section-label">[Verse]</div>
-//   <div part="row">...</div>
-// </div>
 ```
 
-Elements rendered by `HtmlRenderer` are designed to be styled using the CSS `::part()` pseudo-element.
+Elements use `part` attributes so they can be styled via the CSS `::part()` pseudo-element.
+
+### HTML structure
+
+The renderer produces a hierarchy of elements, each with a `part` attribute:
+
+```html
+<div part="song" style="--beat-cols: 8; --min-beat-width: 1.8em">
+
+  <header part="song-header">
+    <h1 part="song-title">Autumn Leaves</h1>
+    <p part="song-artist">Joseph Kosma</p>   <!-- omitted when null -->
+    <p part="song-key">G major</p>           <!-- omitted when null; normalised form -->
+  </header>
+
+  <div part="song-grid">
+
+    <section part="section" style="display: contents">
+      <h2 part="section-label">Verse</h2>   <!-- omitted when section has no label -->
+
+      <div part="row">
+        <!-- open barline -->
+        <span part="barline barline-single" style="grid-column: 1"></span>
+
+        <!-- bar 1: 4/4, 2 chords → 2 beats each -->
+        <!-- time-sig shown because bar.timeSignature is set on this bar -->
+        <span part="slot" style="grid-column: 2 / span 2">
+          <span part="time-sig">
+            <span part="time-sig-num">4</span>
+            <span part="time-sig-den">4</span>
+          </span>
+          <span part="chord"><span part="chord-root">C</span></span>
+        </span>
+        <span part="slot" style="grid-column: 4 / span 2">
+          <span part="chord">
+            <span part="chord-root">A<span part="chord-accidental">♭</span></span>
+            <span part="chord-quality">m</span>
+          </span>
+        </span>
+
+        <!-- barline after bar 1 -->
+        <span part="barline barline-single" style="grid-column: 5"></span>
+
+        <!-- final barline -->
+        <span part="barline barline-final" style="grid-column: 9"></span>
+      </div>
+    </section>
+
+  </div>
+</div>
+```
+
+The `song-grid` element defines a CSS Grid whose column count equals the longest row in the song (`--beat-cols`). All rows use `subgrid`, so barlines align vertically across every section.
+
+#### Slash chord
+
+```html
+<span part="chord chord-slash">
+  <span part="chord-top">
+    <span part="chord-root">A<span part="chord-accidental">♭</span></span>
+    <span part="chord-quality">m</span>
+  </span>
+  <span part="chord-fraction-line"></span>
+  <span part="chord-bass">E<span part="chord-accidental">♭</span></span>
+</span>
+```
+
+#### Dot slot (beat continuation)
+
+```html
+<span part="dot" style="grid-column: 5 / span 1">/</span>
+```
+
+#### Barline with repeat count
+
+```html
+<span part="barline barline-endRepeat">
+  <span part="barline-repeat-count">×3</span>
+</span>
+```
+
+### Part names reference
+
+| Part value | Element | Description |
+|---|---|---|
+| `song` | `<div>` | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables |
+| `song-header` | `<header>` | Title, artist, and key block |
+| `song-title` | `<h1>` | Song title from front matter |
+| `song-artist` | `<p>` | Artist from front matter (omitted when null) |
+| `song-key` | `<p>` | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null) |
+| `song-grid` | `<div>` | CSS Grid container for all rows |
+| `section` | `<section>` | One section; always `display: contents` so children become direct grid items |
+| `section-label` | `<h2>` | Section heading, e.g. "Verse" (omitted when section has no label) |
+| `row` | `<div>` | One row of bars; uses `subgrid` |
+| `barline` | `<span>` | Any barline; always combined with a barline-kind part (see below) |
+| `barline-single` | — | Plain barline `\|` |
+| `barline-double` | — | Double barline `\|\|` |
+| `barline-final` | — | Final barline `\|\|.` |
+| `barline-startRepeat` | — | Start-repeat barline `\|\|:` |
+| `barline-endRepeat` | — | End-repeat barline `:\|\|` |
+| `barline-endRepeatStartRepeat` | — | Turn-around barline `:\|\|:` |
+| `barline-repeat-count` | `<span>` | Repeat count label, e.g. "×3", inside an end-repeat barline |
+| `slot` | `<span>` | One chord slot; carries `grid-column` positioning |
+| `dot` | `<span>` | A beat-continuation dot rendered as `/` |
+| `time-sig` | `<span>` | Time signature stacked fraction |
+| `time-sig-num` | `<span>` | Numerator of the time signature |
+| `time-sig-den` | `<span>` | Denominator of the time signature |
+| `chord` | `<span>` | A chord symbol; gains `chord-slash` when a bass note is present |
+| `chord-slash` | — | Additional part on `chord` when the chord has a bass note |
+| `chord-top` | `<span>` | Upper half of a slash chord (root + quality) |
+| `chord-root` | `<span>` | Note name, e.g. "C" or "B" |
+| `chord-accidental` | `<span>` | Accidental inside a root, rendered as ♭ or ♯ |
+| `chord-quality` | `<span>` | Quality suffix, e.g. "m", "△", "ø" |
+| `chord-fraction-line` | `<span>` | Horizontal rule between numerator and bass in a slash chord |
+| `chord-bass` | `<span>` | Bass note of a slash chord |
+
+### Unicode notation defaults
+
+The HTML renderer uses Unicode symbols by default regardless of the `notation` config:
+
+| Symbol type | Rendered as | Unicode |
+|---|---|---|
+| Flat accidental | ♭ | U+266D |
+| Sharp accidental | ♯ | U+266F |
+| Major seventh | △ | U+25B3 |
+| Diminished | ° | U+00B0 |
+| Half-diminished | ø | U+00F8 |
+
+Minor chords use `m` by default; the `symbolic` preset changes this to `-`.
+
+### Handling narrow containers
+
+The renderer does not auto-scale. If the chart overflows its container, reduce the font size:
+
+```css
+grigson-chart {
+  --grigson-font-size: 0.8rem;
+}
+```
+
+Decreasing `--grigson-font-size` shrinks the rendered output proportionally since all spacing is expressed in `em` units.
+
+### CSS custom properties
+
+These properties can be set on the `<grigson-chart>` element (or any ancestor) to control the appearance:
+
+| Property | Default | Description |
+|---|---|---|
+| `--grigson-font-family` | `Georgia, 'Times New Roman', serif` | Font family for the entire chart |
+| `--grigson-font-size` | `1rem` | Base font size; reduce to fit narrow containers |
+| `--grigson-color` | `inherit` | Text and barline colour |
+| `--grigson-background` | `transparent` | Background of the host element |
+| `--grigson-row-gap` | `1.2em` | Vertical gap between rows within a section |
+| `--grigson-section-gap` | `2em` | Top margin before each section label |
+| `--grigson-barline-width` | `1.5px` | Stroke width of barlines |
+| `--grigson-barline-color` | `currentColor` | Colour of barlines |
+| `--grigson-repeat-dot-size` | `0.3em` | Size of repeat dots |
+| `--grigson-title-font-size` | `1.4em` | Font size of the song title |
+| `--grigson-section-label-font-size` | `0.9em` | Font size of section headings |
+| `--grigson-time-sig-font-size` | `0.7em` | Font size of time signature annotations |
+
+Two additional variables are emitted by the renderer onto `part="song"` and control the grid geometry. You can override them, but normally the renderer computes the right values automatically:
+
+| Variable | Description |
+|---|---|
+| `--beat-cols` | Total number of beat columns in the global grid (equals the beat count of the longest row) |
+| `--min-beat-width` | Minimum width of one beat column, computed from the widest chord in the song |
+
+### Normalizer requirement
+
+Time signature annotations are shown only when `bar.timeSignature` is set on a bar. For songs with a uniform declared meter (e.g. `meter: 4/4` in the front matter), the normalizer sets `bar.timeSignature` on the first bar of the song so that the time signature annotation appears at the start of the chart. Without this, no time signature is shown even if the song has a declared meter.
 
 ---
 
