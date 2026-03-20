@@ -1703,7 +1703,8 @@
       "Move all styles from GrigsonChart._getStyles() into GrigsonHtmlRenderer, including CSS custom properties and dark mode support",
       "Add attributeChangedCallback that dispatches GrigsonRendererUpdateEvent when the element's own attributes change",
       "Export GrigsonHtmlRenderer from src/index.browser.ts"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-chart-renderer-discovery",

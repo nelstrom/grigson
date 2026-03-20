@@ -19,6 +19,8 @@ The browser entry point (`src/index.browser.ts`) exports the browser-safe subset
 - `parseChord(input: string): Chord`
 - `TextRenderer` class with `render(song: Song): string`
 - `GrigsonChart` custom element class
+- `GrigsonHtmlRenderer` custom element class (implements `GrigsonRendererElement`)
+- `GrigsonRendererUpdateEvent`, `GrigsonParseErrorEvent`, `GrigsonRenderErrorEvent` event classes
 - `normaliseSong(song: Song, config?: DetectKeyConfig): Song`
 - All associated TypeScript types
 

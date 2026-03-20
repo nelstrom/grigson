@@ -342,3 +342,6 @@ Created the public extensibility contract types for third-party renderer element
 - `src/renderers/contract.ts`: `GrigsonRendererElement` interface (extends HTMLElement, `renderChart(song: Song): Element`)
 - `src/events.ts`: `GrigsonRendererUpdateEvent`, `GrigsonParseErrorEvent`, `GrigsonRenderErrorEvent` as typed Event subclasses
 - Exported all new types from `src/index.browser.ts` and `src/index.ts`
+
+## grigson-html-renderer-element
+Created `packages/grigson/src/renderers/html-element.ts` with `GrigsonHtmlRenderer` extending `HTMLElement` and implementing `GrigsonRendererElement`. The `renderChart(song: Song): Element` method delegates to `HtmlRenderer`, builds the rendered HTML string, then injects styles + HTML into a wrapper div via `setHTMLUnsafe()` and returns it. Styles (CSS custom properties, dark mode, shadow parts) were moved from `GrigsonChart._getStyles()` into `GrigsonHtmlRenderer._getStyles()`. `attributeChangedCallback` dispatches `GrigsonRendererUpdateEvent` when `notation-preset` changes. Exported `GrigsonHtmlRenderer` from `src/index.browser.ts`.

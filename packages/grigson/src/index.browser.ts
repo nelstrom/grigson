@@ -7,6 +7,7 @@ export { TextRenderer } from './renderers/text.js';
 export { HtmlRenderer } from './renderers/html.js';
 
 export { GrigsonChart } from './element.js';
+export { GrigsonHtmlRenderer } from './renderers/html-element.js';
 
 export type { GrigsonRendererElement } from './renderers/contract.js';
 export { GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent } from './events.js';
