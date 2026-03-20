@@ -1832,6 +1832,7 @@
       "Add an example with an explicit <grigson-html-renderer> child to show renderer configuration",
       "Add an example using <grigson-text-renderer> from the grigson-text-renderer package",
       "Link the demo page from the website navigation"
-    ]
+    ],
+    "passes": true
   }
 ]
