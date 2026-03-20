@@ -31,6 +31,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^10.0.3",
     "fast-check": "^4.6.0",
+    "happy-dom": "^20.8.4",
     "peggy": "^5.1.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",

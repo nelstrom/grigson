@@ -1817,7 +1817,8 @@
       "Test that modifying template.content triggers a re-render",
       "Test that a grigson:renderer-update event from a child triggers a re-render",
       "Test GrigsonHtmlRenderer.renderChart() returns an Element containing the expected shadow parts"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "custom-element-demo-page",

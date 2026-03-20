@@ -1,7 +1,10 @@
-/** @vitest-environment happy-dom */
-import { describe, it, expect, beforeEach } from 'vitest';
+// @vitest-environment happy-dom
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import './register.js';
 import { GrigsonChart } from './element.js';
+import { GrigsonHtmlRenderer } from './renderers/html-element.js';
+import { GrigsonParseErrorEvent, GrigsonRenderErrorEvent, GrigsonRendererUpdateEvent } from './events.js';
+import { parseSong } from './parser/parser.js';
 
 describe('GrigsonChart', () => {
   beforeEach(() => {
@@ -269,5 +272,137 @@ key: C
     const shadowRoot = element.shadowRoot!;
     expect(shadowRoot.querySelector('[data-renderer="a"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[data-renderer="b"]')).toBeNull();
+  });
+
+  it('dispatches GrigsonParseErrorEvent and renders fallback div on invalid chart source', async () => {
+    const element = document.createElement('grigson-chart') as GrigsonChart;
+    const handler = vi.fn();
+    element.addEventListener(GrigsonParseErrorEvent.type, handler);
+    const template = document.createElement('template');
+    template.innerHTML = '| invalid |';
+    element.appendChild(template);
+    document.body.appendChild(element);
+
+    await wait();
+
+    const shadowRoot = element.shadowRoot!;
+    const errorDiv = shadowRoot.querySelector('div');
+    expect(errorDiv).not.toBeNull();
+    expect(errorDiv!.textContent).toBeTruthy();
+    expect(handler).toHaveBeenCalledOnce();
+    const event = handler.mock.calls[0][0] as GrigsonParseErrorEvent;
+    expect(event.error).toBeInstanceOf(Error);
+  });
+
+  it('dispatches GrigsonRenderErrorEvent and renders fallback div when renderChart() throws', async () => {
+    class ThrowingRenderer extends HTMLElement {
+      renderChart(): Element {
+        throw new Error('renderer exploded');
+      }
+    }
+    if (!customElements.get('throwing-renderer')) {
+      customElements.define('throwing-renderer', ThrowingRenderer);
+    }
+
+    const element = document.createElement('grigson-chart') as GrigsonChart;
+    const handler = vi.fn();
+    element.addEventListener(GrigsonRenderErrorEvent.type, handler);
+    const throwingRenderer = document.createElement('throwing-renderer');
+    element.appendChild(throwingRenderer);
+    const template = document.createElement('template');
+    template.innerHTML = '| C |';
+    element.appendChild(template);
+    document.body.appendChild(element);
+
+    await wait();
+
+    const shadowRoot = element.shadowRoot!;
+    const errorDiv = shadowRoot.querySelector('div');
+    expect(errorDiv).not.toBeNull();
+    expect(errorDiv!.textContent).toBe('renderer exploded');
+    expect(handler).toHaveBeenCalledOnce();
+    const event = handler.mock.calls[0][0] as GrigsonRenderErrorEvent;
+    expect(event.error).toBeInstanceOf(Error);
+  });
+
+  it('re-renders when template.content is modified', async () => {
+    document.body.innerHTML = `
+      <grigson-chart>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| C |');
+
+    const template = element.querySelector('template')!;
+    template.innerHTML = '| Dm |';
+    await wait();
+
+    expect(shadowRoot.querySelector('[part="song"]')!.textContent!.trim()).toBe('| Dm |');
+  });
+
+  it('re-renders when a grigson:renderer-update event bubbles from a child', async () => {
+    class ConfigurableRenderer extends HTMLElement {
+      private _label = 'initial';
+
+      setLabel(label: string) {
+        this._label = label;
+        this.dispatchEvent(new GrigsonRendererUpdateEvent());
+      }
+
+      renderChart() {
+        const div = document.createElement('div');
+        div.setAttribute('data-label', this._label);
+        return div;
+      }
+    }
+    if (!customElements.get('configurable-renderer')) {
+      customElements.define('configurable-renderer', ConfigurableRenderer);
+    }
+
+    document.body.innerHTML = `
+      <grigson-chart>
+        <configurable-renderer></configurable-renderer>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    expect(shadowRoot.querySelector('[data-label="initial"]')).not.toBeNull();
+
+    const renderer = element.querySelector('configurable-renderer') as ConfigurableRenderer;
+    renderer.setLabel('updated');
+    await wait();
+
+    expect(shadowRoot.querySelector('[data-label="updated"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[data-label="initial"]')).toBeNull();
+  });
+});
+
+describe('GrigsonHtmlRenderer', () => {
+  it('renderChart() returns an Element containing expected shadow parts', () => {
+    const song = parseSong('| C | G | Am | F |');
+    const renderer = new GrigsonHtmlRenderer();
+    const result = renderer.renderChart(song);
+
+    expect(result).toBeInstanceOf(Element);
+    expect(result.querySelector('[part="song"]')).not.toBeNull();
+    expect(result.querySelector('[part="row"]')).not.toBeNull();
+    expect(result.querySelector('[part="barline"]')).not.toBeNull();
+    expect(result.querySelector('[part="chord"]')).not.toBeNull();
+    expect(result.querySelector('[part="chord-root"]')).not.toBeNull();
+    expect(result.querySelector('[part="chord-suffix"]')).not.toBeNull();
+  });
+
+  it('renderChart() includes frontmatter parts when the song has front matter', () => {
+    const song = parseSong('---\ntitle: Test\nkey: C\n---\n| C |');
+    const renderer = new GrigsonHtmlRenderer();
+    const result = renderer.renderChart(song);
+
+    expect(result.querySelector('[part="frontmatter"]')).not.toBeNull();
+    expect(result.querySelector('[part="frontmatter-value"]')).not.toBeNull();
   });
 });
