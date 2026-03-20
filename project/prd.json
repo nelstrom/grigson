@@ -1798,7 +1798,8 @@
       "Create src/register.ts that calls customElements.define('grigson-svg-renderer', GrigsonSvgRenderer)",
       "Export GrigsonSvgRenderer from src/index.ts",
       "Build and verify the package compiles cleanly"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "custom-element-tests",
