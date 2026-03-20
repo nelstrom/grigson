@@ -22,4 +22,5 @@ meter: 4/4
 | F . Gm Am | Dm | G- | C |
 | F . Gm Am | Dm | G- | D7 |
 | Gm . F C |  G- | Gm . F C |  G- |
-| C | Bb7sus4 | % ||
+| C | Bb7 | % ||
+# TODO: Bb7 should be Bb7sus4 once sus chord quality is supported

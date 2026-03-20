@@ -1846,7 +1846,8 @@
       "Add or update normalizer unit tests to assert that bar.timeSignature is populated on the first bar for uniform-meter songs",
       "Run pnpm test and confirm all tests pass",
       "Commit the change"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "html-renderer-layout-calc",

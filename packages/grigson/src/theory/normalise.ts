@@ -138,5 +138,41 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     }
   }
 
+  // When the song has a declared uniform meter, ensure bar.timeSignature is set on the very first
+  // bar so the renderer knows to display a time signature annotation at the start of the chart.
+  if (newMeter !== null && newMeter !== 'mixed') {
+    const [num, den] = newMeter.split('/').map(Number);
+    const firstSection = finalSections[0];
+    if (firstSection && firstSection.rows.length > 0 && firstSection.rows[0].bars.length > 0) {
+      const firstRow = firstSection.rows[0];
+      const firstBar = firstRow.bars[0];
+      if (!firstBar.timeSignature) {
+        const updatedFirstBar: Bar = {
+          ...firstBar,
+          timeSignature: { numerator: num, denominator: den },
+        };
+        const updatedFirstRow: Row = {
+          ...firstRow,
+          bars: [updatedFirstBar, ...firstRow.bars.slice(1)],
+        };
+        const updatedRows = [updatedFirstRow, ...firstSection.rows.slice(1)];
+        let firstRowReplaced = false;
+        const updatedContent = (firstSection.content ?? firstSection.rows).map((item) => {
+          if (!firstRowReplaced && item.type === 'row') {
+            firstRowReplaced = true;
+            return updatedFirstRow;
+          }
+          return item;
+        });
+        const updatedFirstSection: Section = {
+          ...firstSection,
+          rows: updatedRows,
+          content: updatedContent,
+        };
+        finalSections = [updatedFirstSection, ...finalSections.slice(1)];
+      }
+    }
+  }
+
   return { ...song, key: toCanonicalKey(firstSectionKey), meter: newMeter, sections: finalSections };
 }
