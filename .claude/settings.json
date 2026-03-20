@@ -16,6 +16,7 @@
     "Bash(git add *)",
     "Bash(git commit*)",
     "Bash(./project/prd-done *)",
+    "Bash(./project/prd-done:*)",
     "Bash(./project/prd-status*)"
   ],
   "hooks": {
