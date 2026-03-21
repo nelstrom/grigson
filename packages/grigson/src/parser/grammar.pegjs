@@ -237,7 +237,7 @@ Quality
   / "-"    { return "min7"; }
   / ""     { return "major"; }
 
-Comment = "#" text:$[^\n\r]* Newline { return { type: "comment", text: "#" + text }; }
+Comment = "#" text:$[^\n\r]* (Newline / !.) { return { type: "comment", text: "#" + text }; }
 
 Newline = "\r\n" / "\n"
 

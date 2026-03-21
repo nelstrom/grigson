@@ -1929,6 +1929,24 @@ function peg$parse(input, options) {
       }
       s2 = input.substring(s2, peg$currPos);
       s3 = peg$parseNewline();
+      if (s3 === peg$FAILED) {
+        s3 = peg$currPos;
+        peg$silentFails++;
+        if (input.length > peg$currPos) {
+          s4 = input.charAt(peg$currPos);
+          peg$currPos++;
+        } else {
+          s4 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$e8); }
+        }
+        peg$silentFails--;
+        if (s4 === peg$FAILED) {
+          s3 = undefined;
+        } else {
+          peg$currPos = s3;
+          s3 = peg$FAILED;
+        }
+      }
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
         s0 = peg$f43(s2);
