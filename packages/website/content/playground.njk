@@ -18,15 +18,15 @@ permalink: /playground/
   }
   #input-editor {
     flex: 1;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
   }
   #output-container {
     flex: 1;
     overflow: auto;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border-subtle);
     margin: 0;
     position: relative;
-    background: #fff;
+    background: var(--color-bg);
   }
   #output-container pre {
     margin: 0;
@@ -35,10 +35,10 @@ permalink: /playground/
     box-sizing: border-box;
   }
   .error {
-    color: #cc0000;
+    color: var(--color-error);
     padding: 1rem;
     white-space: pre-wrap;
-    background: #fff;
+    background: var(--color-bg);
   }
 </style>
 
@@ -80,8 +80,8 @@ permalink: /playground/
 
     monaco.languages.setMonarchTokensProvider('grigson', window.grigsonMonarchTokens);
 
-    // Define theme
-    monaco.editor.defineTheme('grigson-theme', {
+    // Define light and dark themes
+    monaco.editor.defineTheme('grigson-light', {
       base: 'vs',
       inherit: true,
       rules: [
@@ -95,19 +95,41 @@ permalink: /playground/
         { token: 'constant.other.chord.accidental.grigson', foreground: '4078F2' },
         { token: 'keyword.other.chord.quality.grigson', foreground: '986801' },
       ],
-      colors: {
-        'editor.background': '#FAFAFA',
-      }
+      colors: { 'editor.background': '#FAFAFA' },
     });
+
+    monaco.editor.defineTheme('grigson-dark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'punctuation.definition.header.grigson', foreground: '6A737D' },
+        { token: 'variable.parameter.key.grigson', foreground: 'F97583', fontStyle: 'bold' },
+        { token: 'punctuation.separator.key-value.grigson', foreground: '9ECBFF' },
+        { token: 'string.quoted.double.grigson', foreground: '85E89D' },
+        { token: 'string.unquoted.grigson', foreground: '85E89D' },
+        { token: 'punctuation.definition.barline.grigson', foreground: '6A737D', fontStyle: 'bold' },
+        { token: 'constant.other.chord.root.grigson', foreground: '79B8FF', fontStyle: 'bold' },
+        { token: 'constant.other.chord.accidental.grigson', foreground: '79B8FF' },
+        { token: 'keyword.other.chord.quality.grigson', foreground: 'FFAB70' },
+      ],
+      colors: { 'editor.background': '#1E1E1E' },
+    });
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const getTheme = () => prefersDark.matches ? 'grigson-dark' : 'grigson-light';
 
     const editor = monaco.editor.create(document.getElementById('input-editor'), {
       value: readHash(),
       language: 'grigson',
-      theme: 'grigson-theme',
+      theme: getTheme(),
       minimap: { enabled: false },
       automaticLayout: true,
       fontSize: 14,
       fontFamily: 'monospace',
+    });
+
+    prefersDark.addEventListener('change', () => {
+      monaco.editor.setTheme(getTheme());
     });
 
     let hashTimer;

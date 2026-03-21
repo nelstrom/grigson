@@ -18,6 +18,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     return `
       :host {
         display: block;
+        color-scheme: light dark;
         font-family: var(--grigson-font-family, Georgia, 'Times New Roman', serif);
         font-size: var(--grigson-font-size, 1rem);
         color: var(--grigson-color, inherit);
@@ -30,12 +31,6 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-title-font-size: 1.4em;
         --grigson-section-label-font-size: 0.9em;
         --grigson-time-sig-font-size: 0.7em;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :host {
-          --grigson-barline-color: currentColor;
-        }
       }
 
       [part="song-header"] {

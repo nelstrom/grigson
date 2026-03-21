@@ -396,3 +396,13 @@ Extended the HTML renderer test suite from 19 tests (covering only `computeGloba
 
 ## html-renderer-docs
 Updated packages/grigson/documentation/renderer.md with the redesigned HTML renderer. Replaced the old flat HTML structure example with the new CSS Grid hierarchy (song → song-header → song-grid → section[display:contents] → row[subgrid]). Added a full part names reference table, a CSS custom properties reference table (including --beat-cols and --min-beat-width), documented Unicode notation defaults (♭ ♯ △ ° ø), the font-size scaling approach for narrow containers, and the normalizer requirement that bar.timeSignature must be set on the first bar for time signature annotations to appear.
+
+## dark-light-mode
+
+Added dark/light mode support across the website and HTML renderer:
+
+- **base.njk**: Added a `<style>` block with CSS custom properties (`--color-bg`, `--color-fg`, `--color-border`, `--color-border-subtle`, `--color-error`) and a `@media (prefers-color-scheme: dark)` block that overrides them. Also added `color-scheme: light dark` on `:root` and `<meta name="color-scheme">`. Included basic body/nav/pre/code/link styles so pages have consistent typography in both modes.
+
+- **playground.njk**: Replaced hardcoded `#ccc`, `#ddd`, `#fff`, `#cc0000` colours with CSS variables from base. Renamed the Monaco theme `grigson-theme` → `grigson-light` and added a matching `grigson-dark` (based on `vs-dark`). Used `window.matchMedia('(prefers-color-scheme: dark)')` to pick the initial theme and respond to system preference changes at runtime.
+
+- **html-element.ts**: Added `color-scheme: light dark` to the `:host` block so the shadow DOM participates in the system colour scheme. Removed the now-redundant `@media (prefers-color-scheme: dark)` block (it only repeated the default `currentColor` value). The existing defaults (`inherit`, `transparent`, `currentColor`) already adapt automatically to whatever the host page sets.

@@ -1947,7 +1947,8 @@
       "Introduce a prefers-color-scheme: dark block that overrides colours for dark mode",
       "Update html-element.ts default custom properties (--grigson-color, --grigson-background, --grigson-barline-color) to use CSS colour-scheme-aware values or currentColor so they adapt automatically",
       "Test on the songbook, demo, and playground pages in both modes"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "playground-format-button",
