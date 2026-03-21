@@ -21,7 +21,7 @@ export class GrigsonChart extends HTMLElement {
     super();
     this._root = this.attachShadow({ mode: 'open' });
     this._style = document.createElement('style');
-    this._style.textContent = ':host { display: block }';
+    this._style.textContent = ':host { display: block; container-type: inline-size; }';
     this._root.appendChild(this._style);
   }
 
@@ -54,13 +54,14 @@ export class GrigsonChart extends HTMLElement {
     this.removeEventListener(GrigsonRendererUpdateEvent.type, this._rendererUpdateListener);
   }
 
-  private _findRenderer(): GrigsonRendererElement {
+  private _findRenderers(): GrigsonRendererElement[] {
+    const renderers: GrigsonRendererElement[] = [];
     for (const child of this.children) {
       if (typeof (child as unknown as GrigsonRendererElement).renderChart === 'function') {
-        return child as unknown as GrigsonRendererElement;
+        renderers.push(child as unknown as GrigsonRendererElement);
       }
     }
-    return new GrigsonHtmlRenderer();
+    return renderers.length > 0 ? renderers : [new GrigsonHtmlRenderer()];
   }
 
   private _resolveTemplate(): HTMLTemplateElement | null {
@@ -96,7 +97,7 @@ export class GrigsonChart extends HTMLElement {
       return;
     }
 
-    const renderer = this._findRenderer();
+    const renderers = this._findRenderers();
 
     try {
       let song = parseSong(content);
@@ -114,18 +115,20 @@ export class GrigsonChart extends HTMLElement {
         }
       }
 
-      let rendered: Element;
-      try {
-        rendered = renderer.renderChart(song);
-      } catch (renderError) {
-        const div = document.createElement('div');
-        div.textContent = renderError instanceof Error ? renderError.message : String(renderError);
-        this._root.replaceChildren(this._style, div);
-        this.dispatchEvent(new GrigsonRenderErrorEvent(renderError));
-        return;
+      const rendered: Element[] = [];
+      for (const renderer of renderers) {
+        try {
+          rendered.push(renderer.renderChart(song));
+        } catch (renderError) {
+          const div = document.createElement('div');
+          div.textContent = renderError instanceof Error ? renderError.message : String(renderError);
+          this._root.replaceChildren(this._style, div);
+          this.dispatchEvent(new GrigsonRenderErrorEvent(renderError));
+          return;
+        }
       }
 
-      this._root.replaceChildren(this._style, rendered);
+      this._root.replaceChildren(this._style, ...rendered);
     } catch (parseError) {
       const div = document.createElement('div');
       div.textContent = parseError instanceof Error ? parseError.message : String(parseError);

@@ -73,7 +73,9 @@ The `template` attribute lets multiple `<grigson-chart>` elements share one `<te
 
 ### Renderer discovery
 
-`<grigson-chart>` scans its light DOM children for the first element that implements the renderer contract (`typeof el.renderChart === 'function'`). If no child renderer is found, it falls back to `GrigsonHtmlRenderer` automatically.
+`<grigson-chart>` calls `renderChart()` on **every** child element that implements the renderer contract (`typeof el.renderChart === 'function'`), and places all outputs into its shadow root in DOM order. If no child renderer is found, it falls back to `GrigsonHtmlRenderer` automatically.
+
+This makes it possible to place multiple renderer configurations inside one chart, with CSS controlling which is visible.
 
 ```html
 <!-- Implicit fallback renderer (GrigsonHtmlRenderer) -->
@@ -87,6 +89,30 @@ The `template` attribute lets multiple `<grigson-chart>` elements share one `<te
   <template>| C | Am | F | G |</template>
 </grigson-chart>
 ```
+
+### Responsive layout with container queries
+
+`<grigson-chart>` sets `container-type: inline-size` on itself by default, so `@container` rules targeting its children work without any extra CSS. Place multiple renderer configurations inside one chart and use container queries to show the appropriate one:
+
+```html
+<grigson-chart>
+  <template>| C | Am | F | G |</template>
+  <grigson-html-renderer class="narrow"></grigson-html-renderer>
+  <grigson-html-renderer class="wide"></grigson-html-renderer>
+</grigson-chart>
+
+<style>
+  .narrow { display: block; }
+  .wide   { display: none;  }
+
+  @container (min-width: 600px) {
+    .narrow { display: none;  }
+    .wide   { display: block; }
+  }
+</style>
+```
+
+Authors can opt out of containment with `container-type: normal` on the element if needed.
 
 ### `<grigson-html-renderer>`
 

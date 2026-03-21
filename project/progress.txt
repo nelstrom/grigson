@@ -417,3 +417,11 @@ Added a Format button to the Monaco editor toolbar on the playground page.
 - Uses `editor.executeEdits('format', [...])` to replace editor contents while preserving undo history
 - On parse error: displays the error message in `#format-error` without modifying the editor
 - On success: clears any previous format error and returns focus to the editor
+
+## Render to all child renderers + container-type default
+
+- _findRenderer() → _findRenderers(): collects all child renderers, calls renderChart() on each, places all outputs in shadow root
+- Fallback to [new GrigsonHtmlRenderer()] preserved when no children
+- :host gets container-type: inline-size by default
+- Tests updated; docs updated with new renderer discovery and container query patterns
+

@@ -244,7 +244,7 @@ key: C
     expect(shadowRoot.querySelector('[part="chord-root"]')!.textContent).toBe('G');
   });
 
-  it('uses the first child renderer when multiple implement renderChart', async () => {
+  it('calls all child renderers and places both outputs in the shadow root', async () => {
     class RendererA extends HTMLElement {
       renderChart() {
         const div = document.createElement('div');
@@ -273,7 +273,51 @@ key: C
     const element = document.querySelector('grigson-chart')!;
     const shadowRoot = element.shadowRoot!;
     expect(shadowRoot.querySelector('[data-renderer="a"]')).not.toBeNull();
-    expect(shadowRoot.querySelector('[data-renderer="b"]')).toBeNull();
+    expect(shadowRoot.querySelector('[data-renderer="b"]')).not.toBeNull();
+  });
+
+  it('stops rendering and shows error when the second of two renderers throws', async () => {
+    class RendererOk extends HTMLElement {
+      renderChart() {
+        const div = document.createElement('div');
+        div.setAttribute('data-renderer', 'ok');
+        return div;
+      }
+    }
+    class RendererFail extends HTMLElement {
+      renderChart(): Element {
+        throw new Error('second renderer failed');
+      }
+    }
+    if (!customElements.get('renderer-ok')) customElements.define('renderer-ok', RendererOk);
+    if (!customElements.get('renderer-fail')) customElements.define('renderer-fail', RendererFail);
+
+    const element = document.createElement('grigson-chart') as GrigsonChart;
+    const handler = vi.fn();
+    element.addEventListener(GrigsonRenderErrorEvent.type, handler);
+    element.innerHTML = `
+      <renderer-ok></renderer-ok>
+      <renderer-fail></renderer-fail>
+      <template>| C |</template>
+    `;
+    document.body.appendChild(element);
+    await wait();
+
+    const shadowRoot = element.shadowRoot!;
+    expect(shadowRoot.querySelector('[data-renderer="ok"]')).toBeNull();
+    const errorDiv = shadowRoot.querySelector('div');
+    expect(errorDiv).not.toBeNull();
+    expect(errorDiv!.textContent).toBe('second renderer failed');
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
+  it(':host style contains container-type: inline-size', async () => {
+    document.body.innerHTML = `<grigson-chart><template>| C |</template></grigson-chart>`;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const styleEl = element.shadowRoot!.querySelector('style');
+    expect(styleEl).not.toBeNull();
+    expect(styleEl!.textContent).toContain('container-type: inline-size');
   });
 
   it('dispatches GrigsonParseErrorEvent and renders fallback div on invalid chart source', async () => {
