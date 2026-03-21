@@ -88,6 +88,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         grid-template-columns: subgrid;
         grid-template-rows: 1fr;
         align-items: center;
+        line-height: 2;
       }
 
       [part="row"] > * {
@@ -156,11 +157,15 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="slot"] {
+        position: relative;
         display: flex;
         align-items: baseline;
         gap: 0.15em;
-        padding-left: 0.3em;
         overflow: hidden;
+      }
+
+      [part~="barline"] + [part="slot"] {
+        padding-left: 1em;
       }
 
       [part="dot"] {
@@ -207,14 +212,16 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="time-sig"] {
+        position: absolute;
+        left: 0.75em;
+        top: 50%;
+        transform: translate(-50%, -50%);
         display: inline-flex;
         flex-direction: column;
         align-items: center;
         font-size: var(--grigson-time-sig-font-size);
         font-weight: bold;
         line-height: 1.1;
-        margin-right: 0.25em;
-        vertical-align: middle;
         flex-shrink: 0;
       }
 
