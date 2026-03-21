@@ -16,9 +16,32 @@ permalink: /playground/
     height: calc(100vh - 300px);
     min-height: 400px;
   }
+  #editor-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    flex-shrink: 0;
+  }
+  #format-btn {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    cursor: pointer;
+  }
+  #format-error {
+    color: var(--color-error);
+    font-size: 0.85em;
+  }
   #input-editor {
     flex: 1;
     border: 1px solid var(--color-border);
+    min-height: 0;
   }
   #output-container {
     flex: 1;
@@ -43,7 +66,13 @@ permalink: /playground/
 </style>
 
 <div id="playground-container">
-  <div id="input-editor"></div>
+  <div id="editor-section">
+    <div id="editor-toolbar">
+      <button id="format-btn" type="button">Format</button>
+      <span id="format-error" hidden></span>
+    </div>
+    <div id="input-editor"></div>
+  </div>
 
   <div id="output-container">
     <grigson-chart id="playground-output" normalise></grigson-chart>
@@ -167,5 +196,25 @@ permalink: /playground/
 
     editor.onDidChangeModelContent(update);
     update();
+
+    const formatBtn = document.getElementById('format-btn');
+    const formatError = document.getElementById('format-error');
+
+    formatBtn.addEventListener('click', () => {
+      const value = editor.getValue();
+      try {
+        const song = grigson.parseSong(value);
+        const normalised = grigson.normaliseSong(song);
+        const formatted = new grigson.TextRenderer().render(normalised);
+        const model = editor.getModel();
+        editor.executeEdits('format', [{ range: model.getFullModelRange(), text: formatted }]);
+        editor.focus();
+        formatError.textContent = '';
+        formatError.hidden = true;
+      } catch (err) {
+        formatError.textContent = err.message;
+        formatError.hidden = false;
+      }
+    });
   });
 </script>

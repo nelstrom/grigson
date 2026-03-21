@@ -1961,6 +1961,7 @@
       "Wire the button to call the grigson parse + normalise pipeline on the current editor value",
       "On success, replace the editor contents with the normalised output (use editor.setValue or equivalent to preserve undo history where possible)",
       "On parse failure, display the error message (e.g. in the existing error display area) without modifying the editor contents"
-    ]
+    ],
+    "passes": true
   }
 ]

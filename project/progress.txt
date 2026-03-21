@@ -406,3 +406,14 @@ Added dark/light mode support across the website and HTML renderer:
 - **playground.njk**: Replaced hardcoded `#ccc`, `#ddd`, `#fff`, `#cc0000` colours with CSS variables from base. Renamed the Monaco theme `grigson-theme` → `grigson-light` and added a matching `grigson-dark` (based on `vs-dark`). Used `window.matchMedia('(prefers-color-scheme: dark)')` to pick the initial theme and respond to system preference changes at runtime.
 
 - **html-element.ts**: Added `color-scheme: light dark` to the `:host` block so the shadow DOM participates in the system colour scheme. Removed the now-redundant `@media (prefers-color-scheme: dark)` block (it only repeated the default `currentColor` value). The existing defaults (`inherit`, `transparent`, `currentColor`) already adapt automatically to whatever the host page sets.
+
+## playground-format-button
+
+Added a Format button to the Monaco editor toolbar on the playground page.
+
+- Wrapped `#input-editor` in an `#editor-section` flex column to accommodate the new toolbar
+- Added `#editor-toolbar` div containing a "Format" button and a hidden `#format-error` span
+- On click: calls `grigson.parseSong()` → `grigson.normaliseSong()` → `new grigson.TextRenderer().render()` to produce formatted output
+- Uses `editor.executeEdits('format', [...])` to replace editor contents while preserving undo history
+- On parse error: displays the error message in `#format-error` without modifying the editor
+- On success: clears any previous format error and returns focus to the editor
