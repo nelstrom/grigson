@@ -38,13 +38,42 @@ grigson normalise song.chart
 cat file.chart \
   | grigson normalise \
   | grigson transpose --to G \
-  | grigson render \
-  > output.txt
+  | grigson-html-renderer \
+  > output.html
 ```
 
-`normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. `render` is a terminal step that produces a format (plain text) that cannot be piped back into another `grigson` command.
+`normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. Renderer binaries (`grigson-html-renderer`, `grigson-svg-renderer`) are terminal steps that accept `.chart` input and write their output format to stdout.
 
 ## Subcommands
+
+### `grigson generate-renderer`
+
+Scaffolds a new renderer package (`grigson-<name>-renderer/`) in the current directory. The generated package includes all the boilerplate needed to build a custom element, a browser bundle, and a CLI binary — ready for `pnpm install && pnpm build`.
+
+```
+grigson generate-renderer <name> [options]
+```
+
+**Arguments**
+
+| Argument | Description |
+| -------- | ----------- |
+| `name`   | Renderer name: lowercase letters, digits, and hyphens (e.g. `high-contrast`) |
+
+**Options**
+
+| Option            | Description                                                       |
+| ----------------- | ----------------------------------------------------------------- |
+| `--output <path>` | Directory in which to create the package (default: current directory) |
+
+**Examples**
+
+```sh
+grigson generate-renderer high-contrast           # creates ./grigson-high-contrast-renderer/
+grigson generate-renderer my-renderer --output ~/projects
+```
+
+---
 
 ### `grigson normalise`
 
@@ -103,32 +132,6 @@ grigson transpose --raise 2 song.chart    # up a whole step
 grigson transpose --lower 3 song.chart   # down a minor third
 grigson transpose --to G song.chart      # to G major
 cat song.chart | grigson transpose --to Dm    # from stdin
-```
-
----
-
-### `grigson render`
-
-Renders a chart to a specified output format.
-
-```
-grigson render [options] [file]
-```
-
-Reads from `file` if given, otherwise from stdin. Writes to stdout.
-
-**Options**
-
-| Option              | Description                              |
-| ------------------- | ---------------------------------------- |
-| `--format <format>` | Output format: `text` (default); `svg` is not yet implemented |
-
-**Examples**
-
-```sh
-grigson render song.chart               # plain text output (default)
-grigson render song.chart > song.txt   # write to a file
-cat song.chart | grigson render        # read from stdin
 ```
 
 ---

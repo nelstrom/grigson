@@ -80,6 +80,35 @@ cat song.chart | grigson normalise | grigson-svg-renderer > out.svg
 
 ## Subcommands
 
+### `grigson generate-renderer`
+
+Scaffolds a new renderer package (`grigson-<name>-renderer/`) in the current directory. The generated package includes all the boilerplate needed to build a custom element, a browser bundle, and a CLI binary — ready for `pnpm install && pnpm build`.
+
+```
+grigson generate-renderer <name> [options]
+```
+
+**Arguments**
+
+| Argument | Description |
+| -------- | ----------- |
+| `name`   | Renderer name: lowercase letters, digits, and hyphens (e.g. `high-contrast`) |
+
+**Options**
+
+| Option            | Description                                                       |
+| ----------------- | ----------------------------------------------------------------- |
+| `--output <path>` | Directory in which to create the package (default: current directory) |
+
+**Examples**
+
+```sh
+grigson generate-renderer high-contrast           # creates ./grigson-high-contrast-renderer/
+grigson generate-renderer my-renderer --output ~/projects
+```
+
+---
+
 ### `grigson normalise`
 
 Detects the key of a chart and rewrites chord roots to their canonical enharmonic spelling for that key (e.g. `A#` → `Bb` in F major). Updates the `key` field in front matter to match.
