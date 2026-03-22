@@ -9,7 +9,7 @@ import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 import { TextRenderer } from './renderers/text.js';
 import { validate } from './validator.js';
 
-const SUBCOMMANDS = ['normalise', 'render', 'transpose', 'validate'] as const;
+const SUBCOMMANDS = ['normalise', 'transpose', 'validate'] as const;
 type Subcommand = (typeof SUBCOMMANDS)[number];
 
 const HELP: Record<string, string> = {
@@ -17,7 +17,6 @@ const HELP: Record<string, string> = {
 
 Subcommands:
   normalise    Normalise chord spellings in a .chart file
-  render       Render a .chart file to plain text
   transpose    Transpose chords in a .chart file
   validate     Validate one or more .chart files
 
@@ -34,15 +33,6 @@ Options:
   --enharmonic <pref>  F#/Gb preference: f-sharp (default) or g-flat
   -i, --in-place       Edit the file in place instead of writing to stdout
   --help, -h           Show this help message and exit`,
-
-  render: `Usage: grigson render [options] [file]
-
-Reads a .chart file (or stdin if no file is given) and writes the
-rendered output to stdout. No normalisation is performed.
-
-Options:
-  --format <fmt>   Output format: text (default); svg is not yet implemented
-  --help, -h       Show this help message and exit`,
 
   transpose: `Usage: grigson transpose [options] [file]
 
@@ -101,28 +91,6 @@ function runNormalise(parsed: minimist.ParsedArgs): void {
   } else {
     process.stdout.write(output);
   }
-}
-
-function runRender(parsed: minimist.ParsedArgs): void {
-  const filePath = parsed._[1] as string | undefined;
-  const format = (parsed['format'] as string | undefined) ?? 'text';
-
-  if (format === 'svg') {
-    console.error("Error: '--format svg' is not yet implemented.");
-    process.exit(1);
-    return;
-  }
-
-  if (format !== 'text') {
-    console.error(`Error: Unknown format '${format}'.`);
-    process.exit(1);
-    return;
-  }
-
-  const input = readInput(filePath);
-  const song = parseSong(input);
-  const renderer = new TextRenderer();
-  process.stdout.write(renderer.render(song));
 }
 
 function runTranspose(parsed: minimist.ParsedArgs): void {
@@ -256,9 +224,6 @@ export function runCli(args: string[]): void {
   switch (subcommand as Subcommand) {
     case 'normalise':
       runNormalise(parsed);
-      break;
-    case 'render':
-      runRender(parsed);
       break;
     case 'transpose':
       runTranspose(parsed);

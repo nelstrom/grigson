@@ -29,14 +29,54 @@ grigson normalise song.chart
 ## Pipeline examples
 
 ```sh
-cat file.chart \
-  | grigson normalise \
-  | grigson transpose --raise 2 \
-  | grigson render \
-  > output.txt
+# Normalise, transpose, then render to HTML
+cat song.chart | grigson normalise | grigson transpose --to G | grigson-html-renderer > out.html
+
+# Render a single file to SVG
+grigson-svg-renderer song.chart > out.svg
 ```
 
-`normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. `render` is a terminal step that produces a format (SVG, plain text) that cannot be piped back into another `grigson` command.
+`normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. Renderer binaries (`grigson-html-renderer`, `grigson-svg-renderer`) are terminal steps: they accept `.chart` input and write their output format to stdout.
+
+## Renderer binaries
+
+Rendering is handled by dedicated binaries rather than a subcommand of `grigson`. Each renderer binary follows the same interface: an optional file argument, stdin fallback, and stdout output.
+
+### `grigson-html-renderer`
+
+Renders a chart to HTML (the same output as the `<grigson-html-renderer>` custom element).
+
+```
+grigson-html-renderer [options] [file]
+```
+
+**Options**
+
+| Option                            | Description                                                       |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `--notation-preset <preset>`      | Chord notation style: `jazz` (default), `pop`, or `symbolic`      |
+
+**Examples**
+
+```sh
+grigson-html-renderer song.chart > out.html
+cat song.chart | grigson normalise | grigson-html-renderer --notation-preset symbolic > out.html
+```
+
+### `grigson-svg-renderer`
+
+Renders a chart to SVG (the same output as the `<grigson-svg-renderer>` custom element).
+
+```
+grigson-svg-renderer [file]
+```
+
+**Examples**
+
+```sh
+grigson-svg-renderer song.chart > out.svg
+cat song.chart | grigson normalise | grigson-svg-renderer > out.svg
+```
 
 ## Subcommands
 
@@ -148,28 +188,3 @@ grigson validate --format json song.chart      # machine-readable output
 cat song.chart | grigson validate              # read from stdin
 ```
 
----
-
-### `grigson render`
-
-Renders a chart to a specified output format.
-
-```
-grigson render [options] [file]
-```
-
-Reads from `file` if given, otherwise from stdin. Writes to stdout.
-
-**Options**
-
-| Option              | Description                              |
-| ------------------- | ---------------------------------------- |
-| `--format <format>` | Output format: `text` (default); `svg` is not yet implemented |
-
-**Examples**
-
-```sh
-grigson render song.chart                      # plain text output (default)
-grigson render song.chart > song.txt           # write to a file
-cat song.chart | grigson render                # read from stdin
-```

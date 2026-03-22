@@ -31,3 +31,7 @@ export type { Diagnostic, DiagnosticRange } from './validator.js';
 // Custom element contract
 export type { GrigsonRendererElement } from './renderers/contract.js';
 export { GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent } from './events.js';
+
+// CLI helpers
+export { runRenderer } from './run-renderer.js';
+export type { RunRendererOptions } from './run-renderer.js';

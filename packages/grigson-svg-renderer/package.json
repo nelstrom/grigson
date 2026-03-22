@@ -5,6 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "grigson-svg-renderer": "./dist/cli.js"
+  },
   "scripts": {
     "build": "pnpm run build:ts && pnpm run build:browser && pnpm run build:browser:register",
     "build:browser": "vite build",
@@ -16,6 +19,7 @@
     "test:run": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.0",
     "vitest": "^4.0.18"

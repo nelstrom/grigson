@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "grigson": "./dist/cli.js"
+    "grigson": "./dist/cli.js",
+    "grigson-html-renderer": "./dist/html-renderer-cli.js"
   },
   "scripts": {
     "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy && pnpm run build:browser && pnpm run build:browser:register",
