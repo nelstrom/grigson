@@ -37,12 +37,12 @@ grigson normalise song.chart
 ```sh
 cat file.chart \
   | grigson normalise \
-  | grigson transpose --semitones 2 \
-  | grigson render --format svg \
-  > output.svg
+  | grigson transpose --to G \
+  | grigson render \
+  > output.txt
 ```
 
-`normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. `render` is a terminal step that produces a format (SVG, plain text) that cannot be piped back into another `grigson` command.
+`normalise` and `transpose` are endomorphic — `.chart` in, `.chart` out — so they compose freely in any order. `render` is a terminal step that produces a format (plain text) that cannot be piped back into another `grigson` command.
 
 ## Subcommands
 
@@ -76,7 +76,7 @@ cat song.chart | grigson normalise         # read from stdin
 
 ---
 
-### `grigson transpose` _(not yet implemented)_
+### `grigson transpose`
 
 Transposes every chord in a chart by a given interval and updates the `key` field in front matter accordingly.
 
@@ -88,19 +88,20 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option            | Description                                                 |
-| ----------------- | ----------------------------------------------------------- |
-| `--semitones <n>` | Transpose up (positive) or down (negative) by `n` semitones |
-| `--to <key>`      | Transpose to a target key (e.g. `--to G`, `--to Bbm`)       |
+| Option        | Description                                              |
+| ------------- | -------------------------------------------------------- |
+| `--raise <n>` | Transpose up by `n` semitones (positive integer)         |
+| `--lower <n>` | Transpose down by `n` semitones (positive integer)       |
+| `--to <key>`  | Transpose to a target key (e.g. `--to G`, `--to Bbm`)   |
 
-Exactly one of `--semitones` or `--to` is required.
+Exactly one of `--raise`, `--lower`, or `--to` is required.
 
 **Examples**
 
 ```sh
-grigson transpose --semitones 2 song.chart    # up a whole step
-grigson transpose --semitones -3 song.chart   # down a minor third
-grigson transpose --to G song.chart           # to G major
+grigson transpose --raise 2 song.chart    # up a whole step
+grigson transpose --lower 3 song.chart   # down a minor third
+grigson transpose --to G song.chart      # to G major
 cat song.chart | grigson transpose --to Dm    # from stdin
 ```
 
@@ -120,13 +121,61 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 | Option              | Description                              |
 | ------------------- | ---------------------------------------- |
-| `--format <format>` | Output format: `text` (default) or `svg` |
+| `--format <format>` | Output format: `text` (default); `svg` is not yet implemented |
 
 **Examples**
 
 ```sh
-grigson render song.chart                      # normalised plain text (default)
-grigson render --format svg song.chart         # SVG output
-grigson render --format svg song.chart > song.svg
-cat song.chart | grigson render --format svg > song.svg
+grigson render song.chart               # plain text output (default)
+grigson render song.chart > song.txt   # write to a file
+cat song.chart | grigson render        # read from stdin
+```
+
+---
+
+### `grigson validate`
+
+Validates one or more `.chart` files and reports parse errors and semantic warnings. Suitable for CI pipelines and pre-commit hooks.
+
+```
+grigson validate [options] [file...]
+```
+
+Reads from `file` (or multiple files) if given, otherwise from stdin. Writes diagnostics to stdout. Exits with code 0 if no diagnostics are found, code 1 if any are found (errors or warnings).
+
+**Options**
+
+| Option              | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `--format <format>` | Output format: `text` (default) or `json`         |
+
+**Text output format** (default)
+
+```
+song.chart:3:7: error: Expected "|" or end of input but "sus4" found.
+```
+
+Each line follows the standard linter format: `<file>:<line>:<character>: <severity>: <message>` with 1-indexed line and character numbers.
+
+**JSON output format** (`--format json`)
+
+```json
+[
+  {
+    "file": "song.chart",
+    "line": 3,
+    "character": 7,
+    "severity": "error",
+    "message": "Expected \"|\""
+  }
+]
+```
+
+**Examples**
+
+```sh
+grigson validate song.chart                    # validate a single file
+grigson validate *.chart                       # validate multiple files
+grigson validate --format json song.chart      # machine-readable output
+cat song.chart | grigson validate              # read from stdin
 ```

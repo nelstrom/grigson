@@ -29,12 +29,6 @@ grigson normalise song.chart
 ## Pipeline examples
 
 ```sh
-echo "| C | F | G | C | C | F | Bb | C | C | A7 | Dm | G7 |" \
-  | node dist/cli.js normalise \
-  | node dist/cli.js transpose --raise 2 \
-```
-
-```sh
 cat file.chart \
   | grigson normalise \
   | grigson transpose --raise 2 \
