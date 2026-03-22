@@ -4,6 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { runCli } from './cli.js';
 
+// Track tmpDirs created during generate-renderer tests for cleanup
+const tmpDirsToClean: string[] = [];
+
 describe('CLI', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -308,3 +311,58 @@ describe('CLI validate subcommand', () => {
   });
 });
 
+describe('CLI generate-renderer subcommand', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    for (const d of tmpDirsToClean) {
+      if (fs.existsSync(d)) fs.rmSync(d, { recursive: true, force: true });
+    }
+    tmpDirsToClean.length = 0;
+  });
+
+  it('exits with code 1 when no name is provided', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    runCli(['generate-renderer']);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('exits with code 1 for an invalid name', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    runCli(['generate-renderer', 'Invalid-Name']);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('creates the package directory with --output and logs "Created" and "pnpm install"', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'grigson-cli-gen-'));
+    tmpDirsToClean.push(tmpDir);
+
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['generate-renderer', 'my-renderer', '--output', tmpDir]);
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(fs.existsSync(path.join(tmpDir, 'grigson-my-renderer-renderer'))).toBe(true);
+    const output = logSpy.mock.calls[0][0] as string;
+    expect(output).toContain('Created');
+    expect(output).toContain('pnpm install');
+  });
+
+  it('exits with code 0 and prints scaffold help for generate-renderer --help', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['generate-renderer', '--help']);
+
+    expect(exitSpy).toHaveBeenCalledWith(0);
+    const output = logSpy.mock.calls[0][0] as string;
+    expect(output).toContain('generate-renderer');
+    expect(output).toContain('--output');
+  });
+});

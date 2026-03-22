@@ -2,23 +2,26 @@
 
 import { fileURLToPath } from 'url';
 import fs from 'node:fs';
+import path from 'node:path';
 import minimist from 'minimist';
 import { parseSong } from './parser/parser.js';
 import { normaliseSong } from './theory/normalise.js';
 import { transposeSong, transposeSongToKey } from './theory/transpose.js';
 import { TextRenderer } from './renderers/text.js';
 import { validate } from './validator.js';
+import { generateRenderer, validateRendererName } from './generate-renderer.js';
 
-const SUBCOMMANDS = ['normalise', 'transpose', 'validate'] as const;
+const SUBCOMMANDS = ['normalise', 'transpose', 'validate', 'generate-renderer'] as const;
 type Subcommand = (typeof SUBCOMMANDS)[number];
 
 const HELP: Record<string, string> = {
   '': `Usage: grigson <subcommand> [options]
 
 Subcommands:
-  normalise    Normalise chord spellings in a .chart file
-  transpose    Transpose chords in a .chart file
-  validate     Validate one or more .chart files
+  normalise           Normalise chord spellings in a .chart file
+  transpose           Transpose chords in a .chart file
+  validate            Validate one or more .chart files
+  generate-renderer   Scaffold a new renderer package
 
 Options:
   --help, -h   Show this help message and exit`,
@@ -52,6 +55,18 @@ Exits with code 0 if no diagnostics are found, code 1 if any are found (errors o
 
 Options:
   --format <fmt>   Output format: text (default) or json
+  --help, -h       Show this help message and exit`,
+
+  'generate-renderer': `Usage: grigson generate-renderer <name> [options]
+
+Scaffolds a new renderer package (grigson-<name>-renderer/) in the current
+directory, or at --output <path> if specified.
+
+Arguments:
+  name             Renderer name: lowercase letters, digits, and hyphens (e.g. high-contrast)
+
+Options:
+  --output <path>  Directory in which to create the package (default: current directory)
   --help, -h       Show this help message and exit`,
 };
 
@@ -192,10 +207,29 @@ function runValidate(parsed: minimist.ParsedArgs): void {
   }
 }
 
+function runGenerateRenderer(parsed: minimist.ParsedArgs): void {
+  const name = parsed._[1] as string | undefined;
+  const outputDir = (parsed['output'] as string | undefined) ?? process.cwd();
+
+  const error = validateRendererName(name);
+  if (error) {
+    console.error(error);
+    process.exit(1);
+    return;
+  }
+
+  try {
+    generateRenderer(name!, path.resolve(outputDir));
+  } catch (err) {
+    console.error(`Error: ${(err as Error).message}`);
+    process.exit(1);
+  }
+}
+
 export function runCli(args: string[]): void {
   const parsed = minimist(args, {
     boolean: ['help', 'i', 'in-place'],
-    string: ['raise', 'lower', 'to', 'key', 'enharmonic'],
+    string: ['raise', 'lower', 'to', 'key', 'enharmonic', 'output'],
     alias: { h: 'help' }
   });
 
@@ -230,6 +264,9 @@ export function runCli(args: string[]): void {
       break;
     case 'validate':
       runValidate(parsed);
+      break;
+    case 'generate-renderer':
+      runGenerateRenderer(parsed);
       break;
   }
 }

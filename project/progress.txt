@@ -425,3 +425,14 @@ Added a Format button to the Monaco editor toolbar on the playground page.
 - :host gets container-type: inline-size by default
 - Tests updated; docs updated with new renderer discovery and container query patterns
 
+
+## generate-renderer scaffold command
+
+Added `grigson generate-renderer <name>` subcommand that scaffolds a complete renderer package.
+
+- `packages/grigson/src/generate-renderer.ts` — name derivation, validation, template generation, file writing
+- `packages/grigson/src/generate-renderer.test.ts` — 19 unit tests (validation + file generation)
+- `packages/grigson/src/cli.ts` — added `generate-renderer` subcommand with `--output` flag
+- `packages/grigson/src/cli.test.ts` — 4 CLI integration tests
+
+All 495 tests pass.
