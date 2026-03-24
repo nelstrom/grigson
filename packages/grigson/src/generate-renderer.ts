@@ -28,8 +28,8 @@ function generateFiles(name: string): Record<string, string> {
   const className = `Grigson${toPascalCase(name)}Renderer`;
   const elementTag = `grigson-${name}-renderer`;
   const binaryName = `grigson-${name}-renderer`;
-  const viteLibName = `grigson${toPascalCase(name)}Renderer`;
-  const viteRegisterLibName = `grigson${toPascalCase(name)}RendererRegister`;
+  const viteLibName = toCamelCase(`grigson-${name}-renderer`);
+  const viteRegisterLibName = toCamelCase(`grigson-${name}-renderer-register`);
 
   const packageJson = JSON.stringify({
     name: packageName,

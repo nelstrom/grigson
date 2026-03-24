@@ -124,7 +124,7 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
       finalSections = newSections.map((sec) => {
         const strippedRows = sec.rows.map((row) => ({
           ...row,
-          bars: row.bars.map(({ timeSignature: _ts, ...rest }) => rest as Bar),
+          bars: row.bars.map(({ timeSignature: _, ...rest }) => rest as Bar),
         }));
         let rowIdx = 0;
         const strippedContent = (sec.content ?? sec.rows).map((item) =>

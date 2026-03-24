@@ -25,7 +25,6 @@ const COF_POSITIONS: Readonly<Record<number, number>> = {
  */
 export function circleOfFifthsDistance(keyA: string, keyB: string): number {
   const getPosition = (key: string): number => {
-    const mode = getKeyMode(key);
     const majorKey = getRelativeMajor(key) ?? key;
     const root = getKeyRoot(majorKey);
     let pc: number;

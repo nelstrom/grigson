@@ -58,7 +58,7 @@ describe('simile mark (%)', () => {
 
   it('resolved % bar has no simile property in the AST', () => {
     const row = parseRow('| C | % |');
-    expect((row.bars[1] as any).simile).toBeUndefined();
+    expect((row.bars[1] as { simile?: unknown }).simile).toBeUndefined();
   });
 
   it('parses a full song with simile marks', () => {
