@@ -6,30 +6,51 @@ describe('beat-slot parsing', () => {
   it('parse | C | → one ChordSlot with chord C major (single-chord backward compatibility)', () => {
     const bar = parseBar('| C |');
     expect(bar.slots).toHaveLength(1);
-    expect(bar.slots[0]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'C', quality: 'major' } });
+    expect(bar.slots[0]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'C', quality: 'major' },
+    });
   });
 
   it('parse | C G | → two ChordSlots in order', () => {
     const bar = parseBar('| C G |');
     expect(bar.slots).toHaveLength(2);
-    expect(bar.slots[0]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'C', quality: 'major' } });
-    expect(bar.slots[1]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'G', quality: 'major' } });
+    expect(bar.slots[0]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'C', quality: 'major' },
+    });
+    expect(bar.slots[1]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'G', quality: 'major' },
+    });
   });
 
   it('parse | C . . G | → ChordSlot(C), DotSlot, DotSlot, ChordSlot(G)', () => {
     const bar = parseBar('| C . . G |');
     expect(bar.slots).toHaveLength(4);
-    expect(bar.slots[0]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'C', quality: 'major' } });
+    expect(bar.slots[0]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'C', quality: 'major' },
+    });
     expect(bar.slots[1]).toEqual({ type: 'dot' });
     expect(bar.slots[2]).toEqual({ type: 'dot' });
-    expect(bar.slots[3]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'G', quality: 'major' } });
+    expect(bar.slots[3]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'G', quality: 'major' },
+    });
   });
 
   it('parse | C G . . | → ChordSlot(C), ChordSlot(G), DotSlot, DotSlot', () => {
     const bar = parseBar('| C G . . |');
     expect(bar.slots).toHaveLength(4);
-    expect(bar.slots[0]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'C', quality: 'major' } });
-    expect(bar.slots[1]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'G', quality: 'major' } });
+    expect(bar.slots[0]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'C', quality: 'major' },
+    });
+    expect(bar.slots[1]).toEqual({
+      type: 'chord',
+      chord: { type: 'chord', root: 'G', quality: 'major' },
+    });
     expect(bar.slots[2]).toEqual({ type: 'dot' });
     expect(bar.slots[3]).toEqual({ type: 'dot' });
   });

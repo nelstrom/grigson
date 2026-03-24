@@ -31,7 +31,6 @@ if (preset) {
   config.notation = { preset: preset as 'jazz' | 'pop' | 'symbolic' };
 }
 
-await runRenderer(
-  (song) => new HtmlRenderer(config).render(song),
-  { file: parsed._[0] as string | undefined }
-);
+await runRenderer((song) => new HtmlRenderer(config).render(song), {
+  file: parsed._[0] as string | undefined,
+});

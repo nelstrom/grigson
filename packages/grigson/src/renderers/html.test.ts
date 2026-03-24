@@ -52,7 +52,7 @@ describe('computeGlobalLayout', () => {
       expect(beatCols).toBe(4);
     });
 
-    it('mixed time signatures across sections — A Man\'s A Man-style rows', () => {
+    it("mixed time signatures across sections — A Man's A Man-style rows", () => {
       // Verse: 4 bars of 4/4 with 1 slot each = 16 beats
       // Chorus row 1: 4 bars of 4/4 with 1 slot each = 16 beats
       // Chorus row 2: 2 bars of 4/4 + 1 bar of 2/4 = 4+4+2 = 10 beats
@@ -137,9 +137,7 @@ describe('computeGlobalLayout', () => {
     it('cross-section beat alignment: rows of different length have correct columns', () => {
       // Verse row: 4 bars of 4/4 with 1 slot each = 16 beats, barlines at 1,5,9,13,17
       // Chorus row: 2 bars of 4/4 with 1 slot each = 8 beats, final barline at col 9
-      const song = parseSong(
-        '[Verse]\n| (4/4) C | Am | F | G |\n[Chorus]\n| (4/4) C | Am |\n',
-      );
+      const song = parseSong('[Verse]\n| (4/4) C | Am | F | G |\n[Chorus]\n| (4/4) C | Am |\n');
       const { rows, beatCols } = computeGlobalLayout(song);
 
       expect(beatCols).toBe(16);

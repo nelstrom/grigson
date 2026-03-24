@@ -27,7 +27,7 @@ function shiftChord(chord: Chord, semitones: number): Chord {
   } catch {
     return chord;
   }
-  const newPC = ((pc + semitones) % 12 + 12) % 12;
+  const newPC = (((pc + semitones) % 12) + 12) % 12;
   return { ...chord, root: PC_TO_FLAT[newPC] };
 }
 
@@ -98,7 +98,7 @@ export function transposeSongToKey(song: Song, targetKey: string): Song {
 
   const homeTonicPC = rootToPitchClass(homeTonicNote);
   const targetTonicPC = rootToPitchClass(targetTonicNote);
-  const semitones = ((targetTonicPC - homeTonicPC) + 12) % 12;
+  const semitones = (targetTonicPC - homeTonicPC + 12) % 12;
 
   return transposeSong(song, semitones);
 }

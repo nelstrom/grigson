@@ -49,7 +49,10 @@ function parseMeterString(meter: string | null): TimeSignature | null {
 
 function semanticChecks(song: Song): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
-  let effectiveTimeSig: TimeSignature = parseMeterString(song.meter) ?? { numerator: 4, denominator: 4 };
+  let effectiveTimeSig: TimeSignature = parseMeterString(song.meter) ?? {
+    numerator: 4,
+    denominator: 4,
+  };
 
   for (const section of song.sections) {
     for (const row of section.rows) {

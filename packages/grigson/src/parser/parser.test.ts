@@ -162,7 +162,10 @@ describe('chord parsing', () => {
       const bar = parseBar('| C G |');
       expect(bar.slots).toHaveLength(2);
       expect(bar.slots[0]).toEqual({ type: 'chord', chord: cMajor });
-      expect(bar.slots[1]).toEqual({ type: 'chord', chord: { type: 'chord', root: 'G', quality: 'major' } });
+      expect(bar.slots[1]).toEqual({
+        type: 'chord',
+        chord: { type: 'chord', root: 'G', quality: 'major' },
+      });
     });
   });
 
@@ -225,7 +228,12 @@ describe('chord parsing', () => {
   describe('front matter parsing', () => {
     it('parses title and key', () => {
       const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: 'Autumn Leaves', key: 'G major', meter: null });
+      expect(fm).toEqual({
+        type: 'frontMatter',
+        title: 'Autumn Leaves',
+        key: 'G major',
+        meter: null,
+      });
     });
 
     it('parses title without key', () => {
@@ -245,7 +253,23 @@ describe('chord parsing', () => {
 
     it('accepts all 17 valid key spellings and normalizes to canonical form', () => {
       const validKeys = [
-        'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
+        'C',
+        'C#',
+        'Db',
+        'D',
+        'D#',
+        'Eb',
+        'E',
+        'F',
+        'F#',
+        'Gb',
+        'G',
+        'G#',
+        'Ab',
+        'A',
+        'A#',
+        'Bb',
+        'B',
       ];
       for (const key of validKeys) {
         const fm = parseFrontMatter(`---\nkey: ${key}\n---\n`);
@@ -392,7 +416,7 @@ describe('chord parsing', () => {
       expect(song.sections[0].content).toHaveLength(1); // only the row
     });
 
-    it('stores a comment before a section label in that section\'s preamble', () => {
+    it("stores a comment before a section label in that section's preamble", () => {
       const source = '# intro\n[Verse]\n| C | Am |\n';
       const song = parseSong(source);
       expect(song.sections).toHaveLength(1);
@@ -424,15 +448,30 @@ describe('chord parsing', () => {
     });
 
     it('parses F#/A#', () => {
-      expect(parseChord('F#/A#')).toEqual({ type: 'chord', root: 'F#', quality: 'major', bass: 'A#' });
+      expect(parseChord('F#/A#')).toEqual({
+        type: 'chord',
+        root: 'F#',
+        quality: 'major',
+        bass: 'A#',
+      });
     });
 
     it('parses C-/Bb (dash minor with slash bass)', () => {
-      expect(parseChord('C-/Bb')).toEqual({ type: 'chord', root: 'C', quality: 'min7', bass: 'Bb' });
+      expect(parseChord('C-/Bb')).toEqual({
+        type: 'chord',
+        root: 'C',
+        quality: 'min7',
+        bass: 'Bb',
+      });
     });
 
     it('parses G7/B', () => {
-      expect(parseChord('G7/B')).toEqual({ type: 'chord', root: 'G', quality: 'dominant7', bass: 'B' });
+      expect(parseChord('G7/B')).toEqual({
+        type: 'chord',
+        root: 'G',
+        quality: 'dominant7',
+        bass: 'B',
+      });
     });
 
     it('parses Am/C', () => {

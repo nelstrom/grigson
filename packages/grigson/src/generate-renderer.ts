@@ -2,7 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 function toPascalCase(name: string): string {
-  return name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+  return name
+    .split('-')
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join('');
 }
 
 function toCamelCase(name: string): string {
@@ -31,56 +34,63 @@ function generateFiles(name: string): Record<string, string> {
   const viteLibName = toCamelCase(`grigson-${name}-renderer`);
   const viteRegisterLibName = toCamelCase(`grigson-${name}-renderer-register`);
 
-  const packageJson = JSON.stringify({
-    name: packageName,
-    version: '1.0.0',
-    description: `A ${name} renderer custom element for grigson-chart`,
-    type: 'module',
-    main: 'dist/index.js',
-    types: 'dist/index.d.ts',
-    bin: { [binaryName]: './dist/cli.js' },
-    scripts: {
-      build: 'pnpm run build:ts && pnpm run build:browser && pnpm run build:browser:register',
-      'build:browser': 'vite build',
-      'build:browser:register': 'VITE_BUILD_REGISTER=true vite build',
-      'build:ts': 'tsc',
-      typecheck: 'tsc --noEmit',
-      clean: 'rm -rf dist',
-      test: 'vitest',
-      'test:run': 'vitest run',
+  const packageJson = JSON.stringify(
+    {
+      name: packageName,
+      version: '1.0.0',
+      description: `A ${name} renderer custom element for grigson-chart`,
+      type: 'module',
+      main: 'dist/index.js',
+      types: 'dist/index.d.ts',
+      bin: { [binaryName]: './dist/cli.js' },
+      scripts: {
+        build: 'pnpm run build:ts && pnpm run build:browser && pnpm run build:browser:register',
+        'build:browser': 'vite build',
+        'build:browser:register': 'VITE_BUILD_REGISTER=true vite build',
+        'build:ts': 'tsc',
+        typecheck: 'tsc --noEmit',
+        clean: 'rm -rf dist',
+        test: 'vitest',
+        'test:run': 'vitest run',
+      },
+      devDependencies: {
+        '@types/node': '^25.5.0',
+        typescript: '^5.9.3',
+        vite: '^8.0.0',
+        vitest: '^4.0.18',
+      },
+      dependencies: {
+        grigson: 'workspace:*',
+      },
     },
-    devDependencies: {
-      '@types/node': '^25.5.0',
-      typescript: '^5.9.3',
-      vite: '^8.0.0',
-      vitest: '^4.0.18',
-    },
-    dependencies: {
-      grigson: 'workspace:*',
-    },
-  }, null, 2);
+    null,
+    2,
+  );
 
-  const tsconfigJson = JSON.stringify({
-    compilerOptions: {
-      target: 'ES2022',
-      module: 'NodeNext',
-      moduleResolution: 'NodeNext',
-      outDir: 'dist',
-      declaration: true,
-      declarationMap: true,
-      sourceMap: true,
-      strict: true,
-      skipLibCheck: true,
-      esModuleInterop: true,
-      allowImportingTsExtensions: false,
-      rootDir: 'src',
+  const tsconfigJson = JSON.stringify(
+    {
+      compilerOptions: {
+        target: 'ES2022',
+        module: 'NodeNext',
+        moduleResolution: 'NodeNext',
+        outDir: 'dist',
+        declaration: true,
+        declarationMap: true,
+        sourceMap: true,
+        strict: true,
+        skipLibCheck: true,
+        esModuleInterop: true,
+        allowImportingTsExtensions: false,
+        rootDir: 'src',
+      },
+      include: ['src/**/*'],
+      exclude: ['node_modules', 'dist', 'src/**/*.test.ts'],
     },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist', 'src/**/*.test.ts'],
-  }, null, 2);
+    null,
+    2,
+  );
 
-  const viteConfig =
-`import { defineConfig } from 'vite';
+  const viteConfig = `import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 const isRegister = process.env.VITE_BUILD_REGISTER === 'true';
@@ -104,8 +114,7 @@ export default defineConfig({
 });
 `;
 
-  const vitestConfig =
-`import { defineConfig } from 'vitest/config';
+  const vitestConfig = `import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -115,8 +124,7 @@ export default defineConfig({
 });
 `;
 
-  const readme =
-`# ${packageName}
+  const readme = `# ${packageName}
 
 A ${name} renderer custom element for grigson-chart.
 
@@ -152,8 +160,7 @@ pnpm test
 \`\`\`
 `;
 
-  const elementTs =
-`import type { Song } from 'grigson';
+  const elementTs = `import type { Song } from 'grigson';
 import { GrigsonRendererUpdateEvent } from 'grigson';
 import type { GrigsonRendererElement } from 'grigson';
 
@@ -174,23 +181,20 @@ export class ${className} extends HTMLElement implements GrigsonRendererElement 
   const indexTs = `export { ${className} } from './element.js';\n`;
   const indexBrowserTs = `export { ${className} } from './element.js';\n`;
 
-  const registerTs =
-`import { ${className} } from './element.js';
+  const registerTs = `import { ${className} } from './element.js';
 if (typeof customElements !== 'undefined') {
   customElements.define('${elementTag}', ${className});
 }
 `;
 
-  const renderTs =
-`import type { Song } from 'grigson';
+  const renderTs = `import type { Song } from 'grigson';
 
 export default function renderChart(_song: Song): string {
   return '<div>Under construction</div>';
 }
 `;
 
-  const cliTs =
-`#!/usr/bin/env node
+  const cliTs = `#!/usr/bin/env node
 
 import { runRenderer } from 'grigson';
 import renderChart from './render.js';
@@ -249,7 +253,7 @@ export function generateRenderer(name: string, outputDir: string): void {
   const lines = [
     `Created ${packageName}/`,
     '',
-    ...fileList.map(f => `  ${f}`),
+    ...fileList.map((f) => `  ${f}`),
     '',
     'Next steps:',
     '',

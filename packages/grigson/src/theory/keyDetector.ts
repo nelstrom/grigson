@@ -40,23 +40,23 @@ const DORIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
 ];
 
 const AEOLIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
-  new Set<Quality>(['minor', 'min7']),              // i
+  new Set<Quality>(['minor', 'min7']), // i
   new Set<Quality>(['diminished', 'halfDiminished']), // ii°
-  new Set<Quality>(['major', 'maj7']),              // bIII
-  new Set<Quality>(['minor', 'min7']),              // iv  ← distinguishes aeolian from dorian
-  new Set<Quality>(['minor', 'min7']),              // v
-  new Set<Quality>(['major', 'maj7']),              // bVI
-  new Set<Quality>(['major', 'maj7']),              // bVII
+  new Set<Quality>(['major', 'maj7']), // bIII
+  new Set<Quality>(['minor', 'min7']), // iv  ← distinguishes aeolian from dorian
+  new Set<Quality>(['minor', 'min7']), // v
+  new Set<Quality>(['major', 'maj7']), // bVI
+  new Set<Quality>(['major', 'maj7']), // bVII
 ];
 
 const MIXOLYDIAN_DEGREE_QUALITY_SETS: Set<Quality>[] = [
-  new Set<Quality>(['major', 'maj7']),              // I (dominant7 excluded: aliases major V7)
-  new Set<Quality>(['minor', 'min7']),              // ii
+  new Set<Quality>(['major', 'maj7']), // I (dominant7 excluded: aliases major V7)
+  new Set<Quality>(['minor', 'min7']), // ii
   new Set<Quality>(['diminished', 'halfDiminished']), // iii°
-  new Set<Quality>(['major', 'maj7']),              // IV (dominant7 excluded)
-  new Set<Quality>(['minor', 'min7']),              // v  ← distinguishes mixolydian from major
-  new Set<Quality>(['minor', 'min7']),              // vi
-  new Set<Quality>(['major', 'maj7']),              // bVII ← distinguishes mixolydian from major
+  new Set<Quality>(['major', 'maj7']), // IV (dominant7 excluded)
+  new Set<Quality>(['minor', 'min7']), // v  ← distinguishes mixolydian from major
+  new Set<Quality>(['minor', 'min7']), // vi
+  new Set<Quality>(['major', 'maj7']), // bVII ← distinguishes mixolydian from major
 ];
 
 function buildKeyScoreMap(key: string): Map<number, Set<Quality>> {
@@ -170,10 +170,12 @@ function breakFSharpGbTie(chords: Chord[], config?: DetectKeyConfig): string {
 
 function breakGSharpAbTie(chords: Chord[]): string {
   // Count sharp-side spellings (G#, A#, D#) vs flat-side spellings (Ab, Bb, Eb)
-  const sharpCount = chords.filter((c) => c.root === 'G#' || c.root === 'A#' || c.root === 'D#')
-    .length;
-  const flatCount = chords.filter((c) => c.root === 'Ab' || c.root === 'Bb' || c.root === 'Eb')
-    .length;
+  const sharpCount = chords.filter(
+    (c) => c.root === 'G#' || c.root === 'A#' || c.root === 'D#',
+  ).length;
+  const flatCount = chords.filter(
+    (c) => c.root === 'Ab' || c.root === 'Bb' || c.root === 'Eb',
+  ).length;
   if (sharpCount > flatCount) return 'G#m';
   return 'Abm';
 }
@@ -324,10 +326,12 @@ function breakMixolydianMajorTie(mixolydian: string, major: string, chords: Chor
 
 function breakDSharpEbTie(chords: Chord[]): string {
   // Count sharp-side spellings (D#, A#, G#) vs flat-side spellings (Eb, Bb, Ab)
-  const sharpCount = chords.filter((c) => c.root === 'D#' || c.root === 'A#' || c.root === 'G#')
-    .length;
-  const flatCount = chords.filter((c) => c.root === 'Eb' || c.root === 'Bb' || c.root === 'Ab')
-    .length;
+  const sharpCount = chords.filter(
+    (c) => c.root === 'D#' || c.root === 'A#' || c.root === 'G#',
+  ).length;
+  const flatCount = chords.filter(
+    (c) => c.root === 'Eb' || c.root === 'Bb' || c.root === 'Ab',
+  ).length;
   if (sharpCount > flatCount) return 'D#m';
   return 'Ebm';
 }
@@ -352,7 +356,7 @@ export function detectKey(
       const firstPC = rootToPitchClass(chords[0].root);
       const currentBestPC = rootToPitchClass(getKeyRoot(bestKey));
       const candidatePC = rootToPitchClass(getKeyRoot(key));
-      
+
       if (candidatePC === firstPC && currentBestPC !== firstPC) {
         bestKey = key;
       }
@@ -450,7 +454,11 @@ export function detectKey(
     }
   } else if (getKeyMode(bestKey) === 'major') {
     for (const [key, score] of scores) {
-      if (getKeyMode(key) === 'aeolian' && getRelativeMajor(key) === bestKey && score === maxScore) {
+      if (
+        getKeyMode(key) === 'aeolian' &&
+        getRelativeMajor(key) === bestKey &&
+        score === maxScore
+      ) {
         bestKey = breakAeolianMajorTie(key, bestKey, chords);
         break;
       }
@@ -465,7 +473,11 @@ export function detectKey(
     }
   } else if (getKeyMode(bestKey) === 'major') {
     for (const [key, score] of scores) {
-      if (getKeyMode(key) === 'mixolydian' && getRelativeMajor(key) === bestKey && score === maxScore) {
+      if (
+        getKeyMode(key) === 'mixolydian' &&
+        getRelativeMajor(key) === bestKey &&
+        score === maxScore
+      ) {
         bestKey = breakMixolydianMajorTie(key, bestKey, chords);
         break;
       }
@@ -519,11 +531,7 @@ export function detectKey(
         }
         // Verify it's an authentic cadence: penultimate is V7 of this candidate key
         const expectedV7PC = (keyRootPC + 7) % 12;
-        if (
-          keyRootPC === lastPC &&
-          penultimatePC === expectedV7PC &&
-          maxScore - score <= 1
-        ) {
+        if (keyRootPC === lastPC && penultimatePC === expectedV7PC && maxScore - score <= 1) {
           const keyIsMinor = getKeyMode(key) === 'minor';
           const lastIsMinor = lastChord.quality === 'minor';
           if (keyIsMinor === lastIsMinor) {

@@ -1,4 +1,13 @@
-import type { Song, Row, Bar, Chord, Barline, TimeSignature, Section, BeatSlot } from '../parser/types.js';
+import type {
+  Song,
+  Row,
+  Bar,
+  Chord,
+  Barline,
+  TimeSignature,
+  Section,
+  BeatSlot,
+} from '../parser/types.js';
 import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
 
 // ---------------------------------------------------------------------------
@@ -29,14 +38,14 @@ const EM_PER_CHAR = 0.55;
 
 const QUALITY_CHARS: Record<string, number> = {
   major: 0,
-  minor: 1,       // "m"
-  dominant7: 1,   // "7"
+  minor: 1, // "m"
+  dominant7: 1, // "7"
   halfDiminished: 1, // "ø"
-  diminished: 1,  // "°"
-  maj7: 1,        // "△"
-  min7: 2,        // "m7"
-  dim7: 2,        // "°7"
-  dom7flat5: 3,   // "7b5"
+  diminished: 1, // "°"
+  maj7: 1, // "△"
+  min7: 2, // "m7"
+  dim7: 2, // "°7"
+  dom7flat5: 3, // "7b5"
 };
 
 function estimateChordDisplayWidthEm(chord: Chord): number {
@@ -150,9 +159,7 @@ const QUALITY_SYMBOL: Record<string, string> = {
 function renderChordInner(chord: Chord): string {
   const rootHtml = renderChordRoot(chord.root);
   const qualitySymbol = QUALITY_SYMBOL[chord.quality] ?? '';
-  const qualityHtml = qualitySymbol
-    ? `<span part="chord-quality">${qualitySymbol}</span>`
-    : '';
+  const qualityHtml = qualitySymbol ? `<span part="chord-quality">${qualitySymbol}</span>` : '';
   return rootHtml + qualityHtml;
 }
 
@@ -296,7 +303,7 @@ export class HtmlRenderer implements GrigsonRenderer {
         html += `<h2 part="section-label">${section.label}</h2>`;
       }
 
-      for (const item of (section.content ?? section.rows)) {
+      for (const item of section.content ?? section.rows) {
         if (item.type === 'row') {
           const rowLayout = layout.rows.get(item)!;
           html += renderRow(item, rowLayout);

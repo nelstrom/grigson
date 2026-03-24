@@ -3,7 +3,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import './register.js';
 import { GrigsonChart } from './element.js';
 import { GrigsonHtmlRenderer } from './renderers/html-element.js';
-import { GrigsonParseErrorEvent, GrigsonRenderErrorEvent, GrigsonRendererUpdateEvent } from './events.js';
+import {
+  GrigsonParseErrorEvent,
+  GrigsonRenderErrorEvent,
+  GrigsonRendererUpdateEvent,
+} from './events.js';
 import { parseSong } from './parser/parser.js';
 
 describe('GrigsonChart', () => {

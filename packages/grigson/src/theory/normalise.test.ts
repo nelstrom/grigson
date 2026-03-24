@@ -7,7 +7,11 @@ function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
 }
 
 function bar(c: Chord, timeSignature?: { numerator: number; denominator: number }): Bar {
-  const b: Bar = { type: 'bar', slots: [{ type: 'chord', chord: c }], closeBarline: { kind: 'single' } };
+  const b: Bar = {
+    type: 'bar',
+    slots: [{ type: 'chord', chord: c }],
+    closeBarline: { kind: 'single' },
+  };
   if (timeSignature) b.timeSignature = timeSignature;
   return b;
 }
@@ -101,7 +105,14 @@ describe('normaliseSong — Category 2: enharmonic correction of diatonic chord 
 describe('normaliseSong — harmonic-analysis-based spelling', () => {
   it('2-5-1 Bbm-Eb7-Ab in C: roots spelled Bb, Eb, Ab (not A#m, D#7, G#)', () => {
     const s = song([
-      row(ch('C'), ch('Bb', 'minor'), ch('Eb', 'dominant7'), ch('Ab'), ch('G', 'dominant7'), ch('C')),
+      row(
+        ch('C'),
+        ch('Bb', 'minor'),
+        ch('Eb', 'dominant7'),
+        ch('Ab'),
+        ch('G', 'dominant7'),
+        ch('C'),
+      ),
     ]);
     const result = normaliseSong(s);
     const bars = result.sections[0].rows[0].bars;
@@ -112,7 +123,14 @@ describe('normaliseSong — harmonic-analysis-based spelling', () => {
 
   it("2-5-1 Ebm-Ab7-Db in F (What's New B): roots spelled Eb, Ab, Db", () => {
     const s = song([
-      row(ch('F'), ch('Eb', 'minor'), ch('Ab', 'dominant7'), ch('Db'), ch('C', 'dominant7'), ch('F')),
+      row(
+        ch('F'),
+        ch('Eb', 'minor'),
+        ch('Ab', 'dominant7'),
+        ch('Db'),
+        ch('C', 'dominant7'),
+        ch('F'),
+      ),
     ]);
     const result = normaliseSong(s);
     const bars = result.sections[0].rows[0].bars;
@@ -239,9 +257,7 @@ describe('normaliseSong — chord-qualities smoke tests', () => {
   });
 
   it('Am7 Dm7 G#dim7 Am7: identifies Am, G# (raised VII) preserved as G#', () => {
-    const s = song([
-      row(ch('A', 'min7'), ch('D', 'min7'), ch('G#', 'dim7'), ch('A', 'min7')),
-    ]);
+    const s = song([row(ch('A', 'min7'), ch('D', 'min7'), ch('G#', 'dim7'), ch('A', 'min7'))]);
     const result = normaliseSong(s);
     const bars = result.sections[0].rows[0].bars;
     expect(chordOf(bars[0]).root).toBe('A');
@@ -323,7 +339,13 @@ describe('normaliseSong — per-section key detection', () => {
     // Chorus: Bb major with wrong enharmonics (A# D# F A#)
     const verse = section([row(ch('E'), ch('A'), ch('B'), ch('E'))], 'Verse');
     const chorus = section([row(ch('A#'), ch('D#'), ch('F'), ch('A#'))], 'Chorus');
-    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [verse, chorus] };
+    const s: Song = {
+      type: 'song',
+      title: null,
+      key: null,
+      meter: null,
+      sections: [verse, chorus],
+    };
     const result = normaliseSong(s);
     // Verse stays in E major
     expect(chordOf(result.sections[0].rows[0].bars[0]).root).toBe('E');
@@ -343,7 +365,13 @@ describe('normaliseSong — per-section key detection', () => {
   it('front-matter key is set to home key of first section', () => {
     const verse = section([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))], 'Verse');
     const chorus = section([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'Chorus');
-    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [verse, chorus] };
+    const s: Song = {
+      type: 'song',
+      title: null,
+      key: null,
+      meter: null,
+      sections: [verse, chorus],
+    };
     const result = normaliseSong(s);
     expect(result.key).toBe('G major'); // first section is G major
   });
@@ -368,7 +396,10 @@ describe('normaliseSong — meter hoisting', () => {
     const result = normaliseSong(s);
     expect(result.meter).toBe('2/4');
     // First bar gets timeSignature set for renderer; remaining bars have it stripped
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 2, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
+      numerator: 2,
+      denominator: 4,
+    });
     for (const b of result.sections[0].rows[0].bars.slice(1)) {
       expect(b.timeSignature).toBeUndefined();
     }
@@ -384,8 +415,14 @@ describe('normaliseSong — meter hoisting', () => {
     const result = normaliseSong(s);
     expect(result.meter).toBe('mixed');
     // Inline time signatures preserved
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 3, denominator: 4 });
-    expect(result.sections[0].rows[0].bars[1].timeSignature).toEqual({ numerator: 4, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
+      numerator: 3,
+      denominator: 4,
+    });
+    expect(result.sections[0].rows[0].bars[1].timeSignature).toEqual({
+      numerator: 4,
+      denominator: 4,
+    });
   });
 
   it('song with no inline time signatures and no front-matter meter stays meter: null', () => {
@@ -395,8 +432,18 @@ describe('normaliseSong — meter hoisting', () => {
   });
 
   it('song with front-matter meter and no inline TS preserves the front-matter meter', () => {
-    const r: Row = { type: 'row', openBarline: { kind: 'single' }, bars: [bar(ch('C')), bar(ch('G'))] };
-    const s: Song = { type: 'song', title: null, key: null, meter: '3/4', sections: [section([r])] };
+    const r: Row = {
+      type: 'row',
+      openBarline: { kind: 'single' },
+      bars: [bar(ch('C')), bar(ch('G'))],
+    };
+    const s: Song = {
+      type: 'song',
+      title: null,
+      key: null,
+      meter: '3/4',
+      sections: [section([r])],
+    };
     const result = normaliseSong(s);
     expect(result.meter).toBe('3/4');
   });
@@ -412,7 +459,10 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
     const result = normaliseSong(s);
     expect(result.meter).toBe('3/4');
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 3, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
+      numerator: 3,
+      denominator: 4,
+    });
     // Subsequent bars still stripped
     expect(result.sections[0].rows[0].bars[1].timeSignature).toBeUndefined();
     expect(result.sections[0].rows[0].bars[2].timeSignature).toBeUndefined();
@@ -424,9 +474,18 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
       openBarline: { kind: 'single' },
       bars: [bar(ch('C')), bar(ch('G')), bar(ch('Am'))],
     };
-    const s: Song = { type: 'song', title: null, key: null, meter: '3/4', sections: [section([r])] };
+    const s: Song = {
+      type: 'song',
+      title: null,
+      key: null,
+      meter: '3/4',
+      sections: [section([r])],
+    };
     const result = normaliseSong(s);
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 3, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
+      numerator: 3,
+      denominator: 4,
+    });
     expect(result.sections[0].rows[0].bars[1].timeSignature).toBeUndefined();
   });
 
@@ -446,8 +505,14 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
     const result = normaliseSong(s);
     expect(result.meter).toBe('mixed');
     // inline tokens preserved as-is; no extra mutation
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 3, denominator: 4 });
-    expect(result.sections[0].rows[0].bars[1].timeSignature).toEqual({ numerator: 4, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
+      numerator: 3,
+      denominator: 4,
+    });
+    expect(result.sections[0].rows[0].bars[1].timeSignature).toEqual({
+      numerator: 4,
+      denominator: 4,
+    });
   });
 
   it('first bar already has timeSignature: not overwritten', () => {
@@ -461,9 +526,18 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
       timeSignature: { numerator: 4, denominator: 4 },
     };
     const r: Row = { type: 'row', openBarline: { kind: 'single' }, bars: [firstBar, bar(ch('G'))] };
-    const s: Song = { type: 'song', title: null, key: null, meter: '4/4', sections: [section([r])] };
+    const s: Song = {
+      type: 'song',
+      title: null,
+      key: null,
+      meter: '4/4',
+      sections: [section([r])],
+    };
     const result = normaliseSong(s);
     // Should still be 4/4, not duplicated or corrupted
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({ numerator: 4, denominator: 4 });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
+      numerator: 4,
+      denominator: 4,
+    });
   });
 });

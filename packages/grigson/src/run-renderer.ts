@@ -12,11 +12,11 @@ export interface RunRendererOptions {
 export async function runRenderer(render: RenderFn, options?: RunRendererOptions): Promise<void> {
   let input: string;
   try {
-    input = options?.file
-      ? fs.readFileSync(options.file, 'utf8')
-      : fs.readFileSync(0, 'utf8');
+    input = options?.file ? fs.readFileSync(options.file, 'utf8') : fs.readFileSync(0, 'utf8');
   } catch (err) {
-    process.stderr.write(`Error reading input: ${err instanceof Error ? err.message : String(err)}\n`);
+    process.stderr.write(
+      `Error reading input: ${err instanceof Error ? err.message : String(err)}\n`,
+    );
     process.exit(1);
   }
 

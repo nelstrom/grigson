@@ -229,7 +229,9 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
 
   renderChart(song: Song): Element {
     const config: TextRendererConfig = {};
-    const notationPreset = this.getAttribute('notation-preset') as TextRendererConfig['notation'] extends { preset?: infer P } ? P : never;
+    const notationPreset = this.getAttribute(
+      'notation-preset',
+    ) as TextRendererConfig['notation'] extends { preset?: infer P } ? P : never;
     if (notationPreset) {
       config.notation = { preset: notationPreset };
     }

@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { diatonicNotes, getKeyMode, getKeyRoot, getRelativeMajor, getSiblingModes, KEYS } from './keys.js';
+import {
+  diatonicNotes,
+  getKeyMode,
+  getKeyRoot,
+  getRelativeMajor,
+  getSiblingModes,
+  KEYS,
+} from './keys.js';
 
 describe('diatonicNotes', () => {
   it('returns the correct set for C major', () => {

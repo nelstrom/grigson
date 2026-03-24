@@ -94,7 +94,7 @@ describe('generateRenderer', () => {
     generateRenderer('high-contrast', tmpDir);
 
     const pkg = JSON.parse(
-      fs.readFileSync(path.join(tmpDir, 'grigson-high-contrast-renderer', 'package.json'), 'utf8')
+      fs.readFileSync(path.join(tmpDir, 'grigson-high-contrast-renderer', 'package.json'), 'utf8'),
     ) as { name: string; bin: Record<string, string> };
 
     expect(pkg.name).toBe('grigson-high-contrast-renderer');
@@ -107,7 +107,7 @@ describe('generateRenderer', () => {
 
     const content = fs.readFileSync(
       path.join(tmpDir, 'grigson-high-contrast-renderer', 'tsconfig.json'),
-      'utf8'
+      'utf8',
     );
     expect(() => JSON.parse(content)).not.toThrow();
   });
@@ -118,7 +118,7 @@ describe('generateRenderer', () => {
 
     const content = fs.readFileSync(
       path.join(tmpDir, 'grigson-high-contrast-renderer', 'src/element.ts'),
-      'utf8'
+      'utf8',
     );
     expect(content).toContain('class GrigsonHighContrastRenderer');
   });
@@ -129,7 +129,7 @@ describe('generateRenderer', () => {
 
     const content = fs.readFileSync(
       path.join(tmpDir, 'grigson-high-contrast-renderer', 'src/register.ts'),
-      'utf8'
+      'utf8',
     );
     expect(content).toContain("'grigson-high-contrast-renderer'");
   });
@@ -140,7 +140,7 @@ describe('generateRenderer', () => {
 
     const content = fs.readFileSync(
       path.join(tmpDir, 'grigson-high-contrast-renderer', 'vite.config.ts'),
-      'utf8'
+      'utf8',
     );
     expect(content).toContain('grigsonHighContrastRenderer');
     expect(content).toContain('grigsonHighContrastRendererRegister');

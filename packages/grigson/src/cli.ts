@@ -230,7 +230,7 @@ export function runCli(args: string[]): void {
   const parsed = minimist(args, {
     boolean: ['help', 'i', 'in-place'],
     string: ['raise', 'lower', 'to', 'key', 'enharmonic', 'output'],
-    alias: { h: 'help' }
+    alias: { h: 'help' },
   });
 
   const subcommand = parsed._[0] as string | undefined;

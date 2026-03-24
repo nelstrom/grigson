@@ -3,7 +3,11 @@ import { GrigsonHtmlRenderer } from './renderers/html-element.js';
 import type { GrigsonRendererElement } from './renderers/contract.js';
 import { normaliseSong } from './theory/normalise.js';
 import { transposeSong, transposeSongToKey } from './theory/transpose.js';
-import { GrigsonRendererUpdateEvent, GrigsonParseErrorEvent, GrigsonRenderErrorEvent } from './events.js';
+import {
+  GrigsonRendererUpdateEvent,
+  GrigsonParseErrorEvent,
+  GrigsonRenderErrorEvent,
+} from './events.js';
 
 export class GrigsonChart extends HTMLElement {
   static get observedAttributes() {
@@ -89,7 +93,11 @@ export class GrigsonChart extends HTMLElement {
     }
 
     this._templateObserver = new MutationObserver(() => this.update());
-    this._templateObserver.observe(template.content, { childList: true, subtree: true, characterData: true });
+    this._templateObserver.observe(template.content, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
 
     const content = template.innerHTML.trim();
     if (!content) {
@@ -121,7 +129,8 @@ export class GrigsonChart extends HTMLElement {
           rendered.push(renderer.renderChart(song));
         } catch (renderError) {
           const div = document.createElement('div');
-          div.textContent = renderError instanceof Error ? renderError.message : String(renderError);
+          div.textContent =
+            renderError instanceof Error ? renderError.message : String(renderError);
           this._root.replaceChildren(this._style, div);
           this.dispatchEvent(new GrigsonRenderErrorEvent(renderError));
           return;

@@ -120,11 +120,7 @@ function resolveKey(tonicPC: number, iChordIsMinor: boolean): string | null {
   return MAJOR_BY_PC.get(tonicPC) ?? null;
 }
 
-function annotate(
-  chord: Chord,
-  homeKey: string,
-  currentKey: string,
-): AnnotatedChord {
+function annotate(chord: Chord, homeKey: string, currentKey: string): AnnotatedChord {
   return { chord, homeKey, currentKey, currentKeyCandidates: [currentKey] };
 }
 
@@ -304,7 +300,12 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
           pickedKey = majors.length > 0 ? majors[0] : closestCandidates[0];
         }
 
-        result.push({ chord, homeKey, currentKey: pickedKey, currentKeyCandidates: closestCandidates });
+        result.push({
+          chord,
+          homeKey,
+          currentKey: pickedKey,
+          currentKeyCandidates: closestCandidates,
+        });
         i += 1;
         continue;
       }

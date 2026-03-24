@@ -69,7 +69,9 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
 }
 
 function renderBar(bar: Bar, config: TextRendererConfig): string {
-  const ts = bar.timeSignature ? `(${bar.timeSignature.numerator}/${bar.timeSignature.denominator}) ` : '';
+  const ts = bar.timeSignature
+    ? `(${bar.timeSignature.numerator}/${bar.timeSignature.denominator}) `
+    : '';
   const slotsText = bar.slots
     .map((slot) => (slot.type === 'chord' ? renderChord(slot.chord, config) : '.'))
     .join(' ');
@@ -143,14 +145,14 @@ export class TextRenderer implements GrigsonRenderer {
 
     for (const section of song.sections) {
       const lines: string[] = [];
-      for (const comment of (section.preamble ?? [])) {
+      for (const comment of section.preamble ?? []) {
         lines.push(comment.text);
       }
       if (section.label !== null) {
         const keyPart = section.key !== null ? ` key: ${section.key}` : '';
         lines.push(`[${section.label}]${keyPart}`);
       }
-      for (const item of (section.content ?? section.rows)) {
+      for (const item of section.content ?? section.rows) {
         if (item.type === 'comment') {
           lines.push(item.text);
         } else {

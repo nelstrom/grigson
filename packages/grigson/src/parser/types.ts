@@ -77,8 +77,8 @@ export interface Section {
   label: string | null;
   key: string | null;
   rows: Row[];
-  preamble?: CommentLine[];  // comment lines appearing before the section label
-  content?: SectionItem[];   // rows and inline comments appearing after the label
+  preamble?: CommentLine[]; // comment lines appearing before the section label
+  content?: SectionItem[]; // rows and inline comments appearing after the label
 }
 
 export interface Song {

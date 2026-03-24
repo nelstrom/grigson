@@ -167,10 +167,7 @@ describe('analyseHarmony — mixolydian bVII → I cadence', () => {
 describe('analyseHarmony — dorian plagal cadence', () => {
   it('G→Dm in D dorian: plagal cadence assigns both to D dorian', () => {
     // G is IV of D dorian (D tonic, IV = G); Dm is the dorian i
-    const result = analyseHarmony(
-      [maj('G'), min('D'), maj('C'), min('D')],
-      'D dorian',
-    );
+    const result = analyseHarmony([maj('G'), min('D'), maj('C'), min('D')], 'D dorian');
     expect(result[0].currentKey).toBe('D dorian'); // G — IV, plagal cadence
     expect(result[1].currentKey).toBe('D dorian'); // Dm — i, plagal cadence
     expect(result[2].currentKey).toBe('D dorian'); // C — diatonic homeKey
@@ -179,10 +176,7 @@ describe('analyseHarmony — dorian plagal cadence', () => {
 
   it('A→Em in E dorian: plagal cadence assigns both to E dorian', () => {
     // A is IV of E dorian (E tonic, IV = A); Em is the dorian i
-    const result = analyseHarmony(
-      [maj('A'), min('E'), maj('D'), min('E')],
-      'E dorian',
-    );
+    const result = analyseHarmony([maj('A'), min('E'), maj('D'), min('E')], 'E dorian');
     expect(result[0].currentKey).toBe('E dorian'); // A — IV, plagal cadence
     expect(result[1].currentKey).toBe('E dorian'); // Em — i, plagal cadence
     expect(result[2].currentKey).toBe('E dorian'); // D — diatonic homeKey
@@ -247,10 +241,7 @@ describe('circle-of-fifths fallback for isolated borrowed chords', () => {
 
   it('diatonic chords always keep homeKey regardless of circle-of-fifths logic', () => {
     // G, Am, F, Em are all diatonic to C major
-    const result = analyseHarmony(
-      [maj('C'), maj('G'), min('A'), maj('F'), min('E')],
-      'C',
-    );
+    const result = analyseHarmony([maj('C'), maj('G'), min('A'), maj('F'), min('E')], 'C');
     expect(result.every((a) => a.currentKey === 'C')).toBe(true);
   });
 

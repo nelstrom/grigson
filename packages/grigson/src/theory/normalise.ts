@@ -56,7 +56,8 @@ export function normaliseSection(
   declaredKey?: string | null,
 ): { homeKey: string | null; chords: Chord[] } {
   const detectedKey = config?.forceKey ?? detectKey(chords, declaredKey ?? null, config);
-  const homePCToNote = detectedKey !== null ? buildPCToNote(detectedKey) : new Map<number, string>();
+  const homePCToNote =
+    detectedKey !== null ? buildPCToNote(detectedKey) : new Map<number, string>();
   const annotated = detectedKey !== null ? analyseHarmony(chords, detectedKey) : null;
 
   const normalisedChords = chords.map((chord, i) => {
@@ -174,5 +175,10 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     }
   }
 
-  return { ...song, key: toCanonicalKey(firstSectionKey), meter: newMeter, sections: finalSections };
+  return {
+    ...song,
+    key: toCanonicalKey(firstSectionKey),
+    meter: newMeter,
+    sections: finalSections,
+  };
 }
