@@ -4,13 +4,13 @@ A [tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammar for the Grig
 
 ## What tree-sitter provides vs the LSP
 
-| Capability | tree-sitter | LSP |
-|---|---|---|
-| Syntax highlighting | ✓ (structural, via `highlights.scm`) | — |
-| Text objects (select a bar, a row, etc.) | ✓ | — |
-| Error tolerance (partial parses) | ✓ | — |
-| Diagnostics (squiggly underlines) | — | ✓ |
-| Hover / other language features | — | ✓ |
+| Capability                               | tree-sitter                          | LSP |
+| ---------------------------------------- | ------------------------------------ | --- |
+| Syntax highlighting                      | ✓ (structural, via `highlights.scm`) | —   |
+| Text objects (select a bar, a row, etc.) | ✓                                    | —   |
+| Error tolerance (partial parses)         | ✓                                    | —   |
+| Diagnostics (squiggly underlines)        | —                                    | ✓   |
+| Hover / other language features          | —                                    | ✓   |
 
 Both can be active at the same time. tree-sitter handles colouring and structural navigation; the LSP handles diagnostics. See [`packages/language-server`](../language-server/README.md) for LSP setup.
 

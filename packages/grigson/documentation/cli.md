@@ -52,9 +52,9 @@ grigson-html-renderer [options] [file]
 
 **Options**
 
-| Option                            | Description                                                       |
-| --------------------------------- | ----------------------------------------------------------------- |
-| `--notation-preset <preset>`      | Chord notation style: `jazz` (default), `pop`, or `symbolic`      |
+| Option                       | Description                                                  |
+| ---------------------------- | ------------------------------------------------------------ |
+| `--notation-preset <preset>` | Chord notation style: `jazz` (default), `pop`, or `symbolic` |
 
 **Examples**
 
@@ -90,14 +90,14 @@ grigson generate-renderer <name> [options]
 
 **Arguments**
 
-| Argument | Description |
-| -------- | ----------- |
+| Argument | Description                                                                  |
+| -------- | ---------------------------------------------------------------------------- |
 | `name`   | Renderer name: lowercase letters, digits, and hyphens (e.g. `high-contrast`) |
 
 **Options**
 
-| Option            | Description                                                       |
-| ----------------- | ----------------------------------------------------------------- |
+| Option            | Description                                                           |
+| ----------------- | --------------------------------------------------------------------- |
 | `--output <path>` | Directory in which to create the package (default: current directory) |
 
 **Examples**
@@ -151,11 +151,11 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option         | Description                                              |
-| -------------- | -------------------------------------------------------- |
-| `--raise <n>`  | Transpose up by `n` semitones (positive integer)         |
-| `--lower <n>`  | Transpose down by `n` semitones (positive integer)       |
-| `--to <key>`   | Transpose to a target key (e.g. `--to G`, `--to Dm`)    |
+| Option        | Description                                          |
+| ------------- | ---------------------------------------------------- |
+| `--raise <n>` | Transpose up by `n` semitones (positive integer)     |
+| `--lower <n>` | Transpose down by `n` semitones (positive integer)   |
+| `--to <key>`  | Transpose to a target key (e.g. `--to G`, `--to Dm`) |
 
 Exactly one of `--raise`, `--lower`, or `--to` is required.
 
@@ -182,9 +182,9 @@ Reads from `file` (or multiple files) if given, otherwise from stdin. Writes dia
 
 **Options**
 
-| Option              | Description                                       |
-| ------------------- | ------------------------------------------------- |
-| `--format <format>` | Output format: `text` (default) or `json`         |
+| Option              | Description                               |
+| ------------------- | ----------------------------------------- |
+| `--format <format>` | Output format: `text` (default) or `json` |
 
 **Text output format** (default)
 
@@ -216,4 +216,3 @@ grigson validate *.chart                       # validate multiple files
 grigson validate --format json song.chart      # machine-readable output
 cat song.chart | grigson validate              # read from stdin
 ```
-

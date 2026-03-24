@@ -80,10 +80,10 @@ Second and later slots in a bar receive no left padding — they are not matched
 
 ## Summary of responsibilities
 
-| Layer | Responsibility |
-|---|---|
-| Parser | Sets `bar.timeSignature` on bars with an inline `(n/d)` annotation |
-| Normalizer | Sets `bar.timeSignature` on the first bar when a `meter:` front-matter field is declared |
-| Layout (`computeGlobalLayout`) | Sets `showTimeSig` on the first slot of each annotated bar |
-| HTML renderer | Emits `[part="time-sig"]` inside the slot when `showTimeSig` is set |
-| CSS | Reserves space with `padding-left` on post-barline slots; positions time-sig absolutely within that zone |
+| Layer                          | Responsibility                                                                                           |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Parser                         | Sets `bar.timeSignature` on bars with an inline `(n/d)` annotation                                       |
+| Normalizer                     | Sets `bar.timeSignature` on the first bar when a `meter:` front-matter field is declared                 |
+| Layout (`computeGlobalLayout`) | Sets `showTimeSig` on the first slot of each annotated bar                                               |
+| HTML renderer                  | Emits `[part="time-sig"]` inside the slot when `showTimeSig` is set                                      |
+| CSS                            | Reserves space with `padding-left` on post-barline slots; positions time-sig absolutely within that zone |

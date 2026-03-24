@@ -4,14 +4,14 @@ The Grigson documentation website, built with [Eleventy](https://www.11ty.dev/).
 
 ## Pages
 
-| Path | Content |
-| --- | --- |
-| `/` | Homepage |
-| `/format/` | Chart format reference |
-| `/cli/` | CLI reference |
-| `/renderer/` | Renderer documentation |
-| `/testing/` | Testing strategy |
-| `/demo/` | Before/after normalisation example |
+| Path           | Content                                                                  |
+| -------------- | ------------------------------------------------------------------------ |
+| `/`            | Homepage                                                                 |
+| `/format/`     | Chart format reference                                                   |
+| `/cli/`        | CLI reference                                                            |
+| `/renderer/`   | Renderer documentation                                                   |
+| `/testing/`    | Testing strategy                                                         |
+| `/demo/`       | Before/after normalisation example                                       |
 | `/playground/` | Interactive chart editor with live normalisation and syntax highlighting |
 
 ## Local development

@@ -46,7 +46,7 @@ export interface LocationRange {
  * Expected a literal string, like `"foo"i`.
  */
 export interface LiteralExpectation {
-  readonly type: "literal";
+  readonly type: 'literal';
   readonly text: string;
   readonly ignoreCase: boolean;
 }
@@ -54,19 +54,15 @@ export interface LiteralExpectation {
 /**
  * Range of characters, like `a-z`
  */
-export type ClassRange = [
-  start: string,
-  end: string,
-]
+export type ClassRange = [start: string, end: string];
 
-export interface ClassParts extends Array<string | ClassRange> {
-}
+export interface ClassParts extends Array<string | ClassRange> {}
 
 /**
  * Expected a class, such as `[^acd-gz]i`
  */
 export interface ClassExpectation {
-  readonly type: "class";
+  readonly type: 'class';
   readonly parts: ClassParts;
   readonly inverted: boolean;
   readonly ignoreCase: boolean;
@@ -76,14 +72,14 @@ export interface ClassExpectation {
  * Expected any character, with `.`
  */
 export interface AnyExpectation {
-  readonly type: "any";
+  readonly type: 'any';
 }
 
 /**
  * Expected the end of input.
  */
 export interface EndExpectation {
-  readonly type: "end";
+  readonly type: 'end';
 }
 
 /**
@@ -92,7 +88,7 @@ export interface EndExpectation {
  * function.
  */
 export interface OtherExpectation {
-  readonly type: "other";
+  readonly type: 'other';
   readonly description: string;
 }
 
@@ -150,27 +146,27 @@ export interface ParserTracer {
   trace: (event: ParserTracerEvent) => void;
 }
 
-export type ParserTracerEvent
-  = {
-      readonly type: "rule.enter";
+export type ParserTracerEvent =
+  | {
+      readonly type: 'rule.enter';
       readonly rule: string;
-      readonly location: LocationRange
+      readonly location: LocationRange;
     }
   | {
-      readonly type: "rule.fail";
+      readonly type: 'rule.fail';
       readonly rule: string;
-      readonly location: LocationRange
+      readonly location: LocationRange;
     }
   | {
-      readonly type: "rule.match";
+      readonly type: 'rule.match';
       readonly rule: string;
-      readonly location: LocationRange
+      readonly location: LocationRange;
       /** Return value from the rule. */
       readonly result: unknown;
     };
 
-export type StartRuleNames = "Song" | "FrontMatter" | "Row" | "Bar" | "Chord";
-export interface ParseOptions<T extends StartRuleNames = "Song"> {
+export type StartRuleNames = 'Song' | 'FrontMatter' | 'Row' | 'Bar' | 'Chord';
+export interface ParseOptions<T extends StartRuleNames = 'Song'> {
   /**
    * String or object that will be attached to the each `LocationRange` object
    * created by the parser. For example, this can be path to the parsed file
@@ -197,27 +193,27 @@ export declare const parse: typeof ParseFunction;
 
 // Overload of ParseFunction for each allowedStartRule
 
-declare function ParseFunction<Options extends ParseOptions<"Song">>(
+declare function ParseFunction<Options extends ParseOptions<'Song'>>(
   input: string,
   options?: Options,
 ): any;
 
-declare function ParseFunction<Options extends ParseOptions<"FrontMatter">>(
+declare function ParseFunction<Options extends ParseOptions<'FrontMatter'>>(
   input: string,
   options?: Options,
 ): any;
 
-declare function ParseFunction<Options extends ParseOptions<"Row">>(
+declare function ParseFunction<Options extends ParseOptions<'Row'>>(
   input: string,
   options?: Options,
 ): any;
 
-declare function ParseFunction<Options extends ParseOptions<"Bar">>(
+declare function ParseFunction<Options extends ParseOptions<'Bar'>>(
   input: string,
   options?: Options,
 ): any;
 
-declare function ParseFunction<Options extends ParseOptions<"Chord">>(
+declare function ParseFunction<Options extends ParseOptions<'Chord'>>(
   input: string,
   options?: Options,
 ): any;

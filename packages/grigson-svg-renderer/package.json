@@ -2,12 +2,12 @@
   "name": "grigson-svg-renderer",
   "version": "1.0.0",
   "description": "An SVG renderer custom element for grigson-chart",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "bin": {
     "grigson-svg-renderer": "./dist/cli.js"
   },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "pnpm run build:ts && pnpm run build:browser && pnpm run build:browser:register",
     "build:browser": "vite build",
@@ -18,13 +18,13 @@
     "test": "vitest",
     "test:run": "vitest run"
   },
+  "dependencies": {
+    "grigson": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^25.5.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.0",
     "vitest": "^4.0.18"
-  },
-  "dependencies": {
-    "grigson": "workspace:*"
   }
 }

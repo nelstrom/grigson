@@ -137,50 +137,50 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 
 ### Part names reference
 
-| Part value | Element | Description |
-|---|---|---|
-| `song` | `<div>` | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables |
-| `song-header` | `<header>` | Title, artist, and key block |
-| `song-title` | `<h1>` | Song title from front matter |
-| `song-artist` | `<p>` | Artist from front matter (omitted when null) |
-| `song-key` | `<p>` | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null) |
-| `song-grid` | `<div>` | CSS Grid container for all rows |
-| `section` | `<section>` | One section; always `display: contents` so children become direct grid items |
-| `section-label` | `<h2>` | Section heading, e.g. "Verse" (omitted when section has no label) |
-| `row` | `<div>` | One row of bars; uses `subgrid` |
-| `barline` | `<span>` | Any barline; always combined with a barline-kind part (see below) |
-| `barline-single` | — | Plain barline `\|` |
-| `barline-double` | — | Double barline `\|\|` |
-| `barline-final` | — | Final barline `\|\|.` |
-| `barline-startRepeat` | — | Start-repeat barline `\|\|:` |
-| `barline-endRepeat` | — | End-repeat barline `:\|\|` |
-| `barline-endRepeatStartRepeat` | — | Turn-around barline `:\|\|:` |
-| `barline-repeat-count` | `<span>` | Repeat count label, e.g. "×3", inside an end-repeat barline |
-| `slot` | `<span>` | One chord slot; carries `grid-column` positioning |
-| `dot` | `<span>` | A beat-continuation dot rendered as `/` |
-| `time-sig` | `<span>` | Time signature stacked fraction |
-| `time-sig-num` | `<span>` | Numerator of the time signature |
-| `time-sig-den` | `<span>` | Denominator of the time signature |
-| `chord` | `<span>` | A chord symbol; gains `chord-slash` when a bass note is present |
-| `chord-slash` | — | Additional part on `chord` when the chord has a bass note |
-| `chord-top` | `<span>` | Upper half of a slash chord (root + quality) |
-| `chord-root` | `<span>` | Note name, e.g. "C" or "B" |
-| `chord-accidental` | `<span>` | Accidental inside a root, rendered as ♭ or ♯ |
-| `chord-quality` | `<span>` | Quality suffix, e.g. "m", "△", "ø" |
-| `chord-fraction-line` | `<span>` | Horizontal rule between numerator and bass in a slash chord |
-| `chord-bass` | `<span>` | Bass note of a slash chord |
+| Part value                     | Element     | Description                                                                     |
+| ------------------------------ | ----------- | ------------------------------------------------------------------------------- |
+| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables |
+| `song-header`                  | `<header>`  | Title, artist, and key block                                                    |
+| `song-title`                   | `<h1>`      | Song title from front matter                                                    |
+| `song-artist`                  | `<p>`       | Artist from front matter (omitted when null)                                    |
+| `song-key`                     | `<p>`       | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null)          |
+| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                                 |
+| `section`                      | `<section>` | One section; always `display: contents` so children become direct grid items    |
+| `section-label`                | `<h2>`      | Section heading, e.g. "Verse" (omitted when section has no label)               |
+| `row`                          | `<div>`     | One row of bars; uses `subgrid`                                                 |
+| `barline`                      | `<span>`    | Any barline; always combined with a barline-kind part (see below)               |
+| `barline-single`               | —           | Plain barline `\|`                                                              |
+| `barline-double`               | —           | Double barline `\|\|`                                                           |
+| `barline-final`                | —           | Final barline `\|\|.`                                                           |
+| `barline-startRepeat`          | —           | Start-repeat barline `\|\|:`                                                    |
+| `barline-endRepeat`            | —           | End-repeat barline `:\|\|`                                                      |
+| `barline-endRepeatStartRepeat` | —           | Turn-around barline `:\|\|:`                                                    |
+| `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                     |
+| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                               |
+| `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                         |
+| `time-sig`                     | `<span>`    | Time signature stacked fraction                                                 |
+| `time-sig-num`                 | `<span>`    | Numerator of the time signature                                                 |
+| `time-sig-den`                 | `<span>`    | Denominator of the time signature                                               |
+| `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                 |
+| `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                       |
+| `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                    |
+| `chord-root`                   | `<span>`    | Note name, e.g. "C" or "B"                                                      |
+| `chord-accidental`             | `<span>`    | Accidental inside a root, rendered as ♭ or ♯                                    |
+| `chord-quality`                | `<span>`    | Quality suffix, e.g. "m", "△", "ø"                                              |
+| `chord-fraction-line`          | `<span>`    | Horizontal rule between numerator and bass in a slash chord                     |
+| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                                      |
 
 ### Unicode notation defaults
 
 The HTML renderer uses Unicode symbols by default regardless of the `notation` config:
 
-| Symbol type | Rendered as | Unicode |
-|---|---|---|
-| Flat accidental | ♭ | U+266D |
-| Sharp accidental | ♯ | U+266F |
-| Major seventh | △ | U+25B3 |
-| Diminished | ° | U+00B0 |
-| Half-diminished | ø | U+00F8 |
+| Symbol type      | Rendered as | Unicode |
+| ---------------- | ----------- | ------- |
+| Flat accidental  | ♭           | U+266D  |
+| Sharp accidental | ♯           | U+266F  |
+| Major seventh    | △           | U+25B3  |
+| Diminished       | °           | U+00B0  |
+| Half-diminished  | ø           | U+00F8  |
 
 Minor chords use `m` by default; the `symbolic` preset changes this to `-`.
 
@@ -200,27 +200,27 @@ Decreasing `--grigson-font-size` shrinks the rendered output proportionally sinc
 
 These properties can be set on the `<grigson-chart>` element (or any ancestor) to control the appearance:
 
-| Property | Default | Description |
-|---|---|---|
-| `--grigson-font-family` | `Georgia, 'Times New Roman', serif` | Font family for the entire chart |
-| `--grigson-font-size` | `1rem` | Base font size; reduce to fit narrow containers |
-| `--grigson-color` | `inherit` | Text and barline colour |
-| `--grigson-background` | `transparent` | Background of the host element |
-| `--grigson-row-gap` | `1.2em` | Vertical gap between rows within a section |
-| `--grigson-section-gap` | `2em` | Top margin before each section label |
-| `--grigson-barline-width` | `1.5px` | Stroke width of barlines |
-| `--grigson-barline-color` | `currentColor` | Colour of barlines |
-| `--grigson-repeat-dot-size` | `0.3em` | Size of repeat dots |
-| `--grigson-title-font-size` | `1.4em` | Font size of the song title |
-| `--grigson-section-label-font-size` | `0.9em` | Font size of section headings |
-| `--grigson-time-sig-font-size` | `0.7em` | Font size of time signature annotations |
+| Property                            | Default                             | Description                                     |
+| ----------------------------------- | ----------------------------------- | ----------------------------------------------- |
+| `--grigson-font-family`             | `Georgia, 'Times New Roman', serif` | Font family for the entire chart                |
+| `--grigson-font-size`               | `1rem`                              | Base font size; reduce to fit narrow containers |
+| `--grigson-color`                   | `inherit`                           | Text and barline colour                         |
+| `--grigson-background`              | `transparent`                       | Background of the host element                  |
+| `--grigson-row-gap`                 | `1.2em`                             | Vertical gap between rows within a section      |
+| `--grigson-section-gap`             | `2em`                               | Top margin before each section label            |
+| `--grigson-barline-width`           | `1.5px`                             | Stroke width of barlines                        |
+| `--grigson-barline-color`           | `currentColor`                      | Colour of barlines                              |
+| `--grigson-repeat-dot-size`         | `0.3em`                             | Size of repeat dots                             |
+| `--grigson-title-font-size`         | `1.4em`                             | Font size of the song title                     |
+| `--grigson-section-label-font-size` | `0.9em`                             | Font size of section headings                   |
+| `--grigson-time-sig-font-size`      | `0.7em`                             | Font size of time signature annotations         |
 
 Two additional variables are emitted by the renderer onto `part="song"` and control the grid geometry. You can override them, but normally the renderer computes the right values automatically:
 
-| Variable | Description |
-|---|---|
-| `--beat-cols` | Total number of beat columns in the global grid (equals the beat count of the longest row) |
-| `--min-beat-width` | Minimum width of one beat column, computed from the widest chord in the song |
+| Variable           | Description                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `--beat-cols`      | Total number of beat columns in the global grid (equals the beat count of the longest row) |
+| `--min-beat-width` | Minimum width of one beat column, computed from the widest chord in the song               |
 
 ### Normalizer requirement
 

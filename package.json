@@ -2,24 +2,25 @@
   "name": "grigson-monorepo",
   "private": true,
   "description": "Monorepo for the Grigson project",
-  "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "turbo build",
     "test": "turbo test",
     "lint": "turbo lint",
-    "format": "prettier --write \"packages/**/*.{ts,js,json,md}\""
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "tree-sitter-cli"
-    ]
+    "format": "oxfmt \"packages/**/*.{ts,js,json,md}\"",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.3",
-    "prettier": "^3.8.1",
+    "oxfmt": "latest",
     "turbo": "^2.8.17",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "tree-sitter-cli"
+    ]
   }
 }

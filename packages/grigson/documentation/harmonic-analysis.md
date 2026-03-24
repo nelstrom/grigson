@@ -78,6 +78,7 @@ C is bVII of D mixolydian, D is tonic → both get currentKey = 'D mixolydian'
 A chord not captured by any pattern and **not diatonic to homeKey** receives a `currentKey` derived from the circle of fifths. All 63 in-scope keys whose diatonic note set contains the chord's root (by spelling) are collected and ranked by `circleOfFifthsDistance` from `homeKey`. The closest key becomes `currentKey`; all tied candidates are stored in `currentKeyCandidates`.
 
 Tie-breaking rules:
+
 1. If the homeKey's **parallel minor** (e.g. `Cm` for homeKey `C`) is among the tied candidates, it is preferred.
 2. Otherwise, the first **major** key in the tied set is chosen.
 

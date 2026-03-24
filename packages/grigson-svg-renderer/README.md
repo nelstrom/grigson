@@ -28,16 +28,16 @@ Under construction. The `renderChart()` method currently returns a placeholder `
 
 Extends `HTMLElement` and implements `GrigsonRendererElement`.
 
-| Method | Description |
-|--------|-------------|
+| Method                             | Description                     |
+| ---------------------------------- | ------------------------------- |
 | `renderChart(song: Song): Element` | Returns a stub `<svg>` element. |
 
 ## Build outputs
 
-| File | Description |
-|------|-------------|
-| `dist/index.js` | ESM module (TypeScript consumers) |
-| `dist/grigson-svg-renderer.esm.js` | Browser ESM bundle |
-| `dist/grigson-svg-renderer.iife.js` | Browser IIFE bundle |
-| `dist/grigson-svg-renderer-register.esm.js` | Auto-registers `<grigson-svg-renderer>` (ESM) |
+| File                                         | Description                                    |
+| -------------------------------------------- | ---------------------------------------------- |
+| `dist/index.js`                              | ESM module (TypeScript consumers)              |
+| `dist/grigson-svg-renderer.esm.js`           | Browser ESM bundle                             |
+| `dist/grigson-svg-renderer.iife.js`          | Browser IIFE bundle                            |
+| `dist/grigson-svg-renderer-register.esm.js`  | Auto-registers `<grigson-svg-renderer>` (ESM)  |
 | `dist/grigson-svg-renderer-register.iife.js` | Auto-registers `<grigson-svg-renderer>` (IIFE) |

@@ -54,10 +54,10 @@ const inG = transposeSongToKey(song, 'G');
 
 The `<grigson-chart>` custom element supports two transposition attributes:
 
-| Attribute            | Effect                                               |
-|----------------------|------------------------------------------------------|
-| `transpose-key`      | Transposes to the named key (e.g. `transpose-key="G"`) |
-| `transpose-semitones`| Transposes by the given number of semitones (integer) |
+| Attribute             | Effect                                                 |
+| --------------------- | ------------------------------------------------------ |
+| `transpose-key`       | Transposes to the named key (e.g. `transpose-key="G"`) |
+| `transpose-semitones` | Transposes by the given number of semitones (integer)  |
 
 ```html
 <grigson-chart transpose-key="Bb">

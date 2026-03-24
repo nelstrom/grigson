@@ -32,12 +32,14 @@ async function loadGrigson() {
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
 
-connection.onInitialize((): InitializeResult => ({
-  capabilities: {
-    textDocumentSync: TextDocumentSyncKind.Incremental,
-    documentFormattingProvider: true,
-  },
-}));
+connection.onInitialize(
+  (): InitializeResult => ({
+    capabilities: {
+      textDocumentSync: TextDocumentSyncKind.Incremental,
+      documentFormattingProvider: true,
+    },
+  }),
+);
 
 connection.onDocumentFormatting((params) => {
   if (!parseSong || !normaliseSong || !TextRenderer) return [];

@@ -19,11 +19,14 @@ window.grigsonMonarchTokens = {
       // Frontmatter delimiter — opens frontmatter state
       [/^---$/, { token: 'punctuation.definition.header.grigson', next: '@frontmatter' }],
       // Section labels [Name]
-      [/^(\[)([^\]]+)(\])\s*$/, [
-        'punctuation.definition.section.begin.grigson',
-        'entity.name.section.grigson',
-        'punctuation.definition.section.end.grigson',
-      ]],
+      [
+        /^(\[)([^\]]+)(\])\s*$/,
+        [
+          'punctuation.definition.section.begin.grigson',
+          'entity.name.section.grigson',
+          'punctuation.definition.section.end.grigson',
+        ],
+      ],
       // Barlines (complex forms before simple |)
       [/:\|\|x\d+:/, 'punctuation.definition.barline.grigson'],
       [/:\|\|x\d+/, 'punctuation.definition.barline.grigson'],
@@ -38,28 +41,37 @@ window.grigsonMonarchTokens = {
       // Simile mark %
       [/%/, 'keyword.operator.simile.grigson'],
       // Chord: root + optional accidental + optional quality + optional slash bass
-      [/([A-G])([#b]?)((?:m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?)((?:\/[A-G][#b]?)?)/, [
-        'constant.other.chord.root.grigson',
-        'constant.other.chord.accidental.grigson',
-        'keyword.other.chord.quality.grigson',
-        'punctuation.separator.slash.grigson',
-      ]],
+      [
+        /([A-G])([#b]?)((?:m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?)((?:\/[A-G][#b]?)?)/,
+        [
+          'constant.other.chord.root.grigson',
+          'constant.other.chord.accidental.grigson',
+          'keyword.other.chord.quality.grigson',
+          'punctuation.separator.slash.grigson',
+        ],
+      ],
     ],
     frontmatter: [
       // Closing delimiter — pops back to root
       [/^---$/, { token: 'punctuation.definition.header.grigson', next: '@pop' }],
       // key: "quoted value"
-      [/([a-zA-Z]+)(:)(\s*"[^"]*")/, [
-        'variable.parameter.key.grigson',
-        'punctuation.separator.key-value.grigson',
-        'string.quoted.double.grigson',
-      ]],
+      [
+        /([a-zA-Z]+)(:)(\s*"[^"]*")/,
+        [
+          'variable.parameter.key.grigson',
+          'punctuation.separator.key-value.grigson',
+          'string.quoted.double.grigson',
+        ],
+      ],
       // key: unquoted value
-      [/([a-zA-Z]+)(:)(\s*.+)/, [
-        'variable.parameter.key.grigson',
-        'punctuation.separator.key-value.grigson',
-        'string.unquoted.grigson',
-      ]],
+      [
+        /([a-zA-Z]+)(:)(\s*.+)/,
+        [
+          'variable.parameter.key.grigson',
+          'punctuation.separator.key-value.grigson',
+          'string.unquoted.grigson',
+        ],
+      ],
     ],
   },
 };

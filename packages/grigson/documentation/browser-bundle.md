@@ -2,12 +2,12 @@
 
 The grigson library ships two browser-ready bundles alongside the Node.js CommonJS/ESM build:
 
-| File                           | Format                | Global             |
-| ------------------------------ | --------------------- | ------------------ |
-| `dist/grigson.iife.js`         | IIFE (self-executing) | `grigson`          |
-| `dist/grigson.esm.js`          | ES module             | —                  |
-| `dist/grigson-register.iife.js`| IIFE (side-effect)    | `grigsonRegister`  |
-| `dist/grigson-register.esm.js` | ES module             | —                  |
+| File                            | Format                | Global            |
+| ------------------------------- | --------------------- | ----------------- |
+| `dist/grigson.iife.js`          | IIFE (self-executing) | `grigson`         |
+| `dist/grigson.esm.js`           | ES module             | —                 |
+| `dist/grigson-register.iife.js` | IIFE (side-effect)    | `grigsonRegister` |
+| `dist/grigson-register.esm.js`  | ES module             | —                 |
 
 Both are produced by Vite in library mode and are rebuilt automatically as part of `pnpm build`.
 
@@ -43,12 +43,12 @@ The library provides a `<grigson-chart>` custom element for declarative chart re
 
 The `<grigson-chart>` element supports the following attributes for configuration:
 
-| Attribute             | Description                                                                 |
-| --------------------- | --------------------------------------------------------------------------- |
+| Attribute             | Description                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `template`            | ID of an external `<template>` element to use as the chart source. Ignored when an inline `<template>` child is present. |
-| `transpose-key`       | Target key for transposition (e.g., `A`).                                   |
-| `transpose-semitones` | Number of semitones to transpose (e.g., `2` for a whole step up).           |
-| `normalise`           | Presence attribute — normalise enharmonic spellings before rendering.       |
+| `transpose-key`       | Target key for transposition (e.g., `A`).                                                                                |
+| `transpose-semitones` | Number of semitones to transpose (e.g., `2` for a whole step up).                                                        |
+| `normalise`           | Presence attribute — normalise enharmonic spellings before rendering.                                                    |
 
 Changing these attributes via the DOM will automatically re-render the chart.
 
@@ -118,9 +118,9 @@ Authors can opt out of containment with `container-type: normal` on the element 
 
 The built-in renderer element. Accepts:
 
-| Attribute         | Description                                                      |
-| ----------------- | ---------------------------------------------------------------- |
-| `notation-preset` | Chord notation style: `jazz` (default), `pop`, or `symbolic`.   |
+| Attribute         | Description                                                   |
+| ----------------- | ------------------------------------------------------------- |
+| `notation-preset` | Chord notation style: `jazz` (default), `pop`, or `symbolic`. |
 
 When `notation-preset` changes, `<grigson-html-renderer>` dispatches a `grigson:renderer-update` event which causes `<grigson-chart>` to re-render.
 
@@ -130,31 +130,31 @@ CSS Custom Properties and Shadow Parts belong to the **renderer element** (`<gri
 
 #### Custom Properties
 
-| Property                       | Description                                | Default     |
-| ------------------------------ | ------------------------------------------ | ----------- |
-| `--grigson-font-family`        | Font family for the entire chart.           | `monospace` |
-| `--grigson-color`              | Base text color.                            | `inherit`   |
-| `--grigson-background`         | Background color.                           | `transparent`|
-| `--grigson-line-height`        | Line height for the chart rows.             | `1.5`       |
-| `--grigson-barline-color`      | Color of the barlines (`|`).                | `--grigson-color`|
-| `--grigson-chord-root-color`   | Color of the chord roots (e.g., `C`).       | `--grigson-color`|
-| `--grigson-chord-suffix-color` | Color of the chord suffixes (e.g., `m7`).   | `--grigson-color`|
-| `--grigson-frontmatter-color`  | Color of the YAML front matter block.       | `#888`      |
+| Property                       | Description                               | Default           |
+| ------------------------------ | ----------------------------------------- | ----------------- | ----------------- |
+| `--grigson-font-family`        | Font family for the entire chart.         | `monospace`       |
+| `--grigson-color`              | Base text color.                          | `inherit`         |
+| `--grigson-background`         | Background color.                         | `transparent`     |
+| `--grigson-line-height`        | Line height for the chart rows.           | `1.5`             |
+| `--grigson-barline-color`      | Color of the barlines (`                  | `).               | `--grigson-color` |
+| `--grigson-chord-root-color`   | Color of the chord roots (e.g., `C`).     | `--grigson-color` |
+| `--grigson-chord-suffix-color` | Color of the chord suffixes (e.g., `m7`). | `--grigson-color` |
+| `--grigson-frontmatter-color`  | Color of the YAML front matter block.     | `#888`            |
 
 #### Shadow Parts
 
 The following elements can be styled using the `::part()` pseudo-element:
 
-| Part                  | Description                                |
-| --------------------- | ------------------------------------------ |
-| `song`                | The container for the entire song.         |
-| `frontmatter`         | The YAML front matter block.               |
-| `frontmatter-value`   | Values within the front matter fields.     |
-| `row`                 | A single row of bars.                      |
-| `barline`             | A single barline.                          |
-| `chord`               | A complete chord symbol.                   |
-| `chord-root`          | The root note of a chord.                  |
-| `chord-suffix`        | The quality suffix of a chord.             |
+| Part                | Description                            |
+| ------------------- | -------------------------------------- |
+| `song`              | The container for the entire song.     |
+| `frontmatter`       | The YAML front matter block.           |
+| `frontmatter-value` | Values within the front matter fields. |
+| `row`               | A single row of bars.                  |
+| `barline`           | A single barline.                      |
+| `chord`             | A complete chord symbol.               |
+| `chord-root`        | The root note of a chord.              |
+| `chord-suffix`      | The quality suffix of a chord.         |
 
 Example:
 

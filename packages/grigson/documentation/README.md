@@ -303,6 +303,7 @@ key: F
 Syntax highlighting for `.chart` files is available for VS Code.
 
 The extension provides:
+
 - Syntax highlighting for front matter delimiters and fields.
 - Highlighting for barlines (`|`).
 - Highlighting for chord roots, accidentals (`#`, `b`), and qualities (`m`, `7`, `m7b5`).

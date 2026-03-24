@@ -14,7 +14,9 @@
   "tree-sitter": [
     {
       "scope": "source.grigson",
-      "file-types": ["chart"]
+      "file-types": [
+        "chart"
+      ]
     }
   ]
 }

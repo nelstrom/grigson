@@ -27,12 +27,7 @@ export function activate(context: ExtensionContext) {
     documentSelector: [{ scheme: 'file', language: 'grigson' }],
   };
 
-  client = new LanguageClient(
-    'grigson',
-    'Grigson Language Server',
-    serverOptions,
-    clientOptions,
-  );
+  client = new LanguageClient('grigson', 'Grigson Language Server', serverOptions, clientOptions);
   context.subscriptions.push(client);
   client.start();
 }

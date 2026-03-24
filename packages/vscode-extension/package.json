@@ -1,18 +1,23 @@
 {
   "name": "vscode-grigson",
   "displayName": "Grigson Chord Charts",
-  "description": "Syntax highlighting and tools for Grigson .chart files",
   "version": "0.1.0",
-  "engines": {
-    "vscode": "^1.90.0"
-  },
+  "description": "Syntax highlighting and tools for Grigson .chart files",
   "categories": [
     "Programming Languages"
   ],
-  "activationEvents": [
-    "onLanguage:grigson"
-  ],
   "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "grigson-language-server": "workspace:*",
+    "vscode-languageclient": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.0.0"
+  },
   "contributes": {
     "languages": [
       {
@@ -35,15 +40,10 @@
       }
     ]
   },
-  "dependencies": {
-    "grigson-language-server": "workspace:*",
-    "vscode-languageclient": "^9.0.0"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.90.0",
-    "typescript": "^5.0.0"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
+  "activationEvents": [
+    "onLanguage:grigson"
+  ],
+  "engines": {
+    "vscode": "^1.90.0"
   }
 }

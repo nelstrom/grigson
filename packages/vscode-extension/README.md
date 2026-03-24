@@ -14,9 +14,10 @@ VS Code extension for Grigson `.chart` files. Provides syntax highlighting and l
 The extension registers a document formatter for `.chart` files backed by `grigson normalise`. Invoking **Format Document** (`⇧⌥F` on macOS, `Shift+Alt+F` on Windows/Linux) parses the file, normalises chord spellings to match the detected key, and rewrites the document in place. If the file already matches the normalised form, the document is left unchanged.
 
 The formatter is available via:
+
 - **Format Document** in the command palette
 - The right-click context menu → **Format Document**
-- The **Format Document with…** picker (select *Grigson Language Server*)
+- The **Format Document with…** picker (select _Grigson Language Server_)
 - On save, if `editor.formatOnSave` is enabled in settings
 
 No user configuration is required.

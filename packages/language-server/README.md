@@ -23,6 +23,7 @@ pnpm --filter grigson-language-server run build
 On every file open and every keystroke, the server calls `validate()` from the `grigson` package and sends the resulting diagnostics to the editor via `textDocument/publishDiagnostics`. Valid files produce zero diagnostics; parse errors appear as red squiggles with hover tooltips.
 
 Diagnostics include:
+
 - `range` — 0-indexed start/end position of the error
 - `severity` — `Error` (1) for parse errors
 - `message` — the Peggy parse error message

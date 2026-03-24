@@ -1,0 +1,11 @@
+#!/bin/sh
+# Format staged files with oxfmt before committing
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|jsonc|md)$')
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+echo "$STAGED" | xargs ./node_modules/.bin/oxfmt
+echo "$STAGED" | xargs git add

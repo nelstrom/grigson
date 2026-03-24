@@ -2,13 +2,13 @@
   "name": "grigson",
   "version": "1.0.0",
   "description": "A plain-text chord chart format with parser and renderer",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "bin": {
     "grigson": "./dist/cli.js",
     "grigson-html-renderer": "./dist/html-renderer-cli.js"
   },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy && pnpm run build:browser && pnpm run build:browser:register",
     "build:browser": "vite build",
@@ -22,8 +22,11 @@
     "test": "vitest",
     "test:run": "vitest run",
     "coverage": "vitest run --coverage",
-    "format": "prettier --write src/",
+    "format": "oxfmt src/",
     "lint": "eslint src/"
+  },
+  "dependencies": {
+    "minimist": "^1.2.8"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -34,13 +37,9 @@
     "fast-check": "^4.6.0",
     "happy-dom": "^20.8.4",
     "peggy": "^5.1.0",
-    "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
     "vite": "^8.0.0",
     "vitest": "^4.0.18"
-  },
-  "dependencies": {
-    "minimist": "^1.2.8"
   }
 }

@@ -9,10 +9,12 @@ export default async function (eleventyConfig) {
     langs: [],
   });
   await highlighter.loadLanguage({
-    ...JSON.parse(fs.readFileSync(
-      path.join(import.meta.dirname, '../textmate-grammar/grigson.tmLanguage.json'),
-      'utf8'
-    )),
+    ...JSON.parse(
+      fs.readFileSync(
+        path.join(import.meta.dirname, '../textmate-grammar/grigson.tmLanguage.json'),
+        'utf8',
+      ),
+    ),
     name: 'grigson',
   });
 
@@ -22,15 +24,14 @@ export default async function (eleventyConfig) {
   });
 
   eleventyConfig.addAsyncFilter('highlightChart', async (name) => {
-    const source = fs.readFileSync(
-      path.join(import.meta.dirname, 'charts', `${name}.chart`),
-      'utf8'
-    ).trim();
+    const source = fs
+      .readFileSync(path.join(import.meta.dirname, 'charts', `${name}.chart`), 'utf8')
+      .trim();
     return highlighter.codeToHtml(source, { lang: 'grigson', theme: 'nord' });
   });
 
   eleventyConfig.addFilter('indexOf', (arr, page) =>
-    arr.findIndex((item) => item.url === page.url)
+    arr.findIndex((item) => item.url === page.url),
   );
 
   eleventyConfig.addWatchTarget('charts/');
@@ -46,7 +47,8 @@ export default async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     'node_modules/grigson/dist/grigson.iife.js': 'js/grigson.iife.js',
     'node_modules/grigson/dist/grigson-register.iife.js': 'js/grigson-register.iife.js',
-    '../grigson-text-renderer/dist/grigson-text-renderer-register.iife.js': 'js/grigson-text-renderer-register.iife.js',
+    '../grigson-text-renderer/dist/grigson-text-renderer-register.iife.js':
+      'js/grigson-text-renderer-register.iife.js',
     '../textmate-grammar/grigson.tmLanguage.json': 'js/grigson.tmLanguage.json',
     'node_modules/monaco-editor/min/vs': 'js/monaco/vs',
     'node_modules/vscode-oniguruma/release/onig.wasm': 'js/onig.wasm',
