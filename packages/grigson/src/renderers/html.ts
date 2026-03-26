@@ -18,6 +18,8 @@ export interface SlotLayout {
   col: number;
   span: number;
   showTimeSig?: TimeSignature;
+  /** True for synthesized dot slots (remainder beats with no explicit dot in the source) */
+  implicit?: boolean;
 }
 
 export interface RowLayout {
@@ -82,28 +84,38 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
         }
 
         const isMode2 = bar.slots.some((s) => s.type === 'dot');
-        const beatsPerSlot = isMode2 ? 1 : activeTSig.numerator / bar.slots.length;
+        const slotCount = bar.slots.length;
+        const baseSpan = isMode2 ? 1 : Math.floor(activeTSig.numerator / slotCount);
+        const remainder = isMode2 ? 0 : activeTSig.numerator - baseSpan * slotCount;
 
         const slots: SlotLayout[] = [];
         let isFirstSlot = true;
 
-        for (const slot of bar.slots) {
+        bar.slots.forEach((slot, i) => {
           slots.push({
             col: beatOffset + 1,
-            span: beatsPerSlot,
+            span: baseSpan,
             showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
           });
 
           if (slot.type === 'chord') {
-            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / beatsPerSlot;
+            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / baseSpan;
             if (widthPerBeatEm > globalMinBeatWidthEm) {
               globalMinBeatWidthEm = widthPerBeatEm;
             }
           }
 
-          beatOffset += beatsPerSlot;
+          beatOffset += baseSpan;
           isFirstSlot = false;
-        }
+
+          // After the last real slot, synthesize dot slots for any remainder beats
+          if (i === slotCount - 1) {
+            for (let r = 0; r < remainder; r++) {
+              slots.push({ col: beatOffset + 1, span: 1, implicit: true });
+              beatOffset += 1;
+            }
+          }
+        });
 
         rowLayout.bars.push({ slots, closeBarlineCol: beatOffset + 1 });
       }
@@ -231,14 +243,14 @@ function renderRow(row: Row, rowLayout: RowLayout): string {
     const bar: Bar = row.bars[barIdx];
     const barLayout = rowLayout.bars[barIdx];
 
-    for (let slotIdx = 0; slotIdx < bar.slots.length; slotIdx++) {
-      const slot: BeatSlot = bar.slots[slotIdx];
+    for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
       const slotLayout = barLayout.slots[slotIdx];
       const { col, span } = slotLayout;
+      const slot: BeatSlot | undefined = bar.slots[slotIdx];
 
-      if (slot.type === 'dot') {
+      if (slotLayout.implicit || slot?.type === 'dot') {
         html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;
-      } else {
+      } else if (slot) {
         // chord slot
         let slotContent = '';
         if (slotLayout.showTimeSig) {

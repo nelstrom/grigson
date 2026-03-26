@@ -45,6 +45,12 @@ describe('computeGlobalLayout', () => {
       expect(beatCols).toBe(6);
     });
 
+    it('4/4 bar with 3 slots → last slot absorbs remainder, row total=4', () => {
+      const song = parseSong('---\nmeter: 4/4\n---\n| C Am F |\n');
+      const { beatCols } = computeGlobalLayout(song);
+      expect(beatCols).toBe(4);
+    });
+
     it('mode 2 (dot slots): each slot = 1 beat', () => {
       // 4 slots (1 chord + 1 dot + 1 chord + 1 dot) → 4 beats for the bar
       const song = parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n');
@@ -92,6 +98,20 @@ describe('computeGlobalLayout', () => {
       expect(layout.bars[1].slots[0]).toMatchObject({ col: 5, span: 2 });
       expect(layout.bars[1].slots[1]).toMatchObject({ col: 7, span: 2 });
       expect(layout.bars[1].closeBarlineCol).toBe(9);
+    });
+
+    it('3-chord bar: all slots span=1, implicit dot appended for remainder beat', () => {
+      // | C Am F | in 4/4 → floor(4/3)=1, remainder=1 → C:span1, Am:span1, F:span1, implicit-dot:span1
+      const song = parseSong('---\nmeter: 4/4\n---\n| C Am F |\n');
+      const { rows } = computeGlobalLayout(song);
+      const row = song.sections[0].rows[0];
+      const bar = rows.get(row)!.bars[0];
+
+      expect(bar.slots[0]).toMatchObject({ col: 1, span: 1 }); // C
+      expect(bar.slots[1]).toMatchObject({ col: 2, span: 1 }); // Am
+      expect(bar.slots[2]).toMatchObject({ col: 3, span: 1 }); // F
+      expect(bar.slots[3]).toMatchObject({ col: 4, span: 1, implicit: true }); // synthesized dot
+      expect(bar.closeBarlineCol).toBe(5);
     });
 
     it('mode 2 (dot): each slot has span=1', () => {
@@ -244,6 +264,15 @@ describe('HtmlRenderer', () => {
       const html = renderer.render(parseSong('| C/Bb |\n'));
       expect(html).toContain('♭');
       expect(html).toMatch(/part="chord-bass"/);
+    });
+  });
+
+  describe('implicit dot (remainder beats)', () => {
+    it('3-chord 4/4 bar renders identically to explicit trailing dot', () => {
+      const renderer = new HtmlRenderer();
+      const implicit = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C Am F |\n'));
+      const explicit = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C Am F . |\n'));
+      expect(implicit).toBe(explicit);
     });
   });
 
