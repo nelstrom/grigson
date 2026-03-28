@@ -1,10 +1,10 @@
 ---
 layout: base.njk
-title: Chart Format
-permalink: /format/
+title: The Grigson Language
+permalink: /language/
 ---
 
-# Grigson Format Reference
+# The Grigson Language
 
 Grigson is a plain-text format for writing chord charts, named after Lionel Grigson, author of _The Jazz Chord Book_. It is designed so that the source text closely resembles the rendered output, and so that the **form of a song** (AABA, verse/chorus, 12-bar blues, etc.) is apparent at a glance.
 
@@ -51,13 +51,14 @@ key: Ab
 
 Front matter is written in YAML. All fields are optional.
 
-| Field    | Type    | Description                          |
-| -------- | ------- | ------------------------------------ |
-| `title`  | string  | Title of the song                    |
-| `artist` | string  | Composer or artist name              |
-| `key`    | string  | Global key (see Key Notation below)  |
-| `tempo`  | integer | Tempo in BPM                         |
-| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"` |
+| Field    | Type    | Description                                             |
+| -------- | ------- | ------------------------------------------------------- |
+| `title`  | string  | Title of the song                                       |
+| `artist` | string  | Composer or artist name                                 |
+| `key`    | string  | Global key (see Key Notation below)                     |
+| `meter`  | string  | Time signature; default 4/4 (see Time Signatures below) |
+| `tempo`  | integer | Tempo in BPM                                            |
+| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"`                    |
 
 ---
 

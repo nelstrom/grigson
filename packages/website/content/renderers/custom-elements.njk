@@ -1,0 +1,283 @@
+---
+layout: base.njk
+title: Custom Elements
+permalink: /renderers/custom-elements/
+---
+<script src="/js/grigson-text-renderer-register.iife.js"></script>
+
+<h1>Custom Elements</h1>
+<p>
+  Grigson provides a <code>&lt;grigson-chart&gt;</code> custom element for declarative chart
+  rendering in HTML pages. Load the auto-registering bundle and drop the element anywhere in
+  your markup — no JavaScript required for basic usage.
+</p>
+<p>See <a href="/renderers/browser/">Browser bundles</a> for how to load the bundle.</p>
+
+<h2>Inline template</h2>
+<p>
+  Place the chart source in a <code>&lt;template&gt;</code> child. The
+  <code>normalise</code> attribute corrects enharmonic spelling for the detected key.
+</p>
+<pre><code>&lt;grigson-chart normalise&gt;
+  &lt;template&gt;
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+| Am7b5 | D7 | Gm | Gm |
+[B]
+| Cm7 | F7 | Bbmaj7 | Bbmaj7 |
+| Am7b5 | D7 | Gm | Gm |
+  &lt;/template&gt;
+&lt;/grigson-chart&gt;</code></pre>
+
+<grigson-chart normalise>
+  <template>
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+| Am7b5 | D7 | Gm | Gm |
+[B]
+| Cm7 | F7 | Bbmaj7 | Bbmaj7 |
+| Am7b5 | D7 | Gm | Gm |
+  </template>
+</grigson-chart>
+
+<h2>External template — multi-key transposition</h2>
+<p>
+  A single <code>&lt;template id="..."&gt;</code> can be referenced by multiple
+  <code>&lt;grigson-chart&gt;</code> elements via the <code>template</code> attribute.
+  This is useful for producing the same chart in different keys for different instruments:
+</p>
+<ul>
+  <li><strong>Concert pitch</strong> — no transposition</li>
+  <li><strong>Bb instruments</strong> (trumpet, clarinet, tenor sax) — sound a major 2nd lower than written, so transpose up 2 semitones</li>
+  <li><strong>Eb instruments</strong> (alto sax, baritone sax) — sound a major 6th lower than written, so transpose up 9 semitones</li>
+</ul>
+<pre><code>&lt;template id="autumn-leaves"&gt;
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+...
+&lt;/template&gt;
+
+&lt;!-- Concert pitch --&gt;
+&lt;grigson-chart template="autumn-leaves" normalise&gt;&lt;/grigson-chart&gt;
+
+&lt;!-- Bb instruments: transpose +2 semitones --&gt;
+&lt;grigson-chart template="autumn-leaves" normalise transpose-semitones="2"&gt;&lt;/grigson-chart&gt;
+
+&lt;!-- Eb instruments: transpose +9 semitones --&gt;
+&lt;grigson-chart template="autumn-leaves" normalise transpose-semitones="9"&gt;&lt;/grigson-chart&gt;</code></pre>
+
+<template id="autumn-leaves">
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+| Am7b5 | D7 | Gm | Gm |
+[B]
+| Cm7 | F7 | Bbmaj7 | Bbmaj7 |
+| Am7b5 | D7 | Gm | Gm |
+</template>
+
+<h3>Concert pitch</h3>
+<grigson-chart template="autumn-leaves" normalise></grigson-chart>
+
+<h3>Bb instruments (+2 semitones)</h3>
+<grigson-chart template="autumn-leaves" normalise transpose-semitones="2"></grigson-chart>
+
+<h3>Eb instruments (+9 semitones)</h3>
+<grigson-chart template="autumn-leaves" normalise transpose-semitones="9"></grigson-chart>
+
+<h2>Explicit renderer — <code>&lt;grigson-html-renderer&gt;</code></h2>
+<p>
+  By default <code>&lt;grigson-chart&gt;</code> uses the built-in HTML renderer.
+  You can make it explicit by adding a <code>&lt;grigson-html-renderer&gt;</code> child,
+  which lets you target its CSS custom properties and shadow parts directly.
+</p>
+<pre><code>&lt;grigson-chart normalise&gt;
+  &lt;grigson-html-renderer style="
+    --grigson-chord-root-color: steelblue;
+    --grigson-chord-suffix-color: tomato;
+  "&gt;&lt;/grigson-html-renderer&gt;
+  &lt;template&gt;
+---
+title: All The Things You Are
+key: Ab
+---
+[A]
+| Fm7 | Bbm7 | Eb7 | Abmaj7 |
+| Dbmaj7 | G7 | Cmaj7 | Cmaj7 |
+  &lt;/template&gt;
+&lt;/grigson-chart&gt;</code></pre>
+
+<grigson-chart normalise>
+  <grigson-html-renderer style="
+    --grigson-chord-root-color: steelblue;
+    --grigson-chord-suffix-color: tomato;
+  "></grigson-html-renderer>
+  <template>
+---
+title: All The Things You Are
+key: Ab
+---
+[A]
+| Fm7 | Bbm7 | Eb7 | Abmaj7 |
+| Dbmaj7 | G7 | Cmaj7 | Cmaj7 |
+  </template>
+</grigson-chart>
+
+<h2>Third-party renderer — <code>&lt;grigson-text-renderer&gt;</code></h2>
+<p>
+  Any element implementing the <code>GrigsonRendererElement</code> interface can be used as
+  the renderer. <code>&lt;grigson-text-renderer&gt;</code> is a separate package that renders
+  charts as plain text inside a <code>&lt;pre&gt;</code> element.
+</p>
+<pre><code>&lt;!-- Load the separate package --&gt;
+&lt;script src="/js/grigson-text-renderer-register.iife.js"&gt;&lt;/script&gt;
+
+&lt;grigson-chart normalise&gt;
+  &lt;grigson-text-renderer&gt;&lt;/grigson-text-renderer&gt;
+  &lt;template&gt;
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+  &lt;/template&gt;
+&lt;/grigson-chart&gt;</code></pre>
+
+<grigson-chart normalise>
+  <grigson-text-renderer></grigson-text-renderer>
+  <template>
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+| Am7b5 | D7 | Gm | Gm |
+[B]
+| Cm7 | F7 | Bbmaj7 | Bbmaj7 |
+| Am7b5 | D7 | Gm | Gm |
+  </template>
+</grigson-chart>
+
+<h2>Attributes reference</h2>
+<table>
+  <thead>
+    <tr><th>Attribute</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>template</code></td>
+      <td>ID of an external <code>&lt;template&gt;</code> element to use as the chart source. An inline <code>&lt;template&gt;</code> child takes precedence when both are present.</td>
+    </tr>
+    <tr>
+      <td><code>transpose-key</code></td>
+      <td>Target key for transposition (e.g. <code>transpose-key="G"</code>). Takes precedence over <code>transpose-semitones</code> when both are present.</td>
+    </tr>
+    <tr>
+      <td><code>transpose-semitones</code></td>
+      <td>Number of semitones to transpose (e.g. <code>transpose-semitones="2"</code> for a whole step up).</td>
+    </tr>
+    <tr>
+      <td><code>normalise</code></td>
+      <td>Presence attribute — normalise enharmonic spellings before rendering.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Changing any of these attributes via the DOM will automatically re-render the chart.</p>
+
+<h2>CSS API</h2>
+<p>
+  CSS custom properties and shadow parts belong to the renderer element
+  (<code>&lt;grigson-html-renderer&gt;</code> or a custom renderer), not to
+  <code>&lt;grigson-chart&gt;</code> itself.
+</p>
+
+<h3>Custom properties</h3>
+<table>
+  <thead>
+    <tr><th>Property</th><th>Description</th><th>Default</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>--grigson-font-family</code></td><td>Font family for the entire chart.</td><td><code>monospace</code></td></tr>
+    <tr><td><code>--grigson-color</code></td><td>Base text color.</td><td><code>inherit</code></td></tr>
+    <tr><td><code>--grigson-background</code></td><td>Background color.</td><td><code>transparent</code></td></tr>
+    <tr><td><code>--grigson-line-height</code></td><td>Line height for the chart rows.</td><td><code>1.5</code></td></tr>
+    <tr><td><code>--grigson-barline-color</code></td><td>Color of the barlines.</td><td><code>--grigson-color</code></td></tr>
+    <tr><td><code>--grigson-chord-root-color</code></td><td>Color of the chord roots (e.g. <code>C</code>).</td><td><code>--grigson-color</code></td></tr>
+    <tr><td><code>--grigson-chord-suffix-color</code></td><td>Color of the chord suffixes (e.g. <code>m7</code>).</td><td><code>--grigson-color</code></td></tr>
+    <tr><td><code>--grigson-frontmatter-color</code></td><td>Color of the YAML front matter block.</td><td><code>#888</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Shadow parts</h3>
+<table>
+  <thead>
+    <tr><th>Part</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>song</code></td><td>The container for the entire song.</td></tr>
+    <tr><td><code>frontmatter</code></td><td>The YAML front matter block.</td></tr>
+    <tr><td><code>frontmatter-value</code></td><td>Values within the front matter fields.</td></tr>
+    <tr><td><code>row</code></td><td>A single row of bars.</td></tr>
+    <tr><td><code>barline</code></td><td>A single barline.</td></tr>
+    <tr><td><code>chord</code></td><td>A complete chord symbol.</td></tr>
+    <tr><td><code>chord-root</code></td><td>The root note of a chord.</td></tr>
+    <tr><td><code>chord-suffix</code></td><td>The quality suffix of a chord.</td></tr>
+  </tbody>
+</table>
+
+<pre><code>grigson-chart::part(chord-root) {
+  color: #d33;
+  font-weight: bold;
+}
+
+grigson-chart {
+  --grigson-font-family: 'Fira Code', monospace;
+}</code></pre>
+
+<h2>Responsive layout</h2>
+<p>
+  <code>&lt;grigson-chart&gt;</code> sets <code>container-type: inline-size</code> on itself
+  by default, so <code>@container</code> rules targeting its children work without any extra
+  CSS. You can place multiple renderer configurations inside one chart and use container
+  queries to show the appropriate one:
+</p>
+<pre><code>&lt;grigson-chart&gt;
+  &lt;template&gt;| C | Am | F | G |&lt;/template&gt;
+  &lt;grigson-html-renderer class="narrow"&gt;&lt;/grigson-html-renderer&gt;
+  &lt;grigson-html-renderer class="wide"&gt;&lt;/grigson-html-renderer&gt;
+&lt;/grigson-chart&gt;
+
+&lt;style&gt;
+  .narrow { display: block; }
+  .wide   { display: none;  }
+
+  @container (min-width: 600px) {
+    .narrow { display: none;  }
+    .wide   { display: block; }
+  }
+&lt;/style&gt;</code></pre>
+
+<p>Opt out of containment with <code>container-type: normal</code> on the element if needed.</p>
+
+<h2>Building a custom renderer element</h2>
+<p>
+  Any element that implements <code>renderChart(song)</code> can be used as a renderer child.
+  See the <a href="/api/renderer-interface/">API Reference — Renderer Interface</a> for details.
+</p>

@@ -1,50 +1,10 @@
 ---
 layout: base.njk
-title: Renderer
-permalink: /renderer/
+title: SVG Renderer
+permalink: /renderers/svg/
 ---
 
-# Renderer Documentation
-
-Grigson separates parsing from rendering. The parser reads a `.chart` source file and produces an abstract song tree. A renderer takes that tree and produces output — plain text, SVG, or other formats. Other renderers can be created by implementing the same interface.
-
----
-
-## The Plain Text Renderer
-
-The plain text renderer is the simplest renderer, and the best starting point for understanding the grigson pipeline. It takes a parsed song tree and produces a `.chart` file as output — making it, at its most basic, a round-trip identity function: parse a chart, then render it back to text.
-
-This becomes genuinely useful when combined with transposition. You can author a chart in one key, then use the plain text renderer to produce a transposed version as a new `.chart` file:
-
-```javascript
-import { parse } from 'grigson/parser';
-import { TextRenderer } from 'grigson/renderers/text';
-
-const source = `
----
-title: "Autumn Leaves"
-key: G
----
-
-[A]
-| (4/4) Cm7 | F7 | BbM7 | EbM7 |
-| Am7b5 | D7 | Gm | Gm |
-`;
-
-const song = parse(source);
-
-// Identity: renders back to the same .chart format
-const inG = new TextRenderer().render(song);
-
-// Transposed up a tone to A
-const inA = new TextRenderer({ transpose: { toKey: 'A' } }).render(song);
-```
-
-The plain text renderer supports all the same configuration options as the SVG renderer, except for `layout` (which has no meaning for text output).
-
----
-
-## The SVG Renderer
+# SVG Renderer
 
 The SVG renderer produces an SVG string suitable for embedding in an HTML page.
 
@@ -117,6 +77,8 @@ Example:
 }
 ```
 
+---
+
 ### `transpose`
 
 Controls transposition. Transposition is a renderer concern: the source file always describes the song in its original key, and the renderer is responsible for shifting the output.
@@ -147,18 +109,10 @@ Suppose the source chart is in G. All of the following renderer configs produce 
 
 ```javascript
 // Option 1: name the target key
-{
-  transpose: {
-    toKey: 'A';
-  }
-}
+{ transpose: { toKey: 'A' } }
 
 // Option 2: specify the interval
-{
-  transpose: {
-    semitones: 2;
-  }
-}
+{ transpose: { semitones: 2 } }
 ```
 
 If the source chart has per-section key overrides, transposition applies to each section independently. For example, if verse is in `Eb` and chorus is in `Ab`, and you transpose `toKey: 'F'`, the verse will render in F and the chorus in Bb.
@@ -245,6 +199,8 @@ simile: {
 }
 ```
 
+---
+
 ### `repeats`
 
 Controls whether repeat barlines and volta brackets are rendered as written or expanded into linear (through-composed) form.
@@ -300,50 +256,3 @@ layout: {
   minBarWidth: 48,
 }
 ```
-
----
-
-## Rendering the Same Chart Multiple Ways
-
-Because transposition and notation are renderer concerns, the same parsed song tree can be rendered into multiple output variations without re-parsing. This works across renderer types too — you can produce a transposed `.chart` file with the text renderer and an SVG with the SVG renderer from the same parse result:
-
-```javascript
-const song = parse(source);
-
-// Transposed .chart file for a Bb instrument
-const bbChart = new TextRenderer({ transpose: { semitones: 2 } }).render(song);
-
-// Concert pitch SVG for the music stand
-const concertSvg = new SvgRenderer({ notation: { preset: 'jazz' } }).render(song);
-
-// Transposed SVG for a guitarist with capo 2
-const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);
-```
-
----
-
-## Creating a Custom Renderer
-
-A renderer is any object with a `render(song)` method. The method receives the parsed song tree and returns whatever output format the renderer targets.
-
-```javascript
-class MyRenderer {
-  constructor(config = {}) {
-    this.config = config;
-  }
-
-  render(song) {
-    // Walk the song tree and produce output.
-    // song.meta        — front matter fields (title, artist, key, ...)
-    // song.sections    — array of Section objects
-    //   section.name   — e.g. "Verse"
-    //   section.key    — key override for this section, if any
-    //   section.rows   — array of Row objects
-    //     row.bars     — array of Bar objects
-    //       bar.beats  — array of beat slots (chord or hold)
-    //       bar.type   — barline type at start of bar
-  }
-}
-```
-
-The song tree API will be documented separately once the parser is implemented.

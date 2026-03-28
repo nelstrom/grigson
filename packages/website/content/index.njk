@@ -1,0 +1,102 @@
+---
+layout: base.njk
+title: grigson
+permalink: /
+---
+<style>
+  .hero-example {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  @media (max-width: 600px) {
+    .hero-example {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hero-example h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+  }
+
+  .hero-example pre {
+    margin: 0;
+  }
+
+  .quick-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 2rem 0;
+  }
+
+  .quick-links a {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .quick-links a:hover {
+    border-color: var(--color-link);
+  }
+</style>
+
+<h1>grigson</h1>
+<p>A plain-text format and toolkit for writing chord charts.
+Source files use the <code>.chart</code> extension and look like the charts they describe —
+pipe characters for bar lines, standard chord names, YAML front matter for metadata.</p>
+
+<div class="hero-example">
+  <div>
+    <h3>Source</h3>
+    <pre>---
+title: Blues in F
+key: F
+---
+
+[Head]
+||: (4/4) F7 | % | % | % |
+| Bb7 | % | F7 | % |
+| C7 | Bb7 | F7 | C7 :||</pre>
+  </div>
+  <div>
+    <h3>Rendered</h3>
+    <grigson-chart normalise>
+      <template>---
+title: Blues in F
+key: F
+---
+
+[Head]
+||: (4/4) F7 | % | % | % |
+| Bb7 | % | F7 | % |
+| C7 | Bb7 | F7 | C7 :||</template>
+    </grigson-chart>
+  </div>
+</div>
+
+<div class="quick-links">
+  <a href="/language/">Learn the language</a>
+  <a href="/renderers/">Using renderers</a>
+  <a href="/tutorial/">Step-by-step tutorial</a>
+  <a href="/playground/">Try the playground</a>
+</div>
+
+<h2>What's in the toolkit</h2>
+<ul>
+  <li><a href="/language/">The grigson format</a> — a readable plain-text chord chart language with sections, keys, time signatures, repeats, and volta brackets</li>
+  <li><a href="/renderers/custom-elements/">Custom elements</a> — drop <code>&lt;grigson-chart&gt;</code> into any HTML page for live rendering with optional transposition</li>
+  <li><a href="/renderers/svg/">SVG renderer</a> — produce publication-quality SVG for embedding in web pages or exporting</li>
+  <li><a href="/renderers/text/">Text renderer</a> — round-trip <code>.chart</code> output; use with the CLI for transposition pipelines</li>
+  <li><a href="/cli/">CLI</a> — normalise, transpose, and validate <code>.chart</code> files from the command line</li>
+  <li><a href="/playground/">Playground</a> — live editor with syntax highlighting, normalisation, and URL sharing</li>
+</ul>

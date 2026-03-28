@@ -45,6 +45,27 @@
       nav {
         margin-bottom: 1.5rem;
         font-size: 0.9rem;
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+
+      nav .nav-primary {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        flex: 1;
+      }
+
+      nav .nav-api {
+        font-size: 0.8rem;
+        opacity: 0.7;
+      }
+
+      nav .nav-api:hover {
+        opacity: 1;
       }
 
       pre, code {
@@ -71,25 +92,22 @@
   </head>
   <body>
     <nav>
-      <a href="/">grigson</a>
-      |
-      <a href="/format/">Chart Format</a>
-      |
-      <a href="/cli/">CLI Reference</a>
-      |
-      <a href="/renderer/">Renderer</a>
-      |
-      <a href="/testing/">Testing</a>
-      |
-      <a href="/demo/">Demo</a>
-      |
-      <a href="/elements/">Custom Elements</a>
-      |
-      <a href="/playground/">Playground</a>
-      |
-      <a href="/tutorial/">Tutorial</a>
-      |
-      <a href="/songbook/">Songbook</a>
+      <div class="nav-primary">
+        <a href="/">grigson</a>
+        |
+        <a href="/language/">Language</a>
+        |
+        <a href="/renderers/">Renderers</a>
+        |
+        <a href="/cli/">CLI</a>
+        |
+        <a href="/tutorial/">Tutorial</a>
+        |
+        <a href="/songbook/">Songbook</a>
+        |
+        <a href="/playground/">Playground</a>
+      </div>
+      <a class="nav-api" href="/api/">API Reference</a>
     </nav>
     <main>
       {{ content | safe }}
