@@ -1,5 +1,3 @@
-packages/grigson/src/parser/generated.js
-packages/grigson/src/parser/generated.d.ts
 packages/grigson/dist/
 packages/website/_site/
 node_modules/
