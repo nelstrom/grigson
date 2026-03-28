@@ -20,6 +20,8 @@ export interface SlotLayout {
   showTimeSig?: TimeSignature;
   /** True for synthesized dot slots (remainder beats with no explicit dot in the source) */
   implicit?: boolean;
+  /** Index into bar.slots for this layout entry. Undefined means 1:1 with layout index. */
+  sourceSlotIdx?: number;
 }
 
 export interface RowLayout {
@@ -83,39 +85,77 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
           activeTSig = bar.timeSignature;
         }
 
-        const isMode2 = bar.slots.some((s) => s.type === 'dot');
-        const slotCount = bar.slots.length;
-        const baseSpan = isMode2 ? 1 : Math.floor(activeTSig.numerator / slotCount);
-        const remainder = isMode2 ? 0 : activeTSig.numerator - baseSpan * slotCount;
+        const chordCount = bar.slots.filter((s) => s.type === 'chord').length;
+        const hasDots = bar.slots.some((s) => s.type === 'dot');
+        const isEvenDivision = activeTSig.numerator % chordCount === 0;
+        const beatsPerChord = isEvenDivision ? activeTSig.numerator / chordCount : 1;
+
+        // Proportional if chords divide evenly AND (no explicit dots, OR the effective
+        // slots — source slots up to `numerator`, with missing trailing positions treated
+        // as dots — follow the uniform pattern: chords at multiples of beatsPerChord,
+        // dots everywhere else). This means | F . C | and | F . C . | both qualify.
+        const isProportional =
+          isEvenDivision &&
+          (!hasDots ||
+            (() => {
+              for (let i = 0; i < activeTSig.numerator; i++) {
+                const slot = bar.slots[i]; // undefined past end → treated as trailing dot
+                const expectChord = i % beatsPerChord === 0;
+                const isChord = slot !== undefined && slot.type === 'chord';
+                if (expectChord !== isChord) return false;
+              }
+              return true;
+            })());
 
         const slots: SlotLayout[] = [];
-        let isFirstSlot = true;
 
-        bar.slots.forEach((slot, i) => {
-          slots.push({
-            col: beatOffset + 1,
-            span: baseSpan,
-            showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
-          });
-
-          if (slot.type === 'chord') {
-            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / baseSpan;
+        if (isProportional) {
+          let isFirstSlot = true;
+          for (let srcIdx = 0; srcIdx < bar.slots.length; srcIdx++) {
+            const slot = bar.slots[srcIdx];
+            if (slot.type !== 'chord') continue;
+            slots.push({
+              col: beatOffset + 1,
+              span: beatsPerChord,
+              showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
+              // Only needed when dots are present (breaks the 1:1 layout-to-source mapping)
+              sourceSlotIdx: hasDots ? srcIdx : undefined,
+            });
+            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / beatsPerChord;
             if (widthPerBeatEm > globalMinBeatWidthEm) {
               globalMinBeatWidthEm = widthPerBeatEm;
             }
+            beatOffset += beatsPerChord;
+            isFirstSlot = false;
           }
-
-          beatOffset += baseSpan;
-          isFirstSlot = false;
-
-          // After the last real slot, synthesize dot slots for any remainder beats
-          if (i === slotCount - 1) {
-            for (let r = 0; r < remainder; r++) {
-              slots.push({ col: beatOffset + 1, span: 1, implicit: true });
-              beatOffset += 1;
+        } else {
+          const effectiveCount = Math.min(bar.slots.length, activeTSig.numerator);
+          let isFirstSlot = true;
+          for (let i = 0; i < effectiveCount; i++) {
+            const slot = bar.slots[i];
+            slots.push({
+              col: beatOffset + 1,
+              span: 1,
+              showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
+            });
+            if (slot.type === 'chord') {
+              const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord);
+              if (widthPerBeatEm > globalMinBeatWidthEm) {
+                globalMinBeatWidthEm = widthPerBeatEm;
+              }
+            }
+            beatOffset += 1;
+            isFirstSlot = false;
+            // After the last real slot, synthesize implicit dot slots for remainder beats
+            if (i === effectiveCount - 1) {
+              const padding = activeTSig.numerator - effectiveCount;
+              for (let r = 0; r < padding; r++) {
+                slots.push({ col: beatOffset + 1, span: 1, implicit: true });
+                beatOffset += 1;
+              }
             }
           }
-        });
+        }
 
         rowLayout.bars.push({ slots, closeBarlineCol: beatOffset + 1 });
       }
@@ -246,7 +286,8 @@ function renderRow(row: Row, rowLayout: RowLayout): string {
     for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
       const slotLayout = barLayout.slots[slotIdx];
       const { col, span } = slotLayout;
-      const slot: BeatSlot | undefined = bar.slots[slotIdx];
+      const srcIdx = slotLayout.sourceSlotIdx ?? slotIdx;
+      const slot: BeatSlot | undefined = bar.slots[srcIdx];
 
       if (slotLayout.implicit || slot?.type === 'dot') {
         html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;

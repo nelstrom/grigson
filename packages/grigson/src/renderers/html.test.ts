@@ -51,11 +51,33 @@ describe('computeGlobalLayout', () => {
       expect(beatCols).toBe(4);
     });
 
-    it('mode 2 (dot slots): each slot = 1 beat', () => {
-      // 4 slots (1 chord + 1 dot + 1 chord + 1 dot) → 4 beats for the bar
-      const song = parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n');
-      const { beatCols } = computeGlobalLayout(song);
-      expect(beatCols).toBe(4);
+    it('proportional: | C . Am . | same beatCols as | C Am | (uniform dot pattern)', () => {
+      // 2 chords in 4/4 → even division → proportional, 4 beats regardless of explicit dots
+      const a = computeGlobalLayout(parseSong('---\nmeter: 4/4\n---\n| C Am |\n'));
+      const b = computeGlobalLayout(parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n'));
+      expect(a.beatCols).toBe(4);
+      expect(b.beatCols).toBe(4);
+    });
+
+    it('non-proportional: | C . . Am | forced to 1-beat-per-slot', () => {
+      // 2 chords but dots NOT at uniform positions → non-proportional, 4 beats
+      const song = parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n');
+      expect(computeGlobalLayout(song).beatCols).toBe(4);
+    });
+
+    it('proportional: | F . C | (uniform pattern after trailing pad) renders as 4 beats', () => {
+      const song = parseSong('---\nmeter: 4/4\n---\n| F . C |\n');
+      expect(computeGlobalLayout(song).beatCols).toBe(4);
+    });
+
+    it('non-proportional over-full: | F . G . . | truncated to 4 beats', () => {
+      const song = parseSong('---\nmeter: 4/4\n---\n| F . G . . |\n');
+      expect(computeGlobalLayout(song).beatCols).toBe(4);
+    });
+
+    it('non-proportional over-full: | F . G . A | truncated to 4 beats', () => {
+      const song = parseSong('---\nmeter: 4/4\n---\n| F . G . A |\n');
+      expect(computeGlobalLayout(song).beatCols).toBe(4);
     });
 
     it("mixed time signatures across sections — A Man's A Man-style rows", () => {
@@ -114,18 +136,40 @@ describe('computeGlobalLayout', () => {
       expect(bar.closeBarlineCol).toBe(5);
     });
 
-    it('mode 2 (dot): each slot has span=1', () => {
-      // | C . Am . | → 4 slots each 1 beat
+    it('proportional: | C . Am . | renders as C:span2, Am:span2, no dot slots', () => {
+      // Uniform dot pattern → proportional, dot slots skipped in layout
       const song = parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n');
       const { rows } = computeGlobalLayout(song);
       const row = song.sections[0].rows[0];
-      const layout = rows.get(row)!;
-      const bar = layout.bars[0];
+      const bar = rows.get(row)!.bars[0];
 
+      expect(bar.slots).toHaveLength(2); // only chord slots emitted
+      expect(bar.slots[0]).toMatchObject({ col: 1, span: 2 }); // C
+      expect(bar.slots[1]).toMatchObject({ col: 3, span: 2 }); // Am
+      expect(bar.closeBarlineCol).toBe(5);
+    });
+
+    it('non-proportional: | C . . Am | renders as C(1), /(1), /(1), Am(1)', () => {
+      // Dots NOT at uniform positions → non-proportional
+      const song = parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n');
+      const bar = computeGlobalLayout(song).rows.get(song.sections[0].rows[0])!.bars[0];
+
+      expect(bar.slots).toHaveLength(4);
       expect(bar.slots[0]).toMatchObject({ col: 1, span: 1 }); // C
       expect(bar.slots[1]).toMatchObject({ col: 2, span: 1 }); // .
-      expect(bar.slots[2]).toMatchObject({ col: 3, span: 1 }); // Am
-      expect(bar.slots[3]).toMatchObject({ col: 4, span: 1 }); // .
+      expect(bar.slots[2]).toMatchObject({ col: 3, span: 1 }); // .
+      expect(bar.slots[3]).toMatchObject({ col: 4, span: 1 }); // Am
+      expect(bar.closeBarlineCol).toBe(5);
+    });
+
+    it('proportional: | F . C | renders as F:span2, C:span2, no dot slots', () => {
+      // Trailing pad makes | F . C . | which is uniform → proportional
+      const song = parseSong('---\nmeter: 4/4\n---\n| F . C |\n');
+      const bar = computeGlobalLayout(song).rows.get(song.sections[0].rows[0])!.bars[0];
+
+      expect(bar.slots).toHaveLength(2); // only chord slots
+      expect(bar.slots[0]).toMatchObject({ col: 1, span: 2 }); // F
+      expect(bar.slots[1]).toMatchObject({ col: 3, span: 2 }); // C
       expect(bar.closeBarlineCol).toBe(5);
     });
 
@@ -274,19 +318,27 @@ describe('HtmlRenderer', () => {
       const explicit = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C Am F . |\n'));
       expect(implicit).toBe(explicit);
     });
+
+    it('proportional: | C . Am . | renders identically to | C Am |', () => {
+      const renderer = new HtmlRenderer();
+      const withDots = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n'));
+      const withoutDots = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C Am |\n'));
+      expect(withDots).toBe(withoutDots);
+    });
   });
 
   describe('dot slot', () => {
     it('renders dot slot as <span part="dot"> containing "/"', () => {
-      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n'));
+      // Use a non-proportional bar so dots are rendered
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n'));
       expect(html).toContain('part="dot"');
       // dot content is "/"
       expect(html).toMatch(/part="dot"[^>]*>\/</);
     });
 
     it('dot slot has correct grid-column (col 2 for second slot)', () => {
-      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n'));
-      // Second slot is a dot at col 2
+      // | C . . Am | → C at col 1, first dot at col 2
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n'));
       const dotMatches = [...html.matchAll(/part="dot" style="grid-column: (\d+)/g)];
       expect(dotMatches.length).toBeGreaterThan(0);
       expect(dotMatches[0][1]).toBe('2');
