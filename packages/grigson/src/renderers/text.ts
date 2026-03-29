@@ -130,7 +130,7 @@ function renderFrontMatter(title: string | null, key: string | null, meter: stri
   if (key !== null) lines.push(`key: ${key}`);
   if (meter !== null) lines.push(`meter: ${meter}`);
   lines.push('---');
-  return lines.join('\n') + '\n';
+  return lines.join('\n');
 }
 
 export class TextRenderer implements GrigsonRenderer {
