@@ -4,8 +4,8 @@
   "description": "Tree-sitter grammar for the Grigson chord chart format",
   "main": "bindings/node",
   "scripts": {
-    "generate": "tree-sitter generate",
-    "build": "tree-sitter generate",
+    "generate": "tree-sitter generate && oxfmt --config ../../.oxfmtrc.json src/grammar.json src/node-types.json",
+    "build": "tree-sitter generate && oxfmt --config ../../.oxfmtrc.json src/grammar.json src/node-types.json",
     "test": "tree-sitter test"
   },
   "devDependencies": {
