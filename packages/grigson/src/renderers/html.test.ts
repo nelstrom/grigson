@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseSong } from '../parser/parser.js';
 import { computeGlobalLayout, HtmlRenderer } from './html.js';
+import type { Song } from '../parser/types.js';
 
 describe('computeGlobalLayout', () => {
   describe('globalMaxBeats', () => {
@@ -179,10 +180,10 @@ describe('computeGlobalLayout', () => {
       const row = song.sections[0].rows[0];
       const layout = rows.get(row)!;
 
-      // Bar 0: no time sig annotation on first slot (4/4 is default/inherited)
-      expect(layout.bars[0].slots[0].showTimeSig).toBeUndefined();
+      // Bar 0: shows 4/4 from song.meter (no explicit bar.timeSignature needed)
+      expect(layout.bars[0].slots[0].showTimeSig).toEqual({ numerator: 4, denominator: 4 });
 
-      // Bar 1: has time sig annotation because bar.timeSignature is set
+      // Bar 1: has time sig annotation because bar.timeSignature is set (change to 2/4)
       expect(layout.bars[1].slots[0].showTimeSig).toEqual({ numerator: 2, denominator: 4 });
       expect(layout.bars[1].slots[0]).toMatchObject({ col: 5, span: 2 });
       expect(layout.bars[1].closeBarlineCol).toBe(7);
@@ -359,9 +360,39 @@ describe('HtmlRenderer', () => {
       expect(html).toMatch(/part="time-sig-den">4</);
     });
 
-    it('does not show time-sig on bars without bar.timeSignature', () => {
-      // Plain 4/4 song with no inline time sig — no annotation
+    it('shows time-sig on bar 0 when song.meter is set and bar has no explicit timeSignature', () => {
+      // Frontmatter meter only — time sig should appear at bar 0 without inline (x/y) token
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | Am |\n'));
+      expect(html).toContain('part="time-sig"');
+    });
+
+    it('does not show time-sig on bar 0 when song.meter is null', () => {
+      const song: Song = {
+        type: 'song',
+        title: null,
+        key: null,
+        meter: null,
+        sections: [
+          {
+            type: 'section',
+            label: null,
+            rows: [
+              {
+                type: 'row',
+                openBarline: { kind: 'single' },
+                bars: [
+                  {
+                    type: 'bar',
+                    slots: [{ type: 'chord', chord: { root: 'C', quality: null, bass: null } }],
+                    closeBarline: { kind: 'single' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const html = renderer.render(song);
       expect(html).not.toContain('part="time-sig"');
     });
   });

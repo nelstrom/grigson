@@ -69,11 +69,22 @@ function rowsOfSection(section: Section): Row[] {
   return section.rows;
 }
 
+function parseMeterToTimeSig(meter: string | null): TimeSignature {
+  if (meter && meter !== 'mixed') {
+    const [n, d] = meter.split('/').map(Number);
+    if (!isNaN(n) && !isNaN(d)) return { numerator: n, denominator: d };
+  }
+  return { numerator: 4, denominator: 4 };
+}
+
 export function computeGlobalLayout(song: Song): GlobalLayout {
-  let activeTSig: TimeSignature = { numerator: 4, denominator: 4 };
+  let activeTSig: TimeSignature = parseMeterToTimeSig(song.meter);
   const rowLayouts = new Map<Row, RowLayout>();
   let globalMaxBeats = 0;
   let globalMinBeatWidthEm = 0;
+  // Track whether we're still on the first bar of the song, so we can show the
+  // initial time signature there even when it comes only from song.meter frontmatter.
+  let isSongFirstBar = song.meter !== null && song.meter !== 'mixed';
 
   for (const section of song.sections) {
     for (const row of rowsOfSection(section)) {
@@ -84,6 +95,11 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
         if (bar.timeSignature) {
           activeTSig = bar.timeSignature;
         }
+
+        // For the very first bar, synthesize showTimeSig from activeTSig (i.e. song.meter)
+        // when the bar doesn't carry its own explicit timeSignature token.
+        const barTimeSig = bar.timeSignature ?? (isSongFirstBar ? activeTSig : undefined);
+        isSongFirstBar = false;
 
         const chordCount = bar.slots.filter((s) => s.type === 'chord').length;
         const hasDots = bar.slots.some((s) => s.type === 'dot');
@@ -117,7 +133,7 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
             slots.push({
               col: beatOffset + 1,
               span: beatsPerChord,
-              showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
+              showTimeSig: isFirstSlot && barTimeSig ? barTimeSig : undefined,
               // Only needed when dots are present (breaks the 1:1 layout-to-source mapping)
               sourceSlotIdx: hasDots ? srcIdx : undefined,
             });
@@ -136,7 +152,7 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
             slots.push({
               col: beatOffset + 1,
               span: 1,
-              showTimeSig: isFirstSlot && bar.timeSignature ? bar.timeSignature : undefined,
+              showTimeSig: isFirstSlot && barTimeSig ? barTimeSig : undefined,
             });
             if (slot.type === 'chord') {
               const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord);

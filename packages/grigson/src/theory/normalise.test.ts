@@ -395,12 +395,8 @@ describe('normaliseSong — meter hoisting', () => {
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
     const result = normaliseSong(s);
     expect(result.meter).toBe('2/4');
-    // First bar gets timeSignature set for renderer; remaining bars have it stripped
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
-      numerator: 2,
-      denominator: 4,
-    });
-    for (const b of result.sections[0].rows[0].bars.slice(1)) {
+    // All bars have inline tokens stripped — meter lives in frontmatter only
+    for (const b of result.sections[0].rows[0].bars) {
       expect(b.timeSignature).toBeUndefined();
     }
   });
@@ -425,10 +421,10 @@ describe('normaliseSong — meter hoisting', () => {
     });
   });
 
-  it('song with no inline time signatures and no front-matter meter stays meter: null', () => {
+  it('song with no inline time signatures and no front-matter meter defaults to meter: 4/4', () => {
     const s = song([row(ch('C'), ch('Am'), ch('F'), ch('G'))]);
     const result = normaliseSong(s);
-    expect(result.meter).toBeNull();
+    expect(result.meter).toBe('4/4');
   });
 
   it('song with front-matter meter and no inline TS preserves the front-matter meter', () => {
@@ -449,8 +445,8 @@ describe('normaliseSong — meter hoisting', () => {
   });
 });
 
-describe('normaliseSong — first-bar timeSignature annotation', () => {
-  it('uniform meter from inline TS: first bar gets timeSignature set', () => {
+describe('normaliseSong — bar timeSignature stripping', () => {
+  it('uniform meter from inline TS: all bars have timeSignature stripped', () => {
     const r: Row = {
       type: 'row',
       openBarline: { kind: 'single' },
@@ -459,16 +455,13 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
     const result = normaliseSong(s);
     expect(result.meter).toBe('3/4');
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
-      numerator: 3,
-      denominator: 4,
-    });
-    // Subsequent bars still stripped
+    // All inline tokens stripped — meter lives in frontmatter only
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toBeUndefined();
     expect(result.sections[0].rows[0].bars[1].timeSignature).toBeUndefined();
     expect(result.sections[0].rows[0].bars[2].timeSignature).toBeUndefined();
   });
 
-  it('front-matter meter with no inline TS: first bar gets timeSignature set', () => {
+  it('front-matter meter with no inline TS: no bars have timeSignature', () => {
     const r: Row = {
       type: 'row',
       openBarline: { kind: 'single' },
@@ -482,10 +475,7 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
       sections: [section([r])],
     };
     const result = normaliseSong(s);
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
-      numerator: 3,
-      denominator: 4,
-    });
+    expect(result.sections[0].rows[0].bars[0].timeSignature).toBeUndefined();
     expect(result.sections[0].rows[0].bars[1].timeSignature).toBeUndefined();
   });
 
@@ -495,7 +485,7 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
     expect(result.sections[0].rows[0].bars[0].timeSignature).toBeUndefined();
   });
 
-  it('mixed meter: first bar timeSignature is determined by inline tokens (not overwritten)', () => {
+  it('mixed meter: all bars keep their inline timeSignature tokens', () => {
     const r: Row = {
       type: 'row',
       openBarline: { kind: 'single' },
@@ -504,38 +494,12 @@ describe('normaliseSong — first-bar timeSignature annotation', () => {
     const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [section([r])] };
     const result = normaliseSong(s);
     expect(result.meter).toBe('mixed');
-    // inline tokens preserved as-is; no extra mutation
+    // inline tokens preserved as-is
     expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
       numerator: 3,
       denominator: 4,
     });
     expect(result.sections[0].rows[0].bars[1].timeSignature).toEqual({
-      numerator: 4,
-      denominator: 4,
-    });
-  });
-
-  it('first bar already has timeSignature: not overwritten', () => {
-    // In mixed meter, the existing timeSignature on the first bar should not be overwritten
-    // (this path is not reached for mixed meter anyway, but check the guard explicitly
-    // by using a pre-normalised song with meter already set)
-    const firstBar: Bar = {
-      type: 'bar',
-      slots: [{ type: 'chord', chord: ch('C') }],
-      closeBarline: { kind: 'single' },
-      timeSignature: { numerator: 4, denominator: 4 },
-    };
-    const r: Row = { type: 'row', openBarline: { kind: 'single' }, bars: [firstBar, bar(ch('G'))] };
-    const s: Song = {
-      type: 'song',
-      title: null,
-      key: null,
-      meter: '4/4',
-      sections: [section([r])],
-    };
-    const result = normaliseSong(s);
-    // Should still be 4/4, not duplicated or corrupted
-    expect(result.sections[0].rows[0].bars[0].timeSignature).toEqual({
       numerator: 4,
       denominator: 4,
     });

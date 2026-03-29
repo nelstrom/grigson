@@ -120,7 +120,7 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     );
 
     if (uniqueMeters.size === 1) {
-      // Uniform — hoist to front-matter, strip inline tokens
+      // Uniform — hoist to front-matter, strip inline tokens from all bars
       newMeter = [...uniqueMeters][0];
       finalSections = newSections.map((sec) => {
         const strippedRows = sec.rows.map((row) => ({
@@ -139,40 +139,9 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     }
   }
 
-  // When the song has a declared uniform meter, ensure bar.timeSignature is set on the very first
-  // bar so the renderer knows to display a time signature annotation at the start of the chart.
-  if (newMeter !== null && newMeter !== 'mixed') {
-    const [num, den] = newMeter.split('/').map(Number);
-    const firstSection = finalSections[0];
-    if (firstSection && firstSection.rows.length > 0 && firstSection.rows[0].bars.length > 0) {
-      const firstRow = firstSection.rows[0];
-      const firstBar = firstRow.bars[0];
-      if (!firstBar.timeSignature) {
-        const updatedFirstBar: Bar = {
-          ...firstBar,
-          timeSignature: { numerator: num, denominator: den },
-        };
-        const updatedFirstRow: Row = {
-          ...firstRow,
-          bars: [updatedFirstBar, ...firstRow.bars.slice(1)],
-        };
-        const updatedRows = [updatedFirstRow, ...firstSection.rows.slice(1)];
-        let firstRowReplaced = false;
-        const updatedContent = (firstSection.content ?? firstSection.rows).map((item) => {
-          if (!firstRowReplaced && item.type === 'row') {
-            firstRowReplaced = true;
-            return updatedFirstRow;
-          }
-          return item;
-        });
-        const updatedFirstSection: Section = {
-          ...firstSection,
-          rows: updatedRows,
-          content: updatedContent,
-        };
-        finalSections = [updatedFirstSection, ...finalSections.slice(1)];
-      }
-    }
+  // Default to 4/4 when no meter has been declared or inferred
+  if (newMeter === null) {
+    newMeter = '4/4';
   }
 
   return {
