@@ -436,3 +436,11 @@ Added `grigson generate-renderer <name>` subcommand that scaffolds a complete re
 - `packages/grigson/src/cli.test.ts` — 4 CLI integration tests
 
 All 495 tests pass.
+
+## notation-preset-types (2026-03-30)
+Created three new files under `packages/grigson/src/notation/`:
+- `preset.ts`: `NotationPreset` interface (keys matching all `Quality` enum values + `flat`/`sharp`) and `DEFAULT_PRESET` with Unicode symbols
+- `registry.ts`: global singleton Map pre-seeded with `'default'`, plus `registerPreset()` and `resolvePreset()`
+- `index.ts`: re-exports for `grigson/presets` sub-path entry point
+
+Build and all 505 tests pass.

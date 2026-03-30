@@ -1974,7 +1974,8 @@
       "Create packages/grigson/src/notation/registry.ts with the singleton registry Map, registerPreset(), and resolvePreset()",
       "Create packages/grigson/src/notation/index.ts re-exporting from preset.ts and registry.ts",
       "Run pnpm build to confirm TypeScript compiles cleanly"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "notation-package-exports",
