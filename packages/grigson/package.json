@@ -9,6 +9,16 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./presets": {
+      "import": "./dist/notation/index.js",
+      "types": "./dist/notation/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy && pnpm run build:browser && pnpm run build:browser:register",
     "build:browser": "vite build",

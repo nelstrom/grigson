@@ -444,3 +444,6 @@ Created three new files under `packages/grigson/src/notation/`:
 - `index.ts`: re-exports for `grigson/presets` sub-path entry point
 
 Build and all 505 tests pass.
+
+## notation-package-exports
+Added exports field to packages/grigson/package.json exposing '.' (main entry) and './presets' (pointing to dist/notation/index.js and dist/notation/index.d.ts). This allows consumers to import { registerPreset } from 'grigson/presets'. Build and all 505 tests pass.

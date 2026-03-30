@@ -1986,7 +1986,8 @@
       "Add an exports field to packages/grigson/package.json with entries for '.' and './presets'",
       "Run pnpm build and confirm the dist/notation/ files are present",
       "Verify that import { registerPreset } from 'grigson/presets' resolves in a test or build check"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "notation-text-renderer",
