@@ -1963,5 +1963,94 @@
       "On parse failure, display the error message (e.g. in the existing error display area) without modifying the editor contents"
     ],
     "passes": true
+  },
+  {
+    "id": "notation-preset-types",
+    "category": "functional",
+    "description": "Create the NotationPreset type, DEFAULT_PRESET, and global registry",
+    "detail": "Create three new files under packages/grigson/src/notation/: preset.ts (NotationPreset interface with keys matching the Quality enum plus flat/sharp, and the DEFAULT_PRESET object using Unicode symbols), registry.ts (global singleton Map pre-seeded with 'default', plus registerPreset() and resolvePreset() functions), and index.ts (re-exports all three for the grigson/presets sub-path entry point). See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Create packages/grigson/src/notation/preset.ts with NotationPreset interface and DEFAULT_PRESET constant",
+      "Create packages/grigson/src/notation/registry.ts with the singleton registry Map, registerPreset(), and resolvePreset()",
+      "Create packages/grigson/src/notation/index.ts re-exporting from preset.ts and registry.ts",
+      "Run pnpm build to confirm TypeScript compiles cleanly"
+    ]
+  },
+  {
+    "id": "notation-package-exports",
+    "category": "functional",
+    "description": "Add grigson/presets sub-path export to package.json",
+    "detail": "packages/grigson/package.json currently uses main/types fields with no exports map. Add an exports field that exposes '.' (main entry) and './presets' (pointing to dist/notation/index.js and dist/notation/index.d.ts) so that consumers can import { registerPreset } from 'grigson/presets'. See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Add an exports field to packages/grigson/package.json with entries for '.' and './presets'",
+      "Run pnpm build and confirm the dist/notation/ files are present",
+      "Verify that import { registerPreset } from 'grigson/presets' resolves in a test or build check"
+    ]
+  },
+  {
+    "id": "notation-text-renderer",
+    "category": "functional",
+    "description": "Migrate the text renderer to the new preset system",
+    "detail": "Replace the text renderer's ad-hoc PRESETS/DEFAULT_NOTATION constants and the partial switch statement with the new resolvePreset() function. Update TextRendererConfig.notation to accept preset?: string | Partial<NotationPreset> (removing the old minor/dominant7/halfDim fields). Add a stripTags() helper that strips HTML tags from preset values before use in text output. All qualities (including the previously hardcoded diminished, maj7, min7, dim7, dom7flat5) should now read from the resolved preset. Handle root accidental substitution carefully — the root from the parser is always [A-G] followed by an optional trailing 'b' or '#'. See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Remove PRESETS and DEFAULT_NOTATION constants from text.ts",
+      "Update TextRendererConfig.notation type to use preset?: string | Partial<NotationPreset>",
+      "Add stripTags() helper function",
+      "Rewrite renderChord() to call resolvePreset() and use preset fields for all qualities",
+      "Fix root accidental substitution to only replace trailing b/# (not letters in note names like B or G)",
+      "Run pnpm test to confirm existing text renderer tests pass"
+    ]
+  },
+  {
+    "id": "notation-html-renderer",
+    "category": "functional",
+    "description": "Wire the HTML renderer chord and accidental rendering to the preset system",
+    "detail": "The HTML renderer currently hardcodes Unicode symbols (ø, °, △, ♭, ♯) for chord quality suffixes and root accidentals. Import resolvePreset() from ../notation/registry.js and use it in chord rendering: preset[chord.quality] provides the suffix HTML (may contain <sup>/<sub> tags, inserted directly into output string); preset.flat and preset.sharp replace the hardcoded ♭/♯ in root note rendering. The HtmlRenderer already accepts TextRendererConfig so the config type change from the text renderer task flows through automatically. See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Import resolvePreset and NotationPreset from ../notation/registry.js in html.ts",
+      "In the chord rendering function, replace hardcoded quality suffix strings with preset[chord.quality]",
+      "In root note rendering, replace hardcoded ♭/♯ with preset.flat and preset.sharp",
+      "Run pnpm test to confirm existing HTML renderer tests pass",
+      "Manually verify that an inline preset object { minor: '-' } produces C- instead of Cm in output"
+    ]
+  },
+  {
+    "id": "notation-cli-preset-file",
+    "category": "functional",
+    "description": "Add --notation-preset-file flag to the HTML renderer CLI",
+    "detail": "The HTML renderer CLI (html-renderer-cli.ts) currently accepts --notation-preset as a string for named presets. Add a --notation-preset-file <path> flag that reads a JSON file from disk and passes its contents as an inline Partial<NotationPreset> object in the renderer config. Update the help string to document both flags. See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Add 'notation-preset-file' to the minimist string options",
+      "Read and JSON.parse the file when --notation-preset-file is provided, passing the result as config.notation.preset",
+      "Update the HELP string to document the new flag",
+      "Run pnpm build to confirm compilation",
+      "Manually test: echo '{\"minor\":\"-\"}' > /tmp/test-preset.json && echo '| Cm |' | grigson-html-renderer --notation-preset-file /tmp/test-preset.json"
+    ]
+  },
+  {
+    "id": "notation-xss-test",
+    "category": "quality",
+    "description": "Add a test documenting XSS risk from preset values in HTML output",
+    "detail": "Preset values like <sup>7</sup> are interpolated directly into the HTML renderer's output string. A malicious preset could inject arbitrary HTML. Add a test that passes a preset containing a <script> tag (e.g. dominant7: \"<script>alert('xss')</script>\") to the HTML renderer and asserts the script tag appears verbatim in the output, documenting the current unsafe behavior. Add a TODO comment pointing to DOMPurify or the HTML Sanitizer API as the eventual fix. See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Add a test case in the HTML renderer test file for a preset with a <script> tag value",
+      "Assert the rendered output contains the script tag literally (documents current behavior)",
+      "Add a // TODO comment referencing DOMPurify / HTML Sanitizer API near the interpolation site in html.ts",
+      "Run pnpm test to confirm the new test passes"
+    ]
+  },
+  {
+    "id": "notation-docs",
+    "category": "documentation",
+    "description": "Update renderer.md to document the new notation preset system",
+    "detail": "Update packages/grigson/documentation/renderer.md to replace the outdated jazz/pop/symbolic preset documentation with accurate documentation of the new system: the NotationPreset schema (all fields with their Quality enum keys), the DEFAULT_PRESET values, how to pass an inline preset object, how to register and use named presets via grigson/presets, the CLI --notation-preset and --notation-preset-file flags, and the <sup>/<sub> HTML tag convention for superscript/subscript. Remove references to jazz, pop, and symbolic presets. See project/plans/notation-presets.md for full context.",
+    "steps": [
+      "Update the notation section of renderer.md with the new NotationPreset schema and field descriptions",
+      "Document the DEFAULT_PRESET values in a table",
+      "Add a code example showing inline preset usage",
+      "Add a code example showing registerPreset() and named preset usage in a browser context",
+      "Document the CLI flags including --notation-preset-file",
+      "Remove all references to jazz, pop, and symbolic presets"
+    ]
   }
 ]
