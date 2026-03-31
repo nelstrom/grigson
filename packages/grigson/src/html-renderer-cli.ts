@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'node:fs';
 import minimist from 'minimist';
 import { HtmlRenderer } from './renderers/html.js';
 import type { TextRendererConfig } from './renderers/text.js';
+import type { NotationPreset } from './notation/registry.js';
 import { runRenderer } from './run-renderer.js';
 
 const HELP = `Usage: grigson-html-renderer [options] [file]
@@ -11,11 +13,12 @@ Reads a .chart file (or stdin if no file is given) and writes the rendered
 HTML to stdout. No normalisation is performed.
 
 Options:
-  --notation-preset <preset>  Chord notation style: jazz (default), pop, or symbolic
-  --help, -h                  Show this help message and exit`;
+  --notation-preset <name>        Named notation preset (e.g. "jazz")
+  --notation-preset-file <path>   Path to a JSON file containing a partial NotationPreset object
+  --help, -h                      Show this help message and exit`;
 
 const parsed = minimist(process.argv.slice(2), {
-  string: ['notation-preset'],
+  string: ['notation-preset', 'notation-preset-file'],
   boolean: ['help'],
   alias: { h: 'help' },
 });
@@ -26,9 +29,13 @@ if (parsed['help']) {
 }
 
 const config: TextRendererConfig = {};
-const preset = parsed['notation-preset'] as string | undefined;
-if (preset) {
-  config.notation = { preset: preset as 'jazz' | 'pop' | 'symbolic' };
+const presetName = parsed['notation-preset'] as string | undefined;
+const presetFile = parsed['notation-preset-file'] as string | undefined;
+if (presetFile) {
+  const raw = readFileSync(presetFile, 'utf8');
+  config.notation = { preset: JSON.parse(raw) as Partial<NotationPreset> };
+} else if (presetName) {
+  config.notation = { preset: presetName };
 }
 
 await runRenderer((song) => new HtmlRenderer(config).render(song), {

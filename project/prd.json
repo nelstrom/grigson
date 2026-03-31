@@ -2029,7 +2029,8 @@
       "Update the HELP string to document the new flag",
       "Run pnpm build to confirm compilation",
       "Manually test: echo '{\"minor\":\"-\"}' > /tmp/test-preset.json && echo '| Cm |' | grigson-html-renderer --notation-preset-file /tmp/test-preset.json"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "notation-xss-test",
