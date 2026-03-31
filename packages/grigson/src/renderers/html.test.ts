@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
 import { parseSong } from '../parser/parser.js';
 import { computeGlobalLayout, HtmlRenderer } from './html.js';
@@ -411,15 +412,43 @@ describe('HtmlRenderer', () => {
     });
   });
 
-  describe('XSS risk documentation', () => {
-    it('preset values containing script tags pass through verbatim into HTML output (unsafe behavior — see TODO in html.ts)', () => {
-      // This test documents the current unsafe behavior: preset values are interpolated
-      // directly into the HTML output string without sanitization. A malicious preset
-      // could inject arbitrary HTML into the rendered output.
+  describe('preset sanitization', () => {
+    it('strips <script> tags from preset values', () => {
       const maliciousPreset = { dominant7: "<script>alert('xss')</script>" };
       const xssRenderer = new HtmlRenderer({ notation: { preset: maliciousPreset } });
       const html = xssRenderer.render(parseSong('| G7 |\n'));
-      expect(html).toContain("<script>alert('xss')</script>");
+      expect(html).not.toContain('<script>');
+      expect(html).not.toContain("alert('xss')");
+    });
+
+    it('allows <sup> in preset values', () => {
+      const html = new HtmlRenderer({ notation: { preset: { dominant7: '<sup>7</sup>' } } }).render(
+        parseSong('| G7 |\n'),
+      );
+      expect(html).toContain('<sup>7</sup>');
+    });
+
+    it('allows <sub> in preset values', () => {
+      const html = new HtmlRenderer({ notation: { preset: { dominant7: '<sub>7</sub>' } } }).render(
+        parseSong('| G7 |\n'),
+      );
+      expect(html).toContain('<sub>7</sub>');
+    });
+
+    it('allows <small> in preset values', () => {
+      const html = new HtmlRenderer({
+        notation: { preset: { dominant7: '<small>7</small>' } },
+      }).render(parseSong('| G7 |\n'));
+      expect(html).toContain('<small>7</small>');
+    });
+
+    it('strips attributes from allowed tags', () => {
+      const html = new HtmlRenderer({
+        notation: { preset: { dominant7: '<sup class="x" onclick="bad()">7</sup>' } },
+      }).render(parseSong('| G7 |\n'));
+      expect(html).toContain('<sup>7</sup>');
+      expect(html).not.toContain('onclick');
+      expect(html).not.toContain('class');
     });
   });
 

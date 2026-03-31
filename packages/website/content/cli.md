@@ -207,6 +207,8 @@ grigson-html-renderer [options] [file]
 
 **`--notation-preset-file`** reads a JSON file whose fields override the defaults. Only the fields you specify are changed; all others keep their default values.
 
+**Security note:** Preset values are interpolated directly into the HTML output without sanitization. Unlike the browser renderer (which uses DOMPurify to strip unsafe HTML from preset values), the CLI has no DOM environment to perform sanitization. You are responsible for ensuring that any preset file passed to `--notation-preset-file` comes from a trusted source.
+
 Example `my-preset.json`:
 
 ```json

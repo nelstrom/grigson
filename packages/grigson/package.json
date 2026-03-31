@@ -36,6 +36,7 @@
     "lint": "eslint src/"
   },
   "dependencies": {
+    "dompurify": "^3.3.3",
     "minimist": "^1.2.8"
   },
   "devDependencies": {

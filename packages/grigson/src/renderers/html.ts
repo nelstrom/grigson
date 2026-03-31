@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import type {
   Song,
   Row,
@@ -10,6 +11,24 @@ import type {
 } from '../parser/types.js';
 import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
 import { type NotationPreset, resolvePreset } from '../notation/registry.js';
+
+const PRESET_ALLOWED_TAGS = ['sup', 'sub', 'small'];
+
+function sanitizePresetValue(value: string): string {
+  // DOMPurify requires a DOM to initialize. In browser contexts it is always
+  // available; in Node (e.g. the CLI) it is not, so sanitize is not a function
+  // and preset values are returned unchanged. See cli.md for the CLI trust model.
+  if (typeof DOMPurify.sanitize !== 'function') return value;
+  return DOMPurify.sanitize(value, { ALLOWED_TAGS: PRESET_ALLOWED_TAGS, ALLOWED_ATTR: [] });
+}
+
+function sanitizePreset(preset: NotationPreset): NotationPreset {
+  const result = {} as NotationPreset;
+  for (const key of Object.keys(preset) as Array<keyof NotationPreset>) {
+    result[key] = sanitizePresetValue(preset[key]);
+  }
+  return result;
+}
 
 // ---------------------------------------------------------------------------
 // Global layout calculation
@@ -219,9 +238,6 @@ function renderChordRoot(root: string, preset: NotationPreset): string {
 
 function renderChordInner(chord: Chord, preset: NotationPreset): string {
   const rootHtml = renderChordRoot(chord.root, preset);
-  // TODO: sanitize preset values using DOMPurify or the HTML Sanitizer API before
-  // interpolating — a malicious preset (e.g. dominant7: "<script>…</script>") would
-  // be injected into the DOM verbatim. See notation-presets.md § "Security note".
   const qualitySymbol = preset[chord.quality as keyof NotationPreset] ?? '';
   const qualityHtml = qualitySymbol ? `<span part="chord-quality">${qualitySymbol}</span>` : '';
   return rootHtml + qualityHtml;
@@ -350,7 +366,7 @@ export class HtmlRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
-    const preset = resolvePreset(this.config.notation?.preset);
+    const preset = sanitizePreset(resolvePreset(this.config.notation?.preset));
     const layout = computeGlobalLayout(song);
     const { beatCols, minBeatWidth } = layout;
 
