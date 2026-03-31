@@ -1,0 +1,91 @@
+---
+layout: base.njk
+title: Notation Presets
+permalink: /renderers/presets/
+---
+<script>
+  window.grigsonRegister.registerPreset('ascii', {
+    flat: 'b',
+    sharp: '#',
+    halfDiminished: 'm7b5',
+    diminished: 'dim',
+    maj7: 'maj7',
+    dim7: 'dim7',
+    dom7flat5: '7b5'
+  });
+</script>
+
+<h1>Notation Presets</h1>
+<p>
+  A <em>notation preset</em> controls how chord symbols are rendered — accidentals,
+  quality suffixes, and special glyphs. The default preset uses Unicode music symbols;
+  a custom preset can use ASCII-safe alternatives.
+</p>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start">
+  <div>
+    <h2>Default preset</h2>
+    <p>Unicode glyphs: ♭ ♯ ø ° △</p>
+  </div>
+  <div>
+    <h2>Custom &ldquo;ascii&rdquo; preset</h2>
+    <p>ASCII alternatives: b # m7b5 dim maj7</p>
+  </div>
+</div>
+<grigson-chart normalise style="display:grid; grid-template-columns:1fr 1fr; gap:2rem">
+  <grigson-html-renderer></grigson-html-renderer>
+  <grigson-html-renderer notation-preset="ascii"></grigson-html-renderer>
+  <template>{{ 'notation-demo' | readChart }}</template>
+</grigson-chart>
+
+<h2>How it works</h2>
+<p>
+  Register a preset once using <code>window.grigsonRegister.registerPreset()</code>
+  (from <code>grigson-register.iife.js</code> — the same bundle the custom elements use):
+</p>
+<pre><code>window.grigsonRegister.registerPreset('ascii', {
+  flat: 'b',
+  sharp: '#',
+  halfDiminished: 'm7b5',
+  diminished: 'dim',
+  maj7: 'maj7',
+});</code></pre>
+<p>
+  Then reference it by name on <code>&lt;grigson-html-renderer&gt;</code>:
+</p>
+<pre><code>&lt;grigson-chart normalise&gt;
+  &lt;grigson-html-renderer notation-preset="ascii"&gt;&lt;/grigson-html-renderer&gt;
+  &lt;template&gt;...&lt;/template&gt;
+&lt;/grigson-chart&gt;</code></pre>
+<p>
+  The <code>notation-preset</code> attribute belongs to <code>&lt;grigson-html-renderer&gt;</code>,
+  not <code>&lt;grigson-chart&gt;</code>. Multiple renderer children inside one
+  <code>&lt;grigson-chart&gt;</code> each render the same parsed song independently:
+</p>
+<pre><code>&lt;grigson-chart normalise&gt;
+  &lt;grigson-html-renderer&gt;&lt;/grigson-html-renderer&gt;
+  &lt;grigson-html-renderer notation-preset="ascii"&gt;&lt;/grigson-html-renderer&gt;
+  &lt;template&gt;...&lt;/template&gt;
+&lt;/grigson-chart&gt;</code></pre>
+
+<h2>Preset fields</h2>
+<table>
+  <thead><tr><th>Field</th><th>Default</th><th>Example custom</th></tr></thead>
+  <tbody>
+    <tr><td><code>flat</code></td><td>♭</td><td>b</td></tr>
+    <tr><td><code>sharp</code></td><td>♯</td><td>#</td></tr>
+    <tr><td><code>halfDiminished</code></td><td>ø</td><td>m7b5</td></tr>
+    <tr><td><code>diminished</code></td><td>°</td><td>dim</td></tr>
+    <tr><td><code>maj7</code></td><td>△</td><td>maj7</td></tr>
+    <tr><td><code>min7</code></td><td>m7</td><td>m7</td></tr>
+    <tr><td><code>dim7</code></td><td>°7</td><td>dim7</td></tr>
+    <tr><td><code>dom7flat5</code></td><td>7♭5</td><td>7b5</td></tr>
+    <tr><td><code>major</code></td><td>(empty)</td><td>(empty)</td></tr>
+    <tr><td><code>minor</code></td><td>m</td><td>m</td></tr>
+    <tr><td><code>dominant7</code></td><td>7</td><td>7</td></tr>
+  </tbody>
+</table>
+<p>
+  Unspecified fields fall back to <code>DEFAULT_PRESET</code>. See the
+  <a href="/api/">API Reference</a> for the full <code>NotationPreset</code> interface.
+</p>

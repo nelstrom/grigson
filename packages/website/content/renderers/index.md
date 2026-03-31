@@ -39,5 +39,6 @@ const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);
 - [SVG renderer](/renderers/svg/) — produces an SVG string for embedding in HTML
 - [Custom elements](/renderers/custom-elements/) — `<grigson-chart>` and `<grigson-html-renderer>` for declarative HTML embedding
 - [Browser bundles](/renderers/browser/) — loading grigson in a browser via IIFE or ES module
+- [Notation presets](/renderers/presets/) — customising chord symbol rendering with `registerPreset()`
 
 For building your own renderer, see the [API Reference](/api/renderer-interface/).
