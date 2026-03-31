@@ -131,14 +131,14 @@ If the source chart has per-section key overrides, transposition applies to each
 
 ### `notation`
 
-Controls how chord symbols are written in the output. Pass a `NotationPreset` object inline (merged on top of the defaults), or pass a named preset registered via `registerPreset()` from `grigson/presets`.
+Controls how chord symbols are written in the output. Pass a `NotationPreset` object inline (merged on top of the defaults), or pass a named preset registered via `definePreset()` from `grigson/presets`.
 
 ```javascript
 notation: {
   // Inline partial preset — merged on top of DEFAULT_PRESET.
   preset: { minor: '-', flat: 'b', sharp: '#' },
 
-  // Or a named preset registered via registerPreset().
+  // Or a named preset registered via definePreset().
   preset: 'myPreset',
 }
 ```

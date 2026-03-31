@@ -3,7 +3,7 @@ export type { NotationPreset };
 
 const registry = new Map<string, NotationPreset>([['default', DEFAULT_PRESET]]);
 
-export function registerPreset(name: string, preset: Partial<NotationPreset>): void {
+export function definePreset(name: string, preset: Partial<NotationPreset>): void {
   registry.set(name, { ...DEFAULT_PRESET, ...preset });
 }
 

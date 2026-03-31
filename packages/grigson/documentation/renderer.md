@@ -363,14 +363,14 @@ If `toKey` matches the source key (or `semitones` is 0), no transposition occurs
 
 ### `notation`
 
-Controls how chord symbols are written in the output. A `NotationPreset` object maps each chord quality to a string suffix. You can pass a preset inline as an object (merged on top of the defaults), or pass a named preset registered via `registerPreset()`.
+Controls how chord symbols are written in the output. A `NotationPreset` object maps each chord quality to a string suffix. You can pass a preset inline as an object (merged on top of the defaults), or pass a named preset registered via `definePreset()`.
 
 ```javascript
 notation: {
   // Inline partial preset — merged on top of DEFAULT_PRESET.
   preset: { minor: '-', flat: 'b', sharp: '#' },
 
-  // Or a named preset registered via registerPreset().
+  // Or a named preset registered via definePreset().
   preset: 'myPreset',
 }
 ```
@@ -445,10 +445,10 @@ const text = new TextRenderer({
 For browser and custom-element contexts, you can register a named preset once and refer to it by name from any renderer or `<grigson-chart>` element.
 
 ```javascript
-import { registerPreset } from 'grigson/presets';
+import { definePreset } from 'grigson/presets';
 
 // Register a custom preset at app startup
-registerPreset('ascii', {
+definePreset('ascii', {
   flat: 'b',
   sharp: '#',
   halfDiminished: 'm7b5',

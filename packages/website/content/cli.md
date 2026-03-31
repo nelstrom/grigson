@@ -199,11 +199,11 @@ grigson-html-renderer [options] [file]
 
 **Options**
 
-| Option                          | Description                                                           |
-| ------------------------------- | --------------------------------------------------------------------- |
-| `--notation-preset <name>`      | Named notation preset (must be pre-registered via `registerPreset()`) |
-| `--notation-preset-file <path>` | Path to a JSON file containing a partial `NotationPreset` object      |
-| `--help`, `-h`                  | Show help and exit                                                    |
+| Option                          | Description                                                         |
+| ------------------------------- | ------------------------------------------------------------------- |
+| `--notation-preset <name>`      | Named notation preset (must be pre-registered via `definePreset()`) |
+| `--notation-preset-file <path>` | Path to a JSON file containing a partial `NotationPreset` object    |
+| `--help`, `-h`                  | Show help and exit                                                  |
 
 **`--notation-preset-file`** reads a JSON file whose fields override the defaults. Only the fields you specify are changed; all others keep their default values.
 

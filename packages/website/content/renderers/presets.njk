@@ -4,7 +4,7 @@ title: Notation Presets
 permalink: /renderers/presets/
 ---
 <script>
-  window.grigsonRegister.registerPreset('ascii', {
+  window.grigsonRegister.definePreset('ascii', {
     flat: 'b',
     sharp: '#',
     halfDiminished: 'm7b5',
@@ -40,10 +40,10 @@ permalink: /renderers/presets/
 
 <h2>How it works</h2>
 <p>
-  Register a preset once using <code>window.grigsonRegister.registerPreset()</code>
+  Register a preset once using <code>window.grigsonRegister.definePreset()</code>
   (from <code>grigson-register.iife.js</code> — the same bundle the custom elements use):
 </p>
-<pre><code>window.grigsonRegister.registerPreset('ascii', {
+<pre><code>window.grigsonRegister.definePreset('ascii', {
   flat: 'b',
   sharp: '#',
   halfDiminished: 'm7b5',
