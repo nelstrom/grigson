@@ -447,3 +447,6 @@ Build and all 505 tests pass.
 
 ## notation-package-exports
 Added exports field to packages/grigson/package.json exposing '.' (main entry) and './presets' (pointing to dist/notation/index.js and dist/notation/index.d.ts). This allows consumers to import { registerPreset } from 'grigson/presets'. Build and all 505 tests pass.
+
+## notation-text-renderer
+Migrated the text renderer to the new preset system. Replaced ad-hoc PRESETS/DEFAULT_NOTATION constants and partial switch statement with resolvePreset(). Updated TextRendererConfig.notation type to accept preset?: string | Partial<NotationPreset>. Added stripTags() helper. Added TEXT_DEFAULT internal preset with ASCII-safe values that round-trip through the parser (used when no preset is specified). Fixed root accidental substitution to use regex match on [A-G](b|#)? so note letters like B and G are not corrupted. All 505 tests pass.

@@ -1,4 +1,5 @@
 import type { Song, Row, Bar, Chord, Barline, BeatSlot } from '../parser/types.js';
+import { type NotationPreset, resolvePreset } from '../notation/registry.js';
 
 export interface GrigsonRenderer {
   render(song: Song): string;
@@ -6,66 +7,55 @@ export interface GrigsonRenderer {
 
 export interface TextRendererConfig {
   notation?: {
-    preset?: 'jazz' | 'pop' | 'symbolic';
-    minor?: string;
-    dominant7?: string;
-    halfDim?: string;
+    preset?: string | Partial<NotationPreset>;
   };
   simile?: {
     output?: 'shorthand' | 'longhand';
   };
 }
 
-const DEFAULT_NOTATION: Required<NonNullable<TextRendererConfig['notation']>> = {
-  preset: 'jazz',
+// ASCII-safe defaults used when no preset is specified — values must round-trip
+// through the parser.
+const TEXT_DEFAULT: NotationPreset = {
+  major: '',
   minor: 'm',
   dominant7: '7',
-  halfDim: 'm7b5',
+  halfDiminished: 'm7b5',
+  diminished: 'dim',
+  maj7: 'maj7',
+  min7: 'm7',
+  dim7: 'dim7',
+  dom7flat5: '7b5',
+  flat: 'b',
+  sharp: '#',
 };
 
-const PRESETS: Record<string, Partial<NonNullable<TextRendererConfig['notation']>>> = {
-  jazz: { minor: 'm', halfDim: 'm7b5' },
-  pop: { minor: 'm', halfDim: 'm7b5' },
-  symbolic: { minor: '-', halfDim: 'ø' },
-};
+function stripTags(s: string): string {
+  return s.replace(/<[^>]+>/g, '');
+}
 
 function renderChord(chord: Chord, config: TextRendererConfig): string {
-  const notation = {
-    ...DEFAULT_NOTATION,
-    ...PRESETS[config.notation?.preset ?? 'jazz'],
-    ...config.notation,
-  };
+  const userPreset = config.notation?.preset;
+  const preset: NotationPreset =
+    userPreset !== undefined ? resolvePreset(userPreset) : TEXT_DEFAULT;
 
-  let suffix: string;
-  switch (chord.quality) {
-    case 'minor':
-      suffix = notation.minor;
-      break;
-    case 'dominant7':
-      suffix = notation.dominant7;
-      break;
-    case 'halfDiminished':
-      suffix = notation.halfDim;
-      break;
-    case 'diminished':
-      suffix = 'dim';
-      break;
-    case 'maj7':
-      suffix = 'maj7';
-      break;
-    case 'min7':
-      suffix = 'm7';
-      break;
-    case 'dim7':
-      suffix = 'dim7';
-      break;
-    case 'dom7flat5':
-      suffix = '7b5';
-      break;
-    default:
-      suffix = '';
+  // Root from parser is always [A-G] followed by optional trailing b or #.
+  // Only replace the accidental suffix, not letters in note names.
+  const rootMatch = chord.root.match(/^([A-G])(b+|#+)?$/);
+  let root: string;
+  if (rootMatch) {
+    const letter = rootMatch[1];
+    const acc = rootMatch[2] ?? '';
+    const flatChar = stripTags(preset.flat);
+    const sharpChar = stripTags(preset.sharp);
+    const renderedAcc = acc.replace(/b/g, flatChar).replace(/#/g, sharpChar);
+    root = letter + renderedAcc;
+  } else {
+    root = chord.root;
   }
-  return chord.root + suffix + (chord.bass ? '/' + chord.bass : '');
+
+  const suffix = stripTags(preset[chord.quality as keyof NotationPreset] ?? '');
+  return root + suffix + (chord.bass ? '/' + chord.bass : '');
 }
 
 function renderBar(bar: Bar, config: TextRendererConfig): string {

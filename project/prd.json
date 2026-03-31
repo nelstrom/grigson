@@ -2001,7 +2001,8 @@
       "Rewrite renderChord() to call resolvePreset() and use preset fields for all qualities",
       "Fix root accidental substitution to only replace trailing b/# (not letters in note names like B or G)",
       "Run pnpm test to confirm existing text renderer tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "notation-html-renderer",
