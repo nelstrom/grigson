@@ -131,50 +131,35 @@ If the source chart has per-section key overrides, transposition applies to each
 
 ### `notation`
 
-Controls how chord symbols are written in the output. You can use a named preset or override individual symbols.
+Controls how chord symbols are written in the output. Pass a `NotationPreset` object inline (merged on top of the defaults), or pass a named preset registered via `registerPreset()` from `grigson/presets`.
 
 ```javascript
 notation: {
-  // Named preset. Overrides below take precedence over the preset.
-  preset: 'jazz', // 'jazz' | 'pop' | 'symbolic'
+  // Inline partial preset — merged on top of DEFAULT_PRESET.
+  preset: { minor: '-', flat: 'b', sharp: '#' },
 
-  // How to write minor chords.
-  minor: 'm',   // 'm' → Cm   |  '-' → C-
-
-  // How to write major seventh.
-  major7: 'M7', // 'M7' → CM7  |  'maj7' → Cmaj7  |  'Δ' → CΔ
-
-  // How to write dominant seventh (usually just '7', but listed for completeness).
-  dominant7: '7',
-
-  // How to write half-diminished (minor seventh flat five).
-  halfDim: 'm7b5', // 'm7b5' → Cm7b5  |  'ø' → Cø
-
-  // How to write diminished.
-  diminished: 'dim', // 'dim' → Cdim  |  '°' → C°
-
-  // How to write diminished seventh.
-  diminished7: 'dim7', // 'dim7' → Cdim7  |  '°7' → C°7
-
-  // How to write augmented.
-  augmented: '+', // '+' → C+  |  'aug' → Caug
-
-  // How to write suspended fourth.
-  sus4: 'sus4', // 'sus4' → Csus4  |  'sus' → Csus (shorthand)
-
-  // Flat and sharp symbols in chord names.
-  flat: 'b',    // 'b' → Bb   |  '♭' → B♭  (Unicode)
-  sharp: '#',   // '#' → C#   |  '♯' → C♯  (Unicode)
+  // Or a named preset registered via registerPreset().
+  preset: 'myPreset',
 }
 ```
 
-#### Built-in presets
+#### `NotationPreset` fields
 
-| Preset           | Minor | Maj7   | Half-dim | Dim   |
-| ---------------- | ----- | ------ | -------- | ----- |
-| `jazz` (default) | `m`   | `M7`   | `m7b5`   | `dim` |
-| `pop`            | `m`   | `maj7` | `m7b5`   | `dim` |
-| `symbolic`       | `-`   | `Δ`    | `ø`      | `°`   |
+| Field            | Default | Description                           |
+| ---------------- | ------- | ------------------------------------- |
+| `major`          | `''`    | Suffix for plain major triads         |
+| `minor`          | `'m'`   | Suffix for minor chords               |
+| `dominant7`      | `'7'`   | Suffix for dominant seventh chords    |
+| `halfDiminished` | `'ø'`   | Suffix for half-diminished / min7♭5   |
+| `diminished`     | `'°'`   | Suffix for diminished triads          |
+| `maj7`           | `'△'`   | Suffix for major seventh chords       |
+| `min7`           | `'m7'`  | Suffix for minor seventh chords       |
+| `dim7`           | `'°7'`  | Suffix for diminished seventh chords  |
+| `dom7flat5`      | `'7♭5'` | Suffix for dominant seventh flat-five |
+| `flat`           | `'♭'`   | Symbol for flat accidentals in roots  |
+| `sharp`          | `'♯'`   | Symbol for sharp accidentals in roots |
+
+Unspecified fields fall back to the defaults shown above.
 
 ---
 

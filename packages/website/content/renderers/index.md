@@ -27,7 +27,7 @@ const song = parse(source);
 const bbChart = new TextRenderer({ transpose: { semitones: 2 } }).render(song);
 
 // Concert pitch SVG for the music stand
-const concertSvg = new SvgRenderer({ notation: { preset: 'jazz' } }).render(song);
+const concertSvg = new SvgRenderer().render(song);
 
 // Transposed SVG for a guitarist with capo 2
 const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);

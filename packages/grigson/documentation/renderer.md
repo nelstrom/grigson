@@ -33,11 +33,11 @@ const inG = new TextRenderer().render(song);
 // Transposed up a tone to A
 const inA = new TextRenderer({ transpose: { toKey: 'A' } }).render(song);
 
-// Using a notation preset
-const symbolic = new TextRenderer({ notation: { preset: 'symbolic' } }).render(song);
+// Using an inline notation preset
+const ascii = new TextRenderer({ notation: { preset: { flat: 'b', sharp: '#', halfDiminished: 'm7b5' } } }).render(song);
 ```
 
-The plain text renderer supports notation presets (`jazz`, `pop`, `symbolic`) to control chord suffixes.
+The plain text renderer supports notation presets to control chord symbols. See the [Notation Presets](#notation) section for details.
 
 ---
 
@@ -50,7 +50,7 @@ import { parseSong } from 'grigson';
 import { HtmlRenderer } from 'grigson/renderers/html';
 
 const song = parseSong('| C | Am |');
-const renderer = new HtmlRenderer({ notation: { preset: 'symbolic' } });
+const renderer = new HtmlRenderer({ notation: { preset: { minor: '-' } } });
 const html = renderer.render(song);
 ```
 
@@ -182,7 +182,7 @@ The HTML renderer uses Unicode symbols by default regardless of the `notation` c
 | Diminished       | °           | U+00B0  |
 | Half-diminished  | ø           | U+00F8  |
 
-Minor chords use `m` by default; the `symbolic` preset changes this to `-`.
+Minor chords use `m` by default; passing `{ minor: '-' }` as an inline preset changes this to `-`.
 
 ### Handling narrow containers
 
@@ -363,50 +363,136 @@ If `toKey` matches the source key (or `semitones` is 0), no transposition occurs
 
 ### `notation`
 
-Controls how chord symbols are written in the output. You can use a named preset or override individual symbols.
+Controls how chord symbols are written in the output. A `NotationPreset` object maps each chord quality to a string suffix. You can pass a preset inline as an object (merged on top of the defaults), or pass a named preset registered via `registerPreset()`.
 
 ```javascript
 notation: {
-  // Named preset. Overrides below take precedence over the preset.
-  preset: 'jazz', // 'jazz' | 'pop' | 'symbolic'
+  // Inline partial preset — merged on top of DEFAULT_PRESET.
+  preset: { minor: '-', flat: 'b', sharp: '#' },
 
-  // How to write minor chords.
-  minor: 'm',   // 'm' → Cm   |  '-' → C-
-
-  // How to write major seventh.
-  major7: 'M7', // 'M7' → CM7  |  'maj7' → Cmaj7  |  'Δ' → CΔ
-
-  // How to write dominant seventh (usually just '7', but listed for completeness).
-  dominant7: '7',
-
-  // How to write half-diminished (minor seventh flat five).
-  halfDim: 'm7b5', // 'm7b5' → Cm7b5  |  'ø' → Cø
-
-  // How to write diminished.
-  diminished: 'dim', // 'dim' → Cdim  |  '°' → C°
-
-  // How to write diminished seventh.
-  diminished7: 'dim7', // 'dim7' → Cdim7  |  '°7' → C°7
-
-  // How to write augmented.
-  augmented: '+', // '+' → C+  |  'aug' → Caug
-
-  // How to write suspended fourth.
-  sus4: 'sus4', // 'sus4' → Csus4  |  'sus' → Csus (shorthand)
-
-  // Flat and sharp symbols in chord names.
-  flat: 'b',    // 'b' → Bb   |  '♭' → B♭  (Unicode)
-  sharp: '#',   // '#' → C#   |  '♯' → C♯  (Unicode)
+  // Or a named preset registered via registerPreset().
+  preset: 'myPreset',
 }
 ```
 
-#### Built-in presets
+#### `NotationPreset` schema
 
-| Preset           | Minor | Maj7   | Half-dim | Dim   |
-| ---------------- | ----- | ------ | -------- | ----- |
-| `jazz` (default) | `m`   | `M7`   | `m7b5`   | `dim` |
-| `pop`            | `m`   | `maj7` | `m7b5`   | `dim` |
-| `symbolic`       | `-`   | `Δ`    | `ø`      | `°`   |
+The keys of `NotationPreset` correspond exactly to the parser's `Quality` enum names, plus `flat` and `sharp` for accidentals.
+
+| Field            | Type     | Description                                           |
+| ---------------- | -------- | ----------------------------------------------------- |
+| `major`          | `string` | Suffix for plain major triads (e.g. `C`)              |
+| `minor`          | `string` | Suffix for minor chords (e.g. `Cm`)                   |
+| `dominant7`      | `string` | Suffix for dominant seventh chords (e.g. `C7`)        |
+| `halfDiminished` | `string` | Suffix for half-diminished / min7♭5 (e.g. `Cø`)       |
+| `diminished`     | `string` | Suffix for diminished triads (e.g. `C°`)              |
+| `maj7`           | `string` | Suffix for major seventh chords (e.g. `C△`)           |
+| `min7`           | `string` | Suffix for minor seventh chords (e.g. `Cm7`)          |
+| `dim7`           | `string` | Suffix for diminished seventh chords (e.g. `C°7`)     |
+| `dom7flat5`      | `string` | Suffix for dominant seventh flat-five (e.g. `C7♭5`)   |
+| `flat`           | `string` | Symbol used for flat accidentals in roots (e.g. `♭`)  |
+| `sharp`          | `string` | Symbol used for sharp accidentals in roots (e.g. `♯`) |
+
+#### `DEFAULT_PRESET` values
+
+| Field            | Default value |
+| ---------------- | ------------- |
+| `major`          | `''`          |
+| `minor`          | `'m'`         |
+| `dominant7`      | `'7'`         |
+| `halfDiminished` | `'ø'`         |
+| `diminished`     | `'°'`         |
+| `maj7`           | `'△'`         |
+| `min7`           | `'m7'`        |
+| `dim7`           | `'°7'`        |
+| `dom7flat5`      | `'7♭5'`       |
+| `flat`           | `'♭'`         |
+| `sharp`          | `'♯'`         |
+
+#### HTML renderer and `<sup>`/`<sub>` tags
+
+The HTML renderer passes preset suffix values directly into the rendered HTML, so suffixes may contain `<sup>` and `<sub>` tags for superscript and subscript notation. For example, a preset value of `'m<sup>7</sup>'` renders as `Cm` with a superscript 7.
+
+The text renderer strips any HTML tags from preset values before output, so the same preset works across both renderers.
+
+> **Security note:** preset values are interpolated into HTML output without sanitization. Only use preset values from trusted sources. See the [Named presets](#named-presets-via-grigsonpresets) section for how to register presets safely in a browser context.
+
+#### Inline preset example
+
+An inline preset is a plain object with any subset of `NotationPreset` fields. Unspecified fields fall back to `DEFAULT_PRESET`.
+
+```javascript
+import { parseSong } from 'grigson';
+import { TextRenderer } from 'grigson/renderers/text';
+
+const song = parseSong('| Cm7 | F7 | BbM7 | Dm7b5 |');
+
+// ASCII accidentals, m7b5 spelling
+const text = new TextRenderer({
+  notation: {
+    preset: {
+      flat: 'b',
+      sharp: '#',
+      halfDiminished: 'm7b5',
+    },
+  },
+}).render(song);
+// → | Cm7 | F7 | BbM7 | Dm7b5 |
+```
+
+#### Named presets via `grigson/presets`
+
+For browser and custom-element contexts, you can register a named preset once and refer to it by name from any renderer or `<grigson-chart>` element.
+
+```javascript
+import { registerPreset } from 'grigson/presets';
+
+// Register a custom preset at app startup
+registerPreset('ascii', {
+  flat: 'b',
+  sharp: '#',
+  halfDiminished: 'm7b5',
+  diminished: 'dim',
+  dim7: 'dim7',
+});
+
+// Use by name in a renderer
+import { HtmlRenderer } from 'grigson/renderers/html';
+const html = new HtmlRenderer({ notation: { preset: 'ascii' } }).render(song);
+```
+
+```html
+<!-- Or use by name in the custom element attribute -->
+<grigson-chart notation-preset="ascii">
+  | Cm7 | F7 | BbM7 |
+</grigson-chart>
+```
+
+The built-in `'default'` preset is always available and corresponds to `DEFAULT_PRESET`.
+
+#### CLI flags
+
+The `grigson-html-renderer` CLI accepts two flags for controlling notation:
+
+```bash
+# Use a named preset (must be pre-registered — useful when extending the CLI)
+grigson-html-renderer --notation-preset myPreset chart.chart
+
+# Load a partial NotationPreset from a JSON file (merged on top of DEFAULT_PRESET)
+grigson-html-renderer --notation-preset-file ./my-preset.json chart.chart
+```
+
+The `--notation-preset-file` flag reads a JSON file whose contents are treated as a `Partial<NotationPreset>`. Only the fields you specify are overridden; all others fall back to `DEFAULT_PRESET`.
+
+Example `my-preset.json`:
+
+```json
+{
+  "flat": "b",
+  "sharp": "#",
+  "halfDiminished": "m7b5"
+}
+```
 
 ---
 
@@ -500,7 +586,7 @@ const song = parse(source);
 const bbChart = new TextRenderer({ transpose: { semitones: 2 } }).render(song);
 
 // Concert pitch SVG for the music stand
-const concertSvg = new SvgRenderer({ notation: { preset: 'jazz' } }).render(song);
+const concertSvg = new SvgRenderer({ notation: { preset: 'default' } }).render(song);
 
 // Transposed SVG for a guitarist with capo 2
 const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);

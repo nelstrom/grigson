@@ -182,3 +182,45 @@ grigson validate *.chart                       # validate multiple files
 grigson validate --format json song.chart      # machine-readable output
 cat song.chart | grigson validate              # read from stdin
 ```
+
+---
+
+## Renderer binaries
+
+Renderer binaries are terminal pipeline steps that accept `.chart` input and write their output format to stdout.
+
+### `grigson-html-renderer`
+
+Reads a `.chart` file (or stdin) and writes rendered HTML to stdout. No normalisation is performed — pipe through `grigson normalise` first if needed.
+
+```
+grigson-html-renderer [options] [file]
+```
+
+**Options**
+
+| Option                          | Description                                                           |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `--notation-preset <name>`      | Named notation preset (must be pre-registered via `registerPreset()`) |
+| `--notation-preset-file <path>` | Path to a JSON file containing a partial `NotationPreset` object      |
+| `--help`, `-h`                  | Show help and exit                                                    |
+
+**`--notation-preset-file`** reads a JSON file whose fields override the defaults. Only the fields you specify are changed; all others keep their default values.
+
+Example `my-preset.json`:
+
+```json
+{
+  "flat": "b",
+  "sharp": "#",
+  "halfDiminished": "m7b5"
+}
+```
+
+**Examples**
+
+```sh
+grigson-html-renderer song.chart                                    # default notation
+grigson-html-renderer --notation-preset-file ./preset.json song.chart
+cat song.chart | grigson normalise | grigson-html-renderer > out.html
+```
