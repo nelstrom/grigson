@@ -1,4 +1,5 @@
 import { type NotationPreset, DEFAULT_PRESET } from './preset.js';
+export type { NotationPreset };
 
 const registry = new Map<string, NotationPreset>([['default', DEFAULT_PRESET]]);
 

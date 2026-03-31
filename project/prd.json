@@ -2015,7 +2015,8 @@
       "In root note rendering, replace hardcoded ♭/♯ with preset.flat and preset.sharp",
       "Run pnpm test to confirm existing HTML renderer tests pass",
       "Manually verify that an inline preset object { minor: '-' } produces C- instead of Cm in output"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "notation-cli-preset-file",

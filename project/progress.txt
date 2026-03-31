@@ -450,3 +450,15 @@ Added exports field to packages/grigson/package.json exposing '.' (main entry) a
 
 ## notation-text-renderer
 Migrated the text renderer to the new preset system. Replaced ad-hoc PRESETS/DEFAULT_NOTATION constants and partial switch statement with resolvePreset(). Updated TextRendererConfig.notation type to accept preset?: string | Partial<NotationPreset>. Added stripTags() helper. Added TEXT_DEFAULT internal preset with ASCII-safe values that round-trip through the parser (used when no preset is specified). Fixed root accidental substitution to use regex match on [A-G](b|#)? so note letters like B and G are not corrupted. All 505 tests pass.
+
+## notation-html-renderer (2026-03-31)
+Wired the HTML renderer chord and accidental rendering to the preset system.
+
+- Added `export type { NotationPreset }` to `notation/registry.ts` (it was imported but not re-exported, causing build failures in both text and html renderers)
+- Added `renderAccidental(acc, preset)` helper replacing the hardcoded `normalizeAccidentals` (which always substituted ♭/♯)
+- Replaced `QUALITY_SYMBOL` record with `preset[chord.quality]` in `renderChordInner`
+- Threaded `NotationPreset` through `renderChordRoot`, `renderChordInner`, `renderChord`, and `renderRow`
+- Resolved preset in `HtmlRenderer.render()` via `resolvePreset(this.config.notation?.preset)` and passed it down
+- Bass note accidentals in slash chords also updated to use preset values
+
+All 505 tests pass. Inline preset `{ minor: '-' }` produces `-` quality instead of `m`.

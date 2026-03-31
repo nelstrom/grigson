@@ -9,6 +9,7 @@ import type {
   BeatSlot,
 } from '../parser/types.js';
 import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
+import { type NotationPreset, resolvePreset } from '../notation/registry.js';
 
 // ---------------------------------------------------------------------------
 // Global layout calculation
@@ -195,43 +196,35 @@ function normalizeAccidentals(text: string): string {
   return text.replace(/b/g, '♭').replace(/#/g, '♯');
 }
 
-function renderChordRoot(root: string): string {
+function renderAccidental(acc: string, preset: NotationPreset): string {
+  return acc.replace(/b/g, preset.flat).replace(/#/g, preset.sharp);
+}
+
+function renderChordRoot(root: string, preset: NotationPreset): string {
   // Root is like "C", "Bb", "F#", "Ab"
   // Split into note letter(s) and accidental
   const match = root.match(/^([A-G])(b+|#+)?$/);
   if (!match) {
     // Fallback: just output with accidental normalization
-    return `<span part="chord-root">${normalizeAccidentals(root)}</span>`;
+    return `<span part="chord-root">${renderAccidental(root, preset)}</span>`;
   }
   const note = match[1];
   const acc = match[2] ?? '';
   if (acc === '') {
     return `<span part="chord-root">${note}</span>`;
   }
-  const unicodeAcc = normalizeAccidentals(acc);
-  return `<span part="chord-root">${note}<span part="chord-accidental">${unicodeAcc}</span></span>`;
+  const renderedAcc = renderAccidental(acc, preset);
+  return `<span part="chord-root">${note}<span part="chord-accidental">${renderedAcc}</span></span>`;
 }
 
-const QUALITY_SYMBOL: Record<string, string> = {
-  major: '',
-  minor: 'm',
-  dominant7: '7',
-  halfDiminished: 'ø',
-  diminished: '°',
-  maj7: '△',
-  min7: 'm7',
-  dim7: '°7',
-  dom7flat5: '7♭5',
-};
-
-function renderChordInner(chord: Chord): string {
-  const rootHtml = renderChordRoot(chord.root);
-  const qualitySymbol = QUALITY_SYMBOL[chord.quality] ?? '';
+function renderChordInner(chord: Chord, preset: NotationPreset): string {
+  const rootHtml = renderChordRoot(chord.root, preset);
+  const qualitySymbol = preset[chord.quality as keyof NotationPreset] ?? '';
   const qualityHtml = qualitySymbol ? `<span part="chord-quality">${qualitySymbol}</span>` : '';
   return rootHtml + qualityHtml;
 }
 
-function renderChord(chord: Chord): string {
+function renderChord(chord: Chord, preset: NotationPreset): string {
   if (chord.bass) {
     const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
     let bassHtml: string;
@@ -241,20 +234,20 @@ function renderChord(chord: Chord): string {
       if (bassAcc === '') {
         bassHtml = bassNote;
       } else {
-        bassHtml = `${bassNote}<span part="chord-accidental">${normalizeAccidentals(bassAcc)}</span>`;
+        bassHtml = `${bassNote}<span part="chord-accidental">${renderAccidental(bassAcc, preset)}</span>`;
       }
     } else {
-      bassHtml = normalizeAccidentals(chord.bass);
+      bassHtml = renderAccidental(chord.bass, preset);
     }
     return (
       `<span part="chord chord-slash">` +
-      `<span part="chord-top">${renderChordInner(chord)}</span>` +
+      `<span part="chord-top">${renderChordInner(chord, preset)}</span>` +
       `<span part="chord-fraction-line"></span>` +
       `<span part="chord-bass">${bassHtml}</span>` +
       `</span>`
     );
   }
-  return `<span part="chord">${renderChordInner(chord)}</span>`;
+  return `<span part="chord">${renderChordInner(chord, preset)}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -288,7 +281,7 @@ function renderTimeSig(ts: TimeSignature): string {
 // Row rendering
 // ---------------------------------------------------------------------------
 
-function renderRow(row: Row, rowLayout: RowLayout): string {
+function renderRow(row: Row, rowLayout: RowLayout, preset: NotationPreset): string {
   let html = `<div part="row">`;
 
   // Open barline
@@ -313,7 +306,7 @@ function renderRow(row: Row, rowLayout: RowLayout): string {
         if (slotLayout.showTimeSig) {
           slotContent += renderTimeSig(slotLayout.showTimeSig);
         }
-        slotContent += renderChord(slot.chord);
+        slotContent += renderChord(slot.chord, preset);
         html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
       }
     }
@@ -354,6 +347,7 @@ export class HtmlRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
   render(song: Song): string {
+    const preset = resolvePreset(this.config.notation?.preset);
     const layout = computeGlobalLayout(song);
     const { beatCols, minBeatWidth } = layout;
 
@@ -375,7 +369,7 @@ export class HtmlRenderer implements GrigsonRenderer {
       for (const item of section.content ?? section.rows) {
         if (item.type === 'row') {
           const rowLayout = layout.rows.get(item)!;
-          html += renderRow(item, rowLayout);
+          html += renderRow(item, rowLayout, preset);
         }
         // comments are intentionally omitted
       }
