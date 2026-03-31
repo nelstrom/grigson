@@ -465,3 +465,6 @@ All 505 tests pass. Inline preset `{ minor: '-' }` produces `-` quality instead 
 
 ## notation-cli-preset-file
 Added --notation-preset-file <path> flag to html-renderer-cli.ts. The flag reads a JSON file from disk, parses it as a Partial<NotationPreset>, and passes it as config.notation.preset. Also updated the HELP string to document both --notation-preset (named preset) and --notation-preset-file (JSON file path). Renamed the existing preset variable to presetName to avoid shadowing. Build and manual test with echo '{"minor":"-"}' confirmed the flag works correctly.
+
+## notation-xss-test (2026-03-31)
+Added a test to `packages/grigson/src/renderers/html.test.ts` documenting the XSS risk from preset values in HTML output. The test passes a preset with `dominant7: "<script>alert('xss')</script>"` to `HtmlRenderer` and asserts the script tag appears verbatim in the rendered output, documenting the current unsafe behavior. Added a `// TODO` comment in `html.ts` near the interpolation site in `renderChordInner` referencing DOMPurify and the HTML Sanitizer API as eventual fixes. All tests pass.

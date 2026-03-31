@@ -411,6 +411,18 @@ describe('HtmlRenderer', () => {
     });
   });
 
+  describe('XSS risk documentation', () => {
+    it('preset values containing script tags pass through verbatim into HTML output (unsafe behavior — see TODO in html.ts)', () => {
+      // This test documents the current unsafe behavior: preset values are interpolated
+      // directly into the HTML output string without sanitization. A malicious preset
+      // could inject arbitrary HTML into the rendered output.
+      const maliciousPreset = { dominant7: "<script>alert('xss')</script>" };
+      const xssRenderer = new HtmlRenderer({ notation: { preset: maliciousPreset } });
+      const html = xssRenderer.render(parseSong('| G7 |\n'));
+      expect(html).toContain("<script>alert('xss')</script>");
+    });
+  });
+
   describe('song wrapper', () => {
     it('outer div has --beat-cols and --min-beat-width CSS variables', () => {
       const html = renderer.render(parseSong('| C |\n'));

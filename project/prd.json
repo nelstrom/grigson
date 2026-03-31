@@ -2042,7 +2042,8 @@
       "Assert the rendered output contains the script tag literally (documents current behavior)",
       "Add a // TODO comment referencing DOMPurify / HTML Sanitizer API near the interpolation site in html.ts",
       "Run pnpm test to confirm the new test passes"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "notation-docs",

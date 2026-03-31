@@ -219,6 +219,9 @@ function renderChordRoot(root: string, preset: NotationPreset): string {
 
 function renderChordInner(chord: Chord, preset: NotationPreset): string {
   const rootHtml = renderChordRoot(chord.root, preset);
+  // TODO: sanitize preset values using DOMPurify or the HTML Sanitizer API before
+  // interpolating — a malicious preset (e.g. dominant7: "<script>…</script>") would
+  // be injected into the DOM verbatim. See notation-presets.md § "Security note".
   const qualitySymbol = preset[chord.quality as keyof NotationPreset] ?? '';
   const qualityHtml = qualitySymbol ? `<span part="chord-quality">${qualitySymbol}</span>` : '';
   return rootHtml + qualityHtml;
