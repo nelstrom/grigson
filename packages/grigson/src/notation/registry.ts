@@ -1,7 +1,10 @@
-import { type NotationPreset, DEFAULT_PRESET } from './preset.js';
+import { type NotationPreset, DEFAULT_PRESET, REALBOOK_PRESET } from './preset.js';
 export type { NotationPreset };
 
-const registry = new Map<string, NotationPreset>([['default', DEFAULT_PRESET]]);
+const registry = new Map<string, NotationPreset>([
+  ['default', DEFAULT_PRESET],
+  ['realbook', REALBOOK_PRESET],
+]);
 
 export function definePreset(name: string, preset: Partial<NotationPreset>): void {
   registry.set(name, { ...DEFAULT_PRESET, ...preset });

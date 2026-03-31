@@ -18,22 +18,35 @@ permalink: /renderers/presets/
 <h1>Notation Presets</h1>
 <p>
   A <em>notation preset</em> controls how chord symbols are rendered — accidentals,
-  quality suffixes, and special glyphs. The default preset uses Unicode music symbols;
-  a custom preset can use ASCII-safe alternatives.
+  quality suffixes, and special glyphs.
 </p>
 
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start">
+<h2>Built-in presets</h2>
+<p>
+  The following presets are available without any registration:
+</p>
+<ul>
+  <li><strong>default</strong> — Unicode glyphs (♭ ♯ ø ° △)</li>
+  <li><strong>realbook</strong> — Real Book dialect (<small>MI</small> <small>MA</small><sup>7</sup> <small>DIM</small>. etc.)</li>
+</ul>
+
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:2rem; align-items:start">
   <div>
-    <h2>Default preset</h2>
+    <h3>Default preset</h3>
     <p>Unicode glyphs: ♭ ♯ ø ° △</p>
   </div>
   <div>
-    <h2>Custom &ldquo;ascii&rdquo; preset</h2>
+    <h3>&ldquo;realbook&rdquo; preset</h3>
+    <p>Real Book dialect: <small>MI</small> <small>MA</small><sup>7</sup> <small>DIM</small>.</p>
+  </div>
+  <div>
+    <h3>Custom &ldquo;ascii&rdquo; preset</h3>
     <p>ASCII alternatives: b # m7b5 dim maj7</p>
   </div>
 </div>
-<grigson-chart normalise style="display:grid; grid-template-columns:1fr 1fr; gap:2rem">
+<grigson-chart normalise style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:2rem">
   <grigson-html-renderer></grigson-html-renderer>
+  <grigson-html-renderer notation-preset="realbook"></grigson-html-renderer>
   <grigson-html-renderer notation-preset="ascii"></grigson-html-renderer>
   <template>{{ 'notation-demo' | readChart }}</template>
 </grigson-chart>

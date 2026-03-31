@@ -468,7 +468,12 @@ const html = new HtmlRenderer({ notation: { preset: 'ascii' } }).render(song);
 </grigson-chart>
 ```
 
-The built-in `'default'` preset is always available and corresponds to `DEFAULT_PRESET`.
+Two presets are built-in and always available without registration:
+
+| Name         | Description                                                                     |
+| ------------ | ------------------------------------------------------------------------------- |
+| `'default'`  | Unicode glyphs (♭ ♯ ø ° △) — corresponds to `DEFAULT_PRESET`                    |
+| `'realbook'` | Real Book dialect: `MI`, `MA7`, `DIM.`, etc. — corresponds to `REALBOOK_PRESET` |
 
 #### CLI flags
 

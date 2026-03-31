@@ -172,12 +172,6 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         font-weight: bold;
       }
 
-      [part="chord-quality"] {
-        font-size: 0.75em;
-        vertical-align: 0.25em;
-        line-height: 0;
-      }
-
       [part="chord-accidental"] {
         font-size: 0.8em;
         vertical-align: 0.15em;
