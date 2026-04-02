@@ -107,6 +107,13 @@ permalink: /playground/
 <script src="/assets/js/grigson-monarch.js"></script>
 <script src="/js/monaco/vs/loader.js"></script>
 <script type="module">
+  import { z } from 'https://esm.sh/zod';
+
+  const rendererConfigSchema = z.discriminatedUnion('name', [
+    z.object({ name: z.literal('html'), preset: z.string().optional() }),
+    z.object({ name: z.literal('text') }),
+  ]);
+
   // lz-string.min.js is loaded as a plain script before Monaco's AMD loader,
   // so it initialises as window.LZString without AMD interference.
   const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = LZString;
@@ -127,10 +134,13 @@ permalink: /playground/
 
     function readRendererConfig() {
       const params = new URLSearchParams(location.search);
-      return {
-        renderer: params.get('renderer') ?? 'html',
-        notationPreset: params.get('notation-preset') ?? '',
-      };
+      const raw = params.get('renderer-config');
+      if (!raw) return { name: 'html' };
+      try {
+        return rendererConfigSchema.parse(JSON.parse(raw));
+      } catch {
+        return { name: 'html' };
+      }
     }
 
     const outputElement = document.getElementById('playground-output');
@@ -222,9 +232,14 @@ permalink: /playground/
     function updateURL() {
       clearTimeout(urlTimer);
       urlTimer = setTimeout(() => {
+        const config = { name: rendererSelect.value };
+        if (rendererSelect.value === 'html' && notationPresetSelect.value) {
+          config.preset = notationPresetSelect.value;
+        }
         const params = new URLSearchParams();
-        if (rendererSelect.value !== 'html') params.set('renderer', rendererSelect.value);
-        if (notationPresetSelect.value) params.set('notation-preset', notationPresetSelect.value);
+        if (config.name !== 'html' || config.preset) {
+          params.set('renderer-config', JSON.stringify(config));
+        }
         const compressed = compressToEncodedURIComponent(editor.getValue());
         const query = params.toString() ? '?' + params.toString() : '';
         history.replaceState(null, '', query + '#code/' + compressed);
@@ -257,8 +272,8 @@ permalink: /playground/
 
     // Initialize renderer selects from URL and apply the renderer
     const initialConfig = readRendererConfig();
-    rendererSelect.value = initialConfig.renderer;
-    notationPresetSelect.value = initialConfig.notationPreset;
+    rendererSelect.value = initialConfig.name;
+    notationPresetSelect.value = initialConfig.preset ?? '';
     applyRenderer();
 
     editor.onDidChangeModelContent(update);
