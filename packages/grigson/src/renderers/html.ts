@@ -348,7 +348,7 @@ function renderRow(
       // Render the entire bar as a single simile glyph (U+E1E7, Bravura repeat1Bar)
       const startCol = barLayout.slots[0]?.col ?? barLayout.closeBarlineCol - 1;
       const span = barLayout.closeBarlineCol - startCol;
-      html += `<span part="simile" style="grid-column: ${startCol} / span ${span}">\uE1E7</span>`;
+      html += `<span part="simile" style="grid-column: ${startCol} / span ${span}">%</span>`;
     } else {
       for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
         const slotLayout = barLayout.slots[slotIdx];

@@ -231,8 +231,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="simile"] {
-        font-family: "Bravura", serif;
-        font-size: 1.4em;
+        font-size: 1.1em;
         display: flex;
         align-items: center;
         justify-content: center;

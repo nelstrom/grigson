@@ -408,11 +408,11 @@ describe('HtmlRenderer', () => {
       expect(html.match(/part="slot"/g)?.length).toBe(2);
     });
 
-    it('shorthand: renders second identical bar as simile glyph (U+E1E7)', () => {
+    it('shorthand: renders second identical bar as simile mark (%)', () => {
       const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
       expect(html).toContain('part="simile"');
-      expect(html).toContain('\uE1E7');
+      expect(html).toContain('>%<');
       // Only the first bar renders as a chord slot
       expect(html.match(/part="slot"/g)?.length).toBe(1);
     });
