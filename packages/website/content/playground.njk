@@ -43,6 +43,14 @@ permalink: /playground/
     border: 1px solid var(--color-border);
     min-height: 0;
   }
+  #renderer-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+  }
   #output-container {
     flex: 1;
     overflow: auto;
@@ -74,11 +82,27 @@ permalink: /playground/
     <div id="input-editor"></div>
   </div>
 
+  <div id="renderer-toolbar">
+    <label for="renderer-select">Renderer:</label>
+    <select id="renderer-select">
+      <option value="html">HTML</option>
+      <option value="text">Text</option>
+    </select>
+    <span id="html-options">
+      <label for="notation-preset-select">Notation preset:</label>
+      <select id="notation-preset-select">
+        <option value="">Default</option>
+        <option value="realbook">Real Book</option>
+      </select>
+    </span>
+  </div>
+
   <div id="output-container">
     <grigson-chart id="playground-output" normalise></grigson-chart>
   </div>
 </div>
 
+<script src="/js/grigson-text-renderer-register.iife.js"></script>
 <script src="/js/lz-string.min.js"></script>
 <script src="/assets/js/grigson-monarch.js"></script>
 <script src="/js/monaco/vs/loader.js"></script>
@@ -101,7 +125,40 @@ permalink: /playground/
       return DEFAULT_VALUE;
     }
 
+    function readRendererConfig() {
+      const params = new URLSearchParams(location.search);
+      return {
+        renderer: params.get('renderer') ?? 'html',
+        notationPreset: params.get('notation-preset') ?? '',
+      };
+    }
+
     const outputElement = document.getElementById('playground-output');
+    const rendererSelect = document.getElementById('renderer-select');
+    const notationPresetSelect = document.getElementById('notation-preset-select');
+    const htmlOptions = document.getElementById('html-options');
+
+    let currentRenderer = null;
+
+    function applyRenderer() {
+      if (currentRenderer && currentRenderer.parentNode === outputElement) {
+        outputElement.removeChild(currentRenderer);
+      }
+
+      const name = rendererSelect.value;
+      if (name === 'text') {
+        currentRenderer = document.createElement('grigson-text-renderer');
+        htmlOptions.hidden = true;
+      } else {
+        currentRenderer = document.createElement('grigson-html-renderer');
+        const preset = notationPresetSelect.value;
+        if (preset) currentRenderer.setAttribute('notation-preset', preset);
+        htmlOptions.hidden = false;
+      }
+
+      const template = outputElement.querySelector('template');
+      outputElement.insertBefore(currentRenderer, template ?? null);
+    }
 
     // Register language and define Monarch tokenizer.
     // (Monaco's Monarch is built into the AMD bundle — no external oniguruma needed.)
@@ -161,17 +218,21 @@ permalink: /playground/
       monaco.editor.setTheme(getTheme());
     });
 
-    let hashTimer;
-    function updateHash() {
-      clearTimeout(hashTimer);
-      hashTimer = setTimeout(() => {
+    let urlTimer;
+    function updateURL() {
+      clearTimeout(urlTimer);
+      urlTimer = setTimeout(() => {
+        const params = new URLSearchParams();
+        if (rendererSelect.value !== 'html') params.set('renderer', rendererSelect.value);
+        if (notationPresetSelect.value) params.set('notation-preset', notationPresetSelect.value);
         const compressed = compressToEncodedURIComponent(editor.getValue());
-        history.replaceState(null, '', '#code/' + compressed);
+        const query = params.toString() ? '?' + params.toString() : '';
+        history.replaceState(null, '', query + '#code/' + compressed);
       }, 500);
     }
 
     function update() {
-      updateHash();
+      updateURL();
       const value = editor.getValue();
       let template = outputElement.querySelector('template');
       if (!template) {
@@ -194,8 +255,30 @@ permalink: /playground/
       })));
     }
 
+    // Initialize renderer selects from URL and apply the renderer
+    const initialConfig = readRendererConfig();
+    rendererSelect.value = initialConfig.renderer;
+    notationPresetSelect.value = initialConfig.notationPreset;
+    applyRenderer();
+
     editor.onDidChangeModelContent(update);
     update();
+
+    rendererSelect.addEventListener('change', () => {
+      applyRenderer();
+      outputElement.update();
+      updateURL();
+    });
+
+    notationPresetSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'html') {
+        const preset = notationPresetSelect.value;
+        if (preset) currentRenderer.setAttribute('notation-preset', preset);
+        else currentRenderer.removeAttribute('notation-preset');
+        outputElement.update();
+      }
+      updateURL();
+    });
 
     const formatBtn = document.getElementById('format-btn');
     const formatError = document.getElementById('format-error');
