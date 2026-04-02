@@ -3,15 +3,25 @@ import { HtmlRenderer } from './html.js';
 import type { TextRendererConfig } from './text.js';
 import type { GrigsonRendererElement } from './contract.js';
 import { GrigsonRendererUpdateEvent } from '../events.js';
+import { bravuraWoff2 } from './bravura-subset.js';
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset'];
+    return ['notation-preset', 'simile-output'];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
     if (oldValue === newValue) return;
     this.dispatchEvent(new GrigsonRendererUpdateEvent());
+  }
+
+  private _ensureFontFace(): void {
+    const id = 'grigson-bravura-font-face';
+    if (document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = `@font-face { font-family: "Bravura"; src: url("${bravuraWoff2}") format("woff2"); font-weight: normal; font-style: normal; }`;
+    document.head.appendChild(style);
   }
 
   private _getStyles(): string {
@@ -30,7 +40,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-repeat-dot-size: 0.3em;
         --grigson-title-font-size: 1.4em;
         --grigson-section-label-font-size: 0.9em;
-        --grigson-time-sig-font-size: 0.7em;
+        --grigson-time-sig-font-size: 1.1em;
       }
 
       [part="song-header"] {
@@ -208,9 +218,10 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: inline-flex;
         flex-direction: column;
         align-items: center;
+        font-family: "Bravura", serif;
         font-size: var(--grigson-time-sig-font-size);
-        font-weight: bold;
-        line-height: 1.1;
+        font-weight: normal;
+        line-height: 0.55;
         flex-shrink: 0;
       }
 
@@ -218,16 +229,30 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       [part="time-sig-den"] {
         display: block;
       }
+
+      [part="simile"] {
+        font-family: "Bravura", serif;
+        font-size: 1.4em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-left: 1em;
+      }
     `;
   }
 
   renderChart(song: Song): Element {
+    this._ensureFontFace();
     const config: TextRendererConfig = {};
     const notationPreset = this.getAttribute(
       'notation-preset',
     ) as TextRendererConfig['notation'] extends { preset?: infer P } ? P : never;
     if (notationPreset) {
       config.notation = { preset: notationPreset };
+    }
+    const simileOutput = this.getAttribute('simile-output');
+    if (simileOutput === 'shorthand' || simileOutput === 'longhand') {
+      config.simile = { output: simileOutput };
     }
 
     const renderer = new HtmlRenderer(config);

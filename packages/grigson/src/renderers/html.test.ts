@@ -285,9 +285,9 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('°');
     });
 
-    it('renders half-diminished quality as ø', () => {
+    it('renders half-diminished quality as Ø (capital, in superscript)', () => {
       const html = renderer.render(parseSong('| Cm7b5 |\n'));
-      expect(html).toContain('ø');
+      expect(html).toContain('<sup>Ø</sup>');
     });
   });
 
@@ -355,10 +355,11 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('part="time-sig-den"');
     });
 
-    it('time-sig-num and time-sig-den contain the correct digits', () => {
+    it('time-sig-num and time-sig-den contain the correct SMuFL digits', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
-      expect(html).toMatch(/part="time-sig-num">2</);
-      expect(html).toMatch(/part="time-sig-den">4</);
+      // Time sig digits are rendered as SMuFL codepoints: U+E082 = '2', U+E084 = '4'
+      expect(html).toContain(`part="time-sig-num">\uE082<`);
+      expect(html).toContain(`part="time-sig-den">\uE084<`);
     });
 
     it('shows time-sig on bar 0 when song.meter is set and bar has no explicit timeSignature', () => {
@@ -395,6 +396,42 @@ describe('HtmlRenderer', () => {
       };
       const html = renderer.render(song);
       expect(html).not.toContain('part="time-sig"');
+    });
+  });
+
+  describe('simile marks', () => {
+    it('longhand (default): renders identical consecutive bars as full chords', () => {
+      const r = new HtmlRenderer();
+      const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
+      expect(html).not.toContain('part="simile"');
+      // Both bars should render as chord slots
+      expect(html.match(/part="slot"/g)?.length).toBe(2);
+    });
+
+    it('shorthand: renders second identical bar as simile glyph (U+E1E7)', () => {
+      const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
+      const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
+      expect(html).toContain('part="simile"');
+      expect(html).toContain('\uE1E7');
+      // Only the first bar renders as a chord slot
+      expect(html.match(/part="slot"/g)?.length).toBe(1);
+    });
+
+    it('shorthand: first bar of a row is never rendered as simile', () => {
+      const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
+      // Two rows, each starting with C — the first bar of each row must not be simile
+      const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n| C | C |\n'));
+      // Each row has 2 bars; second bar of each row is simile = 2 simile marks
+      expect(html.match(/part="simile"/g)?.length).toBe(2);
+      // Each row's first bar is a chord slot = 2 chord slots
+      expect(html.match(/part="slot"/g)?.length).toBe(2);
+    });
+
+    it('shorthand: non-identical bars do not trigger simile', () => {
+      const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
+      const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | Am |\n'));
+      expect(html).not.toContain('part="simile"');
+      expect(html.match(/part="slot"/g)?.length).toBe(2);
     });
   });
 

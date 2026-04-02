@@ -15,10 +15,11 @@ HTML to stdout. No normalisation is performed.
 Options:
   --notation-preset <name>        Named notation preset (e.g. "jazz")
   --notation-preset-file <path>   Path to a JSON file containing a partial NotationPreset object
+  --simile-output <mode>          Simile rendering: "shorthand" (use % glyph) or "longhand" (default)
   --help, -h                      Show this help message and exit`;
 
 const parsed = minimist(process.argv.slice(2), {
-  string: ['notation-preset', 'notation-preset-file'],
+  string: ['notation-preset', 'notation-preset-file', 'simile-output'],
   boolean: ['help'],
   alias: { h: 'help' },
 });
@@ -36,6 +37,10 @@ if (presetFile) {
   config.notation = { preset: JSON.parse(raw) as Partial<NotationPreset> };
 } else if (presetName) {
   config.notation = { preset: presetName };
+}
+const simileOutput = parsed['simile-output'] as string | undefined;
+if (simileOutput === 'shorthand' || simileOutput === 'longhand') {
+  config.simile = { output: simileOutput };
 }
 
 await runRenderer((song) => new HtmlRenderer(config).render(song), {

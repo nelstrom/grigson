@@ -45,6 +45,10 @@ The plain text renderer supports notation presets to control chord symbols. See 
 
 The HTML renderer produces an HTML string using CSS Grid for layout. It is the default renderer used by the `<grigson-chart>` custom element. Beats are equally spaced, barlines align vertically across all rows in the song, and musical Unicode symbols are used throughout.
 
+### Embedded font
+
+The custom element embeds a subset of [Bravura](https://github.com/steinbergmedia/bravura) (© Steinberg Media Technologies, SIL Open Font License 1.1) as a base64-encoded WOFF2 in the injected `<style>` block. This subset covers the SMuFL time-signature glyphs and simile marks only; no network request is made and no font installation is required. The Bravura font family is applied only to `[part="time-sig"]` and `[part="simile"]` elements — all other text continues to use the host-page font stack.
+
 ```javascript
 import { parseSong } from 'grigson';
 import { HtmlRenderer } from 'grigson/renderers/html';
@@ -82,8 +86,9 @@ The renderer produces a hierarchy of elements, each with a `part` attribute:
         <!-- time-sig shown because bar.timeSignature is set on this bar -->
         <span part="slot" style="grid-column: 2 / span 2">
           <span part="time-sig">
-            <span part="time-sig-num">4</span>
-            <span part="time-sig-den">4</span>
+            <!-- SMuFL digits: U+E084 = 4, rendered in Bravura font -->
+            <span part="time-sig-num">&#xE084;</span>
+            <span part="time-sig-den">&#xE084;</span>
           </span>
           <span part="chord"><span part="chord-root">C</span></span>
         </span>
@@ -158,9 +163,10 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 | `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                     |
 | `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                               |
 | `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                         |
-| `time-sig`                     | `<span>`    | Time signature stacked fraction                                                 |
-| `time-sig-num`                 | `<span>`    | Numerator of the time signature                                                 |
-| `time-sig-den`                 | `<span>`    | Denominator of the time signature                                               |
+| `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width    |
+| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses Bravura font for SMuFL digit glyphs       |
+| `time-sig-num`                 | `<span>`    | Numerator of the time signature (SMuFL codepoints U+E080–E089)                  |
+| `time-sig-den`                 | `<span>`    | Denominator of the time signature (SMuFL codepoints U+E080–E089)                |
 | `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                 |
 | `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                       |
 | `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                    |
@@ -200,20 +206,20 @@ Decreasing `--grigson-font-size` shrinks the rendered output proportionally sinc
 
 These properties can be set on the `<grigson-chart>` element (or any ancestor) to control the appearance:
 
-| Property                            | Default                             | Description                                     |
-| ----------------------------------- | ----------------------------------- | ----------------------------------------------- |
-| `--grigson-font-family`             | `Georgia, 'Times New Roman', serif` | Font family for the entire chart                |
-| `--grigson-font-size`               | `1rem`                              | Base font size; reduce to fit narrow containers |
-| `--grigson-color`                   | `inherit`                           | Text and barline colour                         |
-| `--grigson-background`              | `transparent`                       | Background of the host element                  |
-| `--grigson-row-gap`                 | `1.2em`                             | Vertical gap between rows within a section      |
-| `--grigson-section-gap`             | `2em`                               | Top margin before each section label            |
-| `--grigson-barline-width`           | `1.5px`                             | Stroke width of barlines                        |
-| `--grigson-barline-color`           | `currentColor`                      | Colour of barlines                              |
-| `--grigson-repeat-dot-size`         | `0.3em`                             | Size of repeat dots                             |
-| `--grigson-title-font-size`         | `1.4em`                             | Font size of the song title                     |
-| `--grigson-section-label-font-size` | `0.9em`                             | Font size of section headings                   |
-| `--grigson-time-sig-font-size`      | `0.7em`                             | Font size of time signature annotations         |
+| Property                            | Default                             | Description                                                    |
+| ----------------------------------- | ----------------------------------- | -------------------------------------------------------------- |
+| `--grigson-font-family`             | `Georgia, 'Times New Roman', serif` | Font family for the entire chart                               |
+| `--grigson-font-size`               | `1rem`                              | Base font size; reduce to fit narrow containers                |
+| `--grigson-color`                   | `inherit`                           | Text and barline colour                                        |
+| `--grigson-background`              | `transparent`                       | Background of the host element                                 |
+| `--grigson-row-gap`                 | `1.2em`                             | Vertical gap between rows within a section                     |
+| `--grigson-section-gap`             | `2em`                               | Top margin before each section label                           |
+| `--grigson-barline-width`           | `1.5px`                             | Stroke width of barlines                                       |
+| `--grigson-barline-color`           | `currentColor`                      | Colour of barlines                                             |
+| `--grigson-repeat-dot-size`         | `0.3em`                             | Size of repeat dots                                            |
+| `--grigson-title-font-size`         | `1.4em`                             | Font size of the song title                                    |
+| `--grigson-section-label-font-size` | `0.9em`                             | Font size of section headings                                  |
+| `--grigson-time-sig-font-size`      | `1.1em`                             | Font size of time signature annotations (Bravura SMuFL glyphs) |
 
 Two additional variables are emitted by the renderer onto `part="song"` and control the grid geometry. You can override them, but normally the renderer computes the right values automatically:
 
@@ -395,19 +401,19 @@ The keys of `NotationPreset` correspond exactly to the parser's `Quality` enum n
 
 #### `DEFAULT_PRESET` values
 
-| Field            | Default value |
-| ---------------- | ------------- |
-| `major`          | `''`          |
-| `minor`          | `'m'`         |
-| `dominant7`      | `'7'`         |
-| `halfDiminished` | `'ø'`         |
-| `diminished`     | `'°'`         |
-| `maj7`           | `'△'`         |
-| `min7`           | `'m7'`        |
-| `dim7`           | `'°7'`        |
-| `dom7flat5`      | `'7♭5'`       |
-| `flat`           | `'♭'`         |
-| `sharp`          | `'♯'`         |
+| Field            | Default value    |
+| ---------------- | ---------------- |
+| `major`          | `''`             |
+| `minor`          | `'m'`            |
+| `dominant7`      | `'7'`            |
+| `halfDiminished` | `'<sup>Ø</sup>'` |
+| `diminished`     | `'°'`            |
+| `maj7`           | `'△'`            |
+| `min7`           | `'m7'`           |
+| `dim7`           | `'°7'`           |
+| `dom7flat5`      | `'7♭5'`          |
+| `flat`           | `'♭'`            |
+| `sharp`          | `'♯'`            |
 
 #### HTML renderer and `<sup>`/`<sub>` tags
 
@@ -477,7 +483,7 @@ Two presets are built-in and always available without registration:
 
 #### CLI flags
 
-The `grigson-html-renderer` CLI accepts two flags for controlling notation:
+The `grigson-html-renderer` CLI accepts the following flags for controlling notation and simile rendering:
 
 ```bash
 # Use a named preset (must be pre-registered — useful when extending the CLI)
@@ -485,6 +491,9 @@ grigson-html-renderer --notation-preset myPreset chart.chart
 
 # Load a partial NotationPreset from a JSON file (merged on top of DEFAULT_PRESET)
 grigson-html-renderer --notation-preset-file ./my-preset.json chart.chart
+
+# Render repeated bars as simile marks instead of writing them out in full
+grigson-html-renderer --simile-output shorthand chart.chart
 ```
 
 The `--notation-preset-file` flag reads a JSON file whose contents are treated as a `Partial<NotationPreset>`. Only the fields you specify are overridden; all others fall back to `DEFAULT_PRESET`.
@@ -503,7 +512,7 @@ Example `my-preset.json`:
 
 ### `simile`
 
-Controls whether repeated bars are rendered as simile symbols (`%`) or written out in full.
+Controls whether repeated bars are rendered as simile symbols or written out in full.
 
 The source format and the rendered output are independent. Both of the following parse to the same AST:
 
@@ -512,14 +521,24 @@ The source format and the rendered output are independent. Both of the following
 | C | % | % | % |     ← shorthand
 ```
 
-The renderer then decides which form to use in the output, regardless of which form was in the source. One fixed rule always applies: **the first bar of a new row is always rendered in full — never as `%`**. Simile symbols may only appear from the second bar of a row onwards.
+The renderer then decides which form to use in the output, regardless of which form was in the source. One fixed rule always applies: **the first bar of a new row is always rendered in full — never as a simile mark**. Simile marks may only appear from the second bar of a row onwards.
 
 ```javascript
 simile: {
-  // 'shorthand' — use % for consecutive identical bars (after the first bar of each row).
-  // 'longhand'  — always write chords out in full, never use %.
-  output: 'shorthand', // default
+  // 'shorthand' — use a simile mark for consecutive identical bars (after the first bar of each row).
+  // 'longhand'  — always write chords out in full (default).
+  output: 'longhand',
 }
+```
+
+**Text renderer**: simile marks are rendered as `%`.
+
+**HTML renderer**: simile marks are rendered using the Bravura SMuFL glyph U+E1E7 (the standard one-bar repeat slash mark). The bar is replaced by a `<span part="simile">` element spanning the full bar width. Enable it with `simile: { output: 'shorthand' }` in the renderer config, or with the `simile-output="shorthand"` attribute on `<grigson-chart>`.
+
+```html
+<grigson-chart simile-output="shorthand">
+  | C | Am | C | Am |
+</grigson-chart>
 ```
 
 ### `repeats`

@@ -287,11 +287,21 @@ function renderBarline(barline: Barline, col: number): string {
 // Time signature rendering
 // ---------------------------------------------------------------------------
 
+// SMuFL time-signature digits: U+E080 = '0', U+E081 = '1', …, U+E089 = '9'
+const SMUFL_DIGITS = '\uE080\uE081\uE082\uE083\uE084\uE085\uE086\uE087\uE088\uE089';
+
+function smuflDigits(n: number): string {
+  return String(n)
+    .split('')
+    .map((ch) => SMUFL_DIGITS[Number(ch)])
+    .join('');
+}
+
 function renderTimeSig(ts: TimeSignature): string {
   return (
     `<span part="time-sig">` +
-    `<span part="time-sig-num">${ts.numerator}</span>` +
-    `<span part="time-sig-den">${ts.denominator}</span>` +
+    `<span part="time-sig-num">${smuflDigits(ts.numerator)}</span>` +
+    `<span part="time-sig-den">${smuflDigits(ts.denominator)}</span>` +
     `</span>`
   );
 }
@@ -300,38 +310,69 @@ function renderTimeSig(ts: TimeSignature): string {
 // Row rendering
 // ---------------------------------------------------------------------------
 
-function renderRow(row: Row, rowLayout: RowLayout, preset: NotationPreset): string {
+function slotsEqual(a: BeatSlot[], b: BeatSlot[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((slot, i) => {
+    const other = b[i];
+    if (slot.type !== other.type) return false;
+    if (slot.type === 'chord' && other.type === 'chord') {
+      const ca = slot.chord;
+      const cb = other.chord;
+      return ca.root === cb.root && ca.quality === cb.quality && ca.bass === cb.bass;
+    }
+    return true; // both dots
+  });
+}
+
+function renderRow(
+  row: Row,
+  rowLayout: RowLayout,
+  preset: NotationPreset,
+  config: TextRendererConfig,
+): string {
   let html = `<div part="row">`;
 
   // Open barline
   html += renderBarline(row.openBarline, rowLayout.openBarlineCol);
 
+  const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
+  let prevSlots: BeatSlot[] | null = null;
+
   // Bars
   for (let barIdx = 0; barIdx < row.bars.length; barIdx++) {
     const bar: Bar = row.bars[barIdx];
     const barLayout = rowLayout.bars[barIdx];
+    const isSimile = useShorthand && prevSlots !== null && slotsEqual(bar.slots, prevSlots);
 
-    for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
-      const slotLayout = barLayout.slots[slotIdx];
-      const { col, span } = slotLayout;
-      const srcIdx = slotLayout.sourceSlotIdx ?? slotIdx;
-      const slot: BeatSlot | undefined = bar.slots[srcIdx];
+    if (isSimile) {
+      // Render the entire bar as a single simile glyph (U+E1E7, Bravura repeat1Bar)
+      const startCol = barLayout.slots[0]?.col ?? barLayout.closeBarlineCol - 1;
+      const span = barLayout.closeBarlineCol - startCol;
+      html += `<span part="simile" style="grid-column: ${startCol} / span ${span}">\uE1E7</span>`;
+    } else {
+      for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
+        const slotLayout = barLayout.slots[slotIdx];
+        const { col, span } = slotLayout;
+        const srcIdx = slotLayout.sourceSlotIdx ?? slotIdx;
+        const slot: BeatSlot | undefined = bar.slots[srcIdx];
 
-      if (slotLayout.implicit || slot?.type === 'dot') {
-        html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;
-      } else if (slot) {
-        // chord slot
-        let slotContent = '';
-        if (slotLayout.showTimeSig) {
-          slotContent += renderTimeSig(slotLayout.showTimeSig);
+        if (slotLayout.implicit || slot?.type === 'dot') {
+          html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;
+        } else if (slot) {
+          // chord slot
+          let slotContent = '';
+          if (slotLayout.showTimeSig) {
+            slotContent += renderTimeSig(slotLayout.showTimeSig);
+          }
+          slotContent += renderChord(slot.chord, preset);
+          html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
         }
-        slotContent += renderChord(slot.chord, preset);
-        html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
       }
     }
 
     // Close barline
     html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol);
+    prevSlots = bar.slots;
   }
 
   html += `</div>`;
@@ -388,7 +429,7 @@ export class HtmlRenderer implements GrigsonRenderer {
       for (const item of section.content ?? section.rows) {
         if (item.type === 'row') {
           const rowLayout = layout.rows.get(item)!;
-          html += renderRow(item, rowLayout, preset);
+          html += renderRow(item, rowLayout, preset, this.config);
         }
         // comments are intentionally omitted
       }
