@@ -310,6 +310,17 @@ function renderTimeSig(ts: TimeSignature): string {
 // Row rendering
 // ---------------------------------------------------------------------------
 
+// Inline SVG simile mark: two filled circles connected by a diagonal slash.
+// Bravura's U+E1E7 (repeat1Bar) is a tiny dot component designed for engraving
+// software canvas composition — it cannot be used as a scalable CSS character.
+// Proportions traced from Noto Music (inspiration/symbols/simile.svg), scaled from 280×280.
+const SIMILE_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">' +
+  '<circle cx="28" cy="36" r="8" fill="currentColor"/>' +
+  '<circle cx="72" cy="64" r="8" fill="currentColor"/>' +
+  '<path d="M64 19 L85 19 L35 81 L14 81 Z" fill="currentColor"/>' +
+  '</svg>';
+
 function slotsEqual(a: BeatSlot[], b: BeatSlot[]): boolean {
   if (a.length !== b.length) return false;
   return a.every((slot, i) => {
@@ -345,10 +356,9 @@ function renderRow(
     const isSimile = useShorthand && prevSlots !== null && slotsEqual(bar.slots, prevSlots);
 
     if (isSimile) {
-      // Render the entire bar as a single simile glyph (U+E1E7, Bravura repeat1Bar)
       const startCol = barLayout.slots[0]?.col ?? barLayout.closeBarlineCol - 1;
       const span = barLayout.closeBarlineCol - startCol;
-      html += `<span part="simile" style="grid-column: ${startCol} / span ${span}">%</span>`;
+      html += `<span part="simile" style="grid-column: ${startCol} / span ${span}">${SIMILE_SVG}</span>`;
     } else {
       for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
         const slotLayout = barLayout.slots[slotIdx];

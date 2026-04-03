@@ -231,11 +231,15 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="simile"] {
-        font-size: 1.1em;
         display: flex;
         align-items: center;
         justify-content: center;
         padding-left: 1em;
+      }
+
+      [part="simile"] svg {
+        height: 1.2em;
+        width: 1.2em;
       }
     `;
   }
