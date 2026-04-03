@@ -130,7 +130,16 @@ permalink: /playground/
   require.config({ paths: { 'vs': '/js/monaco/vs' } });
 
   require(['vs/editor/editor.main'], function () {
-    const DEFAULT_VALUE = '---\ntitle: Playground Example\nkey: F\n---\n| F | A# | F | C7 |\n|F|Bb|C|F|\n';
+    const DEFAULT_VALUE = `---
+title: "Chord Quality Reference"
+key: C major
+meter: 4/4
+---
+
+| C | Cm | C7 | Cmaj7 ||
+||: Cm7 | Cdim :||: Cdim7 | Cm7b5 :||
+| C7b5 | C7b5 ||.
+`;
 
     function readHash() {
       const hash = location.hash;
