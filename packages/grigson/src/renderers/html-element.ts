@@ -37,7 +37,6 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-section-gap: 2em;
         --grigson-barline-width: 1.5px;
         --grigson-barline-color: currentColor;
-        --grigson-repeat-dot-size: 0.3em;
         --grigson-title-font-size: 1.4em;
         --grigson-section-label-font-size: 0.9em;
         --grigson-time-sig-font-size: 1.1em;
@@ -102,54 +101,46 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
 
       [part~="barline"] {
         width: 0;
-        border-left: var(--grigson-barline-width) solid var(--grigson-barline-color);
         align-self: stretch;
         position: relative;
       }
 
-      [part~="barline-double"] {
-        box-shadow: 3px 0 0 var(--grigson-barline-color);
+      /* Single barline: plain CSS border */
+      [part~="barline-single"] {
+        border-left: var(--grigson-barline-width) solid var(--grigson-barline-color);
       }
 
-      [part~="barline-final"] {
-        border-left-width: calc(var(--grigson-barline-width) * 3);
-        box-shadow: calc(var(--grigson-barline-width) * -3 - 2px) 0 0 var(--grigson-barline-color);
-      }
-
-      [part~="barline-startRepeat"]::after {
-        content: '•\\A•';
-        white-space: pre;
-        font-size: var(--grigson-repeat-dot-size);
-        line-height: 1.8;
+      /* SVG barlines: absolutely positioned within the zero-width span.
+         Fixed 2em height keeps dot sizes and line weights stable regardless of
+         row height — tall rows (e.g. slash chords) don't blow up the symbols.
+         The SVG is centred vertically; on rows shorter than 2em it overflows
+         slightly (intentionally "taller than ideal", cropped by the row gap). */
+      [part~="barline"] svg {
         position: absolute;
-        left: 4px;
+        height: 2em;
+        width: auto;
+        top: 50%;
       }
 
-      [part~="barline-endRepeat"]::before {
-        content: '•\\A•';
-        white-space: pre;
-        font-size: var(--grigson-repeat-dot-size);
-        line-height: 1.8;
-        position: absolute;
-        right: 4px;
+      /* startRepeat: thick bar's left edge at column boundary, dots extend right */
+      [part~="barline-startRepeat"] svg {
+        left: 0;
+        transform: translateY(-50%);
       }
 
-      [part~="barline-endRepeatStartRepeat"]::before {
-        content: '•\\A•';
-        white-space: pre;
-        font-size: var(--grigson-repeat-dot-size);
-        line-height: 1.8;
-        position: absolute;
-        right: 4px;
+      /* double: centred on column boundary so neither thin line overflows the grid */
+      /* final, endRepeat: right-anchored so the thick bar ends at the column boundary */
+      [part~="barline-double"] svg,
+      [part~="barline-final"] svg,
+      [part~="barline-endRepeat"] svg {
+        right: 0;
+        transform: translateY(-50%);
       }
 
-      [part~="barline-endRepeatStartRepeat"]::after {
-        content: '•\\A•';
-        white-space: pre;
-        font-size: var(--grigson-repeat-dot-size);
-        line-height: 1.8;
-        position: absolute;
-        left: 4px;
+      /* Centred: thick bar centred on the column boundary */
+      [part~="barline-endRepeatStartRepeat"] svg {
+        left: 0;
+        transform: translate(-50%, -50%);
       }
 
       [part="barline-repeat-count"] {
