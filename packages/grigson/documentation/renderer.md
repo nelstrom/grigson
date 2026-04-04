@@ -45,9 +45,21 @@ The plain text renderer supports notation presets to control chord symbols. See 
 
 The HTML renderer produces an HTML string using CSS Grid for layout. It is the default renderer used by the `<grigson-chart>` custom element. Beats are equally spaced, barlines align vertically across all rows in the song, and musical Unicode symbols are used throughout.
 
-### Embedded font
+### Embedded fonts
 
-The custom element embeds a subset of [Bravura](https://github.com/steinbergmedia/bravura) (© Steinberg Media Technologies, SIL Open Font License 1.1) as a base64-encoded WOFF2 in the injected `<style>` block. This subset covers the SMuFL time-signature glyphs and simile marks only; no network request is made and no font installation is required. The Bravura font family is applied only to `[part="time-sig"]` and `[part="simile"]` elements — all other text continues to use the host-page font stack.
+The custom element embeds font subsets as base64-encoded WOFF2 data URIs in the injected `<style>` block. No network request is made and no font installation is required.
+
+**Noto Sans / Noto Serif** (© Google LLC, SIL Open Font License 1.1) provide the default body typeface. A Latin-1 subset (U+0000–U+00FF) is embedded for each variant, covering all Western European characters needed for chord names, song titles, and section labels. These fonts use lining figures (digits that sit on the baseline), which is important for chord extensions and superscripted/subscripted numerals.
+
+**Noto Sans Symbols 2** (© Google LLC, SIL Open Font License 1.1) supplies the △ glyph (U+25B3, used for major-seventh chords). Geometric shapes are typeface-agnostic, so a single Symbols 2 subset is shared between the sans and serif variants.
+
+**Bravura** (© Steinberg Media Technologies, SIL Open Font License 1.1) supplies:
+
+- ♭ and ♯ (U+266D, U+266F) for accidentals in chord names
+- SMuFL time-signature digits (U+E080–U+E08B) used by `[part="time-sig"]`
+- SMuFL simile marks (U+E1E7–U+E1E8) used by `[part="simile"]`
+
+The Noto and Bravura subsets are composed into a single logical font family (`GrigsonSans` or `GrigsonSerif`) using CSS `unicode-range`, so each codepoint is served from the most appropriate source transparently. Users who supply their own font via `--grigson-font-family` bypass the embedded fonts entirely.
 
 ```javascript
 import { parseSong } from 'grigson';
@@ -206,20 +218,22 @@ Decreasing `--grigson-font-size` shrinks the rendered output proportionally sinc
 
 These properties can be set on the `<grigson-chart>` element (or any ancestor) to control the appearance:
 
-| Property                            | Default                             | Description                                                    |
-| ----------------------------------- | ----------------------------------- | -------------------------------------------------------------- |
-| `--grigson-font-family`             | `Georgia, 'Times New Roman', serif` | Font family for the entire chart                               |
-| `--grigson-font-size`               | `1rem`                              | Base font size; reduce to fit narrow containers                |
-| `--grigson-color`                   | `inherit`                           | Text and barline colour                                        |
-| `--grigson-background`              | `transparent`                       | Background of the host element                                 |
-| `--grigson-row-gap`                 | `1.2em`                             | Vertical gap between rows within a section                     |
-| `--grigson-section-gap`             | `2em`                               | Top margin before each section label                           |
-| `--grigson-barline-width`           | `1.5px`                             | Stroke width of barlines                                       |
-| `--grigson-barline-color`           | `currentColor`                      | Colour of barlines                                             |
-| `--grigson-repeat-dot-size`         | `0.3em`                             | Size of repeat dots                                            |
-| `--grigson-title-font-size`         | `1.4em`                             | Font size of the song title                                    |
-| `--grigson-section-label-font-size` | `0.9em`                             | Font size of section headings                                  |
-| `--grigson-time-sig-font-size`      | `1.1em`                             | Font size of time signature annotations (Bravura SMuFL glyphs) |
+| Property                              | Default                        | Description                                                                    |
+| ------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
+| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font; bypasses the embedded Noto fonts              |
+| `--grigson-title-font-family`         | inherits chart font            | Font family for the song title; inherits from `--grigson-font-family` if unset |
+| `--grigson-section-label-font-family` | inherits chart font            | Font family for section labels; inherits from `--grigson-font-family` if unset |
+| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers                                |
+| `--grigson-color`                     | `inherit`                      | Text and barline colour                                                        |
+| `--grigson-background`                | `transparent`                  | Background of the host element                                                 |
+| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows within a section                                     |
+| `--grigson-section-gap`               | `2em`                          | Top margin before each section label                                           |
+| `--grigson-barline-width`             | `1.5px`                        | Stroke width of barlines                                                       |
+| `--grigson-barline-color`             | `currentColor`                 | Colour of barlines                                                             |
+| `--grigson-repeat-dot-size`           | `0.3em`                        | Size of repeat dots                                                            |
+| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                                                    |
+| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                                                  |
+| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations (Bravura SMuFL glyphs)                 |
 
 Two additional variables are emitted by the renderer onto `part="song"` and control the grid geometry. You can override them, but normally the renderer computes the right values automatically:
 
@@ -540,6 +554,33 @@ simile: {
   | C | Am | C | Am |
 </grigson-chart>
 ```
+
+### `typeface`
+
+Controls which embedded Noto font variant is used for chart text. Set the `typeface` attribute on `<grigson-html-renderer>`.
+
+| Value     | Font                | Description                                               |
+| --------- | ------------------- | --------------------------------------------------------- |
+| `"sans"`  | Noto Sans (default) | Clean sans-serif; omitting the attribute defaults to this |
+| `"serif"` | Noto Serif          | Traditional serif style                                   |
+
+```html
+<!-- Sans-serif (default — attribute may be omitted) -->
+<grigson-chart>
+  <grigson-html-renderer typeface="sans"></grigson-html-renderer>
+  | C△ | Am7 | Dm7 | G7 |
+</grigson-chart>
+
+<!-- Serif -->
+<grigson-chart>
+  <grigson-html-renderer typeface="serif"></grigson-html-renderer>
+  | C△ | Am7 | Dm7 | G7 |
+</grigson-chart>
+```
+
+The `typeface` attribute only affects the embedded Noto fonts. Setting `--grigson-font-family` overrides the font entirely and ignores `typeface`.
+
+To use a separate font for song titles or section labels while keeping Noto for chord content, set `--grigson-title-font-family` or `--grigson-section-label-font-family` on the chart element.
 
 ### `repeats`
 
