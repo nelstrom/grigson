@@ -89,6 +89,11 @@ permalink: /playground/
       <option value="text">Text</option>
     </select>
     <span id="html-options">
+      <label for="typeface-select">Typeface:</label>
+      <select id="typeface-select">
+        <option value="sans">Sans-serif (default)</option>
+        <option value="serif">Serif</option>
+      </select>
       <label for="notation-preset-select">Notation preset:</label>
       <select id="notation-preset-select">
         <option value="">Default</option>
@@ -117,6 +122,7 @@ permalink: /playground/
   const rendererConfigSchema = z.discriminatedUnion('name', [
     z.object({
       name: z.literal('html'),
+      typeface: z.enum(['sans', 'serif']).optional(),
       preset: z.string().optional(),
       simileOutput: z.enum(['shorthand', 'longhand']).optional(),
     }),
@@ -163,6 +169,7 @@ meter: 4/4
 
     const outputElement = document.getElementById('playground-output');
     const rendererSelect = document.getElementById('renderer-select');
+    const typefaceSelect = document.getElementById('typeface-select');
     const notationPresetSelect = document.getElementById('notation-preset-select');
     const simileOutputSelect = document.getElementById('simile-output-select');
     const htmlOptions = document.getElementById('html-options');
@@ -180,6 +187,7 @@ meter: 4/4
         htmlOptions.hidden = true;
       } else {
         currentRenderer = document.createElement('grigson-html-renderer');
+        currentRenderer.setAttribute('typeface', typefaceSelect.value);
         const preset = notationPresetSelect.value;
         if (preset) currentRenderer.setAttribute('notation-preset', preset);
         const simileOutput = simileOutputSelect.value;
@@ -255,11 +263,12 @@ meter: 4/4
       urlTimer = setTimeout(() => {
         const config = { name: rendererSelect.value };
         if (rendererSelect.value === 'html') {
+          if (typefaceSelect.value !== 'sans') config.typeface = typefaceSelect.value;
           if (notationPresetSelect.value) config.preset = notationPresetSelect.value;
           if (simileOutputSelect.value) config.simileOutput = simileOutputSelect.value;
         }
         const params = new URLSearchParams();
-        if (config.name !== 'html' || config.preset) {
+        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput) {
           params.set('renderer-config', JSON.stringify(config));
         }
         const compressed = compressToEncodedURIComponent(editor.getValue());
@@ -295,6 +304,7 @@ meter: 4/4
     // Initialize renderer selects from URL and apply the renderer
     const initialConfig = readRendererConfig();
     rendererSelect.value = initialConfig.name;
+    typefaceSelect.value = initialConfig.typeface ?? 'sans';
     notationPresetSelect.value = initialConfig.preset ?? '';
     simileOutputSelect.value = initialConfig.simileOutput ?? '';
     applyRenderer();
@@ -305,6 +315,14 @@ meter: 4/4
     rendererSelect.addEventListener('change', () => {
       applyRenderer();
       outputElement.update();
+      updateURL();
+    });
+
+    typefaceSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'html') {
+        currentRenderer.setAttribute('typeface', typefaceSelect.value);
+        outputElement.update();
+      }
       updateURL();
     });
 
