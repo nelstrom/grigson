@@ -4,10 +4,13 @@ import type { TextRendererConfig } from './text.js';
 import type { GrigsonRendererElement } from './contract.js';
 import { GrigsonRendererUpdateEvent } from '../events.js';
 import { bravuraWoff2 } from './bravura-subset.js';
+import { notoSansWoff2 } from './noto-sans-subset.js';
+import { notoSerifWoff2 } from './noto-serif-subset.js';
+import { notoSymbols2Woff2 } from './noto-symbols2-subset.js';
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset', 'simile-output'];
+    return ['notation-preset', 'simile-output', 'typeface'];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
@@ -15,21 +18,48 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     this.dispatchEvent(new GrigsonRendererUpdateEvent());
   }
 
-  private _ensureFontFace(): void {
-    const id = 'grigson-bravura-font-face';
-    if (document.getElementById(id)) return;
-    const style = document.createElement('style');
-    style.id = id;
-    style.textContent = `@font-face { font-family: "Bravura"; src: url("${bravuraWoff2}") format("woff2"); font-weight: normal; font-style: normal; }`;
-    document.head.appendChild(style);
+  private _ensureFontFaces(): void {
+    // Standalone Bravura family — used by [part="time-sig"] for SMuFL codepoints.
+    const bravuraId = 'grigson-bravura-font-face';
+    if (!document.getElementById(bravuraId)) {
+      const style = document.createElement('style');
+      style.id = bravuraId;
+      style.textContent = `@font-face { font-family: "Bravura"; src: url("${bravuraWoff2}") format("woff2"); font-weight: normal; font-style: normal; }`;
+      document.head.appendChild(style);
+    }
+
+    // GrigsonSans and GrigsonSerif composite families.  Both are always
+    // injected so switching typeface via the attribute only requires a CSS
+    // font-family change.  Each family composes three unicode-range blocks:
+    //   • Latin-1 (U+0000–00FF) from the appropriate Noto variant
+    //   • △ (U+25B3) from Noto Sans Symbols 2 (geometric, typeface-agnostic)
+    //   • ♭♯ (U+266D, U+266F) from Bravura
+    const notoId = 'grigson-noto-font-faces';
+    if (!document.getElementById(notoId)) {
+      const style = document.createElement('style');
+      style.id = notoId;
+      style.textContent = [
+        `@font-face{font-family:"GrigsonSans";src:url("${notoSansWoff2}") format("woff2");unicode-range:U+0000-00FF;font-weight:100 900;font-style:normal}`,
+        `@font-face{font-family:"GrigsonSans";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonSans";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+266D,U+266F;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonSerif";src:url("${notoSerifWoff2}") format("woff2");unicode-range:U+0000-00FF;font-weight:100 900;font-style:normal}`,
+        `@font-face{font-family:"GrigsonSerif";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonSerif";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+266D,U+266F;font-weight:normal;font-style:normal}`,
+      ].join('\n');
+      document.head.appendChild(style);
+    }
   }
 
   private _getStyles(): string {
+    const typeface = this.getAttribute('typeface') ?? 'sans';
+    const defaultFamily =
+      typeface === 'serif' ? '"GrigsonSerif", serif' : '"GrigsonSans", sans-serif';
+
     return `
       :host {
         display: block;
         color-scheme: light dark;
-        font-family: var(--grigson-font-family, Georgia, 'Times New Roman', serif);
+        font-family: var(--grigson-font-family, ${defaultFamily});
         font-size: var(--grigson-font-size, 1rem);
         color: var(--grigson-color, inherit);
         background: var(--grigson-background, transparent);
@@ -47,6 +77,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="song-title"] {
+        font-family: var(--grigson-title-font-family);
         font-size: var(--grigson-title-font-size);
         font-weight: bold;
         margin: 0 0 0.2em;
@@ -75,6 +106,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         grid-column: 1 / -1;
         margin-top: var(--grigson-section-gap);
         margin-bottom: 0;
+        font-family: var(--grigson-section-label-font-family);
         font-size: var(--grigson-section-label-font-size);
         font-weight: bold;
         text-transform: uppercase;
@@ -236,7 +268,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
   }
 
   renderChart(song: Song): Element {
-    this._ensureFontFace();
+    this._ensureFontFaces();
     const config: TextRendererConfig = {};
     const notationPreset = this.getAttribute(
       'notation-preset',
