@@ -207,8 +207,10 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
 
       [part="chord-accidental"] {
         font-size: 0.8em;
-        vertical-align: 0.15em;
+        vertical-align: 0.05em;
         line-height: 0;
+        margin-left: -0.2em;
+        margin-right: -0.15em;
       }
 
       [part="chord-slash"] {
