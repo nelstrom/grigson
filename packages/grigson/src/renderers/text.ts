@@ -12,6 +12,7 @@ export interface TextRendererConfig {
   simile?: {
     output?: 'shorthand' | 'longhand';
   };
+  accidentals?: 'unicode' | 'ascii';
 }
 
 // ASCII-safe defaults used when no preset is specified — values must round-trip
@@ -26,9 +27,10 @@ const TEXT_DEFAULT: NotationPreset = {
   min7: 'm7',
   dim7: 'dim7',
   dom7flat5: '7b5',
-  flat: 'b',
-  sharp: '#',
 };
+
+const TEXT_FLAT = 'b';
+const TEXT_SHARP = '#';
 
 function stripTags(s: string): string {
   return s.replace(/<[^>]+>/g, '');
@@ -46,15 +48,15 @@ function renderChord(chord: Chord, config: TextRendererConfig): string {
   if (rootMatch) {
     const letter = rootMatch[1];
     const acc = rootMatch[2] ?? '';
-    const flatChar = stripTags(preset.flat);
-    const sharpChar = stripTags(preset.sharp);
-    const renderedAcc = acc.replace(/b/g, flatChar).replace(/#/g, sharpChar);
+    const renderedAcc = acc.replace(/b/g, TEXT_FLAT).replace(/#/g, TEXT_SHARP);
     root = letter + renderedAcc;
   } else {
     root = chord.root;
   }
 
-  const suffix = stripTags(preset[chord.quality as keyof NotationPreset] ?? '');
+  const suffix = stripTags(preset[chord.quality as keyof NotationPreset] ?? '')
+    .replace(/♭/g, TEXT_FLAT)
+    .replace(/♯/g, TEXT_SHARP);
   return root + suffix + (chord.bass ? '/' + chord.bass : '');
 }
 

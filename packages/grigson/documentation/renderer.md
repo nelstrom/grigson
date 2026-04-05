@@ -106,7 +106,7 @@ The renderer produces a hierarchy of elements, each with a `part` attribute:
         </span>
         <span part="slot" style="grid-column: 4 / span 2">
           <span part="chord">
-            <span part="chord-root">A<span part="chord-accidental">♭</span></span>
+            <span part="chord-root">A<span part="chord-accidental" data-glyph="unicode">♭</span></span>
             <span part="chord-quality">m</span>
           </span>
         </span>
@@ -130,11 +130,11 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 ```html
 <span part="chord chord-slash">
   <span part="chord-top">
-    <span part="chord-root">A<span part="chord-accidental">♭</span></span>
+    <span part="chord-root">A<span part="chord-accidental" data-glyph="unicode">♭</span></span>
     <span part="chord-quality">m</span>
   </span>
   <span part="chord-fraction-line"></span>
-  <span part="chord-bass">E<span part="chord-accidental">♭</span></span>
+  <span part="chord-bass">E<span part="chord-accidental" data-glyph="unicode">♭</span></span>
 </span>
 ```
 
@@ -154,39 +154,40 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 
 ### Part names reference
 
-| Part value                     | Element     | Description                                                                     |
-| ------------------------------ | ----------- | ------------------------------------------------------------------------------- |
-| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables |
-| `song-header`                  | `<header>`  | Title, artist, and key block                                                    |
-| `song-title`                   | `<h1>`      | Song title from front matter                                                    |
-| `song-artist`                  | `<p>`       | Artist from front matter (omitted when null)                                    |
-| `song-key`                     | `<p>`       | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null)          |
-| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                                 |
-| `section`                      | `<section>` | One section; always `display: contents` so children become direct grid items    |
-| `section-label`                | `<h2>`      | Section heading, e.g. "Verse" (omitted when section has no label)               |
-| `row`                          | `<div>`     | One row of bars; uses `subgrid`                                                 |
-| `barline`                      | `<span>`    | Any barline; always combined with a barline-kind part (see below)               |
-| `barline-single`               | —           | Plain barline `\|`                                                              |
-| `barline-double`               | —           | Double barline `\|\|`                                                           |
-| `barline-final`                | —           | Final barline `\|\|.`                                                           |
-| `barline-startRepeat`          | —           | Start-repeat barline `\|\|:`                                                    |
-| `barline-endRepeat`            | —           | End-repeat barline `:\|\|`                                                      |
-| `barline-endRepeatStartRepeat` | —           | Turn-around barline `:\|\|:`                                                    |
-| `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                     |
-| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                               |
-| `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                         |
-| `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width    |
-| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses Bravura font for SMuFL digit glyphs       |
-| `time-sig-num`                 | `<span>`    | Numerator of the time signature (SMuFL codepoints U+E080–E089)                  |
-| `time-sig-den`                 | `<span>`    | Denominator of the time signature (SMuFL codepoints U+E080–E089)                |
-| `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                 |
-| `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                       |
-| `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                    |
-| `chord-root`                   | `<span>`    | Note name, e.g. "C" or "B"                                                      |
-| `chord-accidental`             | `<span>`    | Accidental inside a root, rendered as ♭ or ♯                                    |
-| `chord-quality`                | `<span>`    | Quality suffix, e.g. "m", "△", "ø"                                              |
-| `chord-fraction-line`          | `<span>`    | Horizontal rule between numerator and bass in a slash chord                     |
-| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                                      |
+| Part value                     | Element     | Description                                                                                                       |
+| ------------------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables                                   |
+| `song-header`                  | `<header>`  | Title, artist, and key block                                                                                      |
+| `song-title`                   | `<h1>`      | Song title from front matter                                                                                      |
+| `song-artist`                  | `<p>`       | Artist from front matter (omitted when null)                                                                      |
+| `song-key`                     | `<p>`       | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null)                                            |
+| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                                                                   |
+| `section`                      | `<section>` | One section; always `display: contents` so children become direct grid items                                      |
+| `section-label`                | `<h2>`      | Section heading, e.g. "Verse" (omitted when section has no label)                                                 |
+| `row`                          | `<div>`     | One row of bars; uses `subgrid`                                                                                   |
+| `barline`                      | `<span>`    | Any barline; always combined with a barline-kind part (see below)                                                 |
+| `barline-single`               | —           | Plain barline `\|`                                                                                                |
+| `barline-double`               | —           | Double barline `\|\|`                                                                                             |
+| `barline-final`                | —           | Final barline `\|\|.`                                                                                             |
+| `barline-startRepeat`          | —           | Start-repeat barline `\|\|:`                                                                                      |
+| `barline-endRepeat`            | —           | End-repeat barline `:\|\|`                                                                                        |
+| `barline-endRepeatStartRepeat` | —           | Turn-around barline `:\|\|:`                                                                                      |
+| `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                                                       |
+| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                                                                 |
+| `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                                                           |
+| `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width                                      |
+| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses Bravura font for SMuFL digit glyphs                                         |
+| `time-sig-num`                 | `<span>`    | Numerator of the time signature (SMuFL codepoints U+E080–E089)                                                    |
+| `time-sig-den`                 | `<span>`    | Denominator of the time signature (SMuFL codepoints U+E080–E089)                                                  |
+| `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                                                   |
+| `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                                                         |
+| `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                                                      |
+| `chord-root`                   | `<span>`    | Note name, e.g. "C" or "B"                                                                                        |
+| `chord-accidental`             | `<span>`    | Accidental inside a root or bass note; carries `data-glyph="unicode"` or `data-glyph="ascii"`                     |
+| `chord-quality`                | `<span>`    | Quality suffix, e.g. "m", "△", "ø"                                                                                |
+| `quality-accidental`           | `<span>`    | Accidental within a quality string (e.g. the ♭ in `7(♭5)`); carries `data-glyph="unicode"` (absent in ascii mode) |
+| `chord-fraction-line`          | `<span>`    | Horizontal rule between numerator and bass in a slash chord                                                       |
+| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                                                                        |
 
 ### Unicode notation defaults
 
@@ -388,7 +389,7 @@ Controls how chord symbols are written in the output. A `NotationPreset` object 
 ```javascript
 notation: {
   // Inline partial preset — merged on top of DEFAULT_PRESET.
-  preset: { minor: '-', flat: 'b', sharp: '#' },
+  preset: { minor: '-' },
 
   // Or a named preset registered via definePreset().
   preset: 'myPreset',
@@ -397,37 +398,35 @@ notation: {
 
 #### `NotationPreset` schema
 
-The keys of `NotationPreset` correspond exactly to the parser's `Quality` enum names, plus `flat` and `sharp` for accidentals.
+The keys of `NotationPreset` correspond to the parser's `Quality` enum names. Each value is the string suffix appended after the chord root. Values may contain `<sup>`, `<sub>`, or `<small>` tags for the HTML renderer; the text renderer strips tags automatically.
 
-| Field            | Type     | Description                                           |
-| ---------------- | -------- | ----------------------------------------------------- |
-| `major`          | `string` | Suffix for plain major triads (e.g. `C`)              |
-| `minor`          | `string` | Suffix for minor chords (e.g. `Cm`)                   |
-| `dominant7`      | `string` | Suffix for dominant seventh chords (e.g. `C7`)        |
-| `halfDiminished` | `string` | Suffix for half-diminished / min7♭5 (e.g. `Cø`)       |
-| `diminished`     | `string` | Suffix for diminished triads (e.g. `C°`)              |
-| `maj7`           | `string` | Suffix for major seventh chords (e.g. `C△`)           |
-| `min7`           | `string` | Suffix for minor seventh chords (e.g. `Cm7`)          |
-| `dim7`           | `string` | Suffix for diminished seventh chords (e.g. `C°7`)     |
-| `dom7flat5`      | `string` | Suffix for dominant seventh flat-five (e.g. `C7♭5`)   |
-| `flat`           | `string` | Symbol used for flat accidentals in roots (e.g. `♭`)  |
-| `sharp`          | `string` | Symbol used for sharp accidentals in roots (e.g. `♯`) |
+**Accidentals within quality strings** (e.g. the ♭ in `7(♭5)`) must be written as unicode symbols — ♭ (U+266D) and ♯ (U+266F). The renderer transforms them at render time according to the `accidentals` setting.
+
+| Field            | Type     | Description                                         |
+| ---------------- | -------- | --------------------------------------------------- |
+| `major`          | `string` | Suffix for plain major triads (e.g. `C`)            |
+| `minor`          | `string` | Suffix for minor chords (e.g. `Cm`)                 |
+| `dominant7`      | `string` | Suffix for dominant seventh chords (e.g. `C7`)      |
+| `halfDiminished` | `string` | Suffix for half-diminished / min7♭5 (e.g. `Cø`)     |
+| `diminished`     | `string` | Suffix for diminished triads (e.g. `C°`)            |
+| `maj7`           | `string` | Suffix for major seventh chords (e.g. `C△`)         |
+| `min7`           | `string` | Suffix for minor seventh chords (e.g. `Cm7`)        |
+| `dim7`           | `string` | Suffix for diminished seventh chords (e.g. `C°7`)   |
+| `dom7flat5`      | `string` | Suffix for dominant seventh flat-five (e.g. `C7♭5`) |
 
 #### `DEFAULT_PRESET` values
 
-| Field            | Default value    |
-| ---------------- | ---------------- |
-| `major`          | `''`             |
-| `minor`          | `'m'`            |
-| `dominant7`      | `'7'`            |
-| `halfDiminished` | `'<sup>Ø</sup>'` |
-| `diminished`     | `'°'`            |
-| `maj7`           | `'△'`            |
-| `min7`           | `'m7'`           |
-| `dim7`           | `'°7'`           |
-| `dom7flat5`      | `'7♭5'`          |
-| `flat`           | `'♭'`            |
-| `sharp`          | `'♯'`            |
+| Field            | Default value      |
+| ---------------- | ------------------ |
+| `major`          | `''`               |
+| `minor`          | `'m'`              |
+| `dominant7`      | `'<sup>7</sup>'`   |
+| `halfDiminished` | `'<sup>Ø</sup>'`   |
+| `diminished`     | `'°'`              |
+| `maj7`           | `'<sup>△</sup>'`   |
+| `min7`           | `'m<sup>7</sup>'`  |
+| `dim7`           | `'°<sup>7</sup>'`  |
+| `dom7flat5`      | `'<sup>7♭5</sup>'` |
 
 #### HTML renderer and `<sup>`/`<sub>` tags
 
@@ -447,12 +446,10 @@ import { TextRenderer } from 'grigson/renderers/text';
 
 const song = parseSong('| Cm7 | F7 | BbM7 | Dm7b5 |');
 
-// ASCII accidentals, m7b5 spelling
+// Custom m7b5 spelling
 const text = new TextRenderer({
   notation: {
     preset: {
-      flat: 'b',
-      sharp: '#',
       halfDiminished: 'm7b5',
     },
   },
@@ -468,9 +465,7 @@ For browser and custom-element contexts, you can register a named preset once an
 import { definePreset } from 'grigson/presets';
 
 // Register a custom preset at app startup
-definePreset('ascii', {
-  flat: 'b',
-  sharp: '#',
+definePreset('custom', {
   halfDiminished: 'm7b5',
   diminished: 'dim',
   dim7: 'dim7',
@@ -478,12 +473,12 @@ definePreset('ascii', {
 
 // Use by name in a renderer
 import { HtmlRenderer } from 'grigson/renderers/html';
-const html = new HtmlRenderer({ notation: { preset: 'ascii' } }).render(song);
+const html = new HtmlRenderer({ notation: { preset: 'custom' } }).render(song);
 ```
 
 ```html
 <!-- Or use by name in the custom element attribute -->
-<grigson-chart notation-preset="ascii">
+<grigson-chart notation-preset="custom">
   | Cm7 | F7 | BbM7 |
 </grigson-chart>
 ```
@@ -516,9 +511,8 @@ Example `my-preset.json`:
 
 ```json
 {
-  "flat": "b",
-  "sharp": "#",
-  "halfDiminished": "m7b5"
+  "halfDiminished": "m7b5",
+  "diminished": "dim"
 }
 ```
 
@@ -581,6 +575,39 @@ Controls which embedded Noto font variant is used for chart text. Set the `typef
 The `typeface` attribute only affects the embedded Noto fonts. Setting `--grigson-font-family` overrides the font entirely and ignores `typeface`.
 
 To use a separate font for song titles or section labels while keeping Noto for chord content, set `--grigson-title-font-family` or `--grigson-section-label-font-family` on the chart element.
+
+### `accidentals`
+
+Controls whether flat and sharp symbols are rendered as unicode glyphs (♭♯) or ASCII characters (b#). Applies to all accidentals in the chart: chord roots, bass notes, and accidentals within quality strings (e.g. the ♭ in `7(♭5)`).
+
+| Value       | Root/bass | Quality strings | CSS kerning |
+| ----------- | --------- | --------------- | ----------- |
+| `"unicode"` | ♭ ♯       | ♭ ♯             | applied     |
+| `"ascii"`   | b #       | b #             | not applied |
+
+The default is `"unicode"`. Use `"ascii"` when the active typeface does not have good-looking ♭/♯ glyphs (e.g. a handwritten or display font).
+
+```html
+<!-- Unicode accidentals (default) -->
+<grigson-chart>
+  <grigson-html-renderer></grigson-html-renderer>
+  | Bb7 | Ebmaj7 |
+</grigson-chart>
+
+<!-- ASCII accidentals — useful with display fonts -->
+<grigson-chart style="--grigson-font-family: 'Kaushan Script', cursive;">
+  <grigson-html-renderer accidentals="ascii"></grigson-html-renderer>
+  | Bb7 | Ebmaj7 |
+</grigson-chart>
+```
+
+In the `HtmlRenderer` config object, set `accidentals: 'ascii'`:
+
+```javascript
+const html = new HtmlRenderer({ accidentals: 'ascii' }).render(song);
+```
+
+CSS kerning (negative `margin-left`/`margin-right`) is applied automatically to unicode accidentals via `[data-glyph="unicode"]` selectors on `[part="chord-accidental"]` and `[part="quality-accidental"]` spans. ASCII glyphs do not receive kerning.
 
 ### `repeats`
 

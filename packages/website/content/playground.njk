@@ -104,6 +104,11 @@ permalink: /playground/
         <option value="">Longhand (default)</option>
         <option value="shorthand">Shorthand</option>
       </select>
+      <label for="accidentals-select">Accidentals:</label>
+      <select id="accidentals-select">
+        <option value="">Unicode ♭♯ (default)</option>
+        <option value="ascii">ASCII b#</option>
+      </select>
     </span>
   </div>
 
@@ -125,6 +130,7 @@ permalink: /playground/
       typeface: z.enum(['sans', 'serif']).optional(),
       preset: z.string().optional(),
       simileOutput: z.enum(['shorthand', 'longhand']).optional(),
+      accidentals: z.enum(['ascii', 'unicode']).optional(),
     }),
     z.object({ name: z.literal('text') }),
   ]);
@@ -172,6 +178,7 @@ meter: 4/4
     const typefaceSelect = document.getElementById('typeface-select');
     const notationPresetSelect = document.getElementById('notation-preset-select');
     const simileOutputSelect = document.getElementById('simile-output-select');
+    const accidentalsSelect = document.getElementById('accidentals-select');
     const htmlOptions = document.getElementById('html-options');
 
     let currentRenderer = null;
@@ -192,6 +199,8 @@ meter: 4/4
         if (preset) currentRenderer.setAttribute('notation-preset', preset);
         const simileOutput = simileOutputSelect.value;
         if (simileOutput) currentRenderer.setAttribute('simile-output', simileOutput);
+        const accidentals = accidentalsSelect.value;
+        if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
         htmlOptions.hidden = false;
       }
 
@@ -266,9 +275,10 @@ meter: 4/4
           if (typefaceSelect.value !== 'sans') config.typeface = typefaceSelect.value;
           if (notationPresetSelect.value) config.preset = notationPresetSelect.value;
           if (simileOutputSelect.value) config.simileOutput = simileOutputSelect.value;
+          if (accidentalsSelect.value) config.accidentals = accidentalsSelect.value;
         }
         const params = new URLSearchParams();
-        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput) {
+        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals) {
           params.set('renderer-config', JSON.stringify(config));
         }
         const compressed = compressToEncodedURIComponent(editor.getValue());
@@ -307,6 +317,7 @@ meter: 4/4
     typefaceSelect.value = initialConfig.typeface ?? 'sans';
     notationPresetSelect.value = initialConfig.preset ?? '';
     simileOutputSelect.value = initialConfig.simileOutput ?? '';
+    accidentalsSelect.value = initialConfig.accidentals ?? '';
     applyRenderer();
 
     editor.onDidChangeModelContent(update);
@@ -341,6 +352,16 @@ meter: 4/4
         const simileOutput = simileOutputSelect.value;
         if (simileOutput) currentRenderer.setAttribute('simile-output', simileOutput);
         else currentRenderer.removeAttribute('simile-output');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    accidentalsSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'html') {
+        const accidentals = accidentalsSelect.value;
+        if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
+        else currentRenderer.removeAttribute('accidentals');
         outputElement.update();
       }
       updateURL();

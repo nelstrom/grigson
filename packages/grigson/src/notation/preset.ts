@@ -8,8 +8,6 @@ export interface NotationPreset {
   min7: string;
   dim7: string;
   dom7flat5: string;
-  flat: string;
-  sharp: string;
 }
 
 export const DEFAULT_PRESET: NotationPreset = {
@@ -22,8 +20,6 @@ export const DEFAULT_PRESET: NotationPreset = {
   min7: 'm<sup>7</sup>',
   dim7: '°<sup>7</sup>',
   dom7flat5: '<sup>7♭5</sup>',
-  flat: '♭',
-  sharp: '♯',
 };
 
 /** Real Book chord symbol dialect (e.g. CMA7, CMI, CMI7(♭5)). */
@@ -37,6 +33,4 @@ export const REALBOOK_PRESET: NotationPreset = {
   min7: '<small>MI</small><sup>7</sup>',
   dim7: '<sup>°7</sup>',
   dom7flat5: '<sup>7(♭5)</sup>',
-  flat: '♭',
-  sharp: '♯',
 };

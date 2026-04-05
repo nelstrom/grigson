@@ -10,7 +10,7 @@ import { notoSymbols2Woff2 } from './noto-symbols2-subset.js';
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset', 'simile-output', 'typeface'];
+    return ['notation-preset', 'simile-output', 'typeface', 'accidentals'];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
@@ -209,6 +209,10 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         font-size: 0.8em;
         vertical-align: 0.05em;
         line-height: 0;
+      }
+
+      [part="chord-accidental"][data-glyph="unicode"],
+      [part="quality-accidental"][data-glyph="unicode"] {
         margin-left: -0.2em;
         margin-right: -0.15em;
       }
@@ -281,6 +285,10 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     const simileOutput = this.getAttribute('simile-output');
     if (simileOutput === 'shorthand' || simileOutput === 'longhand') {
       config.simile = { output: simileOutput };
+    }
+    const accidentals = this.getAttribute('accidentals');
+    if (accidentals === 'ascii' || accidentals === 'unicode') {
+      config.accidentals = accidentals;
     }
 
     const renderer = new HtmlRenderer(config);

@@ -263,16 +263,34 @@ describe('HtmlRenderer', () => {
   const renderer = new HtmlRenderer();
 
   describe('Unicode notation', () => {
-    it('renders flat accidental as ♭', () => {
+    it('renders flat accidental as ♭ with data-glyph="unicode"', () => {
       const html = renderer.render(parseSong('| Bb |\n'));
       expect(html).toContain('♭');
+      expect(html).toContain('data-glyph="unicode"');
       expect(html).not.toContain('<span part="chord-accidental">b</span>');
     });
 
-    it('renders sharp accidental as ♯', () => {
+    it('renders sharp accidental as ♯ with data-glyph="unicode"', () => {
       const html = renderer.render(parseSong('| F# |\n'));
       expect(html).toContain('♯');
+      expect(html).toContain('data-glyph="unicode"');
       expect(html).not.toContain('<span part="chord-accidental">#</span>');
+    });
+
+    it('accidentals="ascii" renders flat as b with data-glyph="ascii"', () => {
+      const r = new HtmlRenderer({ accidentals: 'ascii' });
+      const html = r.render(parseSong('| Bb |\n'));
+      expect(html).toContain('data-glyph="ascii"');
+      expect(html).toContain('>b<');
+      expect(html).not.toContain('♭');
+    });
+
+    it('accidentals="ascii" renders sharp as # with data-glyph="ascii"', () => {
+      const r = new HtmlRenderer({ accidentals: 'ascii' });
+      const html = r.render(parseSong('| F# |\n'));
+      expect(html).toContain('data-glyph="ascii"');
+      expect(html).toContain('>#<');
+      expect(html).not.toContain('♯');
     });
 
     it('renders major7 quality as △', () => {
@@ -310,6 +328,34 @@ describe('HtmlRenderer', () => {
       const html = renderer.render(parseSong('| C/Bb |\n'));
       expect(html).toContain('♭');
       expect(html).toMatch(/part="chord-bass"/);
+    });
+
+    it('accidentals="ascii" renders bass accidental as b', () => {
+      const r = new HtmlRenderer({ accidentals: 'ascii' });
+      const html = r.render(parseSong('| C/Bb |\n'));
+      expect(html).not.toContain('♭');
+      expect(html).toMatch(/part="chord-bass"/);
+    });
+  });
+
+  describe('quality-accidental wrapping', () => {
+    it('unicode mode: wraps ♭ in quality string with quality-accidental span', () => {
+      const r = new HtmlRenderer({ notation: { preset: 'realbook' } });
+      const html = r.render(parseSong('| Cm7b5 |\n'));
+      expect(html).toContain('part="quality-accidental" data-glyph="unicode"');
+      expect(html).toContain('♭');
+    });
+
+    it('ascii mode: replaces ♭ in quality string with b, no quality-accidental span', () => {
+      const r = new HtmlRenderer({ notation: { preset: 'realbook' }, accidentals: 'ascii' });
+      const html = r.render(parseSong('| Cm7b5 |\n'));
+      expect(html).not.toContain('part="quality-accidental"');
+      expect(html).not.toContain('♭');
+    });
+
+    it('default preset: dom7flat5 quality wraps ♭ in unicode mode', () => {
+      const html = renderer.render(parseSong('| C7b5 |\n'));
+      expect(html).toContain('part="quality-accidental" data-glyph="unicode"');
     });
   });
 

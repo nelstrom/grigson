@@ -215,35 +215,62 @@ function normalizeAccidentals(text: string): string {
   return text.replace(/b/g, '♭').replace(/#/g, '♯');
 }
 
-function renderAccidental(acc: string, preset: NotationPreset): string {
-  return acc.replace(/b/g, preset.flat).replace(/#/g, preset.sharp);
+type AccidentalsMode = 'unicode' | 'ascii';
+
+function renderAccidental(acc: string, flatChar: string, sharpChar: string): string {
+  return acc.replace(/b/g, flatChar).replace(/#/g, sharpChar);
 }
 
-function renderChordRoot(root: string, preset: NotationPreset): string {
-  // Root is like "C", "Bb", "F#", "Ab"
-  // Split into note letter(s) and accidental
+function wrapQualityAccidentals(html: string, mode: AccidentalsMode): string {
+  if (mode === 'ascii') {
+    return html.replace(/♭/g, 'b').replace(/♯/g, '#');
+  }
+  return html.replace(
+    /[♭♯]/g,
+    (ch) => `<span part="quality-accidental" data-glyph="unicode">${ch}</span>`,
+  );
+}
+
+function renderChordRoot(
+  root: string,
+  flatChar: string,
+  sharpChar: string,
+  mode: AccidentalsMode,
+): string {
   const match = root.match(/^([A-G])(b+|#+)?$/);
   if (!match) {
-    // Fallback: just output with accidental normalization
-    return `<span part="chord-root">${renderAccidental(root, preset)}</span>`;
+    return `<span part="chord-root">${renderAccidental(root, flatChar, sharpChar)}</span>`;
   }
   const note = match[1];
   const acc = match[2] ?? '';
   if (acc === '') {
     return `<span part="chord-root">${note}</span>`;
   }
-  const renderedAcc = renderAccidental(acc, preset);
-  return `<span part="chord-root">${note}<span part="chord-accidental">${renderedAcc}</span></span>`;
+  const renderedAcc = renderAccidental(acc, flatChar, sharpChar);
+  return `<span part="chord-root">${note}<span part="chord-accidental" data-glyph="${mode}">${renderedAcc}</span></span>`;
 }
 
-function renderChordInner(chord: Chord, preset: NotationPreset): string {
-  const rootHtml = renderChordRoot(chord.root, preset);
-  const qualitySymbol = preset[chord.quality as keyof NotationPreset] ?? '';
+function renderChordInner(
+  chord: Chord,
+  preset: NotationPreset,
+  flatChar: string,
+  sharpChar: string,
+  mode: AccidentalsMode,
+): string {
+  const rootHtml = renderChordRoot(chord.root, flatChar, sharpChar, mode);
+  const rawQuality = preset[chord.quality as keyof NotationPreset] ?? '';
+  const qualitySymbol = rawQuality ? wrapQualityAccidentals(rawQuality, mode) : '';
   const qualityHtml = qualitySymbol ? `<span part="chord-quality">${qualitySymbol}</span>` : '';
   return rootHtml + qualityHtml;
 }
 
-function renderChord(chord: Chord, preset: NotationPreset): string {
+function renderChord(
+  chord: Chord,
+  preset: NotationPreset,
+  flatChar: string,
+  sharpChar: string,
+  mode: AccidentalsMode,
+): string {
   if (chord.bass) {
     const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
     let bassHtml: string;
@@ -253,20 +280,20 @@ function renderChord(chord: Chord, preset: NotationPreset): string {
       if (bassAcc === '') {
         bassHtml = bassNote;
       } else {
-        bassHtml = `${bassNote}<span part="chord-accidental">${renderAccidental(bassAcc, preset)}</span>`;
+        bassHtml = `${bassNote}<span part="chord-accidental" data-glyph="${mode}">${renderAccidental(bassAcc, flatChar, sharpChar)}</span>`;
       }
     } else {
-      bassHtml = renderAccidental(chord.bass, preset);
+      bassHtml = renderAccidental(chord.bass, flatChar, sharpChar);
     }
     return (
       `<span part="chord chord-slash">` +
-      `<span part="chord-top">${renderChordInner(chord, preset)}</span>` +
+      `<span part="chord-top">${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>` +
       `<span part="chord-fraction-line"></span>` +
       `<span part="chord-bass">${bassHtml}</span>` +
       `</span>`
     );
   }
-  return `<span part="chord">${renderChordInner(chord, preset)}</span>`;
+  return `<span part="chord">${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -405,6 +432,9 @@ function renderRow(
   rowLayout: RowLayout,
   preset: NotationPreset,
   config: TextRendererConfig,
+  flatChar: string,
+  sharpChar: string,
+  mode: AccidentalsMode,
 ): string {
   let html = `<div part="row">`;
 
@@ -439,7 +469,7 @@ function renderRow(
           if (slotLayout.showTimeSig) {
             slotContent += renderTimeSig(slotLayout.showTimeSig);
           }
-          slotContent += renderChord(slot.chord, preset);
+          slotContent += renderChord(slot.chord, preset, flatChar, sharpChar, mode);
           html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
         }
       }
@@ -483,6 +513,9 @@ export class HtmlRenderer implements GrigsonRenderer {
 
   render(song: Song): string {
     const preset = sanitizePreset(resolvePreset(this.config.notation?.preset));
+    const mode: AccidentalsMode = this.config.accidentals === 'ascii' ? 'ascii' : 'unicode';
+    const flatChar = mode === 'unicode' ? '♭' : 'b';
+    const sharpChar = mode === 'unicode' ? '♯' : '#';
     const layout = computeGlobalLayout(song);
     const { beatCols, minBeatWidth } = layout;
 
@@ -504,7 +537,7 @@ export class HtmlRenderer implements GrigsonRenderer {
       for (const item of section.content ?? section.rows) {
         if (item.type === 'row') {
           const rowLayout = layout.rows.get(item)!;
-          html += renderRow(item, rowLayout, preset, this.config);
+          html += renderRow(item, rowLayout, preset, this.config, flatChar, sharpChar, mode);
         }
         // comments are intentionally omitted
       }
