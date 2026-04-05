@@ -298,14 +298,14 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('△');
     });
 
-    it('renders diminished quality as °', () => {
+    it('renders diminished quality as o (in superscript)', () => {
       const html = renderer.render(parseSong('| Cdim |\n'));
-      expect(html).toContain('°');
+      expect(html).toContain('<sup><small>o</small></sup>');
     });
 
-    it('renders half-diminished quality as Ø (capital, in superscript)', () => {
+    it('renders half-diminished quality as ø (in superscript)', () => {
       const html = renderer.render(parseSong('| Cm7b5 |\n'));
-      expect(html).toContain('<sup>Ø</sup>');
+      expect(html).toContain('<sup><small>ø</small></sup>');
     });
   });
 
