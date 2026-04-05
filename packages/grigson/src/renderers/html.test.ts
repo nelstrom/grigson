@@ -346,10 +346,11 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('♭');
     });
 
-    it('ascii mode: replaces ♭ in quality string with b, no quality-accidental span', () => {
+    it('ascii mode: replaces ♭ in quality string with b, wrapped in quality-accidental span', () => {
       const r = new HtmlRenderer({ notation: { preset: 'realbook' }, accidentals: 'ascii' });
       const html = r.render(parseSong('| Cm7b5 |\n'));
-      expect(html).not.toContain('part="quality-accidental"');
+      expect(html).toContain('part="quality-accidental" data-glyph="ascii"');
+      expect(html).toContain('>b<');
       expect(html).not.toContain('♭');
     });
 

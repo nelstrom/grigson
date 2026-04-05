@@ -154,40 +154,40 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 
 ### Part names reference
 
-| Part value                     | Element     | Description                                                                                                       |
-| ------------------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------- |
-| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables                                   |
-| `song-header`                  | `<header>`  | Title, artist, and key block                                                                                      |
-| `song-title`                   | `<h1>`      | Song title from front matter                                                                                      |
-| `song-artist`                  | `<p>`       | Artist from front matter (omitted when null)                                                                      |
-| `song-key`                     | `<p>`       | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null)                                            |
-| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                                                                   |
-| `section`                      | `<section>` | One section; always `display: contents` so children become direct grid items                                      |
-| `section-label`                | `<h2>`      | Section heading, e.g. "Verse" (omitted when section has no label)                                                 |
-| `row`                          | `<div>`     | One row of bars; uses `subgrid`                                                                                   |
-| `barline`                      | `<span>`    | Any barline; always combined with a barline-kind part (see below)                                                 |
-| `barline-single`               | —           | Plain barline `\|`                                                                                                |
-| `barline-double`               | —           | Double barline `\|\|`                                                                                             |
-| `barline-final`                | —           | Final barline `\|\|.`                                                                                             |
-| `barline-startRepeat`          | —           | Start-repeat barline `\|\|:`                                                                                      |
-| `barline-endRepeat`            | —           | End-repeat barline `:\|\|`                                                                                        |
-| `barline-endRepeatStartRepeat` | —           | Turn-around barline `:\|\|:`                                                                                      |
-| `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                                                       |
-| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                                                                 |
-| `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                                                           |
-| `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width                                      |
-| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses Bravura font for SMuFL digit glyphs                                         |
-| `time-sig-num`                 | `<span>`    | Numerator of the time signature (SMuFL codepoints U+E080–E089)                                                    |
-| `time-sig-den`                 | `<span>`    | Denominator of the time signature (SMuFL codepoints U+E080–E089)                                                  |
-| `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                                                   |
-| `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                                                         |
-| `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                                                      |
-| `chord-root`                   | `<span>`    | Note name, e.g. "C" or "B"                                                                                        |
-| `chord-accidental`             | `<span>`    | Accidental inside a root or bass note; carries `data-glyph="unicode"` or `data-glyph="ascii"`                     |
-| `chord-quality`                | `<span>`    | Quality suffix, e.g. "m", "△", "ø"                                                                                |
-| `quality-accidental`           | `<span>`    | Accidental within a quality string (e.g. the ♭ in `7(♭5)`); carries `data-glyph="unicode"` (absent in ascii mode) |
-| `chord-fraction-line`          | `<span>`    | Horizontal rule between numerator and bass in a slash chord                                                       |
-| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                                                                        |
+| Part value                     | Element     | Description                                                                                                        |
+| ------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width` CSS variables                                    |
+| `song-header`                  | `<header>`  | Title, artist, and key block                                                                                       |
+| `song-title`                   | `<h1>`      | Song title from front matter                                                                                       |
+| `song-artist`                  | `<p>`       | Artist from front matter (omitted when null)                                                                       |
+| `song-key`                     | `<p>`       | Key in normalised form, e.g. "F major", "A♭ major" (omitted when null)                                             |
+| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                                                                    |
+| `section`                      | `<section>` | One section; always `display: contents` so children become direct grid items                                       |
+| `section-label`                | `<h2>`      | Section heading, e.g. "Verse" (omitted when section has no label)                                                  |
+| `row`                          | `<div>`     | One row of bars; uses `subgrid`                                                                                    |
+| `barline`                      | `<span>`    | Any barline; always combined with a barline-kind part (see below)                                                  |
+| `barline-single`               | —           | Plain barline `\|`                                                                                                 |
+| `barline-double`               | —           | Double barline `\|\|`                                                                                              |
+| `barline-final`                | —           | Final barline `\|\|.`                                                                                              |
+| `barline-startRepeat`          | —           | Start-repeat barline `\|\|:`                                                                                       |
+| `barline-endRepeat`            | —           | End-repeat barline `:\|\|`                                                                                         |
+| `barline-endRepeatStartRepeat` | —           | Turn-around barline `:\|\|:`                                                                                       |
+| `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                                                        |
+| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                                                                  |
+| `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                                                            |
+| `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width                                       |
+| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses Bravura font for SMuFL digit glyphs                                          |
+| `time-sig-num`                 | `<span>`    | Numerator of the time signature (SMuFL codepoints U+E080–E089)                                                     |
+| `time-sig-den`                 | `<span>`    | Denominator of the time signature (SMuFL codepoints U+E080–E089)                                                   |
+| `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                                                    |
+| `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                                                          |
+| `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                                                       |
+| `chord-root`                   | `<span>`    | Note name, e.g. "C" or "B"                                                                                         |
+| `chord-accidental`             | `<span>`    | Accidental inside a root or bass note; carries `data-glyph="unicode"` or `data-glyph="ascii"`                      |
+| `chord-quality`                | `<span>`    | Quality suffix, e.g. "m", "△", "ø"                                                                                 |
+| `quality-accidental`           | `<span>`    | Accidental within a quality string (e.g. the ♭ in `7(♭5)`); carries `data-glyph="unicode"` or `data-glyph="ascii"` |
+| `chord-fraction-line`          | `<span>`    | Horizontal rule between numerator and bass in a slash chord                                                        |
+| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                                                                         |
 
 ### Unicode notation defaults
 

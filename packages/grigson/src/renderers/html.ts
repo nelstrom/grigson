@@ -222,13 +222,11 @@ function renderAccidental(acc: string, flatChar: string, sharpChar: string): str
 }
 
 function wrapQualityAccidentals(html: string, mode: AccidentalsMode): string {
-  if (mode === 'ascii') {
-    return html.replace(/♭/g, 'b').replace(/♯/g, '#');
-  }
-  return html.replace(
-    /[♭♯]/g,
-    (ch) => `<span part="quality-accidental" data-glyph="unicode">${ch}</span>`,
-  );
+  const ascii = mode === 'ascii';
+  return html.replace(/[♭♯]/g, (ch) => {
+    const glyph = ascii ? (ch === '♭' ? 'b' : '#') : ch;
+    return `<span part="quality-accidental" data-glyph="${mode}">${glyph}</span>`;
+  });
 }
 
 function renderChordRoot(
