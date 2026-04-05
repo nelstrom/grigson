@@ -202,19 +202,22 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="chord-root"] {
-        font-weight: bold;
+        font-weight: normal;
       }
 
-      [part="chord-accidental"] {
-        font-size: 0.8em;
-        vertical-align: 0.05em;
+      [part="chord-accidental"][data-glyph="unicode"] {
+        vertical-align: super;
         line-height: 0;
+        margin-left: 0.05em;
+        margin-right: 0.05em;
       }
 
-      [part="chord-accidental"][data-glyph="unicode"],
       [part="quality-accidental"][data-glyph="unicode"] {
-        margin-left: -0.2em;
-        margin-right: -0.15em;
+        font-size: 1em;
+        vertical-align: 0.15em;
+        line-height: 0;
+        margin-left: 0.05em;
+        margin-right: 0.05em;
       }
 
       [part="chord-slash"] {
