@@ -61,9 +61,7 @@ The custom element embeds font subsets as base64-encoded WOFF2 data URIs in the 
 
 **PetalumaScript** (© Steinberg Media Technologies GmbH, SIL Open Font License 1.1) is a handwritten Real Book-style text font. A Latin-1 subset is embedded, including ♭ and ♯ which this font provides natively at standard Unicode positions.
 
-**Finale Jazz Text** (© MakeMusic, SIL Open Font License 1.1) is the text companion to MakeMusic's Finale Jazz notation font. A Latin-1 subset is embedded; Bravura fills in ♭♯ since the original font encodes those in a legacy Private Use Area.
-
-The subsets are composed into logical font families (`GrigsonSans`, `GrigsonSerif`, `GrigsonPetaluma`, `GrigsonFinaleJazz`) using CSS `unicode-range`, so each codepoint is served from the most appropriate source transparently. Users who supply their own font via `--grigson-font-family` bypass the embedded fonts entirely.
+The subsets are composed into logical font families (`GrigsonSans`, `GrigsonSerif`, `GrigsonJazz`) using CSS `unicode-range`, so each codepoint is served from the most appropriate source transparently. Users who supply their own font via `--grigson-font-family` bypass the embedded fonts entirely.
 
 ```javascript
 import { parseSong } from 'grigson';
@@ -557,12 +555,11 @@ simile: {
 
 Controls which embedded font is used for chart text. Set the `typeface` attribute on `<grigson-html-renderer>`.
 
-| Value           | Font                | Description                                               |
-| --------------- | ------------------- | --------------------------------------------------------- |
-| `"sans"`        | Noto Sans (default) | Clean sans-serif; omitting the attribute defaults to this |
-| `"serif"`       | Noto Serif          | Traditional serif style                                   |
-| `"petaluma"`    | PetalumaScript      | Handwritten Real Book style (Steinberg, SIL OFL)          |
-| `"finale-jazz"` | Finale Jazz Text    | Finale's jazz text companion font (MakeMusic, SIL OFL)    |
+| Value       | Font                | Description                                               |
+| ----------- | ------------------- | --------------------------------------------------------- |
+| `"sans"`    | Noto Sans (default) | Clean sans-serif; omitting the attribute defaults to this |
+| `"serif"`   | Noto Serif          | Traditional serif style                                   |
+| `"cursive"` | PetalumaScript      | Handwritten Real Book style (Steinberg, SIL OFL)          |
 
 ```html
 <!-- Sans-serif (default — attribute may be omitted) -->
@@ -577,15 +574,9 @@ Controls which embedded font is used for chart text. Set the `typeface` attribut
   | C△ | Am7 | Dm7 | G7 |
 </grigson-chart>
 
-<!-- Handwritten Real Book style -->
+<!-- Cursive (handwritten Real Book style) -->
 <grigson-chart>
-  <grigson-html-renderer typeface="petaluma"></grigson-html-renderer>
-  | C△ | Am7 | Dm7 | G7 |
-</grigson-chart>
-
-<!-- Finale Jazz Text -->
-<grigson-chart>
-  <grigson-html-renderer typeface="finale-jazz"></grigson-html-renderer>
+  <grigson-html-renderer typeface="cursive"></grigson-html-renderer>
   | C△ | Am7 | Dm7 | G7 |
 </grigson-chart>
 ```
