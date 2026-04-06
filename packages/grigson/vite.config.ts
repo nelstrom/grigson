@@ -40,6 +40,13 @@ export default defineConfig({
     emptyOutDir: false,
   },
   plugins: isVisualize
-    ? [visualizer({ open: true, filename: 'dist/stats.html', gzipSize: true, brotliSize: true })]
+    ? [
+        visualizer({
+          open: true,
+          filename: `dist/stats${isCdn ? '-cdn' : ''}.html`,
+          gzipSize: true,
+          brotliSize: true,
+        }),
+      ]
     : [],
 });
