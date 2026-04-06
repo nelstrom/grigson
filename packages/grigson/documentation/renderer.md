@@ -59,7 +59,11 @@ The custom element embeds font subsets as base64-encoded WOFF2 data URIs in the 
 - SMuFL time-signature digits (U+E080–U+E08B) used by `[part="time-sig"]`
 - SMuFL simile marks (U+E1E7–U+E1E8) used by `[part="simile"]`
 
-The Noto and Bravura subsets are composed into a single logical font family (`GrigsonSans` or `GrigsonSerif`) using CSS `unicode-range`, so each codepoint is served from the most appropriate source transparently. Users who supply their own font via `--grigson-font-family` bypass the embedded fonts entirely.
+**PetalumaScript** (© Steinberg Media Technologies GmbH, SIL Open Font License 1.1) is a handwritten Real Book-style text font. A Latin-1 subset is embedded, including ♭ and ♯ which this font provides natively at standard Unicode positions.
+
+**Finale Jazz Text** (© MakeMusic, SIL Open Font License 1.1) is the text companion to MakeMusic's Finale Jazz notation font. A Latin-1 subset is embedded; Bravura fills in ♭♯ since the original font encodes those in a legacy Private Use Area.
+
+The subsets are composed into logical font families (`GrigsonSans`, `GrigsonSerif`, `GrigsonPetaluma`, `GrigsonFinaleJazz`) using CSS `unicode-range`, so each codepoint is served from the most appropriate source transparently. Users who supply their own font via `--grigson-font-family` bypass the embedded fonts entirely.
 
 ```javascript
 import { parseSong } from 'grigson';
@@ -551,12 +555,14 @@ simile: {
 
 ### `typeface`
 
-Controls which embedded Noto font variant is used for chart text. Set the `typeface` attribute on `<grigson-html-renderer>`.
+Controls which embedded font is used for chart text. Set the `typeface` attribute on `<grigson-html-renderer>`.
 
-| Value     | Font                | Description                                               |
-| --------- | ------------------- | --------------------------------------------------------- |
-| `"sans"`  | Noto Sans (default) | Clean sans-serif; omitting the attribute defaults to this |
-| `"serif"` | Noto Serif          | Traditional serif style                                   |
+| Value           | Font                | Description                                               |
+| --------------- | ------------------- | --------------------------------------------------------- |
+| `"sans"`        | Noto Sans (default) | Clean sans-serif; omitting the attribute defaults to this |
+| `"serif"`       | Noto Serif          | Traditional serif style                                   |
+| `"petaluma"`    | PetalumaScript      | Handwritten Real Book style (Steinberg, SIL OFL)          |
+| `"finale-jazz"` | Finale Jazz Text    | Finale's jazz text companion font (MakeMusic, SIL OFL)    |
 
 ```html
 <!-- Sans-serif (default — attribute may be omitted) -->
@@ -570,9 +576,21 @@ Controls which embedded Noto font variant is used for chart text. Set the `typef
   <grigson-html-renderer typeface="serif"></grigson-html-renderer>
   | C△ | Am7 | Dm7 | G7 |
 </grigson-chart>
+
+<!-- Handwritten Real Book style -->
+<grigson-chart>
+  <grigson-html-renderer typeface="petaluma"></grigson-html-renderer>
+  | C△ | Am7 | Dm7 | G7 |
+</grigson-chart>
+
+<!-- Finale Jazz Text -->
+<grigson-chart>
+  <grigson-html-renderer typeface="finale-jazz"></grigson-html-renderer>
+  | C△ | Am7 | Dm7 | G7 |
+</grigson-chart>
 ```
 
-The `typeface` attribute only affects the embedded Noto fonts. Setting `--grigson-font-family` overrides the font entirely and ignores `typeface`.
+The `typeface` attribute only affects the embedded fonts. Setting `--grigson-font-family` overrides the font entirely and ignores `typeface`.
 
 To use a separate font for song titles or section labels while keeping Noto for chord content, set `--grigson-title-font-family` or `--grigson-section-label-font-family` on the chart element.
 

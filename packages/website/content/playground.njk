@@ -93,6 +93,8 @@ permalink: /playground/
       <select id="typeface-select">
         <option value="sans">Sans-serif (default)</option>
         <option value="serif">Serif</option>
+        <option value="petaluma">Petaluma (jazz)</option>
+        <option value="finale-jazz">Finale Jazz (jazz)</option>
       </select>
       <label for="notation-preset-select">Notation preset:</label>
       <select id="notation-preset-select">
@@ -127,7 +129,7 @@ permalink: /playground/
   const rendererConfigSchema = z.discriminatedUnion('name', [
     z.object({
       name: z.literal('html'),
-      typeface: z.enum(['sans', 'serif']).optional(),
+      typeface: z.enum(['sans', 'serif', 'petaluma', 'finale-jazz']).optional(),
       preset: z.string().optional(),
       simileOutput: z.enum(['shorthand', 'longhand']).optional(),
       accidentals: z.enum(['ascii', 'unicode']).optional(),
