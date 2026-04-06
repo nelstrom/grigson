@@ -1,5 +1,5 @@
 ---
-layout: base.njk
+layout: base-cdn.njk
 title: CDN Build
 permalink: /tutorial/cdn-build/
 order: 7
@@ -7,13 +7,6 @@ tags: tutorial
 ---
 
 <style>
-  .cdn-demo {
-    width: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    display: block;
-  }
-
   .lesson-nav {
     display: flex;
     gap: 1rem;
@@ -51,7 +44,7 @@ tags: tutorial
 &lt;!-- Usage is the same either way -->
 &lt;grigson-chart normalise>
   &lt;template>
-    | Cm7 | F7 | BbMaj7 | Ebmaj7 |
+    | Cm7 | F7 | BbMaj7 | EbMaj7 |
     | Am7b5 | D7 | Gm | % |
   &lt;/template>
 &lt;/grigson-chart></code></pre>
@@ -77,46 +70,9 @@ tags: tutorial
   <code>cdn.jsdelivr.net</code>.
 </p>
 
-<iframe id="cdn-demo" class="cdn-demo" title="CDN build demo"></iframe>
-
-<script>
-  const chart = `---
-title: "Autumn Leaves"
-key: G minor
-meter: 4/4
----
-
-[A]
-||: Cm7 | F7 | BbMaj7 | EbMaj7 |
-| Am7b5 | D7 | Gm | % :|
-
-[B]
-| Am7b5 | D7 | Gm | % |
-| Cm7 | F7 | BbMaj7 | % |
-| Am7b5 | D7 | Gm | D7 ||`;
-
-  const srcdoc = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <style>
-      body { margin: 1rem; font-family: system-ui, sans-serif; }
-    </style>
-    <script src="/js/grigson-cdn-register.iife.js"><\/script>
-  </head>
-  <body>
-    <grigson-chart normalise>
-      <template>${chart}<\/template>
-    </grigson-chart>
-  </body>
-</html>`;
-
-  const frame = document.getElementById('cdn-demo');
-  frame.srcdoc = srcdoc;
-  frame.addEventListener('load', () => {
-    frame.style.height = frame.contentDocument.body.scrollHeight + 32 + 'px';
-  });
-</script>
+<grigson-chart normalise>
+  <template>{{ 'autumn-leaves' | readChart }}</template>
+</grigson-chart>
 
 {% set lessons = collections.tutorial | sort(false, false, 'data.order') %}
 {% set currentIndex = lessons | indexOf(page) %}
