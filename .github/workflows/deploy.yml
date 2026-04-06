@@ -21,18 +21,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
-        working-directory: packages/website
-        run: npm install
+        run: pnpm install
 
-      - name: Build website
-        working-directory: packages/website
-        run: npm run build
+      - name: Build
+        run: pnpm build
+        env:
+          ELEVENTY_PATH_PREFIX: /grigson/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
