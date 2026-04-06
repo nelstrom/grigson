@@ -12,6 +12,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.3",
+    "globals": "^17.4.0",
     "oxfmt": "latest",
     "turbo": "^2.8.17",
     "typescript": "^5.9.3",
