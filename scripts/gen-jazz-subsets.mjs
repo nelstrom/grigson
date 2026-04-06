@@ -2,7 +2,6 @@
 /**
  * Generates jazz/Real Book-style font subset TypeScript files for the HTML renderer:
  *   packages/grigson/src/renderers/petaluma-script-subset.ts
- *   packages/grigson/src/renderers/finale-jazz-text-subset.ts
  *
  * Font source files are cached in scripts/fonts/ and downloaded on first run.
  * OFL licence files are saved alongside each font where available.
@@ -38,21 +37,6 @@ const FONTS = [
     exportName: 'petalumaScriptWoff2',
     credit:
       'PetalumaScript, © Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
-  },
-  {
-    cacheName: 'FinaleJazzText.otf',
-    oflCacheName: 'FinaleJazzText-OFL.txt',
-    fontUrl:
-      'https://raw.githubusercontent.com/dbenjaminmiller/finale-fonts/master/FinaleJazzText.otf',
-    // FinaleJazzText is SIL OFL per MakeMusic's licensing page; no direct OFL URL from this mirror.
-    oflUrl: null,
-    // Latin-1 only — ♭♯ are not at standard Unicode codepoints in this font (legacy PUA encoding),
-    // so Bravura fills those in via a separate unicode-range block in the composite family.
-    unicodes: 'U+0000-00FF',
-    outTs: join(ROOT, 'packages/grigson/src/renderers/finale-jazz-text-subset.ts'),
-    exportName: 'finaleJazzTextWoff2',
-    credit:
-      'Finale Jazz Text, © MakeMusic, licensed under the SIL Open Font License 1.1.',
   },
 ];
 

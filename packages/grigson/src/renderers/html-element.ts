@@ -8,7 +8,6 @@ import { notoSansWoff2 } from './noto-sans-subset.js';
 import { notoSerifWoff2 } from './noto-serif-subset.js';
 import { notoSymbols2Woff2 } from './noto-symbols2-subset.js';
 import { petalumaScriptWoff2 } from './petaluma-script-subset.js';
-import { finaleJazzTextWoff2 } from './finale-jazz-text-subset.js';
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
@@ -51,20 +50,16 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       document.head.appendChild(style);
     }
 
-    // GrigsonPetaluma and GrigsonFinaleJazz — jazz/Real Book style typefaces for comparison.
-    // Both still use NotoSansSymbols2 for △ (U+25B3) as neither jazz font includes it.
+    // GrigsonJazz — PetalumaScript, a handwritten Real Book-style typeface.
+    // Uses NotoSansSymbols2 for △ (U+25B3) which PetalumaScript does not include.
+    // PetalumaScript has ♭♯ at standard Unicode positions so no Bravura fallback is needed.
     const jazzId = 'grigson-jazz-font-faces';
     if (!document.getElementById(jazzId)) {
       const style = document.createElement('style');
       style.id = jazzId;
       style.textContent = [
-        // GrigsonPetaluma: PetalumaScript covers Latin-1 and ♭♯ natively (no Bravura fallback needed)
-        `@font-face{font-family:"GrigsonPetaluma";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonPetaluma";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
-        // GrigsonFinaleJazz: FinaleJazzText for Latin-1; Bravura fills ♭♯ (legacy PUA encoding in source font)
-        `@font-face{font-family:"GrigsonFinaleJazz";src:url("${finaleJazzTextWoff2}") format("woff2");unicode-range:U+0000-00FF;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonFinaleJazz";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+266D,U+266F;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonFinaleJazz";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonJazz";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonJazz";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
       ].join('\n');
       document.head.appendChild(style);
     }
@@ -75,11 +70,9 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     const defaultFamily =
       typeface === 'serif'
         ? '"GrigsonSerif", serif'
-        : typeface === 'petaluma'
-          ? '"GrigsonPetaluma", cursive'
-          : typeface === 'finale-jazz'
-            ? '"GrigsonFinaleJazz", cursive'
-            : '"GrigsonSans", sans-serif';
+        : typeface === 'cursive'
+          ? '"GrigsonJazz", cursive'
+          : '"GrigsonSans", sans-serif';
 
     return `
       :host {
