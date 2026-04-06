@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 const isRegister = process.env.VITE_BUILD_REGISTER === 'true';
+const isVisualize = process.env.VITE_VISUALIZE === 'true';
 
 export default defineConfig({
   build: {
@@ -19,4 +21,7 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: false,
   },
+  plugins: isVisualize
+    ? [visualizer({ open: true, filename: 'dist/stats.html', gzipSize: true, brotliSize: true })]
+    : [],
 });
