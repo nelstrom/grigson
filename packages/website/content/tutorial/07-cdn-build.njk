@@ -7,6 +7,14 @@ tags: tutorial
 ---
 
 <style>
+  #demo-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+  }
+
   .lesson-nav {
     display: flex;
     gap: 1rem;
@@ -70,9 +78,27 @@ tags: tutorial
   <code>cdn.jsdelivr.net</code>.
 </p>
 
+<div id="demo-toolbar">
+  <label for="typeface-select">Typeface:</label>
+  <select id="typeface-select">
+    <option value="sans">Sans-serif (default)</option>
+    <option value="serif">Serif</option>
+    <option value="cursive">Cursive (Petaluma)</option>
+  </select>
+</div>
+
 <grigson-chart normalise>
+  <grigson-html-renderer id="demo-renderer"></grigson-html-renderer>
   <template>{{ 'autumn-leaves' | readChart }}</template>
 </grigson-chart>
+
+<script>
+  const select = document.getElementById('typeface-select');
+  const renderer = document.getElementById('demo-renderer');
+  select.addEventListener('change', () => {
+    renderer.setAttribute('typeface', select.value);
+  });
+</script>
 
 {% set lessons = collections.tutorial | sort(false, false, 'data.order') %}
 {% set currentIndex = lessons | indexOf(page) %}
