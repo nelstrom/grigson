@@ -82,6 +82,7 @@ export const bravuraWoff2 = '${dataUri}';
 
 mkdirSync(dirname(OUT_TS), { recursive: true });
 writeFileSync(OUT_TS, ts, 'utf8');
+execSync(`oxfmt --config ${join(ROOT, '.oxfmtrc.json')} "${OUT_TS}"`);
 console.log(`Written → ${OUT_TS} (${(ts.length / 1024).toFixed(1)} KB)`);
 
 mkdirSync(dirname(OUT_WOFF2), { recursive: true });

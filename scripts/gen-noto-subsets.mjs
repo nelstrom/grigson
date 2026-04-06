@@ -129,6 +129,7 @@ export const ${font.exportName} = '${dataUri}';
 `;
 
   writeFileSync(font.outTs, ts, 'utf8');
+  execSync(`oxfmt --config ${join(ROOT, '.oxfmtrc.json')} "${font.outTs}"`);
   console.log(`  Written → ${font.outTs} (${(ts.length / 1024).toFixed(1)} KB)`);
 
   mkdirSync(FONTS_PKG_DIR, { recursive: true });
