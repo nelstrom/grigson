@@ -22,6 +22,7 @@ import { tmpdir } from 'node:os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const FONTS_DIR = join(__dirname, 'fonts');
+const FONTS_PKG_DIR = join(ROOT, 'packages/grigson-fonts/fonts');
 
 const FONTS = [
   {
@@ -34,6 +35,7 @@ const FONTS = [
     // PetalumaScript also has ♭♯ at standard Unicode positions, so no Bravura fallback needed.
     unicodes: 'U+0000-00FF,U+266D,U+266F',
     outTs: join(ROOT, 'packages/grigson/src/renderers/petaluma-script-subset.ts'),
+    pkgWoff2Name: 'PetalumaScript-subset.woff2',
     exportName: 'petalumaScriptWoff2',
     credit:
       'PetalumaScript, © Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
@@ -50,6 +52,7 @@ for (const font of FONTS) {
   const cachedOfl = join(FONTS_DIR, font.oflCacheName);
   const tmpFont = join(tmp, font.cacheName);
   const tmpWoff2 = join(tmp, font.cacheName.replace(/\.(ttf|otf)$/, '.woff2'));
+  const pkgWoff2 = join(FONTS_PKG_DIR, font.pkgWoff2Name);
 
   // Download font if not cached.
   if (existsSync(cachedFont)) {
@@ -97,6 +100,10 @@ export const ${font.exportName} = '${dataUri}';
 
   writeFileSync(font.outTs, ts, 'utf8');
   console.log(`  Written → ${font.outTs} (${(ts.length / 1024).toFixed(1)} KB)`);
+
+  mkdirSync(FONTS_PKG_DIR, { recursive: true });
+  writeFileSync(pkgWoff2, woff2);
+  console.log(`  Written → ${pkgWoff2} (${(woff2.length / 1024).toFixed(1)} KB)`);
 }
 
 console.log('\nDone.');

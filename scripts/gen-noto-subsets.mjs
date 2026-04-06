@@ -25,6 +25,7 @@ import { tmpdir } from 'node:os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const FONTS_DIR = join(__dirname, 'fonts');
+const FONTS_PKG_DIR = join(ROOT, 'packages/grigson-fonts/fonts');
 
 const FONTS = [
   {
@@ -37,6 +38,7 @@ const FONTS = [
     // titles and chord quality text.
     unicodes: 'U+0000-00FF',
     outTs: join(ROOT, 'packages/grigson/src/renderers/noto-sans-subset.ts'),
+    pkgWoff2Name: 'NotoSans-subset.woff2',
     exportName: 'notoSansWoff2',
     credit: 'Noto Sans, © Google LLC, licensed under the SIL Open Font License 1.1.',
   },
@@ -48,6 +50,7 @@ const FONTS = [
     oflUrl: 'https://github.com/google/fonts/raw/main/ofl/notoserif/OFL.txt',
     unicodes: 'U+0000-00FF',
     outTs: join(ROOT, 'packages/grigson/src/renderers/noto-serif-subset.ts'),
+    pkgWoff2Name: 'NotoSerif-subset.woff2',
     exportName: 'notoSerifWoff2',
     credit: 'Noto Serif, © Google LLC, licensed under the SIL Open Font License 1.1.',
   },
@@ -63,6 +66,7 @@ const FONTS = [
     // typeface-agnostic.
     unicodes: 'U+25B3',
     outTs: join(ROOT, 'packages/grigson/src/renderers/noto-symbols2-subset.ts'),
+    pkgWoff2Name: 'NotoSansSymbols2-subset.woff2',
     exportName: 'notoSymbols2Woff2',
     credit: 'Noto Sans Symbols 2, © Google LLC, licensed under the SIL Open Font License 1.1.',
   },
@@ -78,6 +82,7 @@ for (const font of FONTS) {
   const cachedOfl = join(FONTS_DIR, font.oflCacheName);
   const tmpTtf = join(tmp, font.cacheName);
   const tmpWoff2 = join(tmp, font.cacheName.replace(/\.ttf$/, '.woff2'));
+  const pkgWoff2 = join(FONTS_PKG_DIR, font.pkgWoff2Name);
 
   // Download TTF if not cached.
   if (existsSync(cachedTtf)) {
@@ -125,6 +130,10 @@ export const ${font.exportName} = '${dataUri}';
 
   writeFileSync(font.outTs, ts, 'utf8');
   console.log(`  Written → ${font.outTs} (${(ts.length / 1024).toFixed(1)} KB)`);
+
+  mkdirSync(FONTS_PKG_DIR, { recursive: true });
+  writeFileSync(pkgWoff2, woff2);
+  console.log(`  Written → ${pkgWoff2} (${(woff2.length / 1024).toFixed(1)} KB)`);
 }
 
 console.log('\nDone.');

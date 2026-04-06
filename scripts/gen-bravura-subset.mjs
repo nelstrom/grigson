@@ -22,6 +22,7 @@ import { tmpdir } from 'node:os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const OUT_TS = join(ROOT, 'packages/grigson/src/renderers/bravura-subset.ts');
+const OUT_WOFF2 = join(ROOT, 'packages/grigson-fonts/fonts/Bravura-subset.woff2');
 const FONTS_DIR = join(__dirname, 'fonts');
 const CACHED_OTF = join(FONTS_DIR, 'Bravura.otf');
 
@@ -82,3 +83,7 @@ export const bravuraWoff2 = '${dataUri}';
 mkdirSync(dirname(OUT_TS), { recursive: true });
 writeFileSync(OUT_TS, ts, 'utf8');
 console.log(`Written → ${OUT_TS} (${(ts.length / 1024).toFixed(1)} KB)`);
+
+mkdirSync(dirname(OUT_WOFF2), { recursive: true });
+writeFileSync(OUT_WOFF2, woff2);
+console.log(`Written → ${OUT_WOFF2} (${(woff2.length / 1024).toFixed(1)} KB)`);

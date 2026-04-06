@@ -20,9 +20,11 @@
     }
   },
   "scripts": {
-    "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy && pnpm run build:browser && pnpm run build:browser:register",
+    "build": "pnpm run build:grammar && pnpm run build:ts && pnpm run build:copy && pnpm run build:browser && pnpm run build:browser:register && pnpm run build:browser:cdn && pnpm run build:browser:cdn:register",
     "build:browser": "vite build",
     "build:browser:register": "VITE_BUILD_REGISTER=true vite build",
+    "build:browser:cdn": "VITE_FONTS=cdn vite build",
+    "build:browser:cdn:register": "VITE_FONTS=cdn VITE_BUILD_REGISTER=true vite build",
     "analyze": "VITE_VISUALIZE=true vite build",
     "build:grammar": "peggy --format es --dts --allowed-start-rules Song,FrontMatter,Row,Bar,Chord -o src/parser/generated.js src/parser/grammar.pegjs && oxfmt --config ../../.oxfmtrc.json src/parser/generated.js src/parser/generated.d.ts",
     "build:ts": "tsc -p tsconfig.build.json",

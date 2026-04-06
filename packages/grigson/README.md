@@ -70,4 +70,4 @@ pnpm run build
 pnpm test
 ```
 
-The build runs in stages: `build:grammar` (Peggy → generated parser), `build:ts` (TypeScript), `build:browser` (Vite IIFE + ESM bundles).
+The build runs in stages: `build:grammar` (Peggy → generated parser), `build:ts` (TypeScript), then four Vite browser builds: embedded and CDN variants, each in regular and register flavours. See [Browser Bundle](documentation/browser-bundle.md) for the full file listing and guidance on which build to use.

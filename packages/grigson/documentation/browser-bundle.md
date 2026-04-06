@@ -1,15 +1,41 @@
 # Browser Bundle
 
-The grigson library ships two browser-ready bundles alongside the Node.js CommonJS/ESM build:
+The grigson library ships browser-ready bundles in two variants: **embedded** (fonts baked in as
+base64 data URIs, zero network dependency) and **CDN** (fonts loaded from jsDelivr at runtime,
+smaller download). Each variant comes as IIFE and ESM, plus an auto-registering `-register` build:
 
-| File                            | Format                | Global            |
-| ------------------------------- | --------------------- | ----------------- |
-| `dist/grigson.iife.js`          | IIFE (self-executing) | `grigson`         |
-| `dist/grigson.esm.js`           | ES module             | —                 |
-| `dist/grigson-register.iife.js` | IIFE (side-effect)    | `grigsonRegister` |
-| `dist/grigson-register.esm.js`  | ES module             | —                 |
+| File                                | Format                | Fonts    | Approx size |
+| ----------------------------------- | --------------------- | -------- | ----------- |
+| `dist/grigson.iife.js`              | IIFE (self-executing) | embedded | ~300 KB     |
+| `dist/grigson.esm.js`               | ES module             | embedded | ~325 KB     |
+| `dist/grigson-register.iife.js`     | IIFE (side-effect)    | embedded | ~300 KB     |
+| `dist/grigson-register.esm.js`      | ES module             | embedded | ~325 KB     |
+| `dist/grigson-cdn.iife.js`          | IIFE (self-executing) | CDN URLs | ~55 KB      |
+| `dist/grigson-cdn.esm.js`           | ES module             | CDN URLs | ~60 KB      |
+| `dist/grigson-cdn-register.iife.js` | IIFE (side-effect)    | CDN URLs | ~55 KB      |
+| `dist/grigson-cdn-register.esm.js`  | ES module             | CDN URLs | ~60 KB      |
 
-Both are produced by Vite in library mode and are rebuilt automatically as part of `pnpm build`.
+All are produced by Vite in library mode and are rebuilt automatically as part of `pnpm build`.
+
+## Choosing a build
+
+**Embedded builds** (`grigson.iife.js`, `grigson-register.iife.js`, …) bundle the font subsets
+directly as base64 data URIs. They work with no network access and are the right choice when:
+
+- You need offline or intranet support.
+- You serve the script from a CDN or asset host yourself.
+- You want a single-file deployment with no external dependencies.
+
+**CDN builds** (`grigson-cdn.iife.js`, `grigson-cdn-register.iife.js`, …) replace the embedded
+data URIs with jsDelivr URLs pointing to the
+[`grigson-fonts`](../../grigson-fonts/README.md) package. The fonts are fetched from
+`https://cdn.jsdelivr.net/gh/nelstrom/grigson@grigson-fonts-v{version}/packages/grigson-fonts/fonts/`
+on first use and cached by the browser. Use these when:
+
+- Bundle size is a priority and a network connection is available.
+- You are already loading other assets from a CDN.
+
+Both variants expose exactly the same JavaScript API.
 
 ## Exported API
 
