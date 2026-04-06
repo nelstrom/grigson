@@ -9,6 +9,13 @@ tags: tutorial
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap');
 
+  @font-face {
+    font-family: "Finale Jazz Text";
+    src: url('/assets/fonts/FinaleJazzText.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
   .typeface-examples {
     display: flex;
     flex-direction: column;
@@ -36,9 +43,9 @@ tags: tutorial
 <h1>Typefaces</h1>
 
 <p>
-  The HTML renderer bundles two Noto font variants — sans-serif and serif — so
-  charts have a consistent house style wherever they appear, with no network
-  dependency. You can also override the font entirely using the
+  The HTML renderer bundles three font variants — Noto Sans, Noto Serif, and
+  PetalumaScript (a handwritten Real Book style) — so charts have a consistent
+  house style wherever they appear, with no network dependency. You can also override the font entirely using the
   <code>--grigson-font-family</code> CSS custom property, which lets you bring
   any typeface you like.
 </p>
@@ -72,7 +79,21 @@ tags: tutorial
     <h2>Cursive</h2>
     <p>Petaluma — set <code>typeface="petaluma"</code> on <code>&lt;grigson-html-renderer&gt;</code>.</p>
     <grigson-chart normalise>
-      <grigson-html-renderer notation-preset="realbook" typeface="petaluma"></grigson-html-renderer>
+      <grigson-html-renderer notation-preset="realbook" typeface="cursive"></grigson-html-renderer>
+      <template>{{ 'autumn-leaves' | readChart }}</template>
+    </grigson-chart>
+  </section>
+
+  <section>
+    <h2>Finale Jazz Text</h2>
+    <p>
+      A self-hosted OFL font from MakeMusic, applied via
+      <code>--grigson-font-family</code> on the <code>&lt;grigson-chart&gt;</code> element.
+      The Real Book preset and ASCII accidentals are used because this font does not include
+      ♭/♯ at standard Unicode positions.
+    </p>
+    <grigson-chart normalise style="--grigson-font-family: 'Finale Jazz Text', cursive;">
+      <grigson-html-renderer notation-preset="realbook" accidentals="ascii"></grigson-html-renderer>
       <template>{{ 'autumn-leaves' | readChart }}</template>
     </grigson-chart>
   </section>
