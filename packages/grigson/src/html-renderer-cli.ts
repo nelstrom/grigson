@@ -16,10 +16,11 @@ Options:
   --notation-preset <name>        Named notation preset (e.g. "jazz")
   --notation-preset-file <path>   Path to a JSON file containing a partial NotationPreset object
   --simile-output <mode>          Simile rendering: "shorthand" (use % glyph) or "longhand" (default)
+  --accidentals <mode>            Accidental symbols: "unicode" (♭♯, default) or "ascii" (b#)
   --help, -h                      Show this help message and exit`;
 
 const parsed = minimist(process.argv.slice(2), {
-  string: ['notation-preset', 'notation-preset-file', 'simile-output'],
+  string: ['notation-preset', 'notation-preset-file', 'simile-output', 'accidentals'],
   boolean: ['help'],
   alias: { h: 'help' },
 });
@@ -41,6 +42,10 @@ if (presetFile) {
 const simileOutput = parsed['simile-output'] as string | undefined;
 if (simileOutput === 'shorthand' || simileOutput === 'longhand') {
   config.simile = { output: simileOutput };
+}
+const accidentals = parsed['accidentals'] as string | undefined;
+if (accidentals === 'unicode' || accidentals === 'ascii') {
+  config.accidentals = accidentals;
 }
 
 await runRenderer((song) => new HtmlRenderer(config).render(song), {
