@@ -47,6 +47,7 @@ export default async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     'node_modules/grigson/dist/grigson.iife.js': 'js/grigson.iife.js',
     'node_modules/grigson/dist/grigson-register.iife.js': 'js/grigson-register.iife.js',
+    'node_modules/grigson/dist/grigson-cdn-register.iife.js': 'js/grigson-cdn-register.iife.js',
     '../grigson-text-renderer/dist/grigson-text-renderer-register.iife.js':
       'js/grigson-text-renderer-register.iife.js',
     '../textmate-grammar/grigson.tmLanguage.json': 'js/grigson.tmLanguage.json',
