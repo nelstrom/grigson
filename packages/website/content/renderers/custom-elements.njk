@@ -3,7 +3,7 @@ layout: base.njk
 title: Custom Elements
 permalink: /renderers/custom-elements/
 ---
-<script src="/js/grigson-text-renderer-register.iife.js"></script>
+<script src="{{ '/js/grigson-text-renderer-register.iife.js' | url }}"></script>
 
 <h1>Custom Elements</h1>
 <p>
@@ -11,7 +11,7 @@ permalink: /renderers/custom-elements/
   rendering in HTML pages. Load the auto-registering bundle and drop the element anywhere in
   your markup — no JavaScript required for basic usage.
 </p>
-<p>See <a href="/renderers/browser/">Browser bundles</a> for how to load the bundle.</p>
+<p>See <a href="{{ '/renderers/browser/' | url }}">Browser bundles</a> for how to load the bundle.</p>
 
 <h2>Inline template</h2>
 <p>
@@ -279,5 +279,5 @@ grigson-chart {
 <h2>Building a custom renderer element</h2>
 <p>
   Any element that implements <code>renderChart(song)</code> can be used as a renderer child.
-  See the <a href="/api/renderer-interface/">API Reference — Renderer Interface</a> for details.
+  See the <a href="{{ '/api/renderer-interface/' | url }}">API Reference — Renderer Interface</a> for details.
 </p>

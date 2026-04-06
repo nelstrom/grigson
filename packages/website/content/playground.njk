@@ -118,10 +118,10 @@ permalink: /playground/
   </div>
 </div>
 
-<script src="/js/grigson-text-renderer-register.iife.js"></script>
-<script src="/js/lz-string.min.js"></script>
-<script src="/assets/js/grigson-monarch.js"></script>
-<script src="/js/monaco/vs/loader.js"></script>
+<script src="{{ '/js/grigson-text-renderer-register.iife.js' | url }}"></script>
+<script src="{{ '/js/lz-string.min.js' | url }}"></script>
+<script src="{{ '/assets/js/grigson-monarch.js' | url }}"></script>
+<script src="{{ '/js/monaco/vs/loader.js' | url }}"></script>
 <script type="module">
   import { z } from 'https://esm.sh/zod';
 
@@ -140,7 +140,7 @@ permalink: /playground/
   // so it initialises as window.LZString without AMD interference.
   const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = LZString;
 
-  require.config({ paths: { 'vs': '/js/monaco/vs' } });
+  require.config({ paths: { 'vs': '{{ '/js/monaco/vs' | url }}' } });
 
   require(['vs/editor/editor.main'], function () {
     const DEFAULT_VALUE = `---

@@ -88,28 +88,28 @@
       }
     </style>
     {% block scripts %}
-    <script src="/js/grigson.iife.js"></script>
-    <script src="/js/grigson-register.iife.js"></script>
+    <script src="{{ '/js/grigson.iife.js' | url }}"></script>
+    <script src="{{ '/js/grigson-register.iife.js' | url }}"></script>
     {% endblock %}
   </head>
   <body>
     <nav>
       <div class="nav-primary">
-        <a href="/">grigson</a>
+        <a href="{{ '/' | url }}">grigson</a>
         |
-        <a href="/language/">Language</a>
+        <a href="{{ '/language/' | url }}">Language</a>
         |
-        <a href="/renderers/">Renderers</a>
+        <a href="{{ '/renderers/' | url }}">Renderers</a>
         |
-        <a href="/cli/">CLI</a>
+        <a href="{{ '/cli/' | url }}">CLI</a>
         |
-        <a href="/tutorial/">Tutorial</a>
+        <a href="{{ '/tutorial/' | url }}">Tutorial</a>
         |
-        <a href="/songbook/">Songbook</a>
+        <a href="{{ '/songbook/' | url }}">Songbook</a>
         |
-        <a href="/playground/">Playground</a>
+        <a href="{{ '/playground/' | url }}">Playground</a>
       </div>
-      <a class="nav-api" href="/api/">API Reference</a>
+      <a class="nav-api" href="{{ '/api/' | url }}">API Reference</a>
     </nav>
     <main>
       {{ content | safe }}

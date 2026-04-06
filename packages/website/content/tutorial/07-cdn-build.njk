@@ -104,9 +104,9 @@ tags: tutorial
 {% set currentIndex = lessons | indexOf(page) %}
 <nav class="lesson-nav">
   {% if currentIndex > 0 %}
-    <a href="{{ lessons[currentIndex - 1].url }}">← Previous</a>
+    <a href="{{ lessons[currentIndex - 1].url | url }}">← Previous</a>
   {% endif %}
   {% if currentIndex < lessons.length - 1 %}
-    <a href="{{ lessons[currentIndex + 1].url }}">Next →</a>
+    <a href="{{ lessons[currentIndex + 1].url | url }}">Next →</a>
   {% endif %}
 </nav>

@@ -7,6 +7,6 @@ permalink: /songbook/
 <p>Reference charts used to verify the HTML renderer.</p>
 <ol>
   {% for song in collections.songbook | sort(false, false, 'data.order') %}
-    <li><a href="{{ song.url }}">{{ song.data.title }}</a>{% if song.data.artist %} <span class="song-artist">— {{ song.data.artist }}</span>{% endif %}</li>
+    <li><a href="{{ song.url | url }}">{{ song.data.title }}</a>{% if song.data.artist %} <span class="song-artist">— {{ song.data.artist }}</span>{% endif %}</li>
   {% endfor %}
 </ol>

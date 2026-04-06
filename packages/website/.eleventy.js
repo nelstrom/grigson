@@ -57,6 +57,7 @@ export default async function (eleventyConfig) {
   });
 
   return {
+    pathPrefix: process.env.ELEVENTY_PATH_PREFIX ?? '/',
     dir: {
       input: 'content',
       includes: '../_includes',

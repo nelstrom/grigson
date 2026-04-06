@@ -10,13 +10,13 @@ layout: base.njk
 {% set songs = collections.songbook | sort(false, false, 'data.order') %}
 {% set currentIndex = songs | indexOf(page) %}
 <nav class="songbook-nav">
-  <a href="/songbook/">Songbook</a>
+  <a href="{{ '/songbook/' | url }}">Songbook</a>
   <span class="songbook-nav-arrows">
     {% if currentIndex > 0 %}
-      <a href="{{ songs[currentIndex - 1].url }}">← {{ songs[currentIndex - 1].data.title }}</a>
+      <a href="{{ songs[currentIndex - 1].url | url }}">← {{ songs[currentIndex - 1].data.title }}</a>
     {% endif %}
     {% if currentIndex < songs.length - 1 %}
-      <a href="{{ songs[currentIndex + 1].url }}">{{ songs[currentIndex + 1].data.title }} →</a>
+      <a href="{{ songs[currentIndex + 1].url | url }}">{{ songs[currentIndex + 1].data.title }} →</a>
     {% endif %}
   </span>
 </nav>
