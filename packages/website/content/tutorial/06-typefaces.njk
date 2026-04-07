@@ -9,9 +9,18 @@ tags: tutorial
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap');
 
+  /* FinaleJazz composite: text face (Latin-1) + notation face (accidentals/△) */
   @font-face {
-    font-family: "Finale Jazz Text";
-    src: url('{{ '/assets/fonts/FinaleJazzText.woff2' | url }}') format('woff2');
+    font-family: "FinaleJazz";
+    src: url('{{ '/assets/fonts/FinaleJazzText-subset.woff2' | url }}') format('woff2');
+    unicode-range: U+0000-00FF;
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "FinaleJazz";
+    src: url('https://cdn.jsdelivr.net/gh/nelstrom/grigson@grigson-fonts-v1.1.0/packages/grigson-fonts/fonts/GrigsonJazz-subset.woff2') format('woff2');
+    unicode-range: U+266D-266F, U+25B3;
     font-weight: normal;
     font-style: normal;
   }
@@ -85,15 +94,14 @@ tags: tutorial
   </section>
 
   <section>
-    <h2>Finale Jazz Text</h2>
+    <h2>Finale Jazz</h2>
     <p>
-      A self-hosted OFL font from MakeMusic, applied via
-      <code>--grigson-font-family</code> on the <code>&lt;grigson-chart&gt;</code> element.
-      The Real Book preset and ASCII accidentals are used because this font does not include
-      ♭/♯ at standard Unicode positions.
+      A jazz handwriting style derived from the OFL-licensed Finale Jazz font by MakeMusic,
+      loaded from jsDelivr and applied via <code>--grigson-font-family</code> on the
+      <code>&lt;grigson-chart&gt;</code> element.
     </p>
-    <grigson-chart normalise style="--grigson-font-family: 'Finale Jazz Text', cursive;">
-      <grigson-html-renderer notation-preset="realbook" accidentals="ascii"></grigson-html-renderer>
+    <grigson-chart normalise style="--grigson-font-family: 'FinaleJazz', cursive;">
+      <grigson-html-renderer notation-preset="realbook"></grigson-html-renderer>
       <template>{{ 'autumn-leaves' | readChart }}</template>
     </grigson-chart>
   </section>
