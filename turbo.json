@@ -3,7 +3,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "_site/**", "src/parser.c", "src/grammar.json", "src/node-types.json"]
+      "outputs": ["dist/**", "_site/**", "src/parser.c", "src/grammar.json", "src/node-types.json"],
+      "env": ["ELEVENTY_PATH_PREFIX", "VITE_FONTS", "VITE_BUILD_REGISTER", "VITE_VISUALIZE"]
     },
     "test": {
       "dependsOn": ["^build"],
