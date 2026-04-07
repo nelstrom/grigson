@@ -59,6 +59,12 @@ const FILES = [
     outTs: join(ROOT, 'packages/grigson/src/renderers/petaluma-script-cdn.ts'),
     regenerate: 'node scripts/gen-jazz-subsets.mjs && node scripts/gen-cdn-constants.mjs',
   },
+  {
+    file: 'GrigsonJazz-subset.woff2',
+    exportName: 'grigsonJazzWoff2',
+    outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-jazz-cdn.ts'),
+    regenerate: 'node scripts/reencode-finale-jazz.mjs && node scripts/gen-jazz-subsets.mjs && node scripts/gen-cdn-constants.mjs',
+  },
 ];
 
 for (const { file, exportName, outTs, regenerate } of FILES) {

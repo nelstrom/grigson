@@ -40,6 +40,20 @@ const FONTS = [
     credit:
       'PetalumaScript, © Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
   },
+  {
+    cacheName: 'GrigsonJazz.otf',
+    // Generated locally by scripts/reencode-finale-jazz.mjs — no download URL.
+    fontUrl: null,
+    oflUrl: null,
+    // Latin-1 covers chord text and quality symbols (° U+00B0, ø U+00F8).
+    // ♭♯ and △ are now available at standard Unicode positions via re-encoding.
+    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3',
+    outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-jazz-subset.ts'),
+    pkgWoff2Name: 'GrigsonJazz-subset.woff2',
+    exportName: 'grigsonJazzWoff2',
+    credit:
+      'GrigsonJazz, derived from FinaleJazz by MakeMusic Inc., licensed under the SIL Open Font License 1.1.',
+  },
 ];
 
 mkdirSync(FONTS_DIR, { recursive: true });
@@ -49,16 +63,16 @@ for (const font of FONTS) {
   console.log(`\n── ${font.cacheName} ──`);
 
   const cachedFont = join(FONTS_DIR, font.cacheName);
-  const cachedOfl = join(FONTS_DIR, font.oflCacheName);
+  const cachedOfl = font.oflCacheName ? join(FONTS_DIR, font.oflCacheName) : null;
   const tmpFont = join(tmp, font.cacheName);
   const tmpWoff2 = join(tmp, font.cacheName.replace(/\.(ttf|otf)$/, '.woff2'));
   const pkgWoff2 = join(FONTS_PKG_DIR, font.pkgWoff2Name);
 
-  // Download font if not cached.
+  // Load font — either from cache, by downloading, or from a local-only file.
   if (existsSync(cachedFont)) {
     console.log(`  Using cached ${font.cacheName}`);
     writeFileSync(tmpFont, readFileSync(cachedFont));
-  } else {
+  } else if (font.fontUrl) {
     console.log(`  Downloading ${font.fontUrl}…`);
     const res = await fetch(font.fontUrl);
     if (!res.ok)
@@ -67,11 +81,15 @@ for (const font of FONTS) {
     writeFileSync(tmpFont, buf);
     writeFileSync(cachedFont, buf);
     console.log(`  → cached to ${cachedFont}`);
+  } else {
+    throw new Error(
+      `${font.cacheName} not found in ${FONTS_DIR}. Run: node scripts/reencode-finale-jazz.mjs`,
+    );
   }
   console.log(`  Font: ${(readFileSync(tmpFont).length / 1024).toFixed(0)} KB`);
 
   // Download OFL if not cached and a URL is provided.
-  if (font.oflUrl && !existsSync(cachedOfl)) {
+  if (font.oflUrl && cachedOfl && !existsSync(cachedOfl)) {
     console.log(`  Downloading OFL.txt…`);
     const res = await fetch(font.oflUrl);
     if (res.ok) writeFileSync(cachedOfl, await res.text(), 'utf8');
