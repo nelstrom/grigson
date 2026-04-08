@@ -25,7 +25,7 @@ eleventyComputed:
       <thead>
         <tr>
           <th>Codepoint</th>
-          <th>Symbol</th>
+          <th>Glyph</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -33,7 +33,13 @@ eleventyComputed:
         {% for item in font.coverage %}
           <tr>
             <td><code>U+{{ item.hex }}</code></td>
-            <td>{{ item.symbol }}</td>
+            <td>
+              {% if item.svgPath %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="{{ item.viewBox }}" style="width:2rem;height:2rem;display:block;">
+                  <path d="{{ item.svgPath }}" transform="scale(1,-1)" fill="currentColor"/>
+                </svg>
+              {% endif %}
+            </td>
             <td>
               {% if item.present %}
                 <span class="present">PRESENT</span>

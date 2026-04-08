@@ -210,12 +210,17 @@ for (const font of FONTS) {
   })).filter(s => s.glyphs.length > 0);
 
   // Coverage summary for target codepoints
-  const coverage = font.targetCodepoints.map(cp => ({
-    cp,
-    hex: cp.toString(16).toUpperCase().padStart(4, '0'),
-    symbol: String.fromCodePoint(cp),
-    present: glyphs.some(g => g.cp === cp),
-  }));
+  const glyphByCp = new Map(glyphs.map(g => [g.cp, g]));
+  const coverage = font.targetCodepoints.map(cp => {
+    const glyph = glyphByCp.get(cp);
+    return {
+      cp,
+      hex: cp.toString(16).toUpperCase().padStart(4, '0'),
+      present: !!glyph,
+      svgPath: glyph?.svgPath ?? '',
+      viewBox: glyph?.viewBox ?? '',
+    };
+  });
 
   const out = {
     slug: font.slug,
