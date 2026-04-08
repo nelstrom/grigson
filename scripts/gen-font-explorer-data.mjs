@@ -69,8 +69,8 @@ const FONTS = [
       0xE085, 0xE086, 0xE087, 0xE088, 0xE089,  // time sig digits 5–9
       0xE08A,  // common time
       0xE08B,  // cut time
-      0xE1E7,  // repeat1Bar simile
-      0xE1E8,  // repeat2Bars simile
+      0xE500,  // repeat1Bar simile
+      0xE501,  // repeat2Bars simile
     ],
     sections: [
       { title: 'Non-SMuFL glyphs', filter: cp => cp < 0xE000 },

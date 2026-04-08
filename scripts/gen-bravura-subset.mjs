@@ -33,12 +33,12 @@ const BRAVURA_URL =
 //   U+E080-E089  time signature digits 0-9
 //   U+E08A       common time (C)
 //   U+E08B       cut time
-//   U+E1E7       repeat1Bar (single-bar simile mark)
-//   U+E1E8       repeat2Bars (two-bar simile, reserved for future use)
+//   U+E500       repeat1Bar (single-bar simile mark)
+//   U+E501       repeat2Bars (two-bar simile mark)
 // Standard Unicode music symbols (also present in Bravura):
 //   U+266D       ♭ MUSIC FLAT SIGN
 //   U+266F       ♯ MUSIC SHARP SIGN
-const UNICODES = 'U+266D,U+266F,U+E080-E08B,U+E1E7,U+E1E8';
+const UNICODES = 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501';
 
 const tmp = tmpdir();
 const otfPath = join(tmp, 'Bravura.otf');
@@ -76,7 +76,7 @@ const ts = `\
 //
 // Contains a subset of Bravura (https://github.com/steinbergmedia/bravura),
 // © Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.
-// Glyphs included: ♭♯ (U+266D, U+266F), SMuFL time-signature digits (U+E080–E08B), simile marks (U+E1E7–E1E8).
+// Glyphs included: ♭♯ (U+266D, U+266F), SMuFL time-signature digits (U+E080–E08B), simile marks (U+E500–E501).
 export const bravuraWoff2 = '${dataUri}';
 `;
 
