@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
- * Re-encodes FinaleJazz.otf as GrigsonJazz.otf by adding standard Unicode
- * cmap entries that point to the existing SMuFL glyph outlines:
+ * Merges FinaleJazzText.otf (Latin text) and FinaleJazz.otf (SMuFL accidentals)
+ * into a single derivative font: GrigsonJazz.otf.
+ *
+ * FinaleJazzText provides the Latin-1 text glyphs used in chord charts (letters,
+ * digits, °, ø, etc.).  FinaleJazz provides the accidental and chord-quality
+ * glyph outlines at SMuFL codepoints.  Four glyphs are copied from FinaleJazz
+ * and mapped to standard Unicode positions:
  *
  *   U+266D ♭  →  uniE260  (SMuFL accidentalFlat)
  *   U+266E ♮  →  uniE261  (SMuFL accidentalNatural)
  *   U+266F ♯  →  uniE262  (SMuFL accidentalSharp)
  *   U+25B3 △  →  uniE873  (SMuFL chordSymbolMajorSeventh)
  *
- * The existing SMuFL entries are left intact.  The font is renamed from
- * "Finale Jazz" to "GrigsonJazz" to satisfy the SIL OFL reserved-name
- * requirement for derivatives.
+ * The font is renamed from "Finale Jazz Text" to "GrigsonJazz" to satisfy the
+ * SIL OFL reserved-name requirement for derivatives.
  *
  * Prerequisites:  pip install fonttools
  * Usage:          node scripts/reencode-finale-jazz.mjs
@@ -24,30 +28,71 @@ import { tmpdir } from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = join(__dirname, 'fonts');
-const src  = join(FONTS_DIR, 'FinaleJazz.otf');
-const dest = join(FONTS_DIR, 'GrigsonJazz.otf');
+const base   = join(FONTS_DIR, 'FinaleJazzText.otf');
+const source = join(FONTS_DIR, 'FinaleJazz.otf');
+const dest   = join(FONTS_DIR, 'GrigsonJazz.otf');
 
 const pyScript = `\
 from fontTools.ttLib import TTFont
+from fontTools.pens.recordingPen import RecordingPen
+from fontTools.pens.t2CharStringPen import T2CharStringPen
 
-font = TTFont(${JSON.stringify(src)})
+base   = TTFont(${JSON.stringify(base)})
+source = TTFont(${JSON.stringify(source)})
 
-new_mappings = {
-    0x266D: 'uniE260',   # flat
-    0x266E: 'uniE261',   # natural
-    0x266F: 'uniE262',   # sharp
-    0x25B3: 'uniE873',   # major-seventh triangle
+src_glyphs  = source.getGlyphSet()
+base_cff    = base['CFF '].cff.topDictIndex[0]
+base_cs     = base_cff.CharStrings
+base_order  = base.getGlyphOrder()
+
+# Glyphs to import from FinaleJazz, mapped to standard Unicode codepoints
+IMPORT = {
+    0x266D: 'uniE260',   # ♭ flat
+    0x266E: 'uniE261',   # ♮ natural
+    0x266F: 'uniE262',   # ♯ sharp
+    0x25B3: 'uniE873',   # △ major-seventh triangle
 }
 
-for table in font['cmap'].tables:
-    table.cmap.update(new_mappings)
+for unicode_cp, glyph_name in IMPORT.items():
+    # Round-trip through RecordingPen → T2Pen to avoid subr-reference issues
+    rec = RecordingPen()
+    src_glyphs[glyph_name].draw(rec)
 
-REPLACEMENTS = [('Finale Jazz', 'GrigsonJazz'), ('FinaleJazz', 'GrigsonJazz')]
-for record in font['name'].names:
+    t2pen = T2CharStringPen(src_glyphs[glyph_name].width, src_glyphs)
+    rec.replay(t2pen)
+    new_cs = t2pen.getCharString()
+
+    new_cs.private = base_cff.Private
+    # CharStrings uses an indexed structure: names map to integer indices
+    # into charStringsIndex.items; append the new charstring and record its index.
+    base_cs.charStringsIndex.items.append(new_cs)
+    base_cs.charStrings[glyph_name] = len(base_cs.charStringsIndex.items) - 1
+
+    # Advance width + lsb
+    src_width = src_glyphs[glyph_name].width
+    base['hmtx'].metrics[glyph_name] = (src_width, 0)
+
+    # Register in glyph order
+    if glyph_name not in base_order:
+        base_order.append(glyph_name)
+
+base.setGlyphOrder(base_order)
+
+# Map standard Unicode codepoints to the imported glyph names
+for table in base['cmap'].tables:
+    table.cmap.update({cp: name for cp, name in IMPORT.items()})
+
+# Rename: replace all occurrences of the reserved Finale names
+REPLACEMENTS = [
+    ('Finale Jazz Text', 'GrigsonJazz'),
+    ('FinaleJazzText',   'GrigsonJazz'),
+    ('Finale Jazz',      'GrigsonJazz'),
+    ('FinaleJazz',       'GrigsonJazz'),
+]
+for record in base['name'].names:
     try:
         s = record.toUnicode()
     except Exception:
-        # Fall back to raw bytes replacement for records that can't be decoded
         raw = record.string
         for orig, repl in REPLACEMENTS:
             for enc in ('utf-16-be', 'latin-1', 'ascii'):
@@ -67,7 +112,7 @@ for record in font['name'].names:
         except UnicodeEncodeError:
             record.string = new_s.encode('utf-16-be')
 
-font.save(${JSON.stringify(dest)})
+base.save(${JSON.stringify(dest)})
 print('Saved', ${JSON.stringify(dest)})
 `;
 
