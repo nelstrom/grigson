@@ -61,8 +61,17 @@ const FONTS = [
     derived: false,
     cacheName: 'Bravura.otf',
     fontUrl: null, // already cached
-    // Accidentals and △ we use in GrigsonSans/Serif composites
-    targetCodepoints: [0x266d, 0x266f],
+    // Codepoints used in the bundled Bravura subset (see scripts/gen-bravura-subset.mjs)
+    targetCodepoints: [
+      0x266d,  // ♭ flat
+      0x266f,  // ♯ sharp
+      0xE080, 0xE081, 0xE082, 0xE083, 0xE084,  // time sig digits 0–4
+      0xE085, 0xE086, 0xE087, 0xE088, 0xE089,  // time sig digits 5–9
+      0xE08A,  // common time
+      0xE08B,  // cut time
+      0xE1E7,  // repeat1Bar simile
+      0xE1E8,  // repeat2Bars simile
+    ],
     sections: [
       { title: 'Non-SMuFL glyphs', filter: cp => cp < 0xE000 },
       { title: 'SMuFL glyphs (U+E000–U+EFFF)', filter: cp => cp >= 0xE000 && cp < 0xF000 },
