@@ -35,7 +35,7 @@ eleventyComputed:
             <td><code>U+{{ item.hex }}</code></td>
             <td>
               {% if item.svgPath %}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="{{ item.viewBox }}" style="width:2rem;height:2rem;display:block;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="{{ item.viewBox }}">
                   <path d="{{ item.svgPath }}" transform="scale(1,-1)" fill="currentColor"/>
                 </svg>
               {% endif %}
