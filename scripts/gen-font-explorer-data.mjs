@@ -56,6 +56,20 @@ const FONTS = [
     ],
   },
   {
+    slug: 'petaluma-script',
+    name: 'PetalumaScript',
+    derived: false,
+    cacheName: 'PetalumaScript.otf',
+    fontUrl: null, // already cached
+    // ♭♯ are present at standard Unicode in PetalumaScript (no Bravura fallback needed)
+    // △ U+25B3 is NOT covered — NotoSymbols2 is used as fallback in GrigsonCursive
+    targetCodepoints: [0x266d, 0x266f, 0x266e, 0x25b3],
+    sections: [
+      { title: 'Non-SMuFL glyphs', filter: cp => cp < 0xE000 },
+      { title: 'SMuFL glyphs (U+E000–)', filter: cp => cp >= 0xE000 },
+    ],
+  },
+  {
     slug: 'bravura',
     name: 'Bravura',
     derived: false,
