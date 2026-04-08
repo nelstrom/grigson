@@ -29,6 +29,34 @@ mkdirSync(OUT_DIR, { recursive: true });
 
 const FONTS = [
   {
+    slug: 'noto-sans',
+    name: 'NotoSans',
+    derived: false,
+    cacheName: 'NotoSans-Variable.ttf',
+    fontUrl: null, // already cached
+    // GrigsonSans uses this for U+0000-00FF; verify Latin-1 range is fully covered
+    targetCodepoints: [0x0041, 0x0061, 0x00C0, 0x00FF], // A, a, À, ÿ
+    sections: [
+      { title: 'Latin & common (U+0000–U+04FF)', filter: cp => cp < 0x0500 },
+      { title: 'Other scripts (U+0500–U+DFFF)', filter: cp => cp >= 0x0500 && cp < 0xE000 },
+      { title: 'PUA & beyond (U+E000–)', filter: cp => cp >= 0xE000 },
+    ],
+  },
+  {
+    slug: 'noto-serif',
+    name: 'NotoSerif',
+    derived: false,
+    cacheName: 'NotoSerif-Variable.ttf',
+    fontUrl: null, // already cached
+    // GrigsonSerif uses this for U+0000-00FF
+    targetCodepoints: [0x0041, 0x0061, 0x00C0, 0x00FF], // A, a, À, ÿ
+    sections: [
+      { title: 'Latin & common (U+0000–U+04FF)', filter: cp => cp < 0x0500 },
+      { title: 'Other scripts (U+0500–U+DFFF)', filter: cp => cp >= 0x0500 && cp < 0xE000 },
+      { title: 'PUA & beyond (U+E000–)', filter: cp => cp >= 0xE000 },
+    ],
+  },
+  {
     slug: 'finale-jazz',
     name: 'FinaleJazz',
     derived: false,
