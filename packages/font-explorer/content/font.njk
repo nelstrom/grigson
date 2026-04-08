@@ -48,8 +48,16 @@ eleventyComputed:
   </div>
 {% endif %}
 
+<nav class="toc">
+  <ol>
+    {% for section in font.sections %}
+      <li><a href="#{{ section.title | slugify }}">{{ section.title }}</a> <span class="toc-count">({{ section.glyphs.length }})</span></li>
+    {% endfor %}
+  </ol>
+</nav>
+
 {% for section in font.sections %}
-  <h2>{{ section.title }} ({{ section.glyphs.length }})</h2>
+  <h2 id="{{ section.title | slugify }}">{{ section.title }} <span class="section-count">({{ section.glyphs.length }})</span></h2>
   <table class="glyph-table">
     <thead>
       <tr>
