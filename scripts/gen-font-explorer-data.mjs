@@ -56,6 +56,29 @@ const FONTS = [
     ],
   },
   {
+    slug: 'petaluma',
+    name: 'Petaluma',
+    derived: false,
+    cacheName: 'Petaluma.otf',
+    fontUrl: 'https://github.com/steinbergmedia/petaluma/raw/master/redist/otf/Petaluma.otf',
+    // Same target codepoints as Bravura — Petaluma is its handwritten-style SMuFL counterpart
+    targetCodepoints: [
+      0x266d,  // ♭ flat
+      0x266f,  // ♯ sharp
+      0xE080, 0xE081, 0xE082, 0xE083, 0xE084,  // time sig digits 0–4
+      0xE085, 0xE086, 0xE087, 0xE088, 0xE089,  // time sig digits 5–9
+      0xE08A,  // common time
+      0xE08B,  // cut time
+      0xE500,  // repeat1Bar simile
+      0xE501,  // repeat2Bars simile
+    ],
+    sections: [
+      { title: 'Non-SMuFL glyphs', filter: cp => cp < 0xE000 },
+      { title: 'SMuFL glyphs (U+E000–U+EFFF)', filter: cp => cp >= 0xE000 && cp < 0xF000 },
+      { title: 'PUA glyphs (U+F000–)', filter: cp => cp >= 0xF000 },
+    ],
+  },
+  {
     slug: 'petaluma-script',
     name: 'PetalumaScript',
     derived: false,
