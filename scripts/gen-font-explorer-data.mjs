@@ -56,6 +56,20 @@ const FONTS = [
     ],
   },
   {
+    slug: 'bravura',
+    name: 'Bravura',
+    derived: false,
+    cacheName: 'Bravura.otf',
+    fontUrl: null, // already cached
+    // Accidentals and △ we use in GrigsonSans/Serif composites
+    targetCodepoints: [0x266d, 0x266f],
+    sections: [
+      { title: 'Non-SMuFL glyphs', filter: cp => cp < 0xE000 },
+      { title: 'SMuFL glyphs (U+E000–U+EFFF)', filter: cp => cp >= 0xE000 && cp < 0xF000 },
+      { title: 'PUA glyphs (U+F000–)', filter: cp => cp >= 0xF000 },
+    ],
+  },
+  {
     slug: 'noto-symbols2',
     name: 'NotoSansSymbols2',
     derived: false,
