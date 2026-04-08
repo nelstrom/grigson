@@ -1,6 +1,6 @@
 {
   "name": "grigson-fonts",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Font subsets for grigson — NotoSans, NotoSerif, Bravura, PetalumaScript, GrigsonJazz",
   "license": "OFL-1.1"
 }
