@@ -10,6 +10,8 @@ packages/grigson-svg-renderer/dist/
 packages/language-server/dist/
 packages/vscode-extension/dist/
 packages/website/_site/
+packages/font-explorer/_data/fonts/
+packages/font-explorer/_site/
 
 # Generated parser files in the grigson package
 packages/grigson/src/parser/generated.js

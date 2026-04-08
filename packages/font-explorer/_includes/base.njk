@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} — Grigson Font Explorer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 1.5rem 2rem;
+      color: #111;
+      background: #fff;
+    }
+
+    h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+    h2 { font-size: 1rem; margin: 2rem 0 0.5rem; }
+
+    .meta {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    nav { margin-bottom: 1.5rem; }
+    nav a { color: #0066cc; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+
+    /* Coverage panel */
+    .coverage {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+    }
+
+    .coverage h2 { margin: 0 0 0.5rem; }
+
+    .coverage table {
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .coverage td, .coverage th {
+      padding: 0.2rem 0.75rem;
+      text-align: left;
+      border: none;
+    }
+
+    .coverage th {
+      font-weight: 600;
+      color: #555;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding-bottom: 0.4rem;
+    }
+
+    .present { color: #1a7a1a; font-weight: 600; }
+    .missing { color: #cc2200; font-weight: 600; }
+
+    /* Glyph table */
+    .glyph-table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .glyph-table th {
+      text-align: left;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.3rem 0.5rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .glyph-table td {
+      padding: 0.2rem 0.5rem;
+      vertical-align: middle;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .col-hex   { width: 6rem; font-family: monospace; }
+    .col-glyph { width: 11rem; text-align: center; }
+    .col-name  { }
+    .col-adv   { width: 5rem; text-align: right; font-family: monospace; color: #888; font-size: 0.85em; }
+
+    .glyph-table td.col-glyph {
+      padding: 0.1rem 0.3rem;
+    }
+
+    .glyph-table svg {
+      display: block;
+      margin: 0 auto;
+      width: 10rem;
+      height: 10rem;
+    }
+
+    /* Highlight rows for target codepoints */
+    tr.is-target td {
+      background: #fffbe6;
+    }
+
+    tr.is-target td.col-hex {
+      font-weight: 700;
+      color: #b8860b;
+    }
+  </style>
+</head>
+<body>
+  {{ content | safe }}
+</body>
+</html>

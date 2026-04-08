@@ -1,0 +1,13 @@
+---
+layout: base.njk
+title: Font Explorer
+---
+
+<h1>Grigson Font Explorer</h1>
+<p class="meta">Per-font glyph tables for fonts used in the Grigson project.</p>
+
+<ul>
+  {% for font in fontPages %}
+    <li><a href="/{{ font.slug }}/">{{ font.name }}</a> — {{ font.totalGlyphs }} glyphs ({{ font.outline }}, {{ font.upm }} UPM)</li>
+  {% endfor %}
+</ul>

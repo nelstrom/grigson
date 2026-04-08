@@ -468,3 +468,16 @@ Added --notation-preset-file <path> flag to html-renderer-cli.ts. The flag reads
 
 ## notation-xss-test (2026-03-31)
 Added a test to `packages/grigson/src/renderers/html.test.ts` documenting the XSS risk from preset values in HTML output. The test passes a preset with `dominant7: "<script>alert('xss')</script>"` to `HtmlRenderer` and asserts the script tag appears verbatim in the rendered output, documenting the current unsafe behavior. Added a `// TODO` comment in `html.ts` near the interpolation site in `renderChordInner` referencing DOMPurify and the HTML Sanitizer API as eventual fixes. All tests pass.
+
+## packages/font-explorer — initial implementation (2026-04-08)
+
+Created `packages/font-explorer/`, a local-only Eleventy 3 static site for exploring glyph
+tables of fonts used in the Grigson project.
+
+- `scripts/gen-font-explorer-data.mjs`: downloads fonts if needed, runs fonttools Python to
+  extract per-glyph SVG path + metadata, writes JSON to `_data/fonts/<slug>.json`
+- Font pages for FinaleJazz (718 glyphs, 3 sections) and NotoMusic (890 glyphs)
+- Coverage check panel for NotoMusic: ♭ U+266D PRESENT, ♯ U+266F PRESENT, ♮ U+266E PRESENT,
+  △ U+25B3 MISSING
+- Eleventy config, templates (index + per-font pagination), base layout with inline CSS
+- `.gitignore` updated: `_data/fonts/` and `_site/` excluded

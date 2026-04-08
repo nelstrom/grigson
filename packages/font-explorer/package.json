@@ -1,0 +1,13 @@
+{
+  "name": "grigson-font-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../scripts/gen-font-explorer-data.mjs && eleventy",
+    "serve": "node ../../scripts/gen-font-explorer-data.mjs && eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

@@ -1,0 +1,79 @@
+---
+layout: base.njk
+pagination:
+  data: fontPages
+  size: 1
+  alias: font
+permalink: "{{ font.slug }}/"
+eleventyComputed:
+  title: "{{ font.name }}"
+---
+
+<nav><a href="/">← All fonts</a></nav>
+
+<h1>{{ font.name }}</h1>
+<p class="meta">
+  {{ font.totalGlyphs }} glyphs &nbsp;·&nbsp;
+  {{ font.outline }} outlines &nbsp;·&nbsp;
+  {{ font.upm }} UPM
+</p>
+
+{% if font.coverage.length %}
+  <div class="coverage">
+    <h2>Coverage check</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Codepoint</th>
+          <th>Symbol</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in font.coverage %}
+          <tr>
+            <td><code>U+{{ item.hex }}</code></td>
+            <td>{{ item.symbol }}</td>
+            <td>
+              {% if item.present %}
+                <span class="present">PRESENT</span>
+              {% else %}
+                <span class="missing">MISSING</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+{% for section in font.sections %}
+  <h2>{{ section.title }} ({{ section.glyphs.length }})</h2>
+  <table class="glyph-table">
+    <thead>
+      <tr>
+        <th class="col-hex">Codepoint</th>
+        <th class="col-glyph">Glyph</th>
+        <th class="col-name">Name</th>
+        <th class="col-adv">Advance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in section.glyphs %}
+        <tr{% if g.isTarget %} class="is-target"{% endif %}>
+          <td class="col-hex">U+{{ g.hex }}</td>
+          <td class="col-glyph">
+            {% if g.svgPath %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="{{ g.viewBox }}">
+                <path d="{{ g.svgPath }}" transform="scale(1,-1)" fill="currentColor"/>
+              </svg>
+            {% endif %}
+          </td>
+          <td class="col-name">{{ g.name }}</td>
+          <td class="col-adv">{{ g.advance }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
