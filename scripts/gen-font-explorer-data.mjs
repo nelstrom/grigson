@@ -56,6 +56,20 @@ const FONTS = [
     ],
   },
   {
+    slug: 'noto-symbols2',
+    name: 'NotoSansSymbols2',
+    derived: false,
+    cacheName: 'NotoSansSymbols2-Regular.ttf',
+    fontUrl:
+      'https://raw.githubusercontent.com/notofonts/notofonts.github.io/main/fonts/NotoSansSymbols2/full/ttf/NotoSansSymbols2-Regular.ttf',
+    // U+25B3 △ is the glyph we use from this font as a fallback in GrigsonSans/Serif/Cursive
+    targetCodepoints: [0x25b3],
+    sections: [
+      { title: 'Non-PUA glyphs', filter: cp => cp < 0xE000 },
+      { title: 'PUA glyphs (U+E000–)', filter: cp => cp >= 0xE000 },
+    ],
+  },
+  {
     slug: 'noto-music',
     name: 'NotoMusic',
     derived: false,
