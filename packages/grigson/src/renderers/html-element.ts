@@ -20,12 +20,14 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
   }
 
   private _ensureFontFaces(): void {
-    // Standalone Bravura family — used by [part="time-sig"] for SMuFL codepoints.
-    const bravuraId = 'grigson-bravura-font-face';
-    if (!document.getElementById(bravuraId)) {
+    // GrigsonTimeSig — Bravura subset covering only Math Bold digits U+1D7CE–1D7D7.
+    // Registered as a named fallback so system fonts (e.g. Cambria Math) cannot win
+    // for those codepoints when --grigson-font-family is set to a custom font.
+    const timeSigId = 'grigson-time-sig-font-face';
+    if (!document.getElementById(timeSigId)) {
       const style = document.createElement('style');
-      style.id = bravuraId;
-      style.textContent = `@font-face { font-family: "Bravura"; src: url("${bravuraWoff2}") format("woff2"); font-weight: normal; font-style: normal; }`;
+      style.id = timeSigId;
+      style.textContent = `@font-face{font-family:"GrigsonTimeSig";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7;font-weight:normal;font-style:normal}`;
       document.head.appendChild(style);
     }
 
@@ -269,7 +271,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: inline-flex;
         flex-direction: column;
         align-items: center;
-        font-family: "Bravura", serif;
+        font-family: var(--grigson-time-sig-font-family), "GrigsonTimeSig", serif;
         font-size: var(--grigson-time-sig-font-size);
         font-weight: normal;
         line-height: 0.55;

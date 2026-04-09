@@ -507,3 +507,6 @@ Output:
   U+1D7CE–U+1D7D7 → uniE080–uniE089
 
 All 520 tests pass.
+
+## renderer-grigson-time-sig-font
+Replaced the standalone 'grigson-bravura-font-face' injection (family: Bravura, no unicode-range) with a new 'grigson-time-sig-font-face' injection registering 'GrigsonTimeSig' for unicode-range U+1D7CE-1D7D7 (Math Bold digits), backed by bravuraWoff2. Updated [part="time-sig"] font-family from '"Bravura", serif' to 'var(--grigson-time-sig-font-family), "GrigsonTimeSig", serif'. This ensures Math Bold digits always resolve from Bravura even when --grigson-font-family is set to an external font.
