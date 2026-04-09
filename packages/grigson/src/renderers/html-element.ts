@@ -273,7 +273,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: inline-flex;
         flex-direction: column;
         align-items: center;
-        font-family: var(--grigson-time-sig-font-family), var(--grigson-font-family, ${defaultFamily}), "GrigsonTimeSig", serif;
+        font-family: var(--grigson-time-sig-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonTimeSig", serif;
         font-size: var(--grigson-time-sig-font-size);
         font-weight: normal;
         line-height: 0.55;
