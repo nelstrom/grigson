@@ -61,7 +61,7 @@ tags: tutorial
   <section>
     <h2>Sans-serif (default)</h2>
     <p>Noto Sans — the default when no <code>typeface</code> attribute is set.</p>
-    <grigson-chart normalise style="--grigson-time-sig-top: 37%;">
+    <grigson-chart normalise>
       <template>{{ 'autumn-leaves' | readChart }}</template>
     </grigson-chart>
   </section>
@@ -69,7 +69,7 @@ tags: tutorial
   <section>
     <h2>Serif</h2>
     <p>Noto Serif — set <code>typeface="serif"</code> on <code>&lt;grigson-html-renderer&gt;</code>.</p>
-    <grigson-chart normalise style="--grigson-time-sig-top: 37%;">
+    <grigson-chart normalise>
       <grigson-html-renderer typeface="serif"></grigson-html-renderer>
       <template>{{ 'autumn-leaves' | readChart }}</template>
     </grigson-chart>
@@ -78,7 +78,7 @@ tags: tutorial
   <section>
     <h2>Cursive</h2>
     <p>Petaluma — set <code>typeface="petaluma"</code> on <code>&lt;grigson-html-renderer&gt;</code>.</p>
-    <grigson-chart normalise style="--grigson-time-sig-font-size: 0.6em; --grigson-time-sig-top: 40%; --grigson-time-sig-line-height: 1.1;">
+    <grigson-chart normalise>
       <grigson-html-renderer notation-preset="realbook" typeface="cursive"></grigson-html-renderer>
       <template>{{ 'autumn-leaves' | readChart }}</template>
     </grigson-chart>

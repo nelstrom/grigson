@@ -216,23 +216,23 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 
 Set these on the `<grigson-chart>` element or any ancestor.
 
-| Property                              | Default                        | Description                                     |
-| ------------------------------------- | ------------------------------ | ----------------------------------------------- |
-| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font                 |
-| `--grigson-title-font-family`         | inherits                       | Font for the song title                         |
-| `--grigson-section-label-font-family` | inherits                       | Font for section labels                         |
-| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers |
-| `--grigson-color`                     | `inherit`                      | Text and barline colour                         |
-| `--grigson-background`                | `transparent`                  | Background of the host element                  |
-| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows                       |
-| `--grigson-section-gap`               | `2em`                          | Top margin before each section label            |
-| `--grigson-barline-width`             | `1.5px`                        | Barline stroke width                            |
-| `--grigson-barline-color`             | `currentColor`                 | Barline colour                                  |
-| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                     |
-| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                   |
-| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations         |
-| `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator   |
-| `--grigson-time-sig-top`              | `50%`                          | Vertical position of the time signature         |
+| Property                              | Default                        | Description                                               |
+| ------------------------------------- | ------------------------------ | --------------------------------------------------------- |
+| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font                           |
+| `--grigson-title-font-family`         | inherits                       | Font for the song title                                   |
+| `--grigson-section-label-font-family` | inherits                       | Font for section labels                                   |
+| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers           |
+| `--grigson-color`                     | `inherit`                      | Text and barline colour                                   |
+| `--grigson-background`                | `transparent`                  | Background of the host element                            |
+| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows                                 |
+| `--grigson-section-gap`               | `2em`                          | Top margin before each section label                      |
+| `--grigson-barline-width`             | `1.5px`                        | Barline stroke width                                      |
+| `--grigson-barline-color`             | `currentColor`                 | Barline colour                                            |
+| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                               |
+| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                             |
+| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                   |
+| `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator             |
+| `--grigson-time-sig-top`              | `37%`                          | Vertical position: `50%` = centred, lower values shift up |
 
 Two additional variables are set by the renderer on `part="song"` and control the grid geometry. You can override them, but the renderer computes the right values automatically:
 

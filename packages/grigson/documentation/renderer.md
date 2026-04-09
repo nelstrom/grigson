@@ -238,12 +238,12 @@ These properties can be set on the `<grigson-chart>` element (or any ancestor) t
 | `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                                                  |
 | `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                                        |
 | `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator digits                           |
-| `--grigson-time-sig-top`              | `50%`                          | Vertical position of the time-sig block within the bar                         |
+| `--grigson-time-sig-top`              | `37%`                          | Vertical position: `50%` = centred, lower values shift up                      |
 
-The three time-sig variables have typeface-specific defaults set via `:host([typeface="cursive"])` and `:host([typeface="serif"])` rules inside the shadow DOM. This means you can tune them per-typeface without any JS, and they can also be overridden on the host element for custom fonts:
+The time-sig variables have typeface-specific defaults: cursive uses `0.6em` / `1.1` / `40%`. They can be overridden on `grigson-html-renderer` for custom fonts:
 
 ```css
-/* Tune time-sig positioning for a custom font loaded via --grigson-font-family */
+/* Tune time-sig layout for a custom font loaded via --grigson-font-family */
 grigson-html-renderer {
   --grigson-time-sig-font-size: 1.0em;
   --grigson-time-sig-line-height: 0.6;

@@ -94,19 +94,13 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-section-label-font-size: 0.9em;
         --grigson-time-sig-font-size: 1.1em;
         --grigson-time-sig-line-height: 0.55;
-        --grigson-time-sig-top: 50%;
+        --grigson-time-sig-top: 37%;
       }
 
-      :host([typeface="cursive"]) {
-        --grigson-time-sig-font-size: 1.1em;
-        --grigson-time-sig-line-height: 0.55;
-        --grigson-time-sig-top: 50%;
-      }
-
-      :host([typeface="serif"]) {
-        --grigson-time-sig-font-size: 1.1em;
-        --grigson-time-sig-line-height: 0.55;
-        --grigson-time-sig-top: 50%;
+      [data-typeface="cursive"] {
+        --grigson-time-sig-font-size: 0.6em;
+        --grigson-time-sig-line-height: 1.1;
+        --grigson-time-sig-top: 40%;
       }
 
       [part="song-header"] {
@@ -253,6 +247,8 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="time-sig"] {
+        position: relative;
+        top: calc(var(--grigson-time-sig-top) - 50%);
         display: inline-flex;
         flex-direction: column;
         align-items: center;
@@ -303,7 +299,9 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     const renderer = new HtmlRenderer(config);
     const html = renderer.render(song);
 
+    const typeface = this.getAttribute('typeface') ?? 'sans';
     const wrapper = document.createElement('div');
+    wrapper.dataset.typeface = typeface;
     if (typeof wrapper.setHTMLUnsafe === 'function') {
       wrapper.setHTMLUnsafe(`<style>${this._getStyles()}</style>${html}`);
     } else {
