@@ -514,3 +514,15 @@ verify-time-sig-math-bold: Confirmed Math Bold digit re-encoding is complete. Th
 grigson-jazz-timesig-glyphs: Extended IMPORT dict in reencode-finale-jazz.mjs with 10 time-sig glyph mappings (U+1D7CE–1D7D7 → uniE080–uniE089). Fixed non-BMP cmap overflow by routing supplementary codepoints to format-12 tables only. Added U+1D7CE-1D7D7 to GrigsonJazz unicodes in gen-jazz-subsets.mjs. Bumped grigson-fonts to 1.1.2. Regenerated GrigsonJazz.otf and GrigsonJazz-subset.woff2. All 520 tests pass.
 petaluma-timesig-subset: Added GrigsonPetaluma-timesig entry to gen-jazz-subsets.mjs with Python preprocessing to add U+1D7CE–1D7D7 cmap aliases pointing to Petaluma's U+E080–E089 time-sig glyphs. Added replaceAll for multi-occurrence template substitution. Generated grigson-petaluma-timesig-subset.ts (8.5 KB) and GrigsonPetaluma-timesig-subset.woff2 (6.1 KB).
 cursive-timesig-font-override: Added grigsonPetalumaTimeSigWoff2 import to html-element.ts. Appended GrigsonCursive @font-face for U+1D7CE-1D7D7 (Petaluma glyphs) in jazzId block. Updated [part="time-sig"] font-family to prepend var(--grigson-font-family, ${defaultFamily}) so each typeface's composite family gets first pick of Math Bold digits. Build and 520 tests pass.
+
+## notation-docs (2026-04-09)
+
+Updated `packages/grigson/documentation/renderer.md` to accurately reflect the implemented notation preset system:
+
+- **DEFAULT_PRESET table**: corrected all values to match the actual implementation — `minor` is `'<small>m</small>'` (not `'m'`), `diminished` is `'<sup><small>o</small></sup>'` (ASCII letter o, not degree °), `halfDiminished`/`maj7`/`min7`/`dim7` all wrap glyphs in `<small>` tags that the docs previously omitted.
+- **Named preset HTML example**: fixed `<grigson-chart notation-preset="custom">` → `<grigson-html-renderer notation-preset="custom">` — the attribute belongs to the renderer element, not the chart container.
+- **Time-sig HTML structure example**: updated comment and codepoints from SMuFL (U+E084) to Math Bold digits (U+1D7D2 = 𝟒), matching the renderer's current output.
+- **Part names table**: updated `time-sig`, `time-sig-num`, `time-sig-den` descriptions from "SMuFL codepoints U+E080–E089" to "Math Bold digits U+1D7CE–U+1D7D7".
+- **Embedded fonts section**: updated Bravura description from "SMuFL time-signature digits (U+E080–U+E08B)" to "Math Bold digits (U+1D7CE–U+1D7D7) via the GrigsonTimeSig @font-face".
+
+No references to jazz/pop/symbolic presets were present — they had already been removed. All 6 test suites pass.

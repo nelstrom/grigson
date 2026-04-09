@@ -56,7 +56,7 @@ The custom element embeds font subsets as base64-encoded WOFF2 data URIs in the 
 **Bravura** (© Steinberg Media Technologies, SIL Open Font License 1.1) supplies:
 
 - ♭ and ♯ (U+266D, U+266F) for accidentals in chord names
-- SMuFL time-signature digits (U+E080–U+E08B) used by `[part="time-sig"]`
+- Math Bold digits (U+1D7CE–U+1D7D7, 𝟎–𝟗) used by `[part="time-sig"]` via the `GrigsonTimeSig` @font-face
 - SMuFL simile marks (U+E1E7–U+E1E8) used by `[part="simile"]`
 
 **PetalumaScript** (© Steinberg Media Technologies GmbH, SIL Open Font License 1.1) is a handwritten Real Book-style text font. A Latin-1 subset is embedded, including ♭ and ♯ which this font provides natively at standard Unicode positions.
@@ -100,9 +100,9 @@ The renderer produces a hierarchy of elements, each with a `part` attribute:
         <!-- time-sig shown because bar.timeSignature is set on this bar -->
         <span part="slot" style="grid-column: 2 / span 2">
           <span part="time-sig">
-            <!-- SMuFL digits: U+E084 = 4, rendered in Bravura font -->
-            <span part="time-sig-num">&#xE084;</span>
-            <span part="time-sig-den">&#xE084;</span>
+            <!-- Math Bold digits: U+1D7D2 = 𝟒, rendered via GrigsonTimeSig @font-face -->
+            <span part="time-sig-num">𝟒</span>
+            <span part="time-sig-den">𝟒</span>
           </span>
           <span part="chord"><span part="chord-root">C</span></span>
         </span>
@@ -178,9 +178,9 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 | `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                                                                  |
 | `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                                                            |
 | `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width                                       |
-| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses Bravura font for SMuFL digit glyphs                                          |
-| `time-sig-num`                 | `<span>`    | Numerator of the time signature (SMuFL codepoints U+E080–E089)                                                     |
-| `time-sig-den`                 | `<span>`    | Denominator of the time signature (SMuFL codepoints U+E080–E089)                                                   |
+| `time-sig`                     | `<span>`    | Time signature stacked fraction; uses the `GrigsonTimeSig` @font-face for digit glyphs                             |
+| `time-sig-num`                 | `<span>`    | Numerator of the time signature (Math Bold digits U+1D7CE–U+1D7D7, e.g. 𝟎–𝟗)                                       |
+| `time-sig-den`                 | `<span>`    | Denominator of the time signature (Math Bold digits U+1D7CE–U+1D7D7, e.g. 𝟎–𝟗)                                     |
 | `chord`                        | `<span>`    | A chord symbol; gains `chord-slash` when a bass note is present                                                    |
 | `chord-slash`                  | —           | Additional part on `chord` when the chord has a bass note                                                          |
 | `chord-top`                    | `<span>`    | Upper half of a slash chord (root + quality)                                                                       |
@@ -418,17 +418,17 @@ The keys of `NotationPreset` correspond to the parser's `Quality` enum names. Ea
 
 #### `DEFAULT_PRESET` values
 
-| Field            | Default value      |
-| ---------------- | ------------------ |
-| `major`          | `''`               |
-| `minor`          | `'m'`              |
-| `dominant7`      | `'<sup>7</sup>'`   |
-| `halfDiminished` | `'<sup>Ø</sup>'`   |
-| `diminished`     | `'°'`              |
-| `maj7`           | `'<sup>△</sup>'`   |
-| `min7`           | `'m<sup>7</sup>'`  |
-| `dim7`           | `'°<sup>7</sup>'`  |
-| `dom7flat5`      | `'<sup>7♭5</sup>'` |
+| Field            | Default value                    |
+| ---------------- | -------------------------------- |
+| `major`          | `''`                             |
+| `minor`          | `'<small>m</small>'`             |
+| `dominant7`      | `'<sup>7</sup>'`                 |
+| `halfDiminished` | `'<sup><small>ø</small></sup>'`  |
+| `diminished`     | `'<sup><small>o</small></sup>'`  |
+| `maj7`           | `'<sup><small>△</small></sup>'`  |
+| `min7`           | `'<small>m</small><sup>7</sup>'` |
+| `dim7`           | `'<sup><small>o</small>7</sup>'` |
+| `dom7flat5`      | `'<sup>7♭5</sup>'`               |
 
 #### HTML renderer and `<sup>`/`<sub>` tags
 
@@ -480,7 +480,8 @@ const html = new HtmlRenderer({ notation: { preset: 'custom' } }).render(song);
 
 ```html
 <!-- Or use by name in the custom element attribute -->
-<grigson-chart notation-preset="custom">
+<grigson-chart>
+  <grigson-html-renderer notation-preset="custom"></grigson-html-renderer>
   | Cm7 | F7 | BbM7 |
 </grigson-chart>
 ```

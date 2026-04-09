@@ -2057,7 +2057,8 @@
       "Add a code example showing registerPreset() and named preset usage in a browser context",
       "Document the CLI flags including --notation-preset-file",
       "Remove all references to jazz, pop, and symbolic presets"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "bravura-subset-math-bold-cmap",
