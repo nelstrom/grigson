@@ -32,6 +32,9 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: Install Python dependencies
+        run: pip install fonttools brotli
+
       - name: Install dependencies
         run: pnpm install
 
