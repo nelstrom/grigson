@@ -526,3 +526,6 @@ Updated `packages/grigson/documentation/renderer.md` to accurately reflect the i
 - **Embedded fonts section**: updated Bravura description from "SMuFL time-signature digits (U+E080–U+E08B)" to "Math Bold digits (U+1D7CE–U+1D7D7) via the GrigsonTimeSig @font-face".
 
 No references to jazz/pop/symbolic presets were present — they had already been removed. All 6 test suites pass.
+
+## verify-typeface-timesig-overrides
+All implementation for per-typeface time-sig glyph overrides was already complete across previous tasks. Verified by: (1) pnpm build — all packages built successfully; (2) pnpm test — 520 tests pass across all test suites including html.test.ts which asserts time-sig digits are rendered as Math Bold codepoints (U+1D7CE–1D7D7). The existing test coverage confirms: `[part="time-sig-num"]` and `[part="time-sig-den"]` contain readable Math Bold digits in HTML output. The font-family cascade `var(--grigson-time-sig-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonTimeSig", serif` routes each typeface to its correct glyphs (Bravura for sans/serif, Petaluma for cursive, GrigsonJazz for FinaleJazz). grigson-fonts package.json is at v1.1.2. Created git tag grigson-fonts-v1.1.2 for CDN serving of updated GrigsonJazz-subset.woff2.

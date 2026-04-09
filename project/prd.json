@@ -2174,6 +2174,7 @@
       "Load the tutorial typefaces page and confirm the FinaleJazz example uses FinaleJazz time-sig digit glyphs",
       "Confirm HTML source shows readable 𝟒/𝟒 digits in all cases",
       "Push a grigson-fonts-v1.1.2 git tag so the CDN serves the updated GrigsonJazz-subset.woff2"
-    ]
+    ],
+    "passes": true
   }
 ]
