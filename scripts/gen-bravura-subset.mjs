@@ -14,7 +14,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -38,10 +38,13 @@ const BRAVURA_URL =
 // Standard Unicode music symbols (also present in Bravura):
 //   U+266D       ♭ MUSIC FLAT SIGN
 //   U+266F       ♯ MUSIC SHARP SIGN
-const UNICODES = 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501';
+// Math Bold digits (cmap aliases added by preprocessing step below):
+//   U+1D7CE-1D7D7  𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗 — same outlines as U+E080–E089
+const UNICODES = 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501,U+1D7CE-1D7D7';
 
 const tmp = tmpdir();
 const otfPath = join(tmp, 'Bravura.otf');
+const otfWithAliases = join(tmp, 'GrigsonBravura-tmp.otf');
 const woff2Path = join(tmp, 'bravura-subset.woff2');
 
 if (existsSync(CACHED_OTF)) {
@@ -59,11 +62,36 @@ if (existsSync(CACHED_OTF)) {
 }
 console.log(`  → ${otfPath} (${(readFileSync(otfPath).length / 1024).toFixed(0)} KB)`);
 
-console.log('Subsetting with pyftsubset…');
-execSync(
-  `pyftsubset "${otfPath}" --unicodes="${UNICODES}" --flavor=woff2 --output-file="${woff2Path}"`,
-  { stdio: 'inherit' },
+// Preprocessing: add Math Bold cmap aliases U+1D7CE–1D7D7 pointing to the
+// same glyph names as U+E080–E089, so pyftsubset can include them in the
+// subset without adding new outlines.
+const pyScript = join(tmp, 'add_math_bold_cmap.py');
+writeFileSync(
+  pyScript,
+  `\
+from fontTools.ttLib import TTFont
+font = TTFont("${otfPath}")
+for table in font['cmap'].tables:
+    for i in range(10):
+        gname = table.cmap.get(0xE080 + i)
+        if gname:
+            table.cmap[0x1D7CE + i] = gname
+font.save("${otfWithAliases}")
+`,
+  'utf8',
 );
+console.log('Adding Math Bold cmap aliases (U+1D7CE–1D7D7)…');
+try {
+  execSync(`python3 "${pyScript}"`, { stdio: 'inherit' });
+  console.log('Subsetting with pyftsubset…');
+  execSync(
+    `pyftsubset "${otfWithAliases}" --unicodes="${UNICODES}" --flavor=woff2 --output-file="${woff2Path}"`,
+    { stdio: 'inherit' },
+  );
+} finally {
+  try { unlinkSync(otfWithAliases); } catch {}
+  try { unlinkSync(pyScript); } catch {}
+}
 const woff2 = readFileSync(woff2Path);
 console.log(`  → ${woff2Path} (${(woff2.length / 1024).toFixed(1)} KB)`);
 
@@ -76,7 +104,7 @@ const ts = `\
 //
 // Contains a subset of Bravura (https://github.com/steinbergmedia/bravura),
 // © Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.
-// Glyphs included: ♭♯ (U+266D, U+266F), SMuFL time-signature digits (U+E080–E08B), simile marks (U+E500–E501).
+// Glyphs included: ♭♯ (U+266D, U+266F), SMuFL time-signature digits (U+E080–E08B), simile marks (U+E500–E501), Math Bold digits 𝟎–𝟗 (U+1D7CE–1D7D7, aliased to same outlines as U+E080–E089).
 export const bravuraWoff2 = '${dataUri}';
 `;
 

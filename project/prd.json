@@ -2058,5 +2058,114 @@
       "Document the CLI flags including --notation-preset-file",
       "Remove all references to jazz, pop, and symbolic presets"
     ]
+  },
+  {
+    "id": "bravura-subset-math-bold-cmap",
+    "category": "functional",
+    "description": "Add Math Bold cmap aliases and U+1D7CE–1D7D7 to the Bravura subset script",
+    "detail": "Update scripts/gen-bravura-subset.mjs to add a Python preprocessing step before pyftsubset runs. The step opens Bravura.otf, iterates U+E080–E089, and adds cmap aliases at U+1D7CE–1D7D7 pointing to the same glyph names, saving a temp OTF. Then update the UNICODES constant to include the new range: 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501,U+1D7CE-1D7D7'. No new glyphs are created — one set of outlines serves both codepoint ranges. See project/plans/bravura-time-signature-re-encode.md for full context.",
+    "steps": [
+      "In gen-bravura-subset.mjs, write a temporary Python script (via writeFileSync to tmpdir) that opens Bravura.otf, adds U+1D7CE–1D7D7 cmap aliases for U+E080–E089, saves a temp OTF",
+      "Run the Python script with execSync before the pyftsubset call; use the temp OTF as input to pyftsubset",
+      "Update the UNICODES constant to append ',U+1D7CE-1D7D7'",
+      "Update the comment block above UNICODES to document the new range",
+      "Clean up the temp OTF in a finally block"
+    ],
+    "passes": true
+  },
+  {
+    "id": "renderer-time-sig-math-bold",
+    "category": "functional",
+    "description": "Update the HTML renderer to emit Math Bold digits for time signatures",
+    "detail": "In packages/grigson/src/renderers/html.ts, replace the SMUFL_DIGITS constant (U+E080–E089) with a TIME_SIG_DIGITS constant using Math Bold codepoints U+1D7CE–1D7D7. Use String.fromCodePoint() to build the string since these are outside the BMP. Rename the constant and update its one call site in smuflDigits(). See project/plans/bravura-time-signature-re-encode.md for full context.",
+    "steps": [
+      "Replace the SMUFL_DIGITS string literal with: const TIME_SIG_DIGITS = Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0x1D7CE + i)).join('');",
+      "Rename the constant from SMUFL_DIGITS to TIME_SIG_DIGITS",
+      "Update the reference inside smuflDigits() to use TIME_SIG_DIGITS"
+    ]
+  },
+  {
+    "id": "renderer-grigson-time-sig-font",
+    "category": "functional",
+    "description": "Add GrigsonTimeSig @font-face and update the time-sig CSS in html-element.ts",
+    "detail": "In packages/grigson/src/renderers/html-element.ts: (1) Add a new _ensureFontFaces() injection for 'GrigsonTimeSig' that registers the bravuraWoff2 data URI with unicode-range U+1D7CE-1D7D7 — this prevents system fonts (e.g. Cambria Math) from winning for Math Bold digits when an external --grigson-font-family is set. (2) In _getStyles(), change [part=\"time-sig\"] font-family from 'Bravura, serif' to 'var(--grigson-time-sig-font-family), \"GrigsonTimeSig\", serif'. (3) Remove the standalone grigson-bravura-font-face injection (previously used only by [part=\"time-sig\"]) since GrigsonTimeSig now handles that role and the composite families already cover U+266D/266F. See project/plans/bravura-time-signature-re-encode.md for full context.",
+    "steps": [
+      "Add a new injection block in _ensureFontFaces() with id 'grigson-time-sig-font-face', registering GrigsonTimeSig with unicode-range U+1D7CE-1D7D7 pointing to bravuraWoff2",
+      "In _getStyles(), update [part=\"time-sig\"] font-family to: var(--grigson-time-sig-font-family), \"GrigsonTimeSig\", serif",
+      "Remove the standalone grigson-bravura-font-face injection block from _ensureFontFaces()"
+    ]
+  },
+  {
+    "id": "regenerate-bravura-subset",
+    "category": "functional",
+    "description": "Regenerate the Bravura subset WOFF2 and TypeScript constant",
+    "detail": "Run node scripts/gen-bravura-subset.mjs to regenerate packages/grigson/src/renderers/bravura-subset.ts and packages/grigson-fonts/fonts/Bravura-subset.woff2 with the Math Bold range (U+1D7CE–1D7D7) included. This task depends on bravura-subset-math-bold-cmap being complete. See project/plans/bravura-time-signature-re-encode.md for full context.",
+    "steps": [
+      "Run: node scripts/gen-bravura-subset.mjs",
+      "Verify the script completes without errors",
+      "Confirm bravura-subset.ts has been updated (check file modification time or diff)"
+    ]
+  },
+  {
+    "id": "verify-time-sig-math-bold",
+    "category": "testing",
+    "description": "Build, test, and verify time signature digits render correctly from Math Bold range",
+    "detail": "After all prior tasks are complete, build the full project and verify the time signature changes work end-to-end. See project/plans/bravura-time-signature-re-encode.md for full context.",
+    "steps": [
+      "Run: pnpm build",
+      "Run: pnpm test — confirm html.test.ts passes (it covers time signature output)",
+      "Open a chart with a time signature in the browser and view HTML source — digits should appear as 𝟒/𝟒 (Math Bold), not tofu",
+      "Visually confirm the time sig renders correctly (same appearance as before)",
+      "Test with a custom --grigson-font-family (e.g. Kaushan Script) — time sig digits should still render from GrigsonTimeSig (Bravura), not system fonts"
+    ]
+  },
+  {
+    "id": "petaluma-timesig-subset",
+    "category": "functional",
+    "description": "Add a Petaluma time-sig subset entry to gen-jazz-subsets.mjs producing grigsonPetalumaTimeSigWoff2",
+    "detail": "Add a new entry to the FONTS array in scripts/gen-jazz-subsets.mjs for GrigsonPetaluma. The source is Petaluma.otf (already cached at scripts/fonts/Petaluma.otf). Before running pyftsubset, run an inline Python preprocessing step that adds U+1D7CE–1D7D7 as cmap aliases for U+E080–E089. Subset the temp OTF to U+1D7CE-1D7D7 only. Output the TS constant grigsonPetalumaTimeSigWoff2 to grigson-petaluma-timesig-subset.ts and the WOFF2 to packages/grigson-fonts/fonts/GrigsonPetaluma-timesig-subset.woff2. See project/plans/time-signature-re-encode-part-2.md for full context.",
+    "steps": [
+      "Add a new entry to the FONTS array in scripts/gen-jazz-subsets.mjs with slug 'grigson-petaluma-timesig', cacheName 'Petaluma.otf', oflCacheName null (locally cached), unicodes 'U+1D7CE-1D7D7', exportName 'grigsonPetalumaTimeSigWoff2', pkgWoff2Name 'GrigsonPetaluma-timesig-subset.woff2', outTs 'grigson-petaluma-timesig-subset.ts'",
+      "Add a Python preprocessing step in the font's processing block that writes a temp Python script to add cmap aliases U+1D7CE–1D7D7 → same glyph names as U+E080–E089, runs it, and passes the resulting temp OTF to pyftsubset instead of the original",
+      "Run node scripts/gen-jazz-subsets.mjs and confirm grigson-petaluma-timesig-subset.ts is generated"
+    ]
+  },
+  {
+    "id": "grigson-jazz-timesig-glyphs",
+    "category": "functional",
+    "description": "Add time-sig digit glyph imports to reencode-finale-jazz.mjs and include U+1D7CE–1D7D7 in the GrigsonJazz subset",
+    "detail": "Two changes are needed. First, extend the IMPORT dict in scripts/reencode-finale-jazz.mjs with 10 entries mapping U+1D7CE–1D7D7 to glyph names uniE080–uniE089 from FinaleJazz.otf. Second, add U+1D7CE-1D7D7 to the GrigsonJazz unicodes string in scripts/gen-jazz-subsets.mjs. Also bump packages/grigson-fonts/package.json from 1.1.1 to 1.1.2. See project/plans/time-signature-re-encode-part-2.md for full context.",
+    "steps": [
+      "In scripts/reencode-finale-jazz.mjs, extend the IMPORT dict with entries 0x1D7CE: 'uniE080' through 0x1D7D7: 'uniE089'",
+      "In scripts/gen-jazz-subsets.mjs, append ',U+1D7CE-1D7D7' to the GrigsonJazz unicodes string",
+      "Bump packages/grigson-fonts/package.json version from 1.1.1 to 1.1.2",
+      "Run node scripts/reencode-finale-jazz.mjs to regenerate GrigsonJazz.otf with the new glyphs",
+      "Run node scripts/gen-jazz-subsets.mjs to regenerate grigson-jazz-subset.ts and GrigsonJazz-subset.woff2"
+    ]
+  },
+  {
+    "id": "cursive-timesig-font-override",
+    "category": "functional",
+    "description": "Wire up GrigsonCursive and custom font time-sig overrides in html-element.ts",
+    "detail": "Three changes to packages/grigson/src/renderers/html-element.ts. First, import grigsonPetalumaTimeSigWoff2 from the new subset file. Second, inside the existing jazzId block in _ensureFontFaces(), append a third @font-face line registering GrigsonCursive for unicode-range U+1D7CE-1D7D7 pointing to grigsonPetalumaTimeSigWoff2. Third, update [part=\"time-sig\"] font-family in _getStyles() to prepend var(--grigson-font-family, ${defaultFamily}) so that the active typeface's composite family (or custom font) gets first pick of U+1D7CE–1D7D7 before falling through to GrigsonTimeSig (Bravura). See project/plans/time-signature-re-encode-part-2.md for full context.",
+    "steps": [
+      "Add import { grigsonPetalumaTimeSigWoff2 } from './grigson-petaluma-timesig-subset.js' to the imports in html-element.ts",
+      "Inside the jazzId style block in _ensureFontFaces(), append a @font-face line for font-family GrigsonCursive covering unicode-range U+1D7CE-1D7D7 pointing to grigsonPetalumaTimeSigWoff2",
+      "In _getStyles(), update [part=\"time-sig\"] font-family from 'var(--grigson-time-sig-font-family), \"GrigsonTimeSig\", serif' to 'var(--grigson-time-sig-font-family), var(--grigson-font-family, ${defaultFamily}), \"GrigsonTimeSig\", serif'"
+    ]
+  },
+  {
+    "id": "verify-typeface-timesig-overrides",
+    "category": "testing",
+    "description": "Build, test, and verify per-typeface time-sig glyph overrides work correctly",
+    "detail": "After all prior tasks are complete, build and verify that each typeface uses the correct time-sig glyphs. See project/plans/time-signature-re-encode-part-2.md for full context.",
+    "steps": [
+      "Run: pnpm build",
+      "Run: pnpm test — confirm all tests pass",
+      "In the browser, render a chart with a time signature for each typeface (sans, serif, cursive) and confirm: sans/serif use Bravura-style digits, cursive uses Petaluma-style digits",
+      "Load the tutorial typefaces page and confirm the FinaleJazz example uses FinaleJazz time-sig digit glyphs",
+      "Confirm HTML source shows readable 𝟒/𝟒 digits in all cases",
+      "Push a grigson-fonts-v1.1.2 git tag so the CDN serves the updated GrigsonJazz-subset.woff2"
+    ]
   }
 ]
