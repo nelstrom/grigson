@@ -8,6 +8,7 @@ import { notoSansWoff2 } from './noto-sans-subset.js';
 import { notoSerifWoff2 } from './noto-serif-subset.js';
 import { notoSymbols2Woff2 } from './noto-symbols2-subset.js';
 import { petalumaScriptWoff2 } from './petaluma-script-subset.js';
+import { grigsonPetalumaTimeSigWoff2 } from './grigson-petaluma-timesig-subset.js';
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
@@ -62,6 +63,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       style.textContent = [
         `@font-face{font-family:"GrigsonCursive";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
         `@font-face{font-family:"GrigsonCursive";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaTimeSigWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7;font-weight:normal;font-style:normal}`,
       ].join('\n');
       document.head.appendChild(style);
     }
@@ -271,7 +273,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: inline-flex;
         flex-direction: column;
         align-items: center;
-        font-family: var(--grigson-time-sig-font-family), "GrigsonTimeSig", serif;
+        font-family: var(--grigson-time-sig-font-family), var(--grigson-font-family, ${defaultFamily}), "GrigsonTimeSig", serif;
         font-size: var(--grigson-time-sig-font-size);
         font-weight: normal;
         line-height: 0.55;

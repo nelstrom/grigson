@@ -2120,7 +2120,8 @@
       "Open a chart with a time signature in the browser and view HTML source — digits should appear as 𝟒/𝟒 (Math Bold), not tofu",
       "Visually confirm the time sig renders correctly (same appearance as before)",
       "Test with a custom --grigson-font-family (e.g. Kaushan Script) — time sig digits should still render from GrigsonTimeSig (Bravura), not system fonts"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "petaluma-timesig-subset",
@@ -2131,7 +2132,8 @@
       "Add a new entry to the FONTS array in scripts/gen-jazz-subsets.mjs with slug 'grigson-petaluma-timesig', cacheName 'Petaluma.otf', oflCacheName null (locally cached), unicodes 'U+1D7CE-1D7D7', exportName 'grigsonPetalumaTimeSigWoff2', pkgWoff2Name 'GrigsonPetaluma-timesig-subset.woff2', outTs 'grigson-petaluma-timesig-subset.ts'",
       "Add a Python preprocessing step in the font's processing block that writes a temp Python script to add cmap aliases U+1D7CE–1D7D7 → same glyph names as U+E080–E089, runs it, and passes the resulting temp OTF to pyftsubset instead of the original",
       "Run node scripts/gen-jazz-subsets.mjs and confirm grigson-petaluma-timesig-subset.ts is generated"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "grigson-jazz-timesig-glyphs",
@@ -2144,7 +2146,8 @@
       "Bump packages/grigson-fonts/package.json version from 1.1.1 to 1.1.2",
       "Run node scripts/reencode-finale-jazz.mjs to regenerate GrigsonJazz.otf with the new glyphs",
       "Run node scripts/gen-jazz-subsets.mjs to regenerate grigson-jazz-subset.ts and GrigsonJazz-subset.woff2"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "cursive-timesig-font-override",
@@ -2155,7 +2158,8 @@
       "Add import { grigsonPetalumaTimeSigWoff2 } from './grigson-petaluma-timesig-subset.js' to the imports in html-element.ts",
       "Inside the jazzId style block in _ensureFontFaces(), append a @font-face line for font-family GrigsonCursive covering unicode-range U+1D7CE-1D7D7 pointing to grigsonPetalumaTimeSigWoff2",
       "In _getStyles(), update [part=\"time-sig\"] font-family from 'var(--grigson-time-sig-font-family), \"GrigsonTimeSig\", serif' to 'var(--grigson-time-sig-font-family), var(--grigson-font-family, ${defaultFamily}), \"GrigsonTimeSig\", serif'"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "verify-typeface-timesig-overrides",

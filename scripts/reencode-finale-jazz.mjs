@@ -51,6 +51,17 @@ IMPORT = {
     0x266E: 'uniE261',   # ♮ natural
     0x266F: 'uniE262',   # ♯ sharp
     0x25B3: 'uniE873',   # △ major-seventh triangle
+    # time-sig digits at Math Bold codepoints
+    0x1D7CE: 'uniE080',  # 𝟎
+    0x1D7CF: 'uniE081',  # 𝟏
+    0x1D7D0: 'uniE082',  # 𝟐
+    0x1D7D1: 'uniE083',  # 𝟑
+    0x1D7D2: 'uniE084',  # 𝟒
+    0x1D7D3: 'uniE085',  # 𝟓
+    0x1D7D4: 'uniE086',  # 𝟔
+    0x1D7D5: 'uniE087',  # 𝟕
+    0x1D7D6: 'uniE088',  # 𝟖
+    0x1D7D7: 'uniE089',  # 𝟗
 }
 
 for unicode_cp, glyph_name in IMPORT.items():
@@ -78,9 +89,33 @@ for unicode_cp, glyph_name in IMPORT.items():
 
 base.setGlyphOrder(base_order)
 
-# Map standard Unicode codepoints to the imported glyph names
+# Map standard Unicode codepoints to the imported glyph names.
+# BMP codepoints (≤ U+FFFF) go into all tables; supplementary codepoints
+# (> U+FFFF) can only go into format 12/13 tables (format 4 uses 16-bit only).
+bmp_import     = {cp: name for cp, name in IMPORT.items() if cp <= 0xFFFF}
+non_bmp_import = {cp: name for cp, name in IMPORT.items() if cp >  0xFFFF}
+
+from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
 for table in base['cmap'].tables:
-    table.cmap.update({cp: name for cp, name in IMPORT.items()})
+    table.cmap.update(bmp_import)
+    if table.format in (12, 13):
+        table.cmap.update(non_bmp_import)
+
+# If no format-12 table exists, create one so the non-BMP codepoints are reachable.
+if non_bmp_import and not any(t.format == 12 for t in base['cmap'].tables):
+    fmt12 = CmapSubtable.newSubtable(12)
+    fmt12.platformID = 3
+    fmt12.platEncID  = 10
+    fmt12.language   = 0
+    # Seed with all existing BMP mappings from the first Unicode table, plus new ones.
+    existing = {}
+    for t in base['cmap'].tables:
+        if t.platformID in (0, 3):
+            existing.update(t.cmap)
+    existing.update(bmp_import)
+    existing.update(non_bmp_import)
+    fmt12.cmap = existing
+    base['cmap'].tables.append(fmt12)
 
 # Rename: replace all occurrences of the reserved Finale names
 REPLACEMENTS = [

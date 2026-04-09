@@ -14,7 +14,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, unlinkSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -47,12 +47,61 @@ const FONTS = [
     oflUrl: null,
     // Latin-1 covers chord text and quality symbols (° U+00B0, ø U+00F8).
     // ♭♯ and △ are now available at standard Unicode positions via re-encoding.
-    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3',
+    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3,U+1D7CE-1D7D7',
     outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-jazz-subset.ts'),
     pkgWoff2Name: 'GrigsonJazz-subset.woff2',
     exportName: 'grigsonJazzWoff2',
     credit:
       'GrigsonJazz, derived from FinaleJazz by MakeMusic Inc., licensed under the SIL Open Font License 1.1.',
+  },
+  {
+    cacheName: 'Petaluma.otf',
+    oflCacheName: null,
+    // Locally cached — download only if missing.
+    fontUrl: 'https://github.com/steinbergmedia/petaluma/raw/master/redist/otf/Petaluma.otf',
+    oflUrl: null,
+    // Only the Math Bold digit range — time-sig digits for GrigsonCursive typeface.
+    unicodes: 'U+1D7CE-1D7D7',
+    outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts'),
+    pkgWoff2Name: 'GrigsonPetaluma-timesig-subset.woff2',
+    exportName: 'grigsonPetalumaTimeSigWoff2',
+    credit:
+      'GrigsonPetaluma-timesig, derived from Petaluma by Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
+    // Petaluma has time-sig glyphs at U+E080–E089 (SMuFL PUA). Add cmap aliases
+    // at U+1D7CE–1D7D7 (Math Bold) so pyftsubset can find them.
+    preprocessPy: `\
+from fontTools.ttLib import TTFont
+from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
+
+font = TTFont(__INPUT__)
+non_bmp = {}
+for i in range(10):
+    for table in font['cmap'].tables:
+        gname = table.cmap.get(0xE080 + i)
+        if gname:
+            non_bmp[0x1D7CE + i] = gname
+            break
+
+for table in font['cmap'].tables:
+    if table.format in (12, 13):
+        table.cmap.update(non_bmp)
+
+if non_bmp and not any(t.format == 12 for t in font['cmap'].tables):
+    fmt12 = CmapSubtable.newSubtable(12)
+    fmt12.platformID = 3
+    fmt12.platEncID  = 10
+    fmt12.language   = 0
+    existing = {}
+    for t in font['cmap'].tables:
+        if t.platformID in (0, 3):
+            existing.update(t.cmap)
+    existing.update(non_bmp)
+    fmt12.cmap = existing
+    font['cmap'].tables.append(fmt12)
+
+font.save(__OUTPUT__)
+print('Preprocessed Petaluma saved to', __OUTPUT__)
+`,
   },
 ];
 
@@ -95,10 +144,27 @@ for (const font of FONTS) {
     if (res.ok) writeFileSync(cachedOfl, await res.text(), 'utf8');
   }
 
+  // Optional Python preprocessing step (e.g. adding cmap aliases).
+  let fontToSubset = tmpFont;
+  if (font.preprocessPy) {
+    const preprocessedFont = join(tmp, `preprocessed-${font.cacheName}`);
+    const tmpPy = join(tmp, `preprocess-${font.cacheName}.py`);
+    const pyContent = font.preprocessPy
+      .replaceAll('__INPUT__', JSON.stringify(tmpFont))
+      .replaceAll('__OUTPUT__', JSON.stringify(preprocessedFont));
+    writeFileSync(tmpPy, pyContent, 'utf8');
+    try {
+      execSync(`python3 "${tmpPy}"`, { stdio: 'inherit' });
+    } finally {
+      unlinkSync(tmpPy);
+    }
+    fontToSubset = preprocessedFont;
+  }
+
   // Subset with pyftsubset.
   console.log(`  Subsetting unicodes: ${font.unicodes}…`);
   execSync(
-    `pyftsubset "${tmpFont}" --unicodes="${font.unicodes}" --flavor=woff2 --output-file="${tmpWoff2}"`,
+    `pyftsubset "${fontToSubset}" --unicodes="${font.unicodes}" --flavor=woff2 --output-file="${tmpWoff2}"`,
     { stdio: 'inherit' },
   );
   const woff2 = readFileSync(tmpWoff2);
