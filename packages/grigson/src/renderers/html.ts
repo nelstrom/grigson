@@ -37,7 +37,6 @@ function sanitizePreset(preset: NotationPreset): NotationPreset {
 export interface SlotLayout {
   col: number;
   span: number;
-  showTimeSig?: TimeSignature;
   /** True for synthesized dot slots (remainder beats with no explicit dot in the source) */
   implicit?: boolean;
   /** Index into bar.slots for this layout entry. Undefined means 1:1 with layout index. */
@@ -49,12 +48,16 @@ export interface RowLayout {
   bars: Array<{
     slots: SlotLayout[];
     closeBarlineCol: number;
+    /** Time signature to display at this bar's open barline (in the gap cell). */
+    showTimeSig?: TimeSignature;
   }>;
 }
 
 export interface GlobalLayout {
   rows: Map<Row, RowLayout>;
   beatCols: number;
+  /** The resolved beat unit denominator (e.g. 4 for quarter-note, 8 for eighth-note). */
+  beatUnit: number;
   minBeatWidth: string;
 }
 
@@ -98,7 +101,23 @@ function parseMeterToTimeSig(meter: string | null): TimeSignature {
 }
 
 export function computeGlobalLayout(song: Song): GlobalLayout {
-  let activeTSig: TimeSignature = parseMeterToTimeSig(song.meter);
+  const defaultTSig = parseMeterToTimeSig(song.meter);
+
+  // Pre-pass: find the largest denominator across all time signatures to use as the
+  // beat unit. max(denominator) = smallest note value. Mixing 4/4 and 6/8 → beatUnit=8
+  // so that a 4/4 bar gets 8 effective beat columns and a 6/8 bar gets 6.
+  let beatUnit = defaultTSig.denominator;
+  for (const section of song.sections) {
+    for (const row of rowsOfSection(section)) {
+      for (const bar of row.bars) {
+        if (bar.timeSignature && bar.timeSignature.denominator > beatUnit) {
+          beatUnit = bar.timeSignature.denominator;
+        }
+      }
+    }
+  }
+
+  let activeTSig: TimeSignature = defaultTSig;
   const rowLayouts = new Map<Row, RowLayout>();
   let globalMaxBeats = 0;
   let globalMinBeatWidthEm = 0;
@@ -121,14 +140,27 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
         const barTimeSig = bar.timeSignature ?? (isSongFirstBar ? activeTSig : undefined);
         isSongFirstBar = false;
 
+        // effectiveBeatsPerBar: how many beat-unit columns this bar occupies.
+        // e.g. 3/4 in a beatUnit=8 context → 3 × (8÷4) = 6 effective beat columns.
+        const effectiveBeatsPerBar = activeTSig.numerator * (beatUnit / activeTSig.denominator);
+        // effectiveBeatsPerRawBeat: how many beat-unit columns each raw time-sig beat occupies.
+        const effectiveBeatsPerRawBeat = beatUnit / activeTSig.denominator;
+
         const chordCount = bar.slots.filter((s) => s.type === 'chord').length;
         const hasDots = bar.slots.some((s) => s.type === 'dot');
+
+        // rawBeatsPerChord: how many raw time-sig beats each chord occupies (for proportionality check).
         const isEvenDivision = activeTSig.numerator % chordCount === 0;
-        const beatsPerChord = isEvenDivision ? activeTSig.numerator / chordCount : 1;
+        const rawBeatsPerChord = isEvenDivision ? activeTSig.numerator / chordCount : 1;
+
+        // effectiveBeatsPerChord: how many beat-unit columns each chord spans in the grid.
+        const effectiveBeatsPerChord = isEvenDivision
+          ? effectiveBeatsPerBar / chordCount
+          : effectiveBeatsPerRawBeat;
 
         // Proportional if chords divide evenly AND (no explicit dots, OR the effective
         // slots — source slots up to `numerator`, with missing trailing positions treated
-        // as dots — follow the uniform pattern: chords at multiples of beatsPerChord,
+        // as dots — follow the uniform pattern: chords at multiples of rawBeatsPerChord,
         // dots everywhere else). This means | F . C | and | F . C . | both qualify.
         const isProportional =
           isEvenDivision &&
@@ -136,7 +168,7 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
             (() => {
               for (let i = 0; i < activeTSig.numerator; i++) {
                 const slot = bar.slots[i]; // undefined past end → treated as trailing dot
-                const expectChord = i % beatsPerChord === 0;
+                const expectChord = i % rawBeatsPerChord === 0;
                 const isChord = slot !== undefined && slot.type === 'chord';
                 if (expectChord !== isChord) return false;
               }
@@ -145,55 +177,63 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
 
         const slots: SlotLayout[] = [];
 
+        // Grid column formulas (beatOffset is in effective beat units):
+        //   slot col  = 2 × beatOffset + 2
+        //   slot span = 2 × effectiveBeats - 1  (spans beat cols + inner gap cols, not the trailing gap)
+        //   barline col = 2 × beatOffset + 1
+
         if (isProportional) {
-          let isFirstSlot = true;
           for (let srcIdx = 0; srcIdx < bar.slots.length; srcIdx++) {
             const slot = bar.slots[srcIdx];
             if (slot.type !== 'chord') continue;
             slots.push({
-              col: beatOffset + 1,
-              span: beatsPerChord,
-              showTimeSig: isFirstSlot && barTimeSig ? barTimeSig : undefined,
+              col: 2 * beatOffset + 2,
+              span: 2 * effectiveBeatsPerChord - 1,
               // Only needed when dots are present (breaks the 1:1 layout-to-source mapping)
               sourceSlotIdx: hasDots ? srcIdx : undefined,
             });
-            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / beatsPerChord;
+            const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord) / effectiveBeatsPerChord;
             if (widthPerBeatEm > globalMinBeatWidthEm) {
               globalMinBeatWidthEm = widthPerBeatEm;
             }
-            beatOffset += beatsPerChord;
-            isFirstSlot = false;
+            beatOffset += effectiveBeatsPerChord;
           }
         } else {
           const effectiveCount = Math.min(bar.slots.length, activeTSig.numerator);
-          let isFirstSlot = true;
           for (let i = 0; i < effectiveCount; i++) {
             const slot = bar.slots[i];
             slots.push({
-              col: beatOffset + 1,
-              span: 1,
-              showTimeSig: isFirstSlot && barTimeSig ? barTimeSig : undefined,
+              col: 2 * beatOffset + 2,
+              span: 2 * effectiveBeatsPerRawBeat - 1,
             });
             if (slot.type === 'chord') {
-              const widthPerBeatEm = estimateChordDisplayWidthEm(slot.chord);
+              const widthPerBeatEm =
+                estimateChordDisplayWidthEm(slot.chord) / effectiveBeatsPerRawBeat;
               if (widthPerBeatEm > globalMinBeatWidthEm) {
                 globalMinBeatWidthEm = widthPerBeatEm;
               }
             }
-            beatOffset += 1;
-            isFirstSlot = false;
+            beatOffset += effectiveBeatsPerRawBeat;
             // After the last real slot, synthesize implicit dot slots for remainder beats
             if (i === effectiveCount - 1) {
-              const padding = activeTSig.numerator - effectiveCount;
-              for (let r = 0; r < padding; r++) {
-                slots.push({ col: beatOffset + 1, span: 1, implicit: true });
-                beatOffset += 1;
+              const paddingRawBeats = activeTSig.numerator - effectiveCount;
+              for (let r = 0; r < paddingRawBeats; r++) {
+                slots.push({
+                  col: 2 * beatOffset + 2,
+                  span: 2 * effectiveBeatsPerRawBeat - 1,
+                  implicit: true,
+                });
+                beatOffset += effectiveBeatsPerRawBeat;
               }
             }
           }
         }
 
-        rowLayout.bars.push({ slots, closeBarlineCol: beatOffset + 1 });
+        rowLayout.bars.push({
+          slots,
+          closeBarlineCol: 2 * beatOffset + 1,
+          showTimeSig: barTimeSig,
+        });
       }
 
       rowLayouts.set(row, rowLayout);
@@ -204,7 +244,7 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
   }
 
   const minBeatWidth = `${Math.max(globalMinBeatWidthEm, 1.0).toFixed(2)}em`;
-  return { rows: rowLayouts, beatCols: globalMaxBeats, minBeatWidth };
+  return { rows: rowLayouts, beatCols: globalMaxBeats, beatUnit, minBeatWidth };
 }
 
 // ---------------------------------------------------------------------------
@@ -362,15 +402,16 @@ const BARLINE_SVGS: Partial<Record<string, string>> = {
   endRepeatStartRepeat: BARLINE_END_START_REPEAT_SVG,
 };
 
-function renderBarline(barline: Barline, col: number): string {
+function renderBarline(barline: Barline, col: number, showTimeSig?: TimeSignature): string {
   const kindPart = `barline-${barline.kind}`;
   const style = `style="grid-column: ${col}"`;
   const svg = BARLINE_SVGS[barline.kind] ?? '';
+  const timeSigHtml = showTimeSig ? renderTimeSig(showTimeSig) : '';
   const repeatCountHtml =
     barline.repeatCount !== undefined && barline.repeatCount > 2
       ? `<span part="barline-repeat-count">×${barline.repeatCount}</span>`
       : '';
-  return `<span part="barline ${kindPart}" ${style}>${svg}${repeatCountHtml}</span>`;
+  return `<span part="barline ${kindPart}" ${style}>${svg}${timeSigHtml}${repeatCountHtml}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -436,8 +477,8 @@ function renderRow(
 ): string {
   let html = `<div part="row">`;
 
-  // Open barline
-  html += renderBarline(row.openBarline, rowLayout.openBarlineCol);
+  // Open barline — time sig of the first bar appears here (in the gap cell)
+  html += renderBarline(row.openBarline, rowLayout.openBarlineCol, rowLayout.bars[0]?.showTimeSig);
 
   const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
   let prevSlots: BeatSlot[] | null = null;
@@ -463,18 +504,18 @@ function renderRow(
           html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;
         } else if (slot) {
           // chord slot
-          let slotContent = '';
-          if (slotLayout.showTimeSig) {
-            slotContent += renderTimeSig(slotLayout.showTimeSig);
-          }
-          slotContent += renderChord(slot.chord, preset, flatChar, sharpChar, mode);
+          const slotContent = renderChord(slot.chord, preset, flatChar, sharpChar, mode);
           html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
         }
       }
     }
 
-    // Close barline
-    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol);
+    // Close barline — time sig of the next bar appears here (same gap cell, open barline of bar+1)
+    html += renderBarline(
+      bar.closeBarline,
+      barLayout.closeBarlineCol,
+      rowLayout.bars[barIdx + 1]?.showTimeSig,
+    );
     prevSlots = bar.slots;
   }
 

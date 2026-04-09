@@ -130,8 +130,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       [part="song-grid"] {
         display: grid;
         grid-template-columns:
-          repeat(var(--beat-cols), minmax(var(--min-beat-width), 1fr))
-          0fr;
+          auto repeat(var(--beat-cols), minmax(var(--min-beat-width), 1fr) auto);
         row-gap: var(--grigson-row-gap);
       }
 
@@ -169,47 +168,26 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part~="barline"] {
-        width: 0;
+        display: flex;
+        align-items: center;
         align-self: stretch;
         position: relative;
+        margin-right: 0.4em;
       }
 
-      /* Single barline: plain CSS border */
+      /* Single barline: thin vertical fill */
       [part~="barline-single"] {
-        border-left: var(--grigson-barline-width) solid var(--grigson-barline-color);
+        width: var(--grigson-barline-width);
+        background: var(--grigson-barline-color);
       }
 
-      /* SVG barlines: absolutely positioned within the zero-width span.
+      /* SVG barlines: inline in the flex container.
          Fixed 2em height keeps dot sizes and line weights stable regardless of
-         row height — tall rows (e.g. slash chords) don't blow up the symbols.
-         The SVG is centred vertically; on rows shorter than 2em it overflows
-         slightly (intentionally "taller than ideal", cropped by the row gap). */
+         row height — tall rows (e.g. slash chords) don't blow up the symbols. */
       [part~="barline"] svg {
-        position: absolute;
         height: 2em;
         width: auto;
-        top: 50%;
-      }
-
-      /* startRepeat: thick bar's left edge at column boundary, dots extend right */
-      [part~="barline-startRepeat"] svg {
-        left: 0;
-        transform: translateY(-50%);
-      }
-
-      /* double: centred on column boundary so neither thin line overflows the grid */
-      /* final, endRepeat: right-anchored so the thick bar ends at the column boundary */
-      [part~="barline-double"] svg,
-      [part~="barline-final"] svg,
-      [part~="barline-endRepeat"] svg {
-        right: 0;
-        transform: translateY(-50%);
-      }
-
-      /* Centred: thick bar centred on the column boundary */
-      [part~="barline-endRepeatStartRepeat"] svg {
-        left: 0;
-        transform: translate(-50%, -50%);
+        flex-shrink: 0;
       }
 
       [part="barline-repeat-count"] {
@@ -222,15 +200,10 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="slot"] {
-        position: relative;
         display: flex;
         align-items: baseline;
         gap: 0.15em;
         overflow: hidden;
-      }
-
-      [part~="barline"] + [part="slot"] {
-        padding-left: 1em;
       }
 
       [part="dot"] {
@@ -280,10 +253,6 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="time-sig"] {
-        position: absolute;
-        left: 0.75em;
-        top: var(--grigson-time-sig-top);
-        transform: translate(-50%, -50%);
         display: inline-flex;
         flex-direction: column;
         align-items: center;
@@ -292,6 +261,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         font-weight: normal;
         line-height: var(--grigson-time-sig-line-height);
         flex-shrink: 0;
+        padding-left: 0.2em;
       }
 
       [part="time-sig-num"],
@@ -303,7 +273,6 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-left: 1em;
       }
 
       [part="simile"] svg {
