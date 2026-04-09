@@ -35,10 +35,11 @@ const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);
 
 ## Available renderers
 
-- [Text renderer](/renderers/text/) — produces `.chart` output; useful for transposition pipelines and CLI use
-- [SVG renderer](/renderers/svg/) — produces an SVG string for embedding in HTML
-- [Custom elements](/renderers/custom-elements/) — `<grigson-chart>` and `<grigson-html-renderer>` for declarative HTML embedding
-- [Browser bundles](/renderers/browser/) — loading grigson in a browser via IIFE or ES module
-- [Notation presets](/renderers/presets/) — customising chord symbol rendering with `definePreset()`
+- [HTML renderer](/grigson/renderers/html/) — produces an HTML string using CSS Grid; used by the `<grigson-chart>` custom element
+- [Text renderer](/grigson/renderers/text/) — produces `.chart` output; useful for transposition pipelines and CLI use
+- [SVG renderer](/grigson/renderers/svg/) — produces an SVG string for embedding in HTML
+- [Custom elements](/grigson/renderers/custom-elements/) — `<grigson-chart>` and `<grigson-html-renderer>` for declarative HTML embedding
+- [Browser bundles](/grigson/renderers/browser/) — loading grigson in a browser via IIFE or ES module
+- [Notation presets](/grigson/renderers/presets/) — customising chord symbol rendering with `definePreset()`
 
 For building your own renderer, see the [API Reference](/api/renderer-interface/).
