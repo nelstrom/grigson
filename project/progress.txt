@@ -485,3 +485,7 @@ tables of fonts used in the Grigson project.
 
 Updated scripts/gen-bravura-subset.mjs to add a Python preprocessing step before pyftsubset runs. The step opens Bravura.otf, iterates U+E080–E089, and adds cmap aliases at U+1D7CE–1D7D7 pointing to the same glyph names, saving a temp OTF. Updated UNICODES to include U+1D7CE-1D7D7. Updated comment block to document the new range. Cleans up the temp OTF and Python script in a finally block.
 
+
+## renderer-time-sig-math-bold
+
+Replaced SMUFL_DIGITS (U+E080–E089, PUA) with TIME_SIG_DIGITS array using Math Bold codepoints U+1D7CE–1D7D7 (𝟎–𝟗) in packages/grigson/src/renderers/html.ts. Used an array instead of a joined string since these codepoints are outside the BMP and occupy two UTF-16 code units each. Updated the corresponding test to expect Math Bold digits.

@@ -377,13 +377,13 @@ function renderBarline(barline: Barline, col: number): string {
 // Time signature rendering
 // ---------------------------------------------------------------------------
 
-// SMuFL time-signature digits: U+E080 = '0', U+E081 = '1', …, U+E089 = '9'
-const SMUFL_DIGITS = '\uE080\uE081\uE082\uE083\uE084\uE085\uE086\uE087\uE088\uE089';
+// Math Bold digits U+1D7CE–1D7D7: 𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗
+const TIME_SIG_DIGITS = Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0x1d7ce + i));
 
 function smuflDigits(n: number): string {
   return String(n)
     .split('')
-    .map((ch) => SMUFL_DIGITS[Number(ch)])
+    .map((ch) => TIME_SIG_DIGITS[Number(ch)])
     .join('');
 }
 

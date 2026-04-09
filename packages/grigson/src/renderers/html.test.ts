@@ -402,11 +402,11 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('part="time-sig-den"');
     });
 
-    it('time-sig-num and time-sig-den contain the correct SMuFL digits', () => {
+    it('time-sig-num and time-sig-den contain the correct Math Bold digits', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
-      // Time sig digits are rendered as SMuFL codepoints: U+E082 = '2', U+E084 = '4'
-      expect(html).toContain(`part="time-sig-num">\uE082<`);
-      expect(html).toContain(`part="time-sig-den">\uE084<`);
+      // Time sig digits are rendered as Math Bold codepoints: U+1D7D0 = '2', U+1D7D2 = '4'
+      expect(html).toContain(`part="time-sig-num">${String.fromCodePoint(0x1d7d0)}<`);
+      expect(html).toContain(`part="time-sig-den">${String.fromCodePoint(0x1d7d2)}<`);
     });
 
     it('shows time-sig on bar 0 when song.meter is set and bar has no explicit timeSignature', () => {

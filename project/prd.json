@@ -2082,7 +2082,8 @@
       "Replace the SMUFL_DIGITS string literal with: const TIME_SIG_DIGITS = Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0x1D7CE + i)).join('');",
       "Rename the constant from SMUFL_DIGITS to TIME_SIG_DIGITS",
       "Update the reference inside smuflDigits() to use TIME_SIG_DIGITS"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "renderer-grigson-time-sig-font",
