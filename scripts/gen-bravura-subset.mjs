@@ -72,6 +72,10 @@ writeFileSync(
 from fontTools.ttLib import TTFont
 font = TTFont("${otfPath}")
 for table in font['cmap'].tables:
+    # Only format 12 (and 13) support supplementary characters (> U+FFFF).
+    # Format 4 is BMP-only (unsigned short), so skip it to avoid overflow.
+    if table.format not in (12, 13):
+        continue
     for i in range(10):
         gname = table.cmap.get(0xE080 + i)
         if gname:
@@ -110,7 +114,7 @@ export const bravuraWoff2 = '${dataUri}';
 
 mkdirSync(dirname(OUT_TS), { recursive: true });
 writeFileSync(OUT_TS, ts, 'utf8');
-execSync(`oxfmt --config ${join(ROOT, '.oxfmtrc.json')} "${OUT_TS}"`);
+execSync(`pnpm exec oxfmt --config ${join(ROOT, '.oxfmtrc.json')} "${OUT_TS}"`);
 console.log(`Written → ${OUT_TS} (${(ts.length / 1024).toFixed(1)} KB)`);
 
 mkdirSync(dirname(OUT_WOFF2), { recursive: true });

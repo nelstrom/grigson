@@ -489,3 +489,21 @@ Updated scripts/gen-bravura-subset.mjs to add a Python preprocessing step before
 ## renderer-time-sig-math-bold
 
 Replaced SMUFL_DIGITS (U+E080–E089, PUA) with TIME_SIG_DIGITS array using Math Bold codepoints U+1D7CE–1D7D7 (𝟎–𝟗) in packages/grigson/src/renderers/html.ts. Used an array instead of a joined string since these codepoints are outside the BMP and occupy two UTF-16 code units each. Updated the corresponding test to expect Math Bold digits.
+
+## regenerate-bravura-subset
+
+Ran `node scripts/gen-bravura-subset.mjs` to regenerate the Bravura subset with Math Bold digits
+U+1D7CE–1D7D7 included.
+
+Two bugs fixed in the script along the way:
+1. The Python cmap-alias step was writing Math Bold codepoints (> U+FFFF) to all cmap tables,
+   including format 4 (BMP-only), causing an `OverflowError: unsigned short is greater than
+   maximum`. Fixed by restricting the loop to format 12/13 tables only.
+2. `oxfmt` was not on PATH; changed to `pnpm exec oxfmt`.
+
+Output:
+- `packages/grigson/src/renderers/bravura-subset.ts` — updated data URI (9.3 KB)
+- `packages/grigson-fonts/fonts/Bravura-subset.woff2` — 6.6 KB, cmap verified to include
+  U+1D7CE–U+1D7D7 → uniE080–uniE089
+
+All 520 tests pass.

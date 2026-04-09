@@ -2105,7 +2105,8 @@
       "Run: node scripts/gen-bravura-subset.mjs",
       "Verify the script completes without errors",
       "Confirm bravura-subset.ts has been updated (check file modification time or diff)"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "verify-time-sig-math-bold",
