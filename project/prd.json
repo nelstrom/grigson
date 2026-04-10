@@ -2280,7 +2280,8 @@
       "Add BARLINE_GLYPHS map: single → U+E030, double → U+E031, final → U+E032, startRepeat → U+E040, endRepeat → U+E041, endRepeatStartRepeat → U+E042",
       "Update renderBarline() to build glyphHtml as <span part=\"barline-glyph\">{glyph}</span> when a glyph exists",
       "Run pnpm build to confirm no type errors"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-font-faces",

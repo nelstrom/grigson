@@ -5,6 +5,7 @@ import type {
   Bar,
   Chord,
   Barline,
+  BarlineKind,
   TimeSignature,
   Section,
   BeatSlot,
@@ -338,80 +339,27 @@ function renderChord(
 // Barline rendering
 // ---------------------------------------------------------------------------
 
-// Inline SVG barlines. ViewBox height=100; width sets the aspect ratio.
-// Proportions traced from Noto Music reference images in inspiration/symbols/.
-// All shapes use fill="currentColor".
-//
-// Coordinate constants (in viewBox units, calibrated so that at a 2em row
-// height the thin bar ≈ 1.6 px — matching --grigson-barline-width: 1.5px):
-//   thin bar = 5 wide, thick bar = 11 wide, gap = 4
-//   dot radius = 8, dot y-centres = 34 and 66
-
-const BARLINE_SVG_ATTRS = 'xmlns="http://www.w3.org/2000/svg" aria-hidden="true"';
-
-// || — two thin lines, left-anchored
-const BARLINE_DOUBLE_SVG =
-  `<svg ${BARLINE_SVG_ATTRS} viewBox="0 0 16 100">` +
-  '<rect x="0" y="0" width="5" height="100" fill="currentColor"/>' +
-  '<rect x="11" y="0" width="5" height="100" fill="currentColor"/>' +
-  '</svg>';
-
-// ||. — thin + thick, left-anchored
-const BARLINE_FINAL_SVG =
-  `<svg ${BARLINE_SVG_ATTRS} viewBox="0 0 22 100">` +
-  '<rect x="0" y="0" width="5" height="100" fill="currentColor"/>' +
-  '<rect x="11" y="0" width="11" height="100" fill="currentColor"/>' +
-  '</svg>';
-
-// ||: — thick | gap | thin | gap | dots, left-anchored (thick at column boundary)
-const BARLINE_START_REPEAT_SVG =
-  `<svg ${BARLINE_SVG_ATTRS} viewBox="0 0 40 100">` +
-  '<rect x="0" y="0" width="11" height="100" fill="currentColor"/>' +
-  '<rect x="15" y="0" width="5" height="100" fill="currentColor"/>' +
-  '<circle cx="32" cy="34" r="8" fill="currentColor"/>' +
-  '<circle cx="32" cy="66" r="8" fill="currentColor"/>' +
-  '</svg>';
-
-// :|| — dots | gap | thin | gap | thick, right-anchored (thick right edge at column boundary)
-const BARLINE_END_REPEAT_SVG =
-  `<svg ${BARLINE_SVG_ATTRS} viewBox="0 0 40 100">` +
-  '<circle cx="8" cy="34" r="8" fill="currentColor"/>' +
-  '<circle cx="8" cy="66" r="8" fill="currentColor"/>' +
-  '<rect x="20" y="0" width="5" height="100" fill="currentColor"/>' +
-  '<rect x="29" y="0" width="11" height="100" fill="currentColor"/>' +
-  '</svg>';
-
-// :||: — dots | thin | thick | thin | dots, centred on column boundary
-// thick bar centre = viewBox x 34.5, viewBox width = 69 → centre at 34.5 ✓
-const BARLINE_END_START_REPEAT_SVG =
-  `<svg ${BARLINE_SVG_ATTRS} viewBox="0 0 69 100">` +
-  '<circle cx="8" cy="34" r="8" fill="currentColor"/>' +
-  '<circle cx="8" cy="66" r="8" fill="currentColor"/>' +
-  '<rect x="20" y="0" width="5" height="100" fill="currentColor"/>' +
-  '<rect x="29" y="0" width="11" height="100" fill="currentColor"/>' +
-  '<rect x="44" y="0" width="5" height="100" fill="currentColor"/>' +
-  '<circle cx="61" cy="34" r="8" fill="currentColor"/>' +
-  '<circle cx="61" cy="66" r="8" fill="currentColor"/>' +
-  '</svg>';
-
-const BARLINE_SVGS: Partial<Record<string, string>> = {
-  double: BARLINE_DOUBLE_SVG,
-  final: BARLINE_FINAL_SVG,
-  startRepeat: BARLINE_START_REPEAT_SVG,
-  endRepeat: BARLINE_END_REPEAT_SVG,
-  endRepeatStartRepeat: BARLINE_END_START_REPEAT_SVG,
+// SMuFL PUA codepoints for barline/repeat glyphs (Bravura fallback always present)
+const BARLINE_GLYPHS: Partial<Record<BarlineKind, string>> = {
+  single: String.fromCodePoint(0xe030), // barlineSingle (shown only for cursive via CSS)
+  double: String.fromCodePoint(0xe031), // barlineDouble
+  final: String.fromCodePoint(0xe032), // barlineFinal
+  startRepeat: String.fromCodePoint(0xe040), // repeatLeft
+  endRepeat: String.fromCodePoint(0xe041), // repeatRight
+  endRepeatStartRepeat: String.fromCodePoint(0xe042), // repeatRightLeft
 };
 
 function renderBarline(barline: Barline, col: number, showTimeSig?: TimeSignature): string {
   const kindPart = `barline-${barline.kind}`;
   const style = `style="grid-column: ${col}"`;
-  const svg = BARLINE_SVGS[barline.kind] ?? '';
+  const glyph = BARLINE_GLYPHS[barline.kind] ?? '';
+  const glyphHtml = glyph ? `<span part="barline-glyph">${glyph}</span>` : '';
   const timeSigHtml = showTimeSig ? renderTimeSig(showTimeSig) : '';
   const repeatCountHtml =
     barline.repeatCount !== undefined && barline.repeatCount > 2
       ? `<span part="barline-repeat-count">×${barline.repeatCount}</span>`
       : '';
-  return `<span part="barline ${kindPart}" ${style}>${svg}${timeSigHtml}${repeatCountHtml}</span>`;
+  return `<span part="barline ${kindPart}" ${style}>${glyphHtml}${timeSigHtml}${repeatCountHtml}</span>`;
 }
 
 // ---------------------------------------------------------------------------
