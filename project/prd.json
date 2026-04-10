@@ -2363,6 +2363,7 @@
       "Run: node scripts/reencode-finale-jazz.mjs",
       "Run: PATH=\"$(pnpm bin):$PATH\" node scripts/gen-jazz-subsets.mjs",
       "Run pnpm build and pnpm test — confirm all pass"
-    ]
+    ],
+    "passes": true
   }
 ]

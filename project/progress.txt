@@ -578,3 +578,20 @@ Added `--grigson-barline-font-size: 2em` to the `:host` block in `_getStyles()`.
 ## barline-glyph-tests
 
 Added a `describe('barline glyphs')` block in `html.test.ts` with four tests: (1) startRepeat barline contains `part="barline-glyph"`, (2) endRepeat barline contains `part="barline-glyph"`, (3) barline-glyph span contains the U+E040 SMuFL codepoint for startRepeat, (4) single barline also contains `part="barline-glyph"` with U+E030. All 531 tests pass.
+
+## barline-glyph-synthesize-jazz
+
+Synthesized barlineDouble (U+E031) and barlineFinal (U+E032) glyphs in GrigsonJazz by constructing
+them from existing FinaleJazz outlines.
+
+Changes:
+- `scripts/reencode-finale-jazz.mjs`: Added `TransformPen` and `BoundsPen` imports; inserted
+  synthetic glyph construction after the IMPORT loop — measures the inter-stroke gap from
+  `repeatRight` (uniE041), builds `barlineDouble` as two copies of `barlineSingle` at that
+  spacing, and builds `barlineFinal` as the non-dot contours of `repeatRight` shifted to align
+  with origin. Registered both glyphs in CharStrings, hmtx, glyph order, and cmap via
+  `SYNTHETIC_BMP = {0xE031: 'uniE031', 0xE032: 'uniE032'}`.
+- `scripts/gen-jazz-subsets.mjs`: Extended GrigsonJazz unicodes from `U+E030` to `U+E030-E032`
+  so the subset WOFF2 includes the new glyphs.
+
+GrigsonJazz subset grew from ~23 KB to 25.2 KB. All tests pass.
