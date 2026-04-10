@@ -53,6 +53,17 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       document.head.appendChild(style);
     }
 
+    // GrigsonNotation — Bravura subset covering barline and repeat sign SMuFL codepoints.
+    // Used as a fallback for all typefaces so every barline kind renders even when the
+    // primary font (e.g. GrigsonJazz) only covers a subset of those codepoints.
+    const notationId = 'grigson-notation-font-face';
+    if (!document.getElementById(notationId)) {
+      const style = document.createElement('style');
+      style.id = notationId;
+      style.textContent = `@font-face{font-family:"GrigsonNotation";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+E030-E033,U+E040-E042;font-weight:normal;font-style:normal}`;
+      document.head.appendChild(style);
+    }
+
     // GrigsonCursive — PetalumaScript, a handwritten Real Book-style typeface.
     // Uses NotoSansSymbols2 for △ (U+25B3) which PetalumaScript does not include.
     // PetalumaScript has ♭♯ at standard Unicode positions so no Bravura fallback is needed.
@@ -63,7 +74,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       style.textContent = [
         `@font-face{font-family:"GrigsonCursive";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
         `@font-face{font-family:"GrigsonCursive";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaNotationWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E500-E501;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaNotationWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501;font-weight:normal;font-style:normal}`,
       ].join('\n');
       document.head.appendChild(style);
     }

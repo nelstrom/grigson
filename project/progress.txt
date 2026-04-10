@@ -562,3 +562,11 @@ Extended the Bravura WOFF2 subset to include barline and repeat sign codepoints.
 - Deleted `packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts` and `packages/grigson-fonts/fonts/GrigsonPetaluma-timesig-subset.woff2`.
 - `pnpm build` and `pnpm test` (527 tests) pass.
 barline-glyph-renderer: Replaced SVG barline constants in html.ts with SMuFL PUA glyph characters (U+E030-E032, U+E040-E042). Removed BARLINE_DOUBLE_SVG, BARLINE_FINAL_SVG, BARLINE_START_REPEAT_SVG, BARLINE_END_REPEAT_SVG, BARLINE_END_START_REPEAT_SVG, BARLINE_SVG_ATTRS, and BARLINE_SVGS. Added BARLINE_GLYPHS map and updated renderBarline() to emit a <span part="barline-glyph"> child. Added BarlineKind to imports from parser/types.js. All 527 tests pass.
+
+## barline-glyph-font-faces
+
+The import from `grigson-petaluma-notation-subset` was already in place. Added a new
+`GrigsonNotation` @font-face block (id `grigson-notation-font-face`) in `_ensureFontFaces()`
+pointing at `bravuraWoff2` with `unicode-range: U+E030-E033,U+E040-E042`. Extended the
+GrigsonCursive Petaluma @font-face unicode-range from `U+1D7CE-1D7D7,U+E500-E501` to
+`U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501`. Build and all 527 tests pass.

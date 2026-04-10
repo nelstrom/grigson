@@ -2293,7 +2293,8 @@
       "In _ensureFontFaces(), add a new GrigsonNotation @font-face block (separate id, e.g. 'grigson-notation-font-face') covering unicode-range U+E030-E033,U+E040-E042 from bravuraWoff2",
       "Extend the GrigsonCursive Petaluma @font-face unicode-range to U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501",
       "Run pnpm build to confirm no errors"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-css",
