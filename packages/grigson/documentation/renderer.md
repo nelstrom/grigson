@@ -239,6 +239,7 @@ These properties can be set on the `<grigson-chart>` element (or any ancestor) t
 | `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                                        |
 | `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator digits                           |
 | `--grigson-time-sig-top`              | `37%`                          | Vertical position: `50%` = centred, lower values shift up                      |
+| `--grigson-simile-font-size`          | `1.2em`                        | Font size of the simile glyph (U+E1E7) inside `[part="simile"]`                |
 
 The time-sig variables have typeface-specific defaults: cursive uses `0.6em` / `1.1` / `40%`. They can be overridden on `grigson-html-renderer` for custom fonts:
 

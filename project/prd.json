@@ -2239,7 +2239,8 @@
       "Add --grigson-simile-font-size row to the CSS custom properties table in packages/grigson/documentation/renderer.md",
       "Bump the version in the grigson-fonts package.json from 1.1.2 to 1.1.3",
       "Commit and push, then create and push the new version tag so jsDelivr serves the updated WOFF2"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-bravura-subset",
