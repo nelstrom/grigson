@@ -2342,5 +2342,23 @@
       "In scripts/gen-font-explorer-data.mjs, add a GrigsonPetaluma entry with derived: true, cacheName: 'GrigsonPetaluma.otf', targetCodepoints covering U+1D7CE–1D7D7 (Math Bold digits), U+E030–E033 and U+E040–E042 (barlines/repeats), U+E500–E501 (simile marks), and sections matching the Petaluma entry",
       "Run pnpm build in packages/font-explorer and verify the GrigsonPetaluma page renders all target codepoints as present"
     ]
+  },
+  {
+    "id": "barline-glyph-synthesize-jazz",
+    "category": "functional",
+    "description": "Synthesize barlineDouble and barlineFinal glyphs in GrigsonJazz by constructing them from existing FinaleJazz outlines",
+    "detail": "In scripts/reencode-finale-jazz.mjs, add two Python imports (TransformPen, BoundsPen) and a synthetic glyph section after the IMPORT loop: (1) barlineDouble (U+E031 / uniE031) — draw barlineSingle twice, with the second copy shifted right by single_adv + inter_stroke_gap, where the gap is measured from the two barline strokes inside repeatRight (uniE041); (2) barlineFinal (U+E032 / uniE032) — replay only the non-dot contours of repeatRight via a TransformPen that shifts them so the thin stroke aligns with x=0, keeping the same advance width as repeatRight. Dot contours are classified by aspect ratio: height < 3× width. Register both glyphs in CharStrings, hmtx, glyph order, and cmap (add SYNTHETIC_BMP = {0xE031: 'uniE031', 0xE032: 'uniE032'} and merge into bmp_import before the cmap update loop). In scripts/gen-jazz-subsets.mjs, extend the GrigsonJazz unicodes from U+E030 to U+E030-E032. See project/plans/add-glyphs-to-finale.md for full context.",
+    "steps": [
+      "Add 'from fontTools.pens.transformPen import TransformPen' and 'from fontTools.pens.boundsPen import BoundsPen' to the Python imports at the top of the pyScript template in reencode-finale-jazz.mjs",
+      "After the IMPORT loop and base.setGlyphOrder() call, insert the split_contours, contour_bounds, and is_dot helper functions",
+      "Measure the inter-stroke gap from repeatRight (uniE041): record its contours, filter to non-dot strokes, sort by xMin, compute gap = xMin(stroke2) - xMax(stroke1)",
+      "Build barlineDouble (uniE031): record barlineSingle, replay it twice into a T2CharStringPen (second copy via TransformPen offset by single_adv + gap), register CharString, hmtx, glyph order",
+      "Build barlineFinal (uniE032): replay only the barline_pairs contours via a TransformPen that translates by single_xMin - thin_xMin, register CharString, hmtx, glyph order",
+      "Add SYNTHETIC_BMP = {0xE031: 'uniE031', 0xE032: 'uniE032'} and merge into bmp_import before the cmap update loop",
+      "In gen-jazz-subsets.mjs, change GrigsonJazz unicodes from 'U+E030,U+E040-E042' to 'U+E030-E032,U+E040-E042'",
+      "Run: node scripts/reencode-finale-jazz.mjs",
+      "Run: PATH=\"$(pnpm bin):$PATH\" node scripts/gen-jazz-subsets.mjs",
+      "Run pnpm build and pnpm test — confirm all pass"
+    ]
   }
 ]
