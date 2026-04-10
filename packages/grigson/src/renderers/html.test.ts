@@ -543,11 +543,11 @@ describe('HtmlRenderer', () => {
       expect(html.match(/part="slot"/g)?.length).toBe(2);
     });
 
-    it('shorthand: renders second identical bar as simile mark (SVG)', () => {
+    it('shorthand: renders second identical bar as simile mark (glyph)', () => {
       const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
       expect(html).toContain('part="simile"');
-      expect(html).toContain('<svg');
+      expect(html).toContain(String.fromCodePoint(0xe500));
       // Only the first bar renders as a chord slot
       expect(html.match(/part="slot"/g)?.length).toBe(1);
     });

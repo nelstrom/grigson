@@ -2201,7 +2201,8 @@
       "Update the simile render call to use SIMILE_CHAR instead of SIMILE_SVG",
       "In html.test.ts, update the simile SVG assertion to: expect(html).toContain(String.fromCodePoint(0xe500))",
       "Run pnpm test to confirm the updated test passes"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "simile-glyph-font-faces",
@@ -2323,6 +2324,18 @@
       "Add --grigson-barline-font-size row to the CSS custom properties table in packages/grigson/documentation/renderer.md",
       "Bump grigson-fonts package.json version from 1.1.3 to 1.1.4",
       "Commit and push, then create and push the new version tag"
+    ]
+  },
+  {
+    "id": "font-explorer-grigson-petaluma",
+    "category": "tooling",
+    "description": "Add GrigsonPetaluma derived font to font-explorer",
+    "detail": "After barline-glyph-jazz-subsets renames the Petaluma subset to grigson-petaluma-notation-subset and adds barline/repeat codepoints, it's worth saving the preprocessed font permanently as scripts/fonts/GrigsonPetaluma.otf (analogous to GrigsonJazz.otf) and adding a derived font entry to scripts/gen-font-explorer-data.mjs. This lets you verify the Math Bold cmap aliases (U+1D7CE–1D7D7 → E080–E089), simile glyphs (U+E500–E501), and barline glyphs (U+E030–E033, U+E040–E042) are all present and correctly mapped. Should be done after all simile-glyph-* and barline-glyph-* tasks are complete.",
+    "steps": [
+      "In scripts/gen-jazz-subsets.mjs, save the preprocessed Petaluma font to scripts/fonts/GrigsonPetaluma.otf rather than discarding it (write it to FONTS_DIR after the preprocessing step)",
+      "Run node scripts/gen-jazz-subsets.mjs to generate scripts/fonts/GrigsonPetaluma.otf",
+      "In scripts/gen-font-explorer-data.mjs, add a GrigsonPetaluma entry with derived: true, cacheName: 'GrigsonPetaluma.otf', targetCodepoints covering U+1D7CE–1D7D7 (Math Bold digits), U+E030–E033 and U+E040–E042 (barlines/repeats), U+E500–E501 (simile marks), and sections matching the Petaluma entry",
+      "Run pnpm build in packages/font-explorer and verify the GrigsonPetaluma page renders all target codepoints as present"
     ]
   }
 ]
