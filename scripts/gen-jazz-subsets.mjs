@@ -47,7 +47,7 @@ const FONTS = [
     oflUrl: null,
     // Latin-1 covers chord text and quality symbols (° U+00B0, ø U+00F8).
     // ♭♯ and △ are now available at standard Unicode positions via re-encoding.
-    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3,U+1D7CE-1D7D7',
+    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3,U+1D7CE-1D7D7,U+E500-E501',
     outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-jazz-subset.ts'),
     pkgWoff2Name: 'GrigsonJazz-subset.woff2',
     exportName: 'grigsonJazzWoff2',
@@ -61,7 +61,7 @@ const FONTS = [
     fontUrl: 'https://github.com/steinbergmedia/petaluma/raw/master/redist/otf/Petaluma.otf',
     oflUrl: null,
     // Only the Math Bold digit range — time-sig digits for GrigsonCursive typeface.
-    unicodes: 'U+1D7CE-1D7D7',
+    unicodes: 'U+1D7CE-1D7D7,U+E500-E501',
     outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts'),
     pkgWoff2Name: 'GrigsonPetaluma-timesig-subset.woff2',
     exportName: 'grigsonPetalumaTimeSigWoff2',

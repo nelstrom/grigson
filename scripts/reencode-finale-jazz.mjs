@@ -62,6 +62,9 @@ IMPORT = {
     0x1D7D5: 'uniE087',  # 𝟕
     0x1D7D6: 'uniE088',  # 𝟖
     0x1D7D7: 'uniE089',  # 𝟗
+    # simile marks at native SMuFL PUA codepoints
+    0xE500: 'uniE500',   # repeat1Bar
+    0xE501: 'uniE501',   # repeat2Bars
 }
 
 for unicode_cp, glyph_name in IMPORT.items():
@@ -97,7 +100,10 @@ non_bmp_import = {cp: name for cp, name in IMPORT.items() if cp >  0xFFFF}
 
 from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
 for table in base['cmap'].tables:
-    table.cmap.update(bmp_import)
+    # Skip format-6 (trimmed array) — it only handles a contiguous range and
+    # adding high BMP codepoints like U+E500 would overflow it.
+    if table.format != 6:
+        table.cmap.update(bmp_import)
     if table.format in (12, 13):
         table.cmap.update(non_bmp_import)
 

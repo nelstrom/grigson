@@ -2188,7 +2188,8 @@
       "In scripts/gen-jazz-subsets.mjs, extend the GrigsonJazz.otf unicodes to include U+E500-E501",
       "Run: node scripts/gen-jazz-subsets.mjs",
       "Verify grigson-petaluma-timesig-subset.ts and grigson-jazz-subset.ts are updated (larger base64 payload)"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "simile-glyph-renderer",
