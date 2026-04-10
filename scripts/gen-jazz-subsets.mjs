@@ -67,6 +67,8 @@ const FONTS = [
     exportName: 'grigsonPetalumaNotationWoff2',
     credit:
       'GrigsonPetaluma-notation, derived from Petaluma by Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
+    // Save the preprocessed font (with Math Bold cmap aliases added) as GrigsonPetaluma.otf.
+    preprocessedSaveName: 'GrigsonPetaluma.otf',
     // Petaluma has time-sig glyphs at U+E080–E089 (SMuFL PUA). Add cmap aliases
     // at U+1D7CE–1D7D7 (Math Bold) so pyftsubset can find them.
     preprocessPy: `\
@@ -159,6 +161,13 @@ for (const font of FONTS) {
       unlinkSync(tmpPy);
     }
     fontToSubset = preprocessedFont;
+
+    // Optionally persist the preprocessed font for downstream use (e.g. font-explorer).
+    if (font.preprocessedSaveName) {
+      const savedPath = join(FONTS_DIR, font.preprocessedSaveName);
+      writeFileSync(savedPath, readFileSync(preprocessedFont));
+      console.log(`  → saved preprocessed font to ${savedPath}`);
+    }
   }
 
   // Subset with pyftsubset.

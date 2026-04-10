@@ -602,3 +602,20 @@ Added `--grigson-barline-font-size` row (default `2em`) to the CSS custom proper
 `packages/grigson/documentation/renderer.md`. Bumped `grigson-fonts` package.json version from
 1.1.3 to 1.1.4 to reflect the updated Bravura and GrigsonJazz subsets (barline/repeat codepoints
 added). All tests pass.
+
+## font-explorer-grigson-petaluma
+
+Added GrigsonPetaluma derived font to font-explorer.
+
+Changes:
+- `scripts/gen-jazz-subsets.mjs`: Added `preprocessedSaveName: 'GrigsonPetaluma.otf'` to the
+  Petaluma.otf font config entry. After the Python preprocessing step (which adds Math Bold cmap
+  aliases U+1D7CE–1D7D7 → SMuFL E080–E089), the loop now writes the preprocessed font to
+  `scripts/fonts/GrigsonPetaluma.otf` for downstream use.
+- `scripts/gen-font-explorer-data.mjs`: Added a `GrigsonPetaluma` entry with `derived: true`,
+  `cacheName: 'GrigsonPetaluma.otf'`, and targetCodepoints covering all 19 codepoints: Math Bold
+  digits (U+1D7CE–1D7D7), barline/repeat glyphs (U+E030–E033, U+E040–E042), and simile marks
+  (U+E500–E501). Sections match the Petaluma entry (Non-SMuFL / SMuFL / PUA).
+
+Verified: 1532 glyphs extracted from GrigsonPetaluma.otf; all 19 target codepoints report
+PRESENT in the generated `grigson-petaluma/index.html`. All tests pass (531 tests).

@@ -2346,7 +2346,8 @@
       "Run node scripts/gen-jazz-subsets.mjs to generate scripts/fonts/GrigsonPetaluma.otf",
       "In scripts/gen-font-explorer-data.mjs, add a GrigsonPetaluma entry with derived: true, cacheName: 'GrigsonPetaluma.otf', targetCodepoints covering U+1D7CE–1D7D7 (Math Bold digits), U+E030–E033 and U+E040–E042 (barlines/repeats), U+E500–E501 (simile marks), and sections matching the Petaluma entry",
       "Run pnpm build in packages/font-explorer and verify the GrigsonPetaluma page renders all target codepoints as present"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-synthesize-jazz",
