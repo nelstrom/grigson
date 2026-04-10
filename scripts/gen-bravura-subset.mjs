@@ -30,6 +30,8 @@ const BRAVURA_URL =
   'https://github.com/steinbergmedia/bravura/raw/master/redist/otf/Bravura.otf';
 
 // SMuFL glyphs to include:
+//   U+E030-E033  barlines (single, double, final, shortFinal)
+//   U+E040-E042  repeat signs (left, right, rightLeft)
 //   U+E080-E089  time signature digits 0-9
 //   U+E08A       common time (C)
 //   U+E08B       cut time
@@ -40,7 +42,7 @@ const BRAVURA_URL =
 //   U+266F       ♯ MUSIC SHARP SIGN
 // Math Bold digits (cmap aliases added by preprocessing step below):
 //   U+1D7CE-1D7D7  𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗 — same outlines as U+E080–E089
-const UNICODES = 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501,U+1D7CE-1D7D7';
+const UNICODES = 'U+266D,U+266F,U+E030-E033,U+E040-E042,U+E080-E08B,U+E500-E501,U+1D7CE-1D7D7';
 
 const tmp = tmpdir();
 const otfPath = join(tmp, 'Bravura.otf');
@@ -108,7 +110,7 @@ const ts = `\
 //
 // Contains a subset of Bravura (https://github.com/steinbergmedia/bravura),
 // © Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.
-// Glyphs included: ♭♯ (U+266D, U+266F), SMuFL time-signature digits (U+E080–E08B), simile marks (U+E500–E501), Math Bold digits 𝟎–𝟗 (U+1D7CE–1D7D7, aliased to same outlines as U+E080–E089).
+// Glyphs included: ♭♯ (U+266D, U+266F), barlines/repeats (U+E030–E033, U+E040–E042), SMuFL time-signature digits (U+E080–E08B), simile marks (U+E500–E501), Math Bold digits 𝟎–𝟗 (U+1D7CE–1D7D7, aliased to same outlines as U+E080–E089).
 export const bravuraWoff2 = '${dataUri}';
 `;
 

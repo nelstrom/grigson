@@ -546,3 +546,6 @@ Added --grigson-simile-font-size CSS variable (default 1.2em) to the :host block
 ## simile-glyph-docs-and-release (2026-04-10)
 
 Added `--grigson-simile-font-size` row to the CSS custom properties table in packages/grigson/documentation/renderer.md (default 1.2em). Bumped grigson-fonts package.json version from 1.1.2 to 1.1.3 to reflect the GrigsonJazz-subset.woff2 change from the simile glyph work.
+
+## barline-glyph-bravura-subset
+Extended the Bravura WOFF2 subset to include barline and repeat sign codepoints. Updated UNICODES in scripts/gen-bravura-subset.mjs from 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501,U+1D7CE-1D7D7' to 'U+266D,U+266F,U+E030-E033,U+E040-E042,U+E080-E08B,U+E500-E501,U+1D7CE-1D7D7'. Ran the script to regenerate bravura-subset.ts and Bravura-subset.woff2 (7.0 KB). The GrigsonNotation fallback font now has coverage for barlineSingle, barlineDouble, barlineFinal, barlineShortFinal (U+E030–E033) and repeatLeft, repeatRight, repeatRightLeft (U+E040–E042).
