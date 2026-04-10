@@ -9,21 +9,18 @@ characterfully handwritten; Bravura's are clean and geometric. The same `unicode
 
 ---
 
-## Grid architecture: no change required
+## Grid architecture: already implemented
 
-The user proposed reserving dedicated grid cells for barline gaps (interleaved beats +
-barline columns). This would make barlines more semantic in the HTML, but it's a larger
-architectural change that:
+The interleaved beat/gap column layout was implemented in commit c9fbf27
+(`project/plans/grid-layout-refinement.md`). Key implications for this plan:
 
-- Requires emitting an explicit `grid-template-columns` string per song (can't use a simple
-  `repeat(N, 1fr)` anymore)
-- Complicates the `subgrid` approach that lets all rows share the parent grid
-- Has non-trivial interactions with mixed time signatures
-
-The current zero-width trick (`width: 0; position: relative`) works equally well for font
-glyphs as it does for SVGs. Glyphs are absolutely positioned within the zero-width barline
-span — same anchoring (left/right/centred) as today. The grid architecture change is deferred
-as a separate future task.
+- Barlines live in naturally-sized `auto` gap columns — no more zero-width trick.
+- `[part~="barline"]` is a `display: flex; align-items: center` container; barline glyphs
+  flow as flex children. No `position: absolute` needed.
+- `position: relative` stays on `[part~="barline"]` (needed for `[part="barline-repeat-count"]`).
+- Time-sig is already a flex sibling of the barline content inside the barline span.
+- The left/right/centred anchoring rules in the old CSS were specific to the zero-width model
+  and are not needed here.
 
 ---
 
@@ -154,70 +151,58 @@ covers all codepoints in the WOFF2.
 
 ### 3b. Add to per-typeface blocks
 
+Since c9fbf27, typeface-specific overrides use `[data-typeface="..."]` selectors on the
+wrapper div (not `:host([typeface])`, which matched the wrong element):
+
 ```css
-:host([typeface="cursive"]) {
+[data-typeface="cursive"] {
   /* existing time-sig and simile vars ... */
   --grigson-barline-font-size: 2em;  /* tune visually after implementation */
 }
-:host([typeface="serif"]) {
+[data-typeface="serif"] {
   /* existing ... */
   --grigson-barline-font-size: 2em;
 }
 ```
 
-### 3c. `[part="barline-glyph"]` positioning CSS
+### 3c. `[part="barline-glyph"]` CSS
 
-Replace `[part~="barline"] svg` rules with `[part="barline-glyph"]` rules. The anchoring
-logic (left/right/centred) is the same:
+Replace `[part~="barline"] svg` rules with `[part="barline-glyph"]` rules. The glyph span
+is a flex child of the barline container — no absolute positioning or directional anchoring
+needed (that was specific to the old zero-width model):
 
 ```css
 [part="barline-glyph"] {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   font-family: var(--grigson-barline-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonNotation", serif;
   font-size: var(--grigson-barline-font-size);
   font-weight: normal;
   line-height: 1;
-}
-
-/* startRepeat: thick part on left, dots extend right */
-[part~="barline-startRepeat"] [part="barline-glyph"] {
-  left: 0;
-}
-
-/* double, final, endRepeat: thick part on right */
-[part~="barline-double"] [part="barline-glyph"],
-[part~="barline-final"] [part="barline-glyph"],
-[part~="barline-endRepeat"] [part="barline-glyph"] {
-  right: 0;
-}
-
-/* endRepeatStartRepeat: centred on the column boundary */
-[part~="barline-endRepeatStartRepeat"] [part="barline-glyph"] {
-  left: 0;
-  transform: translate(-50%, -50%);
+  flex-shrink: 0;
 }
 ```
 
-### 3d. Single barline: keep CSS border for sans/serif, use glyph for cursive
+### 3d. Single barline: keep CSS fill for sans/serif, use glyph for cursive
+
+The single barline currently uses `width` + `background` (not `border-left`) to render as a
+thin vertical bar. Override both to clear the fill when showing the glyph:
 
 ```css
-/* Default: CSS border, glyph hidden */
+/* Default: CSS fill, glyph hidden */
 [part~="barline-single"] {
-  border-left: var(--grigson-barline-width) solid var(--grigson-barline-color);
+  width: var(--grigson-barline-width);
+  background: var(--grigson-barline-color);
 }
 [part~="barline-single"] [part="barline-glyph"] {
   display: none;
 }
 
-/* Cursive: no border, glyph shown */
-:host([typeface="cursive"]) [part~="barline-single"] {
-  border-left: none;
+/* Cursive: no CSS fill, glyph shown */
+[data-typeface="cursive"] [part~="barline-single"] {
+  width: auto;
+  background: none;
 }
-:host([typeface="cursive"]) [part~="barline-single"] [part="barline-glyph"] {
+[data-typeface="cursive"] [part~="barline-single"] [part="barline-glyph"] {
   display: revert;
-  left: 0;  /* single barline glyph: left-anchored */
 }
 ```
 
@@ -333,7 +318,5 @@ Add `--grigson-barline-font-size` to the CSS custom properties table in `rendere
    `grigson-petaluma-notation-subset` (broader scope) or create a separate barline subset?
    Recommend Option A to keep the number of WOFF2 files manageable. - Yes, good call.
 
-2. **`barline-glyph` vs inline text in barline span**: this plan uses a dedicated
-   `part="barline-glyph"` inner span. An alternative is to emit the glyph character directly
-   into the barline span and make the barline span itself `position: absolute`. Evaluate
-   during implementation. - agree.
+2. **`barline-glyph` vs inline text in barline span**: using a dedicated `part="barline-glyph"`
+   inner span (agreed). The barline span is a flex container; the glyph span is a flex child.

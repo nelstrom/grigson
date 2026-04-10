@@ -109,15 +109,18 @@ U+E500-E501 to GrigsonJazz-subset.woff2 (Step 5), FinaleJazz automatically cover
 }
 ```
 
-### 4b. Add to `:host([typeface="cursive"])` and `:host([typeface="serif"])` blocks
+### 4b. Add to per-typeface blocks
+
+Since c9fbf27, typeface-specific overrides use `[data-typeface="..."]` selectors on the
+wrapper div (not `:host([typeface])`, which matched the wrong element):
 
 ```css
-:host([typeface="cursive"]) {
+[data-typeface="cursive"] {
   /* existing time-sig vars ... */
   --grigson-simile-font-size: 1.2em;  /* tune visually after implementation */
 }
 
-:host([typeface="serif"]) {
+[data-typeface="serif"] {
   /* existing time-sig vars ... */
   --grigson-simile-font-size: 1.2em;  /* tune if Noto Serif needs adjusting */
 }
@@ -131,7 +134,6 @@ U+E500-E501 to GrigsonJazz-subset.woff2 (Step 5), FinaleJazz automatically cover
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 1em;
 }
 
 [part="simile"] svg {
@@ -144,7 +146,6 @@ U+E500-E501 to GrigsonJazz-subset.woff2 (Step 5), FinaleJazz automatically cover
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 1em;
   font-family: var(--grigson-simile-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonTimeSig", serif;
   font-size: var(--grigson-simile-font-size);
 }
@@ -239,8 +240,7 @@ Add `--grigson-simile-font-size` to the CSS custom properties table.
 
 ## Phase B note
 
-Phase B (repeat barlines and plain/double/final barlines via font glyphs) is deferred. The
-grid architecture question (reserving cells for barline gaps) needs to be resolved first, as
-it affects how barline characters are positioned relative to the column boundary. The Petaluma
-barline glyphs (U+E030-E033) shown in the screenshot are very characterful and worth the
-additional effort.
+Phase B (repeat barlines and plain/double/final barlines via font glyphs) is described in
+`project/plans/font-repeat-bars.md`. The grid architecture question that was blocking it has
+been resolved (commit c9fbf27 — interleaved beat/gap columns). Phase B can now proceed after
+Phase A is complete.

@@ -2176,5 +2176,152 @@
       "Push a grigson-fonts-v1.1.2 git tag so the CDN serves the updated GrigsonJazz-subset.woff2"
     ],
     "passes": true
+  },
+  {
+    "id": "simile-glyph-subsets",
+    "category": "functional",
+    "description": "Regenerate Petaluma and GrigsonJazz WOFF2 subsets to include U+E500–E501 simile glyphs",
+    "detail": "Add U+E500–E501 to the Petaluma and GrigsonJazz entries in scripts/gen-jazz-subsets.mjs, and add uniE500/uniE501 to the IMPORT dict in scripts/reencode-finale-jazz.mjs. Run both scripts to regenerate the WOFF2 files embedded in grigson-petaluma-timesig-subset.ts and grigson-jazz-subset.ts. See project/plans/font-similes.md for full context.",
+    "steps": [
+      "In scripts/reencode-finale-jazz.mjs, add 0xE500: 'uniE500' and 0xE501: 'uniE501' to the IMPORT dict, then run: node scripts/reencode-finale-jazz.mjs",
+      "In scripts/gen-jazz-subsets.mjs, extend the Petaluma.otf unicodes from 'U+1D7CE-1D7D7' to 'U+1D7CE-1D7D7,U+E500-E501'",
+      "In scripts/gen-jazz-subsets.mjs, extend the GrigsonJazz.otf unicodes to include U+E500-E501",
+      "Run: node scripts/gen-jazz-subsets.mjs",
+      "Verify grigson-petaluma-timesig-subset.ts and grigson-jazz-subset.ts are updated (larger base64 payload)"
+    ]
+  },
+  {
+    "id": "simile-glyph-renderer",
+    "category": "functional",
+    "description": "Replace SIMILE_SVG with a SMuFL glyph character in html.ts and update the simile test",
+    "detail": "Remove the SIMILE_SVG constant from packages/grigson/src/renderers/html.ts and replace it with SIMILE_CHAR = String.fromCodePoint(0xe500). Update the render call to emit SIMILE_CHAR instead of SIMILE_SVG. Update the test in html.test.ts that asserts '<svg' inside a simile element to instead assert the U+E500 codepoint. See project/plans/font-similes.md for full context.",
+    "steps": [
+      "In html.ts, remove the SIMILE_SVG constant and add: const SIMILE_CHAR = String.fromCodePoint(0xe500)",
+      "Update the simile render call to use SIMILE_CHAR instead of SIMILE_SVG",
+      "In html.test.ts, update the simile SVG assertion to: expect(html).toContain(String.fromCodePoint(0xe500))",
+      "Run pnpm test to confirm the updated test passes"
+    ]
+  },
+  {
+    "id": "simile-glyph-font-faces",
+    "category": "functional",
+    "description": "Extend GrigsonTimeSig and GrigsonCursive @font-face rules to cover U+E500–E501",
+    "detail": "In packages/grigson/src/renderers/html-element.ts, extend the GrigsonTimeSig @font-face unicode-range from U+1D7CE-1D7D7 to U+1D7CE-1D7D7,U+E500-E501 (Bravura already contains these glyphs — no subset regeneration needed). Also extend the GrigsonCursive Petaluma @font-face unicode-range from U+1D7CE-1D7D7 to U+1D7CE-1D7D7,U+E500-E501 — this relies on the regenerated WOFF2 from simile-glyph-subsets. See project/plans/font-similes.md for full context.",
+    "steps": [
+      "In _ensureFontFaces(), extend the GrigsonTimeSig @font-face unicode-range to include U+E500-E501",
+      "Extend the GrigsonCursive Petaluma @font-face unicode-range to include U+E500-E501",
+      "Run pnpm build to confirm no errors"
+    ]
+  },
+  {
+    "id": "simile-glyph-css",
+    "category": "functional",
+    "description": "Add --grigson-simile-font-size CSS variable and update [part=\"simile\"] styles to use a font glyph",
+    "detail": "In packages/grigson/src/renderers/html-element.ts, add --grigson-simile-font-size: 1.2em to the :host block, add per-typeface overrides in the [data-typeface=\"cursive\"] and [data-typeface=\"serif\"] blocks, update [part=\"simile\"] to set font-family and font-size via CSS variables, and remove the [part=\"simile\"] svg rule. Then load the typefaces tutorial page in the browser and tune --grigson-simile-font-size per typeface until the glyph size matches or improves on the previous SVG. See project/plans/font-similes.md for full context.",
+    "steps": [
+      "Add --grigson-simile-font-size: 1.2em to the :host CSS block in _getStyles()",
+      "Add --grigson-simile-font-size overrides to the [data-typeface=\"cursive\"] and [data-typeface=\"serif\"] blocks",
+      "Update [part=\"simile\"] to add font-family (cascading through defaultFamily then GrigsonTimeSig) and font-size: var(--grigson-simile-font-size)",
+      "Remove the [part=\"simile\"] svg rule",
+      "Run pnpm build, then check the typefaces tutorial page visually and tune font-size values per typeface as needed"
+    ]
+  },
+  {
+    "id": "simile-glyph-docs-and-release",
+    "category": "functional",
+    "description": "Document --grigson-simile-font-size and bump the grigson-fonts package version",
+    "detail": "Add --grigson-simile-font-size to the CSS custom properties table in packages/grigson/documentation/renderer.md. Bump the grigson-fonts package.json version (1.1.2 → 1.1.3) since GrigsonJazz-subset.woff2 changed, and push a new git tag so the CDN URL on the tutorial page picks up the updated subset. See project/plans/font-similes.md for full context.",
+    "steps": [
+      "Add --grigson-simile-font-size row to the CSS custom properties table in packages/grigson/documentation/renderer.md",
+      "Bump the version in the grigson-fonts package.json from 1.1.2 to 1.1.3",
+      "Commit and push, then create and push the new version tag so jsDelivr serves the updated WOFF2"
+    ]
+  },
+  {
+    "id": "barline-glyph-bravura-subset",
+    "category": "functional",
+    "description": "Extend the Bravura WOFF2 subset to include barline and repeat sign codepoints U+E030–E033 and U+E040–E042",
+    "detail": "In scripts/gen-bravura-subset.mjs, add U+E030-E033 and U+E040-E042 to the UNICODES constant, then run the script to regenerate bravura-subset.ts. This provides the GrigsonNotation fallback font for sans/serif typefaces. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "In scripts/gen-bravura-subset.mjs, update UNICODES from 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501,U+1D7CE-1D7D7' to 'U+266D,U+266F,U+E030-E033,U+E040-E042,U+E080-E08B,U+E500-E501,U+1D7CE-1D7D7'",
+      "Run: node scripts/gen-bravura-subset.mjs",
+      "Verify packages/grigson/src/renderers/bravura-subset.ts is updated"
+    ]
+  },
+  {
+    "id": "barline-glyph-jazz-subsets",
+    "category": "functional",
+    "description": "Regenerate Petaluma and GrigsonJazz WOFF2 subsets to include barline and repeat sign codepoints, and rename the Petaluma subset file",
+    "detail": "In scripts/reencode-finale-jazz.mjs, add 0xE030, 0xE040, 0xE041, 0xE042 to the IMPORT dict and run it. In scripts/gen-jazz-subsets.mjs, rename the Petaluma entry outputs from grigson-petaluma-timesig-subset to grigson-petaluma-notation-subset (Option A), extend its unicodes to include U+E030-E033,U+E040-E042, and extend the GrigsonJazz entry unicodes to include U+E030,U+E040-E042. Run the script to regenerate both WOFF2s. Then rename/delete the old grigson-petaluma-timesig-subset.ts source file. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "In scripts/reencode-finale-jazz.mjs, add 0xE030: 'uniE030', 0xE040: 'uniE040', 0xE041: 'uniE041', 0xE042: 'uniE042' to the IMPORT dict",
+      "Run: node scripts/reencode-finale-jazz.mjs",
+      "In scripts/gen-jazz-subsets.mjs, rename the Petaluma entry: outTs → grigson-petaluma-notation-subset.ts, pkgWoff2Name → GrigsonPetaluma-notation-subset.woff2, exportName → grigsonPetalumaNotationWoff2",
+      "Extend Petaluma unicodes to 'U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501'",
+      "Extend GrigsonJazz unicodes to include U+E030,U+E040-E042",
+      "Run: node scripts/gen-jazz-subsets.mjs",
+      "Delete the old packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts (replaced by grigson-petaluma-notation-subset.ts)"
+    ]
+  },
+  {
+    "id": "barline-glyph-renderer",
+    "category": "functional",
+    "description": "Replace SVG barline constants in html.ts with SMuFL glyph characters and a part=\"barline-glyph\" inner span",
+    "detail": "In packages/grigson/src/renderers/html.ts, remove BARLINE_DOUBLE_SVG, BARLINE_FINAL_SVG, BARLINE_START_REPEAT_SVG, BARLINE_END_REPEAT_SVG, BARLINE_END_START_REPEAT_SVG, BARLINE_SVG_ATTRS, and BARLINE_SVGS. Replace with a BARLINE_GLYPHS map of SMuFL PUA codepoints (U+E030–E032, U+E040–E042). Update renderBarline() to emit a <span part=\"barline-glyph\"> child containing the glyph character instead of the SVG, while keeping the time-sig and repeat-count children. The single barline (no glyph entry) gets an empty glyphHtml. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "Remove all BARLINE_*_SVG constants, BARLINE_SVG_ATTRS, and BARLINE_SVGS from html.ts",
+      "Add BARLINE_GLYPHS map: single → U+E030, double → U+E031, final → U+E032, startRepeat → U+E040, endRepeat → U+E041, endRepeatStartRepeat → U+E042",
+      "Update renderBarline() to build glyphHtml as <span part=\"barline-glyph\">{glyph}</span> when a glyph exists",
+      "Run pnpm build to confirm no type errors"
+    ]
+  },
+  {
+    "id": "barline-glyph-font-faces",
+    "category": "functional",
+    "description": "Add a GrigsonNotation @font-face and update GrigsonCursive to cover barline codepoints in html-element.ts",
+    "detail": "In packages/grigson/src/renderers/html-element.ts, update the import from grigson-petaluma-timesig-subset to grigson-petaluma-notation-subset (renamed in barline-glyph-jazz-subsets). Add a new GrigsonNotation @font-face in _ensureFontFaces() pointing at bravuraWoff2 with unicode-range U+E030-E033,U+E040-E042. Extend the GrigsonCursive Petaluma @font-face unicode-range to include U+E030-E033,U+E040-E042 alongside the existing ranges. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "Update the import: replace grigsonPetalumaTimeSigWoff2 from grigson-petaluma-timesig-subset with grigsonPetalumaNotationWoff2 from grigson-petaluma-notation-subset",
+      "In _ensureFontFaces(), add a new GrigsonNotation @font-face block (separate id, e.g. 'grigson-notation-font-face') covering unicode-range U+E030-E033,U+E040-E042 from bravuraWoff2",
+      "Extend the GrigsonCursive Petaluma @font-face unicode-range to U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501",
+      "Run pnpm build to confirm no errors"
+    ]
+  },
+  {
+    "id": "barline-glyph-css",
+    "category": "functional",
+    "description": "Add --grigson-barline-font-size CSS variable, [part=\"barline-glyph\"] styles, and update single-barline CSS in html-element.ts",
+    "detail": "In packages/grigson/src/renderers/html-element.ts _getStyles(), add --grigson-barline-font-size: 2em to :host and to [data-typeface=\"cursive\"] / [data-typeface=\"serif\"] blocks. Add a [part=\"barline-glyph\"] rule with font-family cascading through defaultFamily then GrigsonNotation, font-size, line-height: 1, and flex-shrink: 0. Update [part~=\"barline-single\"] to hide the glyph by default (display: none on [part=\"barline-glyph\"]) and add [data-typeface=\"cursive\"] overrides to clear the CSS fill (width: auto; background: none) and show the glyph. Remove [part~=\"barline\"] svg rules. Then build, load the typefaces tutorial page, and tune --grigson-barline-font-size per typeface visually. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "Add --grigson-barline-font-size: 2em to the :host CSS block",
+      "Add --grigson-barline-font-size overrides to [data-typeface=\"cursive\"] and [data-typeface=\"serif\"] blocks",
+      "Add [part=\"barline-glyph\"] CSS rule with font-family, font-size, line-height: 1, flex-shrink: 0",
+      "Add [part~=\"barline-single\"] [part=\"barline-glyph\"] { display: none } to hide the single barline glyph by default",
+      "Add [data-typeface=\"cursive\"] overrides for [part~=\"barline-single\"]: width: auto; background: none; and show the glyph with display: revert",
+      "Remove the [part~=\"barline\"] svg and related SVG rules",
+      "Run pnpm build, then visually check all barline types across typefaces on the tutorial page and tune --grigson-barline-font-size as needed"
+    ]
+  },
+  {
+    "id": "barline-glyph-tests",
+    "category": "functional",
+    "description": "Update html.test.ts to remove SVG barline assertions and add a part=\"barline-glyph\" assertion",
+    "detail": "In packages/grigson/src/renderers/html.test.ts, find any tests that assert on SVG content inside barline spans (e.g. checking for '<svg' in a barline context) and remove or update them. Add a test that confirms part=\"barline-glyph\" is present inside a repeat barline span (e.g. startRepeat). Run pnpm test to confirm all tests pass. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "Search html.test.ts for assertions on '<svg' or SVG content related to barlines and remove/update them",
+      "Add a test asserting that a startRepeat (or other non-single) barline HTML contains part=\"barline-glyph\"",
+      "Run pnpm test and confirm all tests pass"
+    ]
+  },
+  {
+    "id": "barline-glyph-docs-and-release",
+    "category": "functional",
+    "description": "Document --grigson-barline-font-size and bump grigson-fonts to 1.1.4 for the updated Bravura and GrigsonJazz subsets",
+    "detail": "Add --grigson-barline-font-size to the CSS custom properties table in packages/grigson/documentation/renderer.md. Bump the grigson-fonts package.json version to 1.1.4 (Bravura subset and GrigsonJazz subset both changed). Commit and push a new version tag so jsDelivr serves the updated WOFF2 files for the tutorial page's CDN references. See project/plans/font-repeat-bars.md for full context.",
+    "steps": [
+      "Add --grigson-barline-font-size row to the CSS custom properties table in packages/grigson/documentation/renderer.md",
+      "Bump grigson-fonts package.json version from 1.1.3 to 1.1.4",
+      "Commit and push, then create and push the new version tag"
+    ]
   }
 ]
