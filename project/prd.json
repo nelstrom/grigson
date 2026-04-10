@@ -2227,7 +2227,8 @@
       "Update [part=\"simile\"] to add font-family (cascading through defaultFamily then GrigsonTimeSig) and font-size: var(--grigson-simile-font-size)",
       "Remove the [part=\"simile\"] svg rule",
       "Run pnpm build, then check the typefaces tutorial page visually and tune font-size values per typeface as needed"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "simile-glyph-docs-and-release",

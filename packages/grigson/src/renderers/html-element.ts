@@ -95,12 +95,18 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-time-sig-font-size: 1.1em;
         --grigson-time-sig-line-height: 0.55;
         --grigson-time-sig-top: 37%;
+        --grigson-simile-font-size: 1.2em;
       }
 
       [data-typeface="cursive"] {
         --grigson-time-sig-font-size: 0.6em;
         --grigson-time-sig-line-height: 1.1;
         --grigson-time-sig-top: 40%;
+        --grigson-simile-font-size: 1.2em;
+      }
+
+      [data-typeface="serif"] {
+        --grigson-simile-font-size: 1.2em;
       }
 
       [part="song-header"] {
@@ -269,11 +275,8 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: flex;
         align-items: center;
         justify-content: center;
-      }
-
-      [part="simile"] svg {
-        height: 1.2em;
-        width: 1.2em;
+        font-family: var(--grigson-simile-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonTimeSig", serif;
+        font-size: var(--grigson-simile-font-size);
       }
     `;
   }

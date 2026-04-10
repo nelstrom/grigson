@@ -539,3 +539,6 @@ Replaced SIMILE_SVG inline SVG with SIMILE_CHAR = String.fromCodePoint(0xe500) i
 ## simile-glyph-font-faces
 
 Extended GrigsonTimeSig @font-face unicode-range from U+1D7CE-1D7D7 to U+1D7CE-1D7D7,U+E500-E501 so the Bravura subset covers simile mark glyphs. Extended GrigsonCursive Petaluma @font-face unicode-range similarly to U+1D7CE-1D7D7,U+E500-E501 so the Petaluma WOFF2 subset (which already contains U+E500-E501) is used for simile glyphs in cursive typeface.
+
+## simile-glyph-css
+Added --grigson-simile-font-size CSS variable (default 1.2em) to the :host block in _getStyles(). Added per-typeface overrides in the [data-typeface="cursive"] and [data-typeface="serif"] blocks. Updated [part="simile"] to use font-family cascading through defaultFamily then GrigsonTimeSig, and font-size via the new variable. Removed the [part="simile"] svg rule (no longer needed since the simile mark is now a Unicode glyph character U+E500, not an SVG). All 527 tests pass.
