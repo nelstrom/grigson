@@ -595,3 +595,10 @@ Changes:
   so the subset WOFF2 includes the new glyphs.
 
 GrigsonJazz subset grew from ~23 KB to 25.2 KB. All tests pass.
+
+## barline-glyph-docs-and-release
+
+Added `--grigson-barline-font-size` row (default `2em`) to the CSS custom properties table in
+`packages/grigson/documentation/renderer.md`. Bumped `grigson-fonts` package.json version from
+1.1.3 to 1.1.4 to reflect the updated Bravura and GrigsonJazz subsets (barline/repeat codepoints
+added). All tests pass.

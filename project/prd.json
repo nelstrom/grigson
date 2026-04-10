@@ -2333,7 +2333,8 @@
       "Add --grigson-barline-font-size row to the CSS custom properties table in packages/grigson/documentation/renderer.md",
       "Bump grigson-fonts package.json version from 1.1.3 to 1.1.4",
       "Commit and push, then create and push the new version tag"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "font-explorer-grigson-petaluma",
