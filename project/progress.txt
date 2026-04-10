@@ -570,3 +570,11 @@ The import from `grigson-petaluma-notation-subset` was already in place. Added a
 pointing at `bravuraWoff2` with `unicode-range: U+E030-E033,U+E040-E042`. Extended the
 GrigsonCursive Petaluma @font-face unicode-range from `U+1D7CE-1D7D7,U+E500-E501` to
 `U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501`. Build and all 527 tests pass.
+
+## barline-glyph-css
+
+Added `--grigson-barline-font-size: 2em` to the `:host` block in `_getStyles()`. Added the same variable to `[data-typeface="cursive"]` and `[data-typeface="serif"]` override blocks. Added a `[part="barline-glyph"]` CSS rule with font-family cascading through defaultFamily then GrigsonNotation, font-size, line-height: 1, and flex-shrink: 0. Added `[part~="barline-single"] [part="barline-glyph"] { display: none }` to hide the glyph for the CSS-fill single barline by default. Added `[data-typeface="cursive"]` overrides to clear the CSS fill (width: auto; background: none) and show the glyph (display: revert) for cursive single barlines. Removed the `[part~="barline"] svg` rules (no longer needed since barlines are now SMuFL glyphs). All 531 tests pass.
+
+## barline-glyph-tests
+
+Added a `describe('barline glyphs')` block in `html.test.ts` with four tests: (1) startRepeat barline contains `part="barline-glyph"`, (2) endRepeat barline contains `part="barline-glyph"`, (3) barline-glyph span contains the U+E040 SMuFL codepoint for startRepeat, (4) single barline also contains `part="barline-glyph"` with U+E030. All 531 tests pass.

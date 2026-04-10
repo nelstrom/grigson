@@ -2309,7 +2309,8 @@
       "Add [data-typeface=\"cursive\"] overrides for [part~=\"barline-single\"]: width: auto; background: none; and show the glyph with display: revert",
       "Remove the [part~=\"barline\"] svg and related SVG rules",
       "Run pnpm build, then visually check all barline types across typefaces on the tutorial page and tune --grigson-barline-font-size as needed"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-tests",
@@ -2320,7 +2321,8 @@
       "Search html.test.ts for assertions on '<svg' or SVG content related to barlines and remove/update them",
       "Add a test asserting that a startRepeat (or other non-single) barline HTML contains part=\"barline-glyph\"",
       "Run pnpm test and confirm all tests pass"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-docs-and-release",

@@ -570,6 +570,29 @@ describe('HtmlRenderer', () => {
     });
   });
 
+  describe('barline glyphs', () => {
+    it('startRepeat barline contains part="barline-glyph" span', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n||: C |\n'));
+      expect(html).toContain('part="barline-glyph"');
+    });
+
+    it('endRepeat barline contains part="barline-glyph" span', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C :||'));
+      expect(html).toContain('part="barline-glyph"');
+    });
+
+    it('barline-glyph span contains the SMuFL codepoint for startRepeat', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n||: C |\n'));
+      expect(html).toContain(`part="barline-glyph">${String.fromCodePoint(0xe040)}`);
+    });
+
+    it('single barline also contains part="barline-glyph" span', () => {
+      const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C |\n'));
+      expect(html).toContain('part="barline-glyph"');
+      expect(html).toContain(`part="barline-glyph">${String.fromCodePoint(0xe030)}`);
+    });
+  });
+
   describe('section structure', () => {
     it('section element has part="section" and display:contents style', () => {
       const html = renderer.render(parseSong('[Verse]\n| C |\n'));

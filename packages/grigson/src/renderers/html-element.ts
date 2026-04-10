@@ -107,6 +107,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-time-sig-line-height: 0.55;
         --grigson-time-sig-top: 37%;
         --grigson-simile-font-size: 1.2em;
+        --grigson-barline-font-size: 2em;
       }
 
       [data-typeface="cursive"] {
@@ -114,10 +115,12 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-time-sig-line-height: 1.1;
         --grigson-time-sig-top: 40%;
         --grigson-simile-font-size: 1.2em;
+        --grigson-barline-font-size: 2em;
       }
 
       [data-typeface="serif"] {
         --grigson-simile-font-size: 1.2em;
+        --grigson-barline-font-size: 2em;
       }
 
       [part="song-header"] {
@@ -192,12 +195,25 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         background: var(--grigson-barline-color);
       }
 
-      /* SVG barlines: inline in the flex container.
-         Fixed 2em height keeps dot sizes and line weights stable regardless of
-         row height — tall rows (e.g. slash chords) don't blow up the symbols. */
-      [part~="barline"] svg {
-        height: 2em;
+      [part~="barline-single"] [part="barline-glyph"] {
+        display: none;
+      }
+
+      /* Cursive: no CSS fill, glyph shown */
+      [data-typeface="cursive"] [part~="barline-single"] {
         width: auto;
+        background: none;
+      }
+
+      [data-typeface="cursive"] [part~="barline-single"] [part="barline-glyph"] {
+        display: revert;
+      }
+
+      [part="barline-glyph"] {
+        font-family: var(--grigson-barline-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonNotation", serif;
+        font-size: var(--grigson-barline-font-size);
+        font-weight: normal;
+        line-height: 1;
         flex-shrink: 0;
       }
 
