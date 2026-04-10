@@ -28,7 +28,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     if (!document.getElementById(timeSigId)) {
       const style = document.createElement('style');
       style.id = timeSigId;
-      style.textContent = `@font-face{font-family:"GrigsonTimeSig";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7;font-weight:normal;font-style:normal}`;
+      style.textContent = `@font-face{font-family:"GrigsonTimeSig";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E500-E501;font-weight:normal;font-style:normal}`;
       document.head.appendChild(style);
     }
 
@@ -63,7 +63,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       style.textContent = [
         `@font-face{font-family:"GrigsonCursive";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
         `@font-face{font-family:"GrigsonCursive";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaTimeSigWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaTimeSigWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E500-E501;font-weight:normal;font-style:normal}`,
       ].join('\n');
       document.head.appendChild(style);
     }

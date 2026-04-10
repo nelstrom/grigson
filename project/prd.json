@@ -2213,7 +2213,8 @@
       "In _ensureFontFaces(), extend the GrigsonTimeSig @font-face unicode-range to include U+E500-E501",
       "Extend the GrigsonCursive Petaluma @font-face unicode-range to include U+E500-E501",
       "Run pnpm build to confirm no errors"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "simile-glyph-css",

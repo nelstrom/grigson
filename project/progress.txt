@@ -536,3 +536,6 @@ Added U+E500 (repeat1Bar) and U+E501 (repeat2Bars) SMuFL codepoints to the font 
 
 Replaced SIMILE_SVG inline SVG with SIMILE_CHAR = String.fromCodePoint(0xe500) in html.ts. Updated the simile render call and updated the test assertion from '<svg' to the U+E500 codepoint character.
 
+## simile-glyph-font-faces
+
+Extended GrigsonTimeSig @font-face unicode-range from U+1D7CE-1D7D7 to U+1D7CE-1D7D7,U+E500-E501 so the Bravura subset covers simile mark glyphs. Extended GrigsonCursive Petaluma @font-face unicode-range similarly to U+1D7CE-1D7D7,U+E500-E501 so the Petaluma WOFF2 subset (which already contains U+E500-E501) is used for simile glyphs in cursive typeface.
