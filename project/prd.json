@@ -2267,7 +2267,8 @@
       "Extend GrigsonJazz unicodes to include U+E030,U+E040-E042",
       "Run: node scripts/gen-jazz-subsets.mjs",
       "Delete the old packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts (replaced by grigson-petaluma-notation-subset.ts)"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "barline-glyph-renderer",

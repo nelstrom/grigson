@@ -65,6 +65,11 @@ IMPORT = {
     # simile marks at native SMuFL PUA codepoints
     0xE500: 'uniE500',   # repeat1Bar
     0xE501: 'uniE501',   # repeat2Bars
+    # barlines and repeat signs at native SMuFL PUA codepoints
+    0xE030: 'uniE030',   # barlineSingle
+    0xE040: 'uniE040',   # repeatLeft (start repeat)
+    0xE041: 'uniE041',   # repeatRight (end repeat)
+    0xE042: 'uniE042',   # repeatRightLeft (end+start repeat)
 }
 
 for unicode_cp, glyph_name in IMPORT.items():

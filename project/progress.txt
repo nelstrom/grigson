@@ -549,3 +549,15 @@ Added `--grigson-simile-font-size` row to the CSS custom properties table in pac
 
 ## barline-glyph-bravura-subset
 Extended the Bravura WOFF2 subset to include barline and repeat sign codepoints. Updated UNICODES in scripts/gen-bravura-subset.mjs from 'U+266D,U+266F,U+E080-E08B,U+E500,U+E501,U+1D7CE-1D7D7' to 'U+266D,U+266F,U+E030-E033,U+E040-E042,U+E080-E08B,U+E500-E501,U+1D7CE-1D7D7'. Ran the script to regenerate bravura-subset.ts and Bravura-subset.woff2 (7.0 KB). The GrigsonNotation fallback font now has coverage for barlineSingle, barlineDouble, barlineFinal, barlineShortFinal (U+E030–E033) and repeatLeft, repeatRight, repeatRightLeft (U+E040–E042).
+
+## barline-glyph-jazz-subsets
+
+- Added U+E030 (barlineSingle), U+E040 (repeatLeft), U+E041 (repeatRight), U+E042 (repeatRightLeft) to the IMPORT dict in `scripts/reencode-finale-jazz.mjs` and regenerated `scripts/fonts/GrigsonJazz.otf`.
+- In `scripts/gen-jazz-subsets.mjs`:
+  - Renamed the Petaluma entry: outTs → `grigson-petaluma-notation-subset.ts`, pkgWoff2Name → `GrigsonPetaluma-notation-subset.woff2`, exportName → `grigsonPetalumaNotationWoff2`
+  - Extended Petaluma unicodes to `U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501`
+  - Extended GrigsonJazz unicodes to include `U+E030,U+E040-E042`
+- Ran both scripts to regenerate all WOFF2 subsets.
+- Updated `html-element.ts` import from `grigsonPetalumaTimeSigWoff2` / `grigson-petaluma-timesig-subset.js` to `grigsonPetalumaNotationWoff2` / `grigson-petaluma-notation-subset.js`.
+- Deleted `packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts` and `packages/grigson-fonts/fonts/GrigsonPetaluma-timesig-subset.woff2`.
+- `pnpm build` and `pnpm test` (527 tests) pass.

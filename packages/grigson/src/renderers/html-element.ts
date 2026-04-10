@@ -8,7 +8,7 @@ import { notoSansWoff2 } from './noto-sans-subset.js';
 import { notoSerifWoff2 } from './noto-serif-subset.js';
 import { notoSymbols2Woff2 } from './noto-symbols2-subset.js';
 import { petalumaScriptWoff2 } from './petaluma-script-subset.js';
-import { grigsonPetalumaTimeSigWoff2 } from './grigson-petaluma-timesig-subset.js';
+import { grigsonPetalumaNotationWoff2 } from './grigson-petaluma-notation-subset.js';
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
@@ -63,7 +63,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       style.textContent = [
         `@font-face{font-family:"GrigsonCursive";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
         `@font-face{font-family:"GrigsonCursive";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaTimeSigWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E500-E501;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaNotationWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E500-E501;font-weight:normal;font-style:normal}`,
       ].join('\n');
       document.head.appendChild(style);
     }

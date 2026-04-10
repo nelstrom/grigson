@@ -47,7 +47,7 @@ const FONTS = [
     oflUrl: null,
     // Latin-1 covers chord text and quality symbols (° U+00B0, ø U+00F8).
     // ♭♯ and △ are now available at standard Unicode positions via re-encoding.
-    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3,U+1D7CE-1D7D7,U+E500-E501',
+    unicodes: 'U+0000-00FF,U+266D-266F,U+25B3,U+1D7CE-1D7D7,U+E030,U+E040-E042,U+E500-E501',
     outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-jazz-subset.ts'),
     pkgWoff2Name: 'GrigsonJazz-subset.woff2',
     exportName: 'grigsonJazzWoff2',
@@ -60,13 +60,13 @@ const FONTS = [
     // Locally cached — download only if missing.
     fontUrl: 'https://github.com/steinbergmedia/petaluma/raw/master/redist/otf/Petaluma.otf',
     oflUrl: null,
-    // Only the Math Bold digit range — time-sig digits for GrigsonCursive typeface.
-    unicodes: 'U+1D7CE-1D7D7,U+E500-E501',
-    outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-petaluma-timesig-subset.ts'),
-    pkgWoff2Name: 'GrigsonPetaluma-timesig-subset.woff2',
-    exportName: 'grigsonPetalumaTimeSigWoff2',
+    // Math Bold digits, simile marks, and barline/repeat glyphs for GrigsonCursive typeface.
+    unicodes: 'U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501',
+    outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-petaluma-notation-subset.ts'),
+    pkgWoff2Name: 'GrigsonPetaluma-notation-subset.woff2',
+    exportName: 'grigsonPetalumaNotationWoff2',
     credit:
-      'GrigsonPetaluma-timesig, derived from Petaluma by Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
+      'GrigsonPetaluma-notation, derived from Petaluma by Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
     // Petaluma has time-sig glyphs at U+E080–E089 (SMuFL PUA). Add cmap aliases
     // at U+1D7CE–1D7D7 (Math Bold) so pyftsubset can find them.
     preprocessPy: `\
