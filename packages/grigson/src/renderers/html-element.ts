@@ -189,6 +189,14 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         margin-right: 0.4em;
       }
 
+      [part~="barline-position-end"] {
+        justify-self: end;
+      }
+
+      [part~="barline-position-mid"] {
+        justify-self: center;
+      }
+
       /* Single barline: thin vertical fill */
       [part~="barline-single"] {
         width: var(--grigson-barline-width);

@@ -349,8 +349,14 @@ const BARLINE_GLYPHS: Partial<Record<BarlineKind, string>> = {
   endRepeatStartRepeat: String.fromCodePoint(0xe042), // repeatRightLeft
 };
 
-function renderBarline(barline: Barline, col: number, showTimeSig?: TimeSignature): string {
+function renderBarline(
+  barline: Barline,
+  col: number,
+  position: 'start' | 'mid' | 'end',
+  showTimeSig?: TimeSignature,
+): string {
   const kindPart = `barline-${barline.kind}`;
+  const posPart = `barline-position-${position}`;
   const style = `style="grid-column: ${col}"`;
   const glyph = BARLINE_GLYPHS[barline.kind] ?? '';
   const glyphHtml = glyph ? `<span part="barline-glyph">${glyph}</span>` : '';
@@ -359,7 +365,7 @@ function renderBarline(barline: Barline, col: number, showTimeSig?: TimeSignatur
     barline.repeatCount !== undefined && barline.repeatCount > 2
       ? `<span part="barline-repeat-count">×${barline.repeatCount}</span>`
       : '';
-  return `<span part="barline ${kindPart}" ${style}>${glyphHtml}${timeSigHtml}${repeatCountHtml}</span>`;
+  return `<span part="barline ${kindPart} ${posPart}" ${style}>${glyphHtml}${timeSigHtml}${repeatCountHtml}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -418,7 +424,12 @@ function renderRow(
   let html = `<div part="row">`;
 
   // Open barline — time sig of the first bar appears here (in the gap cell)
-  html += renderBarline(row.openBarline, rowLayout.openBarlineCol, rowLayout.bars[0]?.showTimeSig);
+  html += renderBarline(
+    row.openBarline,
+    rowLayout.openBarlineCol,
+    'start',
+    rowLayout.bars[0]?.showTimeSig,
+  );
 
   const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
   let prevSlots: BeatSlot[] | null = null;
@@ -451,9 +462,11 @@ function renderRow(
     }
 
     // Close barline — time sig of the next bar appears here (same gap cell, open barline of bar+1)
+    const isLastBar = barIdx === row.bars.length - 1;
     html += renderBarline(
       bar.closeBarline,
       barLayout.closeBarlineCol,
+      isLastBar ? 'end' : 'mid',
       rowLayout.bars[barIdx + 1]?.showTimeSig,
     );
     prevSlots = bar.slots;
