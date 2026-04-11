@@ -103,6 +103,19 @@ for table in font['cmap'].tables:
         break
 print(f'Triangle glyph for U+25B3: {triangle_glyph}')
 
+# ── 2b. Repeat barline aliases U+E040/E041 → uniE04C/uniE04D ─────────────────
+# U+E04C and U+E04D are compact repeat barlines that suit the cursive aesthetic
+# better than the large sweeping glyphs at U+E040/E041.
+repeat_start_glyph = None
+repeat_end_glyph = None
+for table in font['cmap'].tables:
+    if repeat_start_glyph is None:
+        repeat_start_glyph = table.cmap.get(0xE04C)
+    if repeat_end_glyph is None:
+        repeat_end_glyph = table.cmap.get(0xE04D)
+print(f'Repeat start glyph for U+E040: {repeat_start_glyph}')
+print(f'Repeat end glyph for U+E041: {repeat_end_glyph}')
+
 # ── 3. Copy oslash from PetalumaScript ────────────────────────────────────────
 ps = TTFont(${JSON.stringify(join(FONTS_DIR, 'PetalumaScript.otf'))})
 oslash_name = ps.getBestCmap().get(0x00F8)
@@ -139,6 +152,10 @@ print(f'Copied oslash glyph from PetalumaScript (width={oslash_width})')
 bmp_aliases = {}
 if triangle_glyph:
     bmp_aliases[0x25B3] = triangle_glyph
+if repeat_start_glyph:
+    bmp_aliases[0xE040] = repeat_start_glyph
+if repeat_end_glyph:
+    bmp_aliases[0xE041] = repeat_end_glyph
 bmp_aliases[0x00F8] = oslash_name
 
 for table in font['cmap'].tables:
