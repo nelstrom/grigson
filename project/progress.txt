@@ -619,3 +619,25 @@ Changes:
 
 Verified: 1532 glyphs extracted from GrigsonPetaluma.otf; all 19 target codepoints report
 PRESENT in the generated `grigson-petaluma/index.html`. All tests pass (531 tests).
+
+## grigson-petaluma-oslash-triangle
+
+Re-encoded GrigsonPetaluma to include ø (U+00F8) and △ (U+25B3), removing the need for
+NotoSansSymbols2 as a fallback in GrigsonCursive.
+
+Changes:
+- `scripts/gen-jazz-subsets.mjs`: Updated Petaluma preprocessing script to:
+  1. Alias the triangle glyph (uniE0BD) to U+25B3 via cmap
+  2. Copy the oslash glyph from PetalumaScript.otf into the font at U+00F8, using
+     T2CharStringPen to replay the contour and a non-indexed CharStrings rebuild to insert it
+  Key bug fixed: `font.getGlyphOrder()` returns the same list object as `target_top.charset`;
+  using `list(font.getGlyphOrder())` to copy before charset.append prevents a double-append
+  that inflated glyphOrder by 2 and broke pyftsubset's hmtx decompile.
+  Extended subset unicode-range to include U+00F8 and U+25B3.
+- `packages/grigson/src/renderers/html-element.ts`: GrigsonCursive font-face cascade updated —
+  removed NotoSansSymbols2 entry, extended GrigsonPetaluma notation unicode-range to
+  U+00F8,U+25B3,U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501. Comment updated.
+- `scripts/gen-font-explorer-data.mjs`: Updated GrigsonPetaluma targetCodepoints comments
+  (U+00F8 and U+25B3 no longer marked MISSING); updated PetalumaScript comment re: △ fallback.
+
+Verified: All 33 targetCodepoints PRESENT in GrigsonPetaluma coverage check. All tests pass.

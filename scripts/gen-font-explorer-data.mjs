@@ -113,6 +113,11 @@ const FONTS = [
     // Petaluma SMuFL time-sig digit positions (U+E080–E089) to verify the cmap
     // aliases U+1D7CE–1D7D7 → E080–E089 are correctly wired up.
     targetCodepoints: [
+      // Accidentals and quality symbols
+      0x266d,  // ♭ flat
+      0x266f,  // ♯ sharp
+      0x00f8,  // ø halfDiminished (copied from PetalumaScript during preprocessing)
+      0x25b3,  // △ maj7 (re-encoded from uniE0BD during preprocessing)
       // Time signature digits — Math Bold aliases (what the renderer outputs)
       0x1d7ce, 0x1d7cf, 0x1d7d0, 0x1d7d1, 0x1d7d2,  // 0–4
       0x1d7d3, 0x1d7d4, 0x1d7d5, 0x1d7d6, 0x1d7d7,  // 5–9
@@ -168,7 +173,7 @@ const FONTS = [
     cacheName: 'PetalumaScript.otf',
     fontUrl: null, // already cached
     // ♭♯ are present at standard Unicode in PetalumaScript (no Bravura fallback needed)
-    // △ U+25B3 is NOT covered — NotoSymbols2 is used as fallback in GrigsonCursive
+    // △ U+25B3 is NOT covered by PetalumaScript — provided by GrigsonPetaluma notation subset
     targetCodepoints: [0x266d, 0x266f, 0x266e, 0x25b3],
     sections: [
       { title: 'Non-SMuFL glyphs', filter: cp => cp < 0xE000 },

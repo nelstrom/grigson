@@ -60,22 +60,32 @@ const FONTS = [
     // Locally cached — download only if missing.
     fontUrl: 'https://github.com/steinbergmedia/petaluma/raw/master/redist/otf/Petaluma.otf',
     oflUrl: null,
-    // Math Bold digits, simile marks, and barline/repeat glyphs for GrigsonCursive typeface.
-    unicodes: 'U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501',
+    // Math Bold digits, simile marks, barline/repeat glyphs, plus ø (copied from
+    // PetalumaScript) and △ (re-encoded from U+E0BD) for GrigsonCursive typeface.
+    unicodes: 'U+00F8,U+25B3,U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501',
     outTs: join(ROOT, 'packages/grigson/src/renderers/grigson-petaluma-notation-subset.ts'),
     pkgWoff2Name: 'GrigsonPetaluma-notation-subset.woff2',
     exportName: 'grigsonPetalumaNotationWoff2',
     credit:
       'GrigsonPetaluma-notation, derived from Petaluma by Steinberg Media Technologies GmbH, licensed under the SIL Open Font License 1.1.',
-    // Save the preprocessed font (with Math Bold cmap aliases added) as GrigsonPetaluma.otf.
+    // Save the preprocessed font as GrigsonPetaluma.otf.
     preprocessedSaveName: 'GrigsonPetaluma.otf',
-    // Petaluma has time-sig glyphs at U+E080–E089 (SMuFL PUA). Add cmap aliases
-    // at U+1D7CE–1D7D7 (Math Bold) so pyftsubset can find them.
+    // Preprocessing steps:
+    //   1. Add Math Bold cmap aliases U+1D7CE–1D7D7 → E080–E089 (time-sig digits).
+    //   2. Re-encode the triangle glyph at U+E0BD to also sit at U+25B3 (△ maj7 symbol).
+    //   3. Copy the oslash glyph from PetalumaScript.otf and map it at U+00F8 (ø quality symbol).
     preprocessPy: `\
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
+from fontTools.pens.recordingPen import RecordingPen
+from fontTools.pens.t2CharStringPen import T2CharStringPen
+from fontTools.cffLib import CharStrings
 
 font = TTFont(__INPUT__)
+target_top = font['CFF '].cff.topDictIndex[0]
+old_cs_obj = target_top.CharStrings
+
+# ── 1. Math Bold digit aliases U+1D7CE–1D7D7 → E080–E089 ─────────────────────
 non_bmp = {}
 for i in range(10):
     for table in font['cmap'].tables:
@@ -84,7 +94,55 @@ for i in range(10):
             non_bmp[0x1D7CE + i] = gname
             break
 
+# ── 2. Triangle alias U+25B3 → uniE0BD ────────────────────────────────────────
+triangle_glyph = None
 for table in font['cmap'].tables:
+    gname = table.cmap.get(0xE0BD)
+    if gname:
+        triangle_glyph = gname
+        break
+print(f'Triangle glyph for U+25B3: {triangle_glyph}')
+
+# ── 3. Copy oslash from PetalumaScript ────────────────────────────────────────
+ps = TTFont(${JSON.stringify(join(FONTS_DIR, 'PetalumaScript.otf'))})
+oslash_name = ps.getBestCmap().get(0x00F8)
+ps_gs = ps.getGlyphSet()
+rec = RecordingPen()
+ps_gs[oslash_name].draw(rec)
+oslash_width = ps['hmtx'].metrics[oslash_name][0]
+
+# Rebuild CharStrings in non-indexed mode so we can freely insert glyphs.
+decompiled = {}
+for name in old_cs_obj.charStrings:
+    decompiled[name] = old_cs_obj[name]
+
+pen = T2CharStringPen(oslash_width, old_cs_obj)
+rec.replay(pen)
+oslash_cs = pen.getCharString()
+oslash_cs.private = target_top.Private
+decompiled[oslash_name] = oslash_cs
+
+new_cs_obj = CharStrings(None, None, old_cs_obj.globalSubrs, target_top.Private, None, None)
+new_cs_obj.charStrings = decompiled
+target_top.CharStrings = new_cs_obj
+
+# font.getGlyphOrder() returns the same list object as target_top.charset; copy it first
+# so that charset.append below does not also mutate existing_go.
+existing_go = list(font.getGlyphOrder())
+if oslash_name not in existing_go:
+    target_top.charset.append(oslash_name)
+    font.setGlyphOrder(existing_go + [oslash_name])
+font['hmtx'].metrics[oslash_name] = (oslash_width, 0)
+print(f'Copied oslash glyph from PetalumaScript (width={oslash_width})')
+
+# ── 4. Update cmap tables ──────────────────────────────────────────────────────
+bmp_aliases = {}
+if triangle_glyph:
+    bmp_aliases[0x25B3] = triangle_glyph
+bmp_aliases[0x00F8] = oslash_name
+
+for table in font['cmap'].tables:
+    table.cmap.update(bmp_aliases)
     if table.format in (12, 13):
         table.cmap.update(non_bmp)
 
@@ -98,6 +156,7 @@ if non_bmp and not any(t.format == 12 for t in font['cmap'].tables):
         if t.platformID in (0, 3):
             existing.update(t.cmap)
     existing.update(non_bmp)
+    existing.update(bmp_aliases)
     fmt12.cmap = existing
     font['cmap'].tables.append(fmt12)
 

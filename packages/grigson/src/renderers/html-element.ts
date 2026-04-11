@@ -65,16 +65,16 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     }
 
     // GrigsonCursive — PetalumaScript, a handwritten Real Book-style typeface.
-    // Uses NotoSansSymbols2 for △ (U+25B3) which PetalumaScript does not include.
-    // PetalumaScript has ♭♯ at standard Unicode positions so no Bravura fallback is needed.
+    // GrigsonPetaluma notation subset covers △ (U+25B3) and ø (U+00F8) in addition to
+    // time-sig digits, barlines, and simile marks. PetalumaScript provides all other
+    // Latin-1 text, ♭, and ♯. No NotoSansSymbols2 fallback is needed.
     const jazzId = 'grigson-jazz-font-faces';
     if (!document.getElementById(jazzId)) {
       const style = document.createElement('style');
       style.id = jazzId;
       style.textContent = [
         `@font-face{font-family:"GrigsonCursive";src:url("${petalumaScriptWoff2}") format("woff2");unicode-range:U+0000-00FF,U+266D,U+266F;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonCursive";src:url("${notoSymbols2Woff2}") format("woff2");unicode-range:U+25B3;font-weight:normal;font-style:normal}`,
-        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaNotationWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501;font-weight:normal;font-style:normal}`,
+        `@font-face{font-family:"GrigsonCursive";src:url("${grigsonPetalumaNotationWoff2}") format("woff2");unicode-range:U+00F8,U+25B3,U+1D7CE-1D7D7,U+E030-E033,U+E040-E042,U+E500-E501;font-weight:normal;font-style:normal}`,
       ].join('\n');
       document.head.appendChild(style);
     }
