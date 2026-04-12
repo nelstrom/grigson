@@ -98,6 +98,8 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         color: var(--grigson-color, inherit);
         background: var(--grigson-background, transparent);
         --grigson-row-gap: 1.2em;
+        --grigson-row-border-width: 0px;
+        --grigson-row-border-color: currentColor;
         --grigson-section-gap: 2em;
         --grigson-barline-width: 1.5px;
         --grigson-barline-color: currentColor;
@@ -106,16 +108,21 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-time-sig-font-size: 1.1em;
         --grigson-time-sig-line-height: 0.55;
         --grigson-time-sig-offset: -0.35em;
+        --grigson-chord-offset: 0;
         --grigson-simile-font-size: 1.2em;
+        --grigson-simile-offset: -0.3em;
         --grigson-barline-font-size: 2em;
+        --grigson-barline-glyph-offset: 0.15em;
       }
 
       [data-typeface="cursive"] {
         --grigson-time-sig-font-size: 0.6em;
         --grigson-time-sig-line-height: 1.1;
-        --grigson-time-sig-offset: -0.95em;
+        --grigson-time-sig-offset: -0.4em;
         --grigson-simile-font-size: 1.2em;
         --grigson-barline-font-size: 2em;
+        --grigson-barline-glyph-offset: 0.23em;
+        --grigson-chord-offset: 0.1em;
       }
 
       [data-typeface="serif"] {
@@ -169,7 +176,8 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="row"] {
-        grid-column: 1 / -1;
+        border-top: var(--grigson-row-border-width) solid var(--grigson-row-border-color);
+        border-bottom: var(--grigson-row-border-width) solid var(--grigson-row-border-color);
         display: grid;
         grid-template-columns: subgrid;
         grid-template-rows: 1fr;
@@ -186,11 +194,21 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         align-items: center;
         align-self: stretch;
         position: relative;
-        margin-right: 0.4em;
+        margin-right: 0;
+      }
+
+      [part~="bar-start"] {
+        padding-left: 0.4em;
       }
 
       [part~="barline-position-end"] {
         justify-self: end;
+        margin-right: 0;
+      }
+
+      [part~="barline-position-short-end"] {
+        justify-self: center;
+        margin-right: 0;
       }
 
       [part~="barline-position-mid"] {
@@ -214,7 +232,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [data-typeface="cursive"] [part~="barline-single"] [part="barline-glyph"] {
-        display: revert;
+        display: flex;
       }
 
       [part="barline-glyph"] {
@@ -230,11 +248,6 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         font-size: var(--grigson-barline-font-size);
         font-weight: normal;
         line-height: 1;
-      }
-
-      [part~="barline-startRepeat"] [part="barline-glyph-inner"],
-      [part~="barline-endRepeat"] [part="barline-glyph-inner"],
-      [part~="barline-endRepeatStartRepeat"] [part="barline-glyph-inner"] {
         transform: translateY(var(--grigson-barline-glyph-offset, 0.15em));
       }
 
@@ -247,16 +260,18 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         white-space: nowrap;
       }
 
-      [part="slot"] {
+      [part~="slot"] {
         display: flex;
         align-items: baseline;
         gap: 0.15em;
         overflow: hidden;
+        transform: translateY(var(--grigson-chord-offset));
       }
 
-      [part="dot"] {
+      [part~="dot"] {
         padding-left: 0.3em;
         opacity: 0.4;
+        transform: translateY(var(--grigson-chord-offset));
       }
 
       [part="chord-root"] {
@@ -319,12 +334,13 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         display: block;
       }
 
-      [part="simile"] {
+      [part~="simile"] {
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: var(--grigson-simile-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonTimeSig", serif;
         font-size: var(--grigson-simile-font-size);
+        transform: translateY(var(--grigson-simile-offset));
       }
     `;
   }

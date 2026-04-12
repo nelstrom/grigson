@@ -349,7 +349,11 @@ const BARLINE_GLYPHS: Partial<Record<BarlineKind, string>> = {
   endRepeatStartRepeat: String.fromCodePoint(0xe042), // repeatRightLeft
 };
 
-function renderBarline(barline: Barline, col: number, position: 'start' | 'mid' | 'end'): string {
+function renderBarline(
+  barline: Barline,
+  col: number,
+  position: 'start' | 'mid' | 'end' | 'short-end',
+): string {
   const kindPart = `barline-${barline.kind}`;
   const posPart = `barline-position-${position}`;
   const style = `style="grid-column: ${col}"`;
@@ -416,8 +420,11 @@ function renderRow(
   flatChar: string,
   sharpChar: string,
   mode: AccidentalsMode,
+  sectionMaxCol: number,
 ): string {
-  let html = `<div part="row">`;
+  const rowEndCol = rowLayout.bars[rowLayout.bars.length - 1].closeBarlineCol;
+  const isFullRow = rowEndCol === sectionMaxCol;
+  let html = `<div part="row" style="grid-column: 1 / ${rowEndCol + 1}">`;
 
   // Open barline
   html += renderBarline(row.openBarline, rowLayout.openBarlineCol, 'start');
@@ -434,7 +441,7 @@ function renderRow(
     if (isSimile) {
       const startCol = barLayout.slots[0]?.col ?? barLayout.closeBarlineCol - 1;
       const span = barLayout.closeBarlineCol - startCol;
-      html += `<span part="simile" style="grid-column: ${startCol} / span ${span}">${SIMILE_CHAR}</span>`;
+      html += `<span part="simile bar-start" style="grid-column: ${startCol} / span ${span}">${SIMILE_CHAR}</span>`;
     } else {
       for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
         const slotLayout = barLayout.slots[slotIdx];
@@ -443,19 +450,23 @@ function renderRow(
         const slot: BeatSlot | undefined = bar.slots[srcIdx];
         const timeSigPrefix =
           slotIdx === 0 && barLayout.showTimeSig ? renderTimeSig(barLayout.showTimeSig) : '';
+        const isBarStart = slotIdx === 0;
 
         if (slotLayout.implicit || slot?.type === 'dot') {
-          html += `<span part="dot" style="grid-column: ${col} / span 1">${timeSigPrefix}/</span>`;
+          const dotPart = isBarStart ? 'dot bar-start' : 'dot';
+          html += `<span part="${dotPart}" style="grid-column: ${col} / span 1">${timeSigPrefix}/</span>`;
         } else if (slot) {
           // chord slot
           const slotContent = renderChord(slot.chord, preset, flatChar, sharpChar, mode);
-          html += `<span part="slot" style="grid-column: ${col} / span ${span}">${timeSigPrefix}${slotContent}</span>`;
+          const slotPart = isBarStart ? 'slot bar-start' : 'slot';
+          html += `<span part="${slotPart}" style="grid-column: ${col} / span ${span}">${timeSigPrefix}${slotContent}</span>`;
         }
       }
     }
 
     const isLastBar = barIdx === row.bars.length - 1;
-    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol, isLastBar ? 'end' : 'mid');
+    const closePosition = isLastBar ? (isFullRow ? 'end' : 'short-end') : 'mid';
+    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol, closePosition);
     prevSlots = bar.slots;
   }
 
@@ -513,10 +524,30 @@ export class HtmlRenderer implements GrigsonRenderer {
         html += `<h2 part="section-label">${section.label}</h2>`;
       }
 
-      for (const item of section.content ?? section.rows) {
+      // Compute the widest row in this section so short rows can be identified correctly.
+      const items = section.content ?? section.rows;
+      let sectionMaxCol = 0;
+      for (const item of items) {
         if (item.type === 'row') {
           const rowLayout = layout.rows.get(item)!;
-          html += renderRow(item, rowLayout, preset, this.config, flatChar, sharpChar, mode);
+          const col = rowLayout.bars[rowLayout.bars.length - 1].closeBarlineCol;
+          if (col > sectionMaxCol) sectionMaxCol = col;
+        }
+      }
+
+      for (const item of items) {
+        if (item.type === 'row') {
+          const rowLayout = layout.rows.get(item)!;
+          html += renderRow(
+            item,
+            rowLayout,
+            preset,
+            this.config,
+            flatChar,
+            sharpChar,
+            mode,
+            sectionMaxCol,
+          );
         }
         // comments are intentionally omitted
       }

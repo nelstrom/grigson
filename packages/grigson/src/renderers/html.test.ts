@@ -482,7 +482,7 @@ describe('HtmlRenderer', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
       // The time-sig span must appear inside a slot span.
       // Check by ensuring 'part="time-sig"' follows 'part="slot"' without an intervening 'part="barline'
-      const slotPos = html.indexOf('part="slot"');
+      const slotPos = html.indexOf('part="slot');
       const timeSigPos = html.indexOf('part="time-sig"');
       expect(timeSigPos).toBeGreaterThan(slotPos);
     });
@@ -535,18 +535,18 @@ describe('HtmlRenderer', () => {
     it('longhand (default): renders identical consecutive bars as full chords', () => {
       const r = new HtmlRenderer();
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
-      expect(html).not.toContain('part="simile"');
+      expect(html).not.toContain('part="simile');
       // Both bars should render as chord slots
-      expect(html.match(/part="slot"/g)?.length).toBe(2);
+      expect(html.match(/part="slot[ "]/g)?.length).toBe(2);
     });
 
     it('shorthand: renders second identical bar as simile mark (glyph)', () => {
       const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
-      expect(html).toContain('part="simile"');
+      expect(html).toContain('part="simile');
       expect(html).toContain(String.fromCodePoint(0xe500));
       // Only the first bar renders as a chord slot
-      expect(html.match(/part="slot"/g)?.length).toBe(1);
+      expect(html.match(/part="slot[ "]/g)?.length).toBe(1);
     });
 
     it('shorthand: first bar of a row is never rendered as simile', () => {
@@ -554,16 +554,16 @@ describe('HtmlRenderer', () => {
       // Two rows, each starting with C — the first bar of each row must not be simile
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n| C | C |\n'));
       // Each row has 2 bars; second bar of each row is simile = 2 simile marks
-      expect(html.match(/part="simile"/g)?.length).toBe(2);
+      expect(html.match(/part="simile[ "]/g)?.length).toBe(2);
       // Each row's first bar is a chord slot = 2 chord slots
-      expect(html.match(/part="slot"/g)?.length).toBe(2);
+      expect(html.match(/part="slot[ "]/g)?.length).toBe(2);
     });
 
     it('shorthand: non-identical bars do not trigger simile', () => {
       const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | Am |\n'));
-      expect(html).not.toContain('part="simile"');
-      expect(html.match(/part="slot"/g)?.length).toBe(2);
+      expect(html).not.toContain('part="simile');
+      expect(html.match(/part="slot[ "]/g)?.length).toBe(2);
     });
   });
 

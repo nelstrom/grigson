@@ -231,6 +231,8 @@ Set these on the `<grigson-chart>` element or any ancestor.
 | `--grigson-color`                     | `inherit`                      | Text and barline colour                                                                        |
 | `--grigson-background`                | `transparent`                  | Background of the host element                                                                 |
 | `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows                                                                      |
+| `--grigson-row-border-width`          | `0px`                          | Width of the top and bottom border on each row; set to e.g. `1px` to enable                    |
+| `--grigson-row-border-color`          | `currentColor`                 | Colour of the row top/bottom border                                                            |
 | `--grigson-section-gap`               | `2em`                          | Top margin before each section label                                                           |
 | `--grigson-barline-width`             | `1.5px`                        | Barline stroke width                                                                           |
 | `--grigson-barline-color`             | `currentColor`                 | Barline colour                                                                                 |
