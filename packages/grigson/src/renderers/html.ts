@@ -257,6 +257,7 @@ function normalizeAccidentals(text: string): string {
 }
 
 type AccidentalsMode = 'unicode' | 'ascii';
+type SlashStyle = 'horizontal' | 'diagonal' | 'ascii';
 
 function renderAccidental(acc: string, flatChar: string, sharpChar: string): string {
   return acc.replace(/b/g, flatChar).replace(/#/g, sharpChar);
@@ -309,6 +310,7 @@ function renderChord(
   flatChar: string,
   sharpChar: string,
   mode: AccidentalsMode,
+  slashStyle: SlashStyle = 'horizontal',
 ): string {
   if (chord.bass) {
     const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
@@ -324,8 +326,9 @@ function renderChord(
     } else {
       bassHtml = renderAccidental(chord.bass, flatChar, sharpChar);
     }
+    const styleAttr = ` data-slash-style="${slashStyle}"`;
     return (
-      `<span part="chord chord-slash">` +
+      `<span part="chord chord-slash"${styleAttr}>` +
       `<span part="chord-top">${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>` +
       `<span part="chord-fraction-line"></span>` +
       `<span part="chord-bass">${bassHtml}</span>` +
@@ -420,6 +423,7 @@ function renderRow(
   flatChar: string,
   sharpChar: string,
   mode: AccidentalsMode,
+  slashStyle: SlashStyle,
   sectionMaxCol: number,
 ): string {
   const rowEndCol = rowLayout.bars[rowLayout.bars.length - 1].closeBarlineCol;
@@ -457,7 +461,14 @@ function renderRow(
           html += `<span part="${dotPart}" style="grid-column: ${col} / span 1">${timeSigPrefix}/</span>`;
         } else if (slot) {
           // chord slot
-          const slotContent = renderChord(slot.chord, preset, flatChar, sharpChar, mode);
+          const slotContent = renderChord(
+            slot.chord,
+            preset,
+            flatChar,
+            sharpChar,
+            mode,
+            slashStyle,
+          );
           const slotPart = isBarStart ? 'slot bar-start' : 'slot';
           html += `<span part="${slotPart}" style="grid-column: ${col} / span ${span}">${timeSigPrefix}${slotContent}</span>`;
         }
@@ -504,6 +515,7 @@ export class HtmlRenderer implements GrigsonRenderer {
   render(song: Song): string {
     const preset = sanitizePreset(resolvePreset(this.config.notation?.preset));
     const mode: AccidentalsMode = this.config.accidentals === 'ascii' ? 'ascii' : 'unicode';
+    const slashStyle: SlashStyle = this.config.slashStyle ?? 'diagonal';
     const flatChar = mode === 'unicode' ? '♭' : 'b';
     const sharpChar = mode === 'unicode' ? '♯' : '#';
     const layout = computeGlobalLayout(song);
@@ -546,6 +558,7 @@ export class HtmlRenderer implements GrigsonRenderer {
             flatChar,
             sharpChar,
             mode,
+            slashStyle,
             sectionMaxCol,
           );
         }

@@ -412,6 +412,29 @@ describe('HtmlRenderer', () => {
       expect(html).not.toContain('♭');
       expect(html).toMatch(/part="chord-bass"/);
     });
+
+    it('slashStyle="horizontal" adds data-slash-style="horizontal"', () => {
+      const r = new HtmlRenderer({ slashStyle: 'horizontal' });
+      const html = r.render(parseSong('| G/B |\n'));
+      expect(html).toContain('data-slash-style="horizontal"');
+    });
+
+    it('slashStyle="diagonal" adds data-slash-style="diagonal"', () => {
+      const r = new HtmlRenderer({ slashStyle: 'diagonal' });
+      const html = r.render(parseSong('| G/B |\n'));
+      expect(html).toContain('data-slash-style="diagonal"');
+    });
+
+    it('slashStyle="ascii" adds data-slash-style="ascii"', () => {
+      const r = new HtmlRenderer({ slashStyle: 'ascii' });
+      const html = r.render(parseSong('| G/B |\n'));
+      expect(html).toContain('data-slash-style="ascii"');
+    });
+
+    it('default (no slashStyle) uses diagonal', () => {
+      const html = renderer.render(parseSong('| G/B |\n'));
+      expect(html).toContain('data-slash-style="diagonal"');
+    });
   });
 
   describe('quality-accidental wrapping', () => {

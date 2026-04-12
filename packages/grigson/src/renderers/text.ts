@@ -13,6 +13,7 @@ export interface TextRendererConfig {
     output?: 'shorthand' | 'longhand';
   };
   accidentals?: 'unicode' | 'ascii';
+  slashStyle?: 'horizontal' | 'diagonal' | 'ascii';
 }
 
 // ASCII-safe defaults used when no preset is specified — values must round-trip

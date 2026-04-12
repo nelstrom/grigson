@@ -12,7 +12,7 @@ import { grigsonPetalumaNotationWoff2 } from './grigson-petaluma-notation-subset
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset', 'simile-output', 'typeface', 'accidentals'];
+    return ['notation-preset', 'simile-output', 'typeface', 'accidentals', 'slash-style'];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
@@ -113,6 +113,9 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-simile-offset: -0.3em;
         --grigson-barline-font-size: 2em;
         --grigson-barline-glyph-offset: 0.15em;
+        --grigson-slash-angle: 35deg;
+        --grigson-slash-chord-offset: -0.25em;
+        --grigson-slash-bass-offset: 0.25em;
       }
 
       [data-typeface="cursive"] {
@@ -293,7 +296,8 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         margin-right: 0.05em;
       }
 
-      [part="chord-slash"] {
+      /* ── Slash chord: horizontal (default) ──────────────────────── */
+      [part~="chord-slash"] {
         display: inline-flex;
         flex-direction: column;
         align-items: center;
@@ -306,6 +310,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="chord-fraction-line"] {
+        display: block;
         width: 100%;
         height: 1px;
         background: var(--grigson-barline-color);
@@ -313,6 +318,75 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
 
       [part="chord-bass"] {
         font-size: 0.85em;
+      }
+
+      /* ── Slash chord: horizontal ────────────────────────────────── */
+      [part~="chord-slash"][data-slash-style="horizontal"] {
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+      }
+
+      [part~="chord-slash"][data-slash-style="horizontal"] [part="chord-fraction-line"] {
+        display: block;
+        width: 100%;
+        height: 1px;
+        background: var(--grigson-barline-color);
+      }
+
+      /* ── Slash chord: diagonal (Real Book style) ─────────────────── */
+      [part~="chord-slash"][data-slash-style="diagonal"] {
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+      }
+
+      [part~="chord-slash"][data-slash-style="diagonal"] [part="chord-top"] {
+        align-self: flex-start;
+        transform: translateY(var(--grigson-slash-chord-offset));
+      }
+
+      [part~="chord-slash"][data-slash-style="diagonal"] [part="chord-fraction-line"] {
+        position: relative;
+        display: inline-block;
+        width: 0.5em;
+        height: 1.2em;
+        background: none;
+        overflow: visible;
+      }
+
+      [part~="chord-slash"][data-slash-style="diagonal"] [part="chord-fraction-line"]::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        background: currentColor;
+        transform: rotate(var(--grigson-slash-angle));
+        transform-origin: center;
+      }
+
+      [part~="chord-slash"][data-slash-style="diagonal"] [part="chord-bass"] {
+        align-self: flex-end;
+        transform: translateY(var(--grigson-slash-bass-offset));
+      }
+
+      /* ── Slash chord: ascii ──────────────────────────────────────── */
+      [part~="chord-slash"][data-slash-style="ascii"] {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0;
+      }
+
+      [part~="chord-slash"][data-slash-style="ascii"] [part="chord-fraction-line"] {
+        width: auto;
+        height: auto;
+        background: none;
+      }
+
+      [part~="chord-slash"][data-slash-style="ascii"] [part="chord-fraction-line"]::before {
+        content: "/";
       }
 
       [part="time-sig"] {
@@ -361,6 +435,10 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     const accidentals = this.getAttribute('accidentals');
     if (accidentals === 'ascii' || accidentals === 'unicode') {
       config.accidentals = accidentals;
+    }
+    const slashStyle = this.getAttribute('slash-style');
+    if (slashStyle === 'horizontal' || slashStyle === 'diagonal' || slashStyle === 'ascii') {
+      config.slashStyle = slashStyle;
     }
 
     const renderer = new HtmlRenderer(config);
