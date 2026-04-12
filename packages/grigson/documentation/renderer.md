@@ -188,7 +188,7 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 | `chord-accidental`             | `<span>`    | Accidental inside a root or bass note; carries `data-glyph="unicode"` or `data-glyph="ascii"`                      |
 | `chord-quality`                | `<span>`    | Quality suffix, e.g. "m", "△", "ø"                                                                                 |
 | `quality-accidental`           | `<span>`    | Accidental within a quality string (e.g. the ♭ in `7(♭5)`); carries `data-glyph="unicode"` or `data-glyph="ascii"` |
-| `chord-fraction-line`          | `<span>`    | Horizontal rule between numerator and bass in a slash chord                                                        |
+| `chord-fraction-line`          | `<span>`    | Separator between chord and bass; carries `data-slash-style` matching the renderer setting                         |
 | `chord-bass`                   | `<span>`    | Bass note of a slash chord                                                                                         |
 
 ### Unicode notation defaults
@@ -633,6 +633,50 @@ const html = new HtmlRenderer({ accidentals: 'ascii' }).render(song);
 ```
 
 CSS kerning (negative `margin-left`/`margin-right`) is applied automatically to unicode accidentals via `[data-glyph="unicode"]` selectors on `[part="chord-accidental"]` and `[part="quality-accidental"]` spans. ASCII glyphs do not receive kerning.
+
+### `slashStyle`
+
+Controls how slash chords (e.g. `C/E`) are rendered. The style is recorded as a `data-slash-style` attribute on the `[part="chord chord-slash"]` span and drives the CSS layout.
+
+| Value                    | Appearance                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `"diagonal"` _(default)_ | Chord and bass sit inline separated by a diagonal line, styled after the Real Book |
+| `"horizontal"`           | Chord stacked above a horizontal rule, bass below (fraction style)                 |
+| `"ascii"`                | Chord and bass sit inline separated by a plain `/` character                       |
+
+```html
+<!-- Diagonal — Real Book style (default) -->
+<grigson-chart>
+  <grigson-html-renderer></grigson-html-renderer>
+  | Cm7/Bb | G/B |
+</grigson-chart>
+
+<!-- Horizontal — classic Chord Book fraction style -->
+<grigson-chart>
+  <grigson-html-renderer slash-style="horizontal"></grigson-html-renderer>
+  | Cm7/Bb | G/B |
+</grigson-chart>
+
+<!-- ASCII — plain text slash -->
+<grigson-chart>
+  <grigson-html-renderer slash-style="ascii"></grigson-html-renderer>
+  | Cm7/Bb | G/B |
+</grigson-chart>
+```
+
+In the `HtmlRenderer` config object:
+
+```javascript
+const html = new HtmlRenderer({ slashStyle: 'horizontal' }).render(song);
+```
+
+The diagonal style exposes three CSS custom properties for fine-tuning:
+
+| Property                       | Default   | Effect                                                    |
+| ------------------------------ | --------- | --------------------------------------------------------- |
+| `--grigson-slash-angle`        | `35deg`   | Rotation of the diagonal line (positive = `/` lean)       |
+| `--grigson-slash-chord-offset` | `-0.25em` | Vertical nudge applied to the chord part (negative = up)  |
+| `--grigson-slash-bass-offset`  | `0.25em`  | Vertical nudge applied to the bass note (positive = down) |
 
 ### `repeats`
 

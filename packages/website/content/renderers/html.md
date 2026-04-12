@@ -213,7 +213,7 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 | `chord-quality`                | `<span>`    | Quality suffix                                                          |
 | `quality-accidental`           | `<span>`    | Accidental within a quality string                                      |
 | `chord-top`                    | `<span>`    | Upper half of a slash chord                                             |
-| `chord-fraction-line`          | `<span>`    | Dividing line in a slash chord                                          |
+| `chord-fraction-line`          | `<span>`    | Separator between chord and bass; carries `data-slash-style`            |
 | `chord-bass`                   | `<span>`    | Bass note of a slash chord                                              |
 
 ---
@@ -323,6 +323,35 @@ Or via the custom element attribute:
   | Bb7 | Ebmaj7 |
 </grigson-chart>
 ```
+
+### `slashStyle` / `slash-style`
+
+Controls how slash chords (e.g. `C/E`) are rendered.
+
+| Value                    | Appearance                                                            |
+| ------------------------ | --------------------------------------------------------------------- |
+| `'diagonal'` _(default)_ | Chord and bass inline, separated by a diagonal line (Real Book style) |
+| `'horizontal'`           | Chord stacked above a horizontal rule, bass below (fraction style)    |
+| `'ascii'`                | Chord and bass inline, separated by a plain `/` character             |
+
+```javascript
+const html = new HtmlRenderer({ slashStyle: 'horizontal' }).render(song);
+```
+
+```html
+<grigson-chart>
+  <grigson-html-renderer slash-style="horizontal"></grigson-html-renderer>
+  | Cm7/Bb | G/B |
+</grigson-chart>
+```
+
+The diagonal style can be tuned with CSS custom properties:
+
+| Property                       | Default   | Effect                                              |
+| ------------------------------ | --------- | --------------------------------------------------- |
+| `--grigson-slash-angle`        | `35deg`   | Rotation of the diagonal line (positive = `/` lean) |
+| `--grigson-slash-chord-offset` | `-0.25em` | Vertical offset of the chord part (negative = up)   |
+| `--grigson-slash-bass-offset`  | `0.25em`  | Vertical offset of the bass note (positive = down)  |
 
 ### Typeface
 
