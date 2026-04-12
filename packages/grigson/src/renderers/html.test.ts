@@ -478,16 +478,13 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('part="time-sig-den"');
     });
 
-    it('time-sig is rendered inside the barline span, not inside a slot', () => {
+    it('time-sig is rendered inside a slot span, not inside a barline span', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
-      // The time-sig span must appear inside a barline span, not inside a slot span.
-      // Check by ensuring 'part="time-sig"' follows 'part="barline' without an intervening 'part="slot"'
-      const barlinePos = html.indexOf('part="barline');
-      const timeSigPos = html.indexOf('part="time-sig"');
+      // The time-sig span must appear inside a slot span.
+      // Check by ensuring 'part="time-sig"' follows 'part="slot"' without an intervening 'part="barline'
       const slotPos = html.indexOf('part="slot"');
-      expect(timeSigPos).toBeGreaterThan(barlinePos);
-      // time-sig should come before any slot
-      expect(timeSigPos).toBeLessThan(slotPos);
+      const timeSigPos = html.indexOf('part="time-sig"');
+      expect(timeSigPos).toBeGreaterThan(slotPos);
     });
 
     it('time-sig-num and time-sig-den contain the correct Math Bold digits', () => {
@@ -581,15 +578,15 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('part="barline-glyph"');
     });
 
-    it('barline-glyph span contains the SMuFL codepoint for startRepeat', () => {
+    it('barline-glyph-inner span contains the SMuFL codepoint for startRepeat', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n||: C |\n'));
-      expect(html).toContain(`part="barline-glyph">${String.fromCodePoint(0xe040)}`);
+      expect(html).toContain(`part="barline-glyph-inner">${String.fromCodePoint(0xe040)}`);
     });
 
     it('single barline also contains part="barline-glyph" span', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C |\n'));
       expect(html).toContain('part="barline-glyph"');
-      expect(html).toContain(`part="barline-glyph">${String.fromCodePoint(0xe030)}`);
+      expect(html).toContain(`part="barline-glyph-inner">${String.fromCodePoint(0xe030)}`);
     });
   });
 

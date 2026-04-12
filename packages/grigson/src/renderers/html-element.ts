@@ -105,7 +105,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
         --grigson-section-label-font-size: 0.9em;
         --grigson-time-sig-font-size: 1.1em;
         --grigson-time-sig-line-height: 0.55;
-        --grigson-time-sig-top: 37%;
+        --grigson-time-sig-offset: -0.35em;
         --grigson-simile-font-size: 1.2em;
         --grigson-barline-font-size: 2em;
       }
@@ -113,7 +113,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       [data-typeface="cursive"] {
         --grigson-time-sig-font-size: 0.6em;
         --grigson-time-sig-line-height: 1.1;
-        --grigson-time-sig-top: 40%;
+        --grigson-time-sig-offset: -0.95em;
         --grigson-simile-font-size: 1.2em;
         --grigson-barline-font-size: 2em;
       }
@@ -218,11 +218,24 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="barline-glyph"] {
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      [part="barline-glyph-inner"] {
         font-family: var(--grigson-barline-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonNotation", serif;
         font-size: var(--grigson-barline-font-size);
         font-weight: normal;
         line-height: 1;
-        flex-shrink: 0;
+      }
+
+      [part~="barline-startRepeat"] [part="barline-glyph-inner"],
+      [part~="barline-endRepeat"] [part="barline-glyph-inner"],
+      [part~="barline-endRepeatStartRepeat"] [part="barline-glyph-inner"] {
+        transform: translateY(var(--grigson-barline-glyph-offset, 0.15em));
       }
 
       [part="barline-repeat-count"] {
@@ -288,17 +301,17 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       }
 
       [part="time-sig"] {
-        position: relative;
-        top: calc(var(--grigson-time-sig-top) - 50%);
         display: inline-flex;
         flex-direction: column;
         align-items: center;
+        align-self: center;
+        transform: translateY(var(--grigson-time-sig-offset, 0));
         font-family: var(--grigson-time-sig-font-family, var(--grigson-font-family, ${defaultFamily})), "GrigsonTimeSig", serif;
         font-size: var(--grigson-time-sig-font-size);
         font-weight: normal;
         line-height: var(--grigson-time-sig-line-height);
         flex-shrink: 0;
-        padding-left: 0.2em;
+        padding-right: 0.2em;
       }
 
       [part="time-sig-num"],

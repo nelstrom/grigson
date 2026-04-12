@@ -349,23 +349,19 @@ const BARLINE_GLYPHS: Partial<Record<BarlineKind, string>> = {
   endRepeatStartRepeat: String.fromCodePoint(0xe042), // repeatRightLeft
 };
 
-function renderBarline(
-  barline: Barline,
-  col: number,
-  position: 'start' | 'mid' | 'end',
-  showTimeSig?: TimeSignature,
-): string {
+function renderBarline(barline: Barline, col: number, position: 'start' | 'mid' | 'end'): string {
   const kindPart = `barline-${barline.kind}`;
   const posPart = `barline-position-${position}`;
   const style = `style="grid-column: ${col}"`;
   const glyph = BARLINE_GLYPHS[barline.kind] ?? '';
-  const glyphHtml = glyph ? `<span part="barline-glyph">${glyph}</span>` : '';
-  const timeSigHtml = showTimeSig ? renderTimeSig(showTimeSig) : '';
+  const glyphHtml = glyph
+    ? `<span part="barline-glyph"><span part="barline-glyph-inner">${glyph}</span></span>`
+    : '';
   const repeatCountHtml =
     barline.repeatCount !== undefined && barline.repeatCount > 2
       ? `<span part="barline-repeat-count">×${barline.repeatCount}</span>`
       : '';
-  return `<span part="barline ${kindPart} ${posPart}" ${style}>${glyphHtml}${timeSigHtml}${repeatCountHtml}</span>`;
+  return `<span part="barline ${kindPart} ${posPart}" ${style}>${glyphHtml}${repeatCountHtml}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -423,13 +419,8 @@ function renderRow(
 ): string {
   let html = `<div part="row">`;
 
-  // Open barline — time sig of the first bar appears here (in the gap cell)
-  html += renderBarline(
-    row.openBarline,
-    rowLayout.openBarlineCol,
-    'start',
-    rowLayout.bars[0]?.showTimeSig,
-  );
+  // Open barline
+  html += renderBarline(row.openBarline, rowLayout.openBarlineCol, 'start');
 
   const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
   let prevSlots: BeatSlot[] | null = null;
@@ -450,25 +441,21 @@ function renderRow(
         const { col, span } = slotLayout;
         const srcIdx = slotLayout.sourceSlotIdx ?? slotIdx;
         const slot: BeatSlot | undefined = bar.slots[srcIdx];
+        const timeSigPrefix =
+          slotIdx === 0 && barLayout.showTimeSig ? renderTimeSig(barLayout.showTimeSig) : '';
 
         if (slotLayout.implicit || slot?.type === 'dot') {
-          html += `<span part="dot" style="grid-column: ${col} / span 1">/</span>`;
+          html += `<span part="dot" style="grid-column: ${col} / span 1">${timeSigPrefix}/</span>`;
         } else if (slot) {
           // chord slot
           const slotContent = renderChord(slot.chord, preset, flatChar, sharpChar, mode);
-          html += `<span part="slot" style="grid-column: ${col} / span ${span}">${slotContent}</span>`;
+          html += `<span part="slot" style="grid-column: ${col} / span ${span}">${timeSigPrefix}${slotContent}</span>`;
         }
       }
     }
 
-    // Close barline — time sig of the next bar appears here (same gap cell, open barline of bar+1)
     const isLastBar = barIdx === row.bars.length - 1;
-    html += renderBarline(
-      bar.closeBarline,
-      barLayout.closeBarlineCol,
-      isLastBar ? 'end' : 'mid',
-      rowLayout.bars[barIdx + 1]?.showTimeSig,
-    );
+    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol, isLastBar ? 'end' : 'mid');
     prevSlots = bar.slots;
   }
 

@@ -67,7 +67,9 @@ The slot's `grid-column` span is `2b − 1`, where `b` is the number of beat uni
 
 ### Barlines and time signatures
 
-Barlines are placed in gap columns as natural-width flex containers. A simple `|` barline is roughly 1.5 px wide; complex glyphs (`:||:`, etc.) are inline SVGs that expand the gap column to their natural width. A time signature annotation, when present, appears as a flex sibling of the barline SVG inside the same gap cell — so a `||: 3/4` opening never overlaps.
+Barlines are placed in gap columns as natural-width flex containers. A simple `|` barline is roughly 1.5 px wide; complex glyphs (`:||:`, etc.) expand the gap column to their natural width.
+
+A time signature annotation, when present, is rendered as a flex sibling of the chord inside the **first beat slot** of the bar — not inside the barline gap cell. This keeps the time signature immediately adjacent to the first chord with no dead space, and prevents it from overflowing the `auto` gap column when the bar is narrower than expected.
 
 ### Denominator-aware beat units
 
@@ -111,16 +113,16 @@ In a purely 4/4 chart nothing changes. In a chart mixing 4/4 and 6/8, the 4/4 ba
 
       <div part="row">
 
-        <!-- gap col 1: open barline + time sig for this bar -->
-        <span part="barline barline-single" style="grid-column: 1">
+        <!-- gap col 1: open barline -->
+        <span part="barline barline-single" style="grid-column: 1"></span>
+
+        <!-- beat col 2–8: Cm7 spanning 4 effective beats (col 2, span 7) -->
+        <!-- time-sig is a flex sibling of the chord in the first slot -->
+        <span part="slot" style="grid-column: 2 / span 7">
           <span part="time-sig">
             <span part="time-sig-num">𝟒</span>
             <span part="time-sig-den">𝟒</span>
           </span>
-        </span>
-
-        <!-- beat col 2–8: Cm7 spanning 4 effective beats (col 2, span 7) -->
-        <span part="slot" style="grid-column: 2 / span 7">
           <span part="chord">
             <span part="chord-root">C</span>
             <span part="chord-quality"><small>m</small><sup>7</sup></span>
@@ -168,7 +170,9 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 
 ```html
 <span part="barline barline-endRepeat" style="grid-column: 9">
-  <svg …>…</svg>
+  <span part="barline-glyph">
+    <span part="barline-glyph-inner">𝄇</span>
+  </span>
   <span part="barline-repeat-count">×3</span>
 </span>
 ```
@@ -177,38 +181,40 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 
 ## Part names reference
 
-| Part                           | Element     | Description                                                            |
-| ------------------------------ | ----------- | ---------------------------------------------------------------------- |
-| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width`      |
-| `song-header`                  | `<header>`  | Title and key block                                                    |
-| `song-title`                   | `<h1>`      | Song title                                                             |
-| `song-key`                     | `<p>`       | Key in normalised form (e.g. "F major")                                |
-| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                        |
-| `section`                      | `<section>` | One section; `display: contents` so children are direct grid items     |
-| `section-label`                | `<h2>`      | Section heading (omitted when no label)                                |
-| `row`                          | `<div>`     | One row; uses `subgrid`                                                |
-| `barline`                      | `<span>`    | Any barline; always combined with a kind part (see below)              |
-| `barline-single`               | —           | Plain barline `\|`                                                     |
-| `barline-double`               | —           | Double barline `\|\|`                                                  |
-| `barline-final`                | —           | Final barline `\|\|.`                                                  |
-| `barline-startRepeat`          | —           | Start-repeat `\|\|:`                                                   |
-| `barline-endRepeat`            | —           | End-repeat `:\|\|`                                                     |
-| `barline-endRepeatStartRepeat` | —           | Turn-around `:\|\|:`                                                   |
-| `barline-repeat-count`         | `<span>`    | Repeat count label (e.g. "×3") inside an end-repeat                    |
-| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                      |
-| `dot`                          | `<span>`    | Beat-continuation mark rendered as `/`                                 |
-| `simile`                       | `<span>`    | Single-bar repeat mark; spans the full bar width                       |
-| `time-sig`                     | `<span>`    | Stacked time signature fraction                                        |
-| `time-sig-num`                 | `<span>`    | Numerator (Math Bold digits U+1D7CE–U+1D7D7)                           |
-| `time-sig-den`                 | `<span>`    | Denominator (Math Bold digits U+1D7CE–U+1D7D7)                         |
-| `chord`                        | `<span>`    | Chord symbol; gains `chord-slash` when a bass note is present          |
-| `chord-root`                   | `<span>`    | Note name                                                              |
-| `chord-accidental`             | `<span>`    | Accidental in a root or bass note; `data-glyph="unicode"` or `"ascii"` |
-| `chord-quality`                | `<span>`    | Quality suffix                                                         |
-| `quality-accidental`           | `<span>`    | Accidental within a quality string                                     |
-| `chord-top`                    | `<span>`    | Upper half of a slash chord                                            |
-| `chord-fraction-line`          | `<span>`    | Dividing line in a slash chord                                         |
-| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                             |
+| Part                           | Element     | Description                                                             |
+| ------------------------------ | ----------- | ----------------------------------------------------------------------- |
+| `song`                         | `<div>`     | Outermost container; carries `--beat-cols` and `--min-beat-width`       |
+| `song-header`                  | `<header>`  | Title and key block                                                     |
+| `song-title`                   | `<h1>`      | Song title                                                              |
+| `song-key`                     | `<p>`       | Key in normalised form (e.g. "F major")                                 |
+| `song-grid`                    | `<div>`     | CSS Grid container for all rows                                         |
+| `section`                      | `<section>` | One section; `display: contents` so children are direct grid items      |
+| `section-label`                | `<h2>`      | Section heading (omitted when no label)                                 |
+| `row`                          | `<div>`     | One row; uses `subgrid`                                                 |
+| `barline`                      | `<span>`    | Any barline; always combined with a kind part (see below)               |
+| `barline-single`               | —           | Plain barline `\|`                                                      |
+| `barline-double`               | —           | Double barline `\|\|`                                                   |
+| `barline-final`                | —           | Final barline `\|\|.`                                                   |
+| `barline-startRepeat`          | —           | Start-repeat `\|\|:`                                                    |
+| `barline-endRepeat`            | —           | End-repeat `:\|\|`                                                      |
+| `barline-endRepeatStartRepeat` | —           | Turn-around `:\|\|:`                                                    |
+| `barline-glyph`                | `<span>`    | Clipping container for the barline SMuFL glyph; stretches to row height |
+| `barline-glyph-inner`          | `<span>`    | The SMuFL glyph character; shifted via `--grigson-barline-glyph-offset` |
+| `barline-repeat-count`         | `<span>`    | Repeat count label (e.g. "×3") inside an end-repeat                     |
+| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                       |
+| `dot`                          | `<span>`    | Beat-continuation mark rendered as `/`                                  |
+| `simile`                       | `<span>`    | Single-bar repeat mark; spans the full bar width                        |
+| `time-sig`                     | `<span>`    | Stacked time signature fraction                                         |
+| `time-sig-num`                 | `<span>`    | Numerator (Math Bold digits U+1D7CE–U+1D7D7)                            |
+| `time-sig-den`                 | `<span>`    | Denominator (Math Bold digits U+1D7CE–U+1D7D7)                          |
+| `chord`                        | `<span>`    | Chord symbol; gains `chord-slash` when a bass note is present           |
+| `chord-root`                   | `<span>`    | Note name                                                               |
+| `chord-accidental`             | `<span>`    | Accidental in a root or bass note; `data-glyph="unicode"` or `"ascii"`  |
+| `chord-quality`                | `<span>`    | Quality suffix                                                          |
+| `quality-accidental`           | `<span>`    | Accidental within a quality string                                      |
+| `chord-top`                    | `<span>`    | Upper half of a slash chord                                             |
+| `chord-fraction-line`          | `<span>`    | Dividing line in a slash chord                                          |
+| `chord-bass`                   | `<span>`    | Bass note of a slash chord                                              |
 
 ---
 
@@ -216,23 +222,24 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 
 Set these on the `<grigson-chart>` element or any ancestor.
 
-| Property                              | Default                        | Description                                               |
-| ------------------------------------- | ------------------------------ | --------------------------------------------------------- |
-| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font                           |
-| `--grigson-title-font-family`         | inherits                       | Font for the song title                                   |
-| `--grigson-section-label-font-family` | inherits                       | Font for section labels                                   |
-| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers           |
-| `--grigson-color`                     | `inherit`                      | Text and barline colour                                   |
-| `--grigson-background`                | `transparent`                  | Background of the host element                            |
-| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows                                 |
-| `--grigson-section-gap`               | `2em`                          | Top margin before each section label                      |
-| `--grigson-barline-width`             | `1.5px`                        | Barline stroke width                                      |
-| `--grigson-barline-color`             | `currentColor`                 | Barline colour                                            |
-| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                               |
-| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                             |
-| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                   |
-| `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator             |
-| `--grigson-time-sig-top`              | `37%`                          | Vertical position: `50%` = centred, lower values shift up |
+| Property                              | Default                        | Description                                                                                    |
+| ------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font                                                                |
+| `--grigson-title-font-family`         | inherits                       | Font for the song title                                                                        |
+| `--grigson-section-label-font-family` | inherits                       | Font for section labels                                                                        |
+| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers                                                |
+| `--grigson-color`                     | `inherit`                      | Text and barline colour                                                                        |
+| `--grigson-background`                | `transparent`                  | Background of the host element                                                                 |
+| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows                                                                      |
+| `--grigson-section-gap`               | `2em`                          | Top margin before each section label                                                           |
+| `--grigson-barline-width`             | `1.5px`                        | Barline stroke width                                                                           |
+| `--grigson-barline-color`             | `currentColor`                 | Barline colour                                                                                 |
+| `--grigson-barline-glyph-offset`      | `0.15em`                       | Vertical nudge for repeat/complex barline glyphs; corrects for Bravura's ascent-biased metrics |
+| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                                                                    |
+| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                                                                  |
+| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                                                        |
+| `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator                                                  |
+| `--grigson-time-sig-offset`           | `0`                            | Vertical nudge via `translateY`; percentage is relative to the time-sig element's own height   |
 
 Two additional variables are set by the renderer on `part="song"` and control the grid geometry. You can override them, but the renderer computes the right values automatically:
 
