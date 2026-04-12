@@ -110,6 +110,12 @@ permalink: /playground/
         <option value="">Unicode ♭♯ (default)</option>
         <option value="ascii">ASCII b#</option>
       </select>
+      <label for="slash-style-select">Slash chords:</label>
+      <select id="slash-style-select">
+        <option value="">Diagonal (default)</option>
+        <option value="horizontal">Horizontal</option>
+        <option value="ascii">ASCII /</option>
+      </select>
     </span>
   </div>
 
@@ -132,6 +138,7 @@ permalink: /playground/
       preset: z.string().optional(),
       simileOutput: z.enum(['shorthand', 'longhand']).optional(),
       accidentals: z.enum(['ascii', 'unicode']).optional(),
+      slashStyle: z.enum(['horizontal', 'diagonal', 'ascii']).optional(),
     }),
     z.object({ name: z.literal('text') }),
   ]);
@@ -180,6 +187,7 @@ meter: 4/4
     const notationPresetSelect = document.getElementById('notation-preset-select');
     const simileOutputSelect = document.getElementById('simile-output-select');
     const accidentalsSelect = document.getElementById('accidentals-select');
+    const slashStyleSelect = document.getElementById('slash-style-select');
     const htmlOptions = document.getElementById('html-options');
 
     let currentRenderer = null;
@@ -202,6 +210,8 @@ meter: 4/4
         if (simileOutput) currentRenderer.setAttribute('simile-output', simileOutput);
         const accidentals = accidentalsSelect.value;
         if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
+        const slashStyle = slashStyleSelect.value;
+        if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
         htmlOptions.hidden = false;
       }
 
@@ -277,9 +287,10 @@ meter: 4/4
           if (notationPresetSelect.value) config.preset = notationPresetSelect.value;
           if (simileOutputSelect.value) config.simileOutput = simileOutputSelect.value;
           if (accidentalsSelect.value) config.accidentals = accidentalsSelect.value;
+          if (slashStyleSelect.value) config.slashStyle = slashStyleSelect.value;
         }
         const params = new URLSearchParams();
-        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals) {
+        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals || config.slashStyle) {
           params.set('renderer-config', JSON.stringify(config));
         }
         const compressed = compressToEncodedURIComponent(editor.getValue());
@@ -319,6 +330,7 @@ meter: 4/4
     notationPresetSelect.value = initialConfig.preset ?? '';
     simileOutputSelect.value = initialConfig.simileOutput ?? '';
     accidentalsSelect.value = initialConfig.accidentals ?? '';
+    slashStyleSelect.value = initialConfig.slashStyle ?? '';
     applyRenderer();
 
     editor.onDidChangeModelContent(update);
@@ -363,6 +375,16 @@ meter: 4/4
         const accidentals = accidentalsSelect.value;
         if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
         else currentRenderer.removeAttribute('accidentals');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    slashStyleSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'html') {
+        const slashStyle = slashStyleSelect.value;
+        if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
+        else currentRenderer.removeAttribute('slash-style');
         outputElement.update();
       }
       updateURL();
