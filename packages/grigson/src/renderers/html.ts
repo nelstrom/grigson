@@ -420,19 +420,36 @@ function renderBarline(
   barline: Barline,
   col: number,
   position: 'start' | 'mid' | 'end' | 'short-end',
+  spoken: SpokenPreset | null,
 ): string {
   const kindPart = `barline-${barline.kind}`;
   const posPart = `barline-position-${position}`;
   const style = `style="grid-column: ${col}"`;
   const glyph = BARLINE_GLYPHS[barline.kind] ?? '';
+
+  let ariaAttr = '';
+  let glyphAriaHidden = '';
+  let repeatCountAriaHidden = '';
+
+  if (spoken !== null) {
+    const label = spoken.barline(barline.kind, barline.repeatCount);
+    if (label === null) {
+      ariaAttr = ' aria-hidden="true"';
+    } else {
+      ariaAttr = ` aria-label="${label}"`;
+      glyphAriaHidden = ' aria-hidden="true"';
+      repeatCountAriaHidden = ' aria-hidden="true"';
+    }
+  }
+
   const glyphHtml = glyph
-    ? `<span part="barline-glyph"><span part="barline-glyph-inner">${glyph}</span></span>`
+    ? `<span part="barline-glyph"${glyphAriaHidden}><span part="barline-glyph-inner">${glyph}</span></span>`
     : '';
   const repeatCountHtml =
     barline.repeatCount !== undefined && barline.repeatCount > 2
-      ? `<span part="barline-repeat-count">×${barline.repeatCount}</span>`
+      ? `<span part="barline-repeat-count"${repeatCountAriaHidden}>×${barline.repeatCount}</span>`
       : '';
-  return `<span part="barline ${kindPart} ${posPart}" ${style}>${glyphHtml}${repeatCountHtml}</span>`;
+  return `<span part="barline ${kindPart} ${posPart}"${ariaAttr} ${style}>${glyphHtml}${repeatCountHtml}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -497,7 +514,7 @@ function renderRow(
   let html = `<div part="row" style="grid-column: 1 / ${rowEndCol + 1}">`;
 
   // Open barline
-  html += renderBarline(row.openBarline, rowLayout.openBarlineCol, 'start');
+  html += renderBarline(row.openBarline, rowLayout.openBarlineCol, 'start', spoken);
 
   const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
   let prevSlots: BeatSlot[] | null = null;
@@ -549,7 +566,7 @@ function renderRow(
 
     const isLastBar = barIdx === row.bars.length - 1;
     const closePosition = isLastBar ? (isFullRow ? 'end' : 'short-end') : 'mid';
-    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol, closePosition);
+    html += renderBarline(bar.closeBarline, barLayout.closeBarlineCol, closePosition, spoken);
     prevSlots = bar.slots;
   }
 

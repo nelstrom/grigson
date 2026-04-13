@@ -2435,7 +2435,8 @@
       "When label is a string, add aria-label=\"${label}\" to the outer span; add aria-hidden=\"true\" to barline-glyph and barline-repeat-count child spans",
       "Pass spoken to the renderBarline call for row.openBarline in renderRow",
       "Pass spoken to the renderBarline call for bar.closeBarline in renderRow"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-timesig-simile-dot",
