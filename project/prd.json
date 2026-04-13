@@ -2420,7 +2420,8 @@
       "In renderChord, add aria-label=\"${chordAriaLabel(chord, tsBeats, isWholeBar, spoken)}\" on the outer span when spoken is not null",
       "Add aria-hidden=\"true\" to chord-top, chord-fraction-line, chord-bass spans in renderChord",
       "In renderRow chord slot handling, compute effectiveBeats = (slotLayout.span + 1) / 2, tsBeats = effectiveBeats * (barLayout.activeTSig.denominator / beatUnit), isWholeBar = tsBeats === barLayout.activeTSig.numerator, and pass to renderChord"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-barline-aria",

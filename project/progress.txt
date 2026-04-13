@@ -656,3 +656,6 @@ Added accessibility helpers to `packages/grigson/src/renderers/html.ts`:
 - Added exported `DEFAULT_SPOKEN_PRESET` constant with English labels for all 9 qualities, duration(), barline(), timeSig(), and simile
 - In `render()`, resolved `spoken` from config (null when `aria: false`, otherwise spokenPreset or default)
 - Added `beatUnit` and `spoken` parameters to `renderRow` signature and wired them through from `render()`
+
+## accessibility-chord-aria
+Added ARIA attributes to chord rendering in `packages/grigson/src/renderers/html.ts`. All chord child spans (`chord-root`, `chord-accidental`, `chord-quality`, `quality-accidental`, `chord-top`, `chord-fraction-line`, `chord-bass`) now carry `aria-hidden="true"` since they are purely visual. The outer chord span receives `aria-label` from `chordAriaLabel()` when `spoken` is not null. Duration values (`tsBeats`, `isWholeBar`) are computed in `renderRow` from `slotLayout.span` and `barLayout.activeTSig`, then passed down to `renderChord`. Updated one existing test to use a flexible regex pattern to match the `aria-hidden` attribute on `chord-bass`.

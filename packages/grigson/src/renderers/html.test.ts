@@ -397,7 +397,7 @@ describe('HtmlRenderer', () => {
     it('renders bass note inside chord-bass', () => {
       const html = renderer.render(parseSong('| G/B |\n'));
       // chord-bass should contain "B"
-      expect(html).toMatch(/part="chord-bass">B</);
+      expect(html).toMatch(/part="chord-bass"[^>]*>B</);
     });
 
     it('renders bass accidental in chord-bass for flat bass', () => {

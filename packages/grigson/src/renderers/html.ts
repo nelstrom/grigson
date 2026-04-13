@@ -270,7 +270,7 @@ function wrapQualityAccidentals(html: string, mode: AccidentalsMode): string {
   const ascii = mode === 'ascii';
   return html.replace(/[♭♯]/g, (ch) => {
     const glyph = ascii ? (ch === '♭' ? 'b' : '#') : ch;
-    return `<span part="quality-accidental" data-glyph="${mode}">${glyph}</span>`;
+    return `<span part="quality-accidental" data-glyph="${mode}" aria-hidden="true">${glyph}</span>`;
   });
 }
 
@@ -282,15 +282,15 @@ function renderChordRoot(
 ): string {
   const match = root.match(/^([A-G])(b+|#+)?$/);
   if (!match) {
-    return `<span part="chord-root">${renderAccidental(root, flatChar, sharpChar)}</span>`;
+    return `<span part="chord-root" aria-hidden="true">${renderAccidental(root, flatChar, sharpChar)}</span>`;
   }
   const note = match[1];
   const acc = match[2] ?? '';
   if (acc === '') {
-    return `<span part="chord-root">${note}</span>`;
+    return `<span part="chord-root" aria-hidden="true">${note}</span>`;
   }
   const renderedAcc = renderAccidental(acc, flatChar, sharpChar);
-  return `<span part="chord-root">${note}<span part="chord-accidental" data-glyph="${mode}">${renderedAcc}</span></span>`;
+  return `<span part="chord-root" aria-hidden="true">${note}<span part="chord-accidental" data-glyph="${mode}" aria-hidden="true">${renderedAcc}</span></span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -356,7 +356,9 @@ function renderChordInner(
   const rootHtml = renderChordRoot(chord.root, flatChar, sharpChar, mode);
   const rawQuality = preset[chord.quality as keyof NotationPreset] ?? '';
   const qualitySymbol = rawQuality ? wrapQualityAccidentals(rawQuality, mode) : '';
-  const qualityHtml = qualitySymbol ? `<span part="chord-quality">${qualitySymbol}</span>` : '';
+  const qualityHtml = qualitySymbol
+    ? `<span part="chord-quality" aria-hidden="true">${qualitySymbol}</span>`
+    : '';
   return rootHtml + qualityHtml;
 }
 
@@ -367,7 +369,13 @@ function renderChord(
   sharpChar: string,
   mode: AccidentalsMode,
   slashStyle: SlashStyle = 'horizontal',
+  tsBeats: number = 1,
+  isWholeBar: boolean = false,
+  spoken: SpokenPreset | null = null,
 ): string {
+  const ariaLabelAttr = spoken
+    ? ` aria-label="${chordAriaLabel(chord, tsBeats, isWholeBar, spoken)}"`
+    : '';
   if (chord.bass) {
     const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
     let bassHtml: string;
@@ -377,21 +385,21 @@ function renderChord(
       if (bassAcc === '') {
         bassHtml = bassNote;
       } else {
-        bassHtml = `${bassNote}<span part="chord-accidental" data-glyph="${mode}">${renderAccidental(bassAcc, flatChar, sharpChar)}</span>`;
+        bassHtml = `${bassNote}<span part="chord-accidental" data-glyph="${mode}" aria-hidden="true">${renderAccidental(bassAcc, flatChar, sharpChar)}</span>`;
       }
     } else {
       bassHtml = renderAccidental(chord.bass, flatChar, sharpChar);
     }
     const styleAttr = ` data-slash-style="${slashStyle}"`;
     return (
-      `<span part="chord chord-slash"${styleAttr}>` +
-      `<span part="chord-top">${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>` +
-      `<span part="chord-fraction-line"></span>` +
-      `<span part="chord-bass">${bassHtml}</span>` +
+      `<span part="chord chord-slash"${styleAttr}${ariaLabelAttr}>` +
+      `<span part="chord-top" aria-hidden="true">${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>` +
+      `<span part="chord-fraction-line" aria-hidden="true"></span>` +
+      `<span part="chord-bass" aria-hidden="true">${bassHtml}</span>` +
       `</span>`
     );
   }
-  return `<span part="chord">${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>`;
+  return `<span part="chord"${ariaLabelAttr}>${renderChordInner(chord, preset, flatChar, sharpChar, mode)}</span>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -519,6 +527,9 @@ function renderRow(
           html += `<span part="${dotPart}" style="grid-column: ${col} / span 1">${timeSigPrefix}/</span>`;
         } else if (slot) {
           // chord slot
+          const effectiveBeats = (slotLayout.span + 1) / 2;
+          const tsBeats = effectiveBeats * (barLayout.activeTSig.denominator / beatUnit);
+          const isWholeBar = tsBeats === barLayout.activeTSig.numerator;
           const slotContent = renderChord(
             slot.chord,
             preset,
@@ -526,6 +537,9 @@ function renderRow(
             sharpChar,
             mode,
             slashStyle,
+            tsBeats,
+            isWholeBar,
+            spoken,
           );
           const slotPart = isBarStart ? 'slot bar-start' : 'slot';
           html += `<span part="${slotPart}" style="grid-column: ${col} / span ${span}">${timeSigPrefix}${slotContent}</span>`;
