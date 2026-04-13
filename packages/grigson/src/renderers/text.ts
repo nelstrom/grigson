@@ -1,8 +1,21 @@
-import type { Song, Row, Bar, Chord, Barline, BeatSlot } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline, BeatSlot, BarlineKind } from '../parser/types.js';
 import { type NotationPreset, resolvePreset } from '../notation/registry.js';
 
 export interface GrigsonRenderer {
   render(song: Song): string;
+}
+
+export interface SpokenPreset {
+  /** Spoken suffix for each quality. Empty string = root only (major chord). */
+  qualities: Record<string, string>;
+  /** Format the duration part of a chord label. */
+  duration(beats: number, isWholeBar: boolean): string;
+  /** Label for a barline (null = hide with aria-hidden). */
+  barline(kind: BarlineKind, repeatCount?: number): string | null;
+  /** Label for a time signature. */
+  timeSig(numerator: number, denominator: number): string;
+  /** Label for a simile (bar repeat) mark. */
+  simile: string;
 }
 
 export interface TextRendererConfig {
@@ -14,6 +27,10 @@ export interface TextRendererConfig {
   };
   accidentals?: 'unicode' | 'ascii';
   slashStyle?: 'horizontal' | 'diagonal' | 'ascii';
+  /** Set false to suppress all aria-* attributes. Default: true. */
+  aria?: boolean;
+  /** Override the spoken-word labels used in aria attributes. Defaults to English. */
+  spokenPreset?: SpokenPreset;
 }
 
 // ASCII-safe defaults used when no preset is specified — values must round-trip

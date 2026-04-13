@@ -2367,5 +2367,130 @@
       "Run pnpm build and pnpm test — confirm all pass"
     ],
     "passes": true
+  },
+  {
+    "id": "accessibility-spoken-preset-type",
+    "category": "functional",
+    "description": "Add SpokenPreset interface and aria/spokenPreset fields to TextRendererConfig",
+    "detail": "Add the exported SpokenPreset interface (qualities, duration, barline, timeSig, simile fields) and two new fields (aria?: boolean, spokenPreset?: SpokenPreset) to TextRendererConfig in packages/grigson/src/renderers/text.ts. Import BarlineKind from parser/types.js for the barline function signature. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "Import BarlineKind from '../parser/types.js' in text.ts",
+      "Add exported SpokenPreset interface above TextRendererConfig with fields: qualities: Record<string, string>, duration(beats, isWholeBar): string, barline(kind: BarlineKind, repeatCount?): string | null, timeSig(n, d): string, simile: string",
+      "Add aria?: boolean and spokenPreset?: SpokenPreset to TextRendererConfig"
+    ],
+    "passes": true
+  },
+  {
+    "id": "accessibility-layout-active-tsig",
+    "category": "functional",
+    "description": "Store the active TimeSignature per bar in RowLayout to enable duration calculations",
+    "detail": "Add activeTSig: TimeSignature to the RowLayout.bars array item type in packages/grigson/src/renderers/html.ts, and populate it in computeGlobalLayout (~line 232) by including the activeTSig variable (already maintained in the loop) in the rowLayout.bars.push() call. This data is needed by renderRow to compute how many beats a chord spans. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "In the RowLayout interface, add activeTSig: TimeSignature to the bars array item type alongside showTimeSig",
+      "In computeGlobalLayout, include activeTSig in the object passed to rowLayout.bars.push()"
+    ]
+  },
+  {
+    "id": "accessibility-helpers",
+    "category": "functional",
+    "description": "Add DEFAULT_SPOKEN_PRESET, spokenNote, and chordAriaLabel helpers to the HTML renderer",
+    "detail": "Add to packages/grigson/src/renderers/html.ts: the exported DEFAULT_SPOKEN_PRESET constant (English labels for all 9 qualities, duration, barline, timeSig, simile), the spokenNote() utility (expands b/# accidentals to 'flat'/'sharp'), and chordAriaLabel() which composes them into a full spoken label including duration. Also resolve the spoken preset in render() and thread beatUnit + spoken into renderRow. Depends on accessibility-spoken-preset-type. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "Import SpokenPreset from './text.js' in html.ts",
+      "Add spokenNote(note: string): string function above renderChordInner (~line 293)",
+      "Add chordAriaLabel(chord, tsBeats, isWholeBar, spoken) function",
+      "Add exported DEFAULT_SPOKEN_PRESET constant with English labels for all 9 qualities, duration(), barline(), timeSig(), simile",
+      "In render(), resolve: const spoken = this.config.aria === false ? null : (this.config.spokenPreset ?? DEFAULT_SPOKEN_PRESET)",
+      "Add beatUnit: number and spoken: SpokenPreset | null parameters to renderRow signature",
+      "Pass layout.beatUnit and spoken when calling renderRow in render()"
+    ]
+  },
+  {
+    "id": "accessibility-chord-aria",
+    "category": "functional",
+    "description": "Apply aria-label to chord spans and aria-hidden to all chord child spans",
+    "detail": "Modify chord rendering in packages/grigson/src/renderers/html.ts so that: (1) the outer chord span gets aria-label from chordAriaLabel() when spoken is not null; (2) all internal spans — chord-root, chord-accidental, chord-quality, quality-accidental, chord-top, chord-fraction-line, chord-bass — always get aria-hidden=\"true\" since they are purely visual. Duration (tsBeats, isWholeBar) must be computed in renderRow from slotLayout.span and barLayout.activeTSig. Depends on accessibility-helpers and accessibility-layout-active-tsig. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "Add aria-hidden=\"true\" to chord-root span and chord-accidental span in renderChordRoot",
+      "Add aria-hidden=\"true\" to quality-accidental span in wrapQualityAccidentals",
+      "Add aria-hidden=\"true\" to chord-quality span in renderChordInner",
+      "Add tsBeats: number, isWholeBar: boolean, spoken: SpokenPreset | null to renderChord signature",
+      "In renderChord, add aria-label=\"${chordAriaLabel(chord, tsBeats, isWholeBar, spoken)}\" on the outer span when spoken is not null",
+      "Add aria-hidden=\"true\" to chord-top, chord-fraction-line, chord-bass spans in renderChord",
+      "In renderRow chord slot handling, compute effectiveBeats = (slotLayout.span + 1) / 2, tsBeats = effectiveBeats * (barLayout.activeTSig.denominator / beatUnit), isWholeBar = tsBeats === barLayout.activeTSig.numerator, and pass to renderChord"
+    ]
+  },
+  {
+    "id": "accessibility-barline-aria",
+    "category": "functional",
+    "description": "Apply aria-hidden to decorative barlines and aria-label to repeat barlines",
+    "detail": "Modify renderBarline in packages/grigson/src/renderers/html.ts to accept a spoken: SpokenPreset | null parameter. When spoken is not null, call spoken.barline(kind, repeatCount): if null is returned (single/double/final), add aria-hidden=\"true\" to the outer span; if a string is returned (startRepeat/endRepeat/endRepeatStartRepeat), add aria-label to the outer span and aria-hidden=\"true\" to barline-glyph and barline-repeat-count children. When spoken is null, emit no aria attributes. Pass spoken to both renderBarline call sites in renderRow. Depends on accessibility-helpers. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "Add spoken: SpokenPreset | null parameter to renderBarline",
+      "When spoken is not null, compute label = spoken.barline(barline.kind, barline.repeatCount)",
+      "When label is null, add aria-hidden=\"true\" to the outer barline span",
+      "When label is a string, add aria-label=\"${label}\" to the outer span; add aria-hidden=\"true\" to barline-glyph and barline-repeat-count child spans",
+      "Pass spoken to the renderBarline call for row.openBarline in renderRow",
+      "Pass spoken to the renderBarline call for bar.closeBarline in renderRow"
+    ]
+  },
+  {
+    "id": "accessibility-timesig-simile-dot",
+    "category": "functional",
+    "description": "Apply aria labels to time signatures and simile marks; hide dot slash characters",
+    "detail": "Three changes to packages/grigson/src/renderers/html.ts: (1) renderTimeSig accepts spoken: SpokenPreset | null — when not null, add aria-label=\"${spoken.timeSig(n, d)}\" to the outer span and aria-hidden=\"true\" to both inner spans; (2) the simile span in renderRow gets aria-label=\"${spoken.simile}\" and the SIMILE_CHAR glyph is wrapped in an aria-hidden span, when spoken is not null; (3) the '/' in dot slots is always wrapped in <span aria-hidden=\"true\"> regardless of aria mode (it is purely visual in all cases). Pass spoken to renderTimeSig. Depends on accessibility-helpers. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "Add spoken: SpokenPreset | null to renderTimeSig signature",
+      "When spoken is not null, add aria-label=\"${spoken.timeSig(ts.numerator, ts.denominator)}\" to the outer time-sig span",
+      "Add aria-hidden=\"true\" to time-sig-num and time-sig-den spans (always, since Math Bold digits are unreliable regardless of mode)",
+      "Pass spoken to the renderTimeSig call in renderRow",
+      "In renderRow simile rendering, when spoken is not null add aria-label=\"${spoken.simile}\" to the simile span and wrap SIMILE_CHAR in <span aria-hidden=\"true\">",
+      "In renderRow dot slot rendering, wrap the literal '/' in <span aria-hidden=\"true\"> unconditionally"
+    ]
+  },
+  {
+    "id": "accessibility-tests",
+    "category": "testing",
+    "description": "Add unit and integration tests for ARIA accessibility attributes in the HTML renderer",
+    "detail": "Add tests to packages/grigson/src/renderers/html.test.ts. Export chordAriaLabel from html.ts (or test via rendered HTML). Cover: chordAriaLabel() for all 9 quality values, flat/sharp roots, bass notes, whole-bar vs partial duration; integration assertions that rendered HTML includes correct aria-label on chord spans for single- and multi-chord bars in 4/4; correct aria-label/aria-hidden on all barline types including count repeats; aria-label on time-sig span; aria-label on simile span; aria: false config produces output with no aria-* attributes; custom spokenPreset produces overridden label strings. Depends on all prior accessibility-* tasks. See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "Export chordAriaLabel from html.ts for unit testing",
+      "Add chordAriaLabel unit tests for all 9 quality values using DEFAULT_SPOKEN_PRESET",
+      "Add chordAriaLabel tests for flat root (Bb), sharp root (F#), and a slash chord (G/B)",
+      "Add chordAriaLabel tests for whole-bar (isWholeBar=true) vs partial (isWholeBar=false)",
+      "Add integration test: render a 4/4 song with a single-chord bar and assert aria-label=\"C, whole bar\" on the chord span",
+      "Add integration test: render a 4/4 song with a two-chord bar and assert aria-label=\"F, 2 beats\" and aria-label=\"G, 2 beats\"",
+      "Add integration test: single barline gets aria-hidden=\"true\"; startRepeat barline gets aria-label=\"start repeat\"; endRepeat with count 3 gets aria-label=\"end repeat, play 3 times\"",
+      "Add integration test: time-sig span gets aria-label=\"4/4 time\"",
+      "Add integration test: simile span gets aria-label=\"repeat bar\"",
+      "Add integration test: { aria: false } config produces rendered HTML with no aria-label or aria-hidden attributes",
+      "Add integration test: custom spokenPreset with overridden quality labels produces those labels in rendered HTML"
+    ]
+  },
+  {
+    "id": "accessibility-website-page",
+    "category": "documentation",
+    "description": "Create the dedicated accessibility page on the grigson website",
+    "detail": "Create packages/website/content/accessibility.md with layout base.njk and permalink /accessibility/. The page should cover: (1) intro — ARIA is on by default, no config needed; (2) 'What screen readers hear' with a Blues-in-F source-to-spoken walkthrough; (3) 'Enabling and disabling' with the aria: false snippet; (4) 'Spoken presets' — the SpokenPreset interface fields and DEFAULT_SPOKEN_PRESET in full; (5) 'Creating a preset for another language' with a French example using spread-and-override; (6) 'Using a preset with the custom element'; (7) 'Notes for assistive technology authors' listing which elements carry aria-label vs aria-hidden. Tone: warm and practical. Depends on accessibility-tests (API must be stable). See project/plans/grigson-accessibility.md for full content outline.",
+    "steps": [
+      "Create packages/website/content/accessibility.md with frontmatter: layout base.njk, title Accessibility, permalink /accessibility/",
+      "Write intro paragraph explaining ARIA is on by default",
+      "Write 'What screen readers hear' section: explain the aria-label-on-boundary strategy, then show ||: (4/4) Cm7 | F7 | Bbmaj7 | % :||x3 source alongside the spoken rendition",
+      "Write 'Enabling and disabling' section with new HtmlRenderer({ aria: false }) example and use-case prose",
+      "Write 'Spoken presets' section: show SpokenPreset interface as a table or code block, then show DEFAULT_SPOKEN_PRESET in full",
+      "Write 'Creating a preset for another language' subsection with the French preset example (spread DEFAULT_SPOKEN_PRESET, override qualities, duration, simile)",
+      "Write 'Using a preset with the custom element' subsection",
+      "Write 'Notes for assistive technology authors' section listing aria-label and aria-hidden elements"
+    ]
+  },
+  {
+    "id": "accessibility-website-nav",
+    "category": "documentation",
+    "description": "Add Accessibility to the site navigation and homepage toolkit list",
+    "detail": "Update two website files: (1) packages/website/_includes/base.njk — add an Accessibility nav link between the existing Renderers and CLI links in the primary nav; (2) packages/website/content/index.njk — add a bullet to the 'What's in the toolkit' ul after the custom elements bullet, linking to /accessibility/ with the description 'screen-reader support built in; every chord is announced with its name, quality, and duration; fully customisable spoken labels for any language'. Depends on accessibility-website-page (the page must exist before linking to it). See project/plans/grigson-accessibility.md for full context.",
+    "steps": [
+      "In packages/website/_includes/base.njk, add <a href=\"{{ '/accessibility/' | url }}\">Accessibility</a> and a | separator between the Renderers and CLI nav links",
+      "In packages/website/content/index.njk, add a <li> to the 'What's in the toolkit' ul after the custom elements bullet, linking to /accessibility/ with a one-line description"
+    ]
   }
 ]

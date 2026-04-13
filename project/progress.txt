@@ -641,3 +641,6 @@ Changes:
   (U+00F8 and U+25B3 no longer marked MISSING); updated PetalumaScript comment re: △ fallback.
 
 Verified: All 33 targetCodepoints PRESENT in GrigsonPetaluma coverage check. All tests pass.
+
+## accessibility-spoken-preset-type
+Added SpokenPreset interface and aria/spokenPreset fields to TextRendererConfig in packages/grigson/src/renderers/text.ts. Imported BarlineKind from parser/types.js. SpokenPreset has qualities, duration, barline, timeSig, and simile fields. TextRendererConfig gains aria?: boolean and spokenPreset?: SpokenPreset.
