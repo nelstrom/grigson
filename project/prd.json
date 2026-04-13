@@ -2404,7 +2404,8 @@
       "In render(), resolve: const spoken = this.config.aria === false ? null : (this.config.spokenPreset ?? DEFAULT_SPOKEN_PRESET)",
       "Add beatUnit: number and spoken: SpokenPreset | null parameters to renderRow signature",
       "Pass layout.beatUnit and spoken when calling renderRow in render()"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-chord-aria",

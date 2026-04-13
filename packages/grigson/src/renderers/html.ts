@@ -10,7 +10,7 @@ import type {
   Section,
   BeatSlot,
 } from '../parser/types.js';
-import { type GrigsonRenderer, type TextRendererConfig } from './text.js';
+import { type GrigsonRenderer, type TextRendererConfig, type SpokenPreset } from './text.js';
 import { type NotationPreset, resolvePreset } from '../notation/registry.js';
 
 const PRESET_ALLOWED_TAGS = ['sup', 'sub', 'small'];
@@ -293,6 +293,59 @@ function renderChordRoot(
   return `<span part="chord-root">${note}<span part="chord-accidental" data-glyph="${mode}">${renderedAcc}</span></span>`;
 }
 
+// ---------------------------------------------------------------------------
+// Accessibility helpers
+// ---------------------------------------------------------------------------
+
+function spokenNote(note: string): string {
+  const m = note.match(/^([A-G])(b+|#+)?$/);
+  if (!m) return note;
+  const acc = (m[2] ?? '')
+    .replace(/bb/g, 'double flat')
+    .replace(/b/g, 'flat')
+    .replace(/##/g, 'double sharp')
+    .replace(/#/g, 'sharp');
+  return acc ? `${m[1]} ${acc}` : m[1];
+}
+
+function chordAriaLabel(
+  chord: Chord,
+  tsBeats: number,
+  isWholeBar: boolean,
+  spoken: SpokenPreset,
+): string {
+  const root = spokenNote(chord.root);
+  const quality = spoken.qualities[chord.quality] ?? '';
+  const base = quality ? `${root} ${quality}` : root;
+  const named = chord.bass ? `${base} over ${spokenNote(chord.bass)}` : base;
+  return `${named}, ${spoken.duration(tsBeats, isWholeBar)}`;
+}
+
+export const DEFAULT_SPOKEN_PRESET: SpokenPreset = {
+  qualities: {
+    major: '',
+    minor: 'minor',
+    dominant7: 'dominant 7',
+    halfDiminished: 'half diminished 7',
+    diminished: 'diminished',
+    maj7: 'major 7',
+    min7: 'minor 7',
+    dim7: 'diminished 7',
+    dom7flat5: 'dominant 7 flat 5',
+  },
+  duration: (beats, isWholeBar) =>
+    isWholeBar ? 'whole bar' : `${beats} beat${beats !== 1 ? 's' : ''}`,
+  barline: (kind, repeatCount) => {
+    const playN = repeatCount !== undefined && repeatCount > 2 ? `, play ${repeatCount} times` : '';
+    if (kind === 'startRepeat') return 'start repeat';
+    if (kind === 'endRepeat') return `end repeat${playN}`;
+    if (kind === 'endRepeatStartRepeat') return `end repeat${playN}, start repeat`;
+    return null;
+  },
+  timeSig: (n, d) => `${n}/${d} time`,
+  simile: 'repeat bar',
+};
+
 function renderChordInner(
   chord: Chord,
   preset: NotationPreset,
@@ -428,6 +481,8 @@ function renderRow(
   mode: AccidentalsMode,
   slashStyle: SlashStyle,
   sectionMaxCol: number,
+  beatUnit: number,
+  spoken: SpokenPreset | null,
 ): string {
   const rowEndCol = rowLayout.bars[rowLayout.bars.length - 1].closeBarlineCol;
   const isFullRow = rowEndCol === sectionMaxCol;
@@ -523,6 +578,8 @@ export class HtmlRenderer implements GrigsonRenderer {
     const sharpChar = mode === 'unicode' ? '♯' : '#';
     const layout = computeGlobalLayout(song);
     const { beatCols, minBeatWidth } = layout;
+    const spoken =
+      this.config.aria === false ? null : (this.config.spokenPreset ?? DEFAULT_SPOKEN_PRESET);
 
     let html = `<div part="song" style="--beat-cols: ${beatCols}; --min-beat-width: ${minBeatWidth}">`;
 
@@ -563,6 +620,8 @@ export class HtmlRenderer implements GrigsonRenderer {
             mode,
             slashStyle,
             sectionMaxCol,
+            layout.beatUnit,
+            spoken,
           );
         }
         // comments are intentionally omitted

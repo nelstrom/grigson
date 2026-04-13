@@ -646,3 +646,13 @@ Verified: All 33 targetCodepoints PRESENT in GrigsonPetaluma coverage check. All
 Added SpokenPreset interface and aria/spokenPreset fields to TextRendererConfig in packages/grigson/src/renderers/text.ts. Imported BarlineKind from parser/types.js. SpokenPreset has qualities, duration, barline, timeSig, and simile fields. TextRendererConfig gains aria?: boolean and spokenPreset?: SpokenPreset.
 ## accessibility-layout-active-tsig
 Added activeTSig: TimeSignature to the RowLayout.bars array item type in packages/grigson/src/renderers/html.ts. Populated it in computeGlobalLayout by including the activeTSig variable (already maintained in the loop) in the rowLayout.bars.push() call. This data is needed by renderRow to compute how many beats a chord spans for ARIA duration labels.
+
+## accessibility-helpers
+
+Added accessibility helpers to `packages/grigson/src/renderers/html.ts`:
+- Imported `SpokenPreset` from `./text.js`
+- Added `spokenNote()` — expands b/# accidentals to 'flat'/'sharp' for spoken output
+- Added `chordAriaLabel()` — composes root, quality, bass, and duration into a full spoken label
+- Added exported `DEFAULT_SPOKEN_PRESET` constant with English labels for all 9 qualities, duration(), barline(), timeSig(), and simile
+- In `render()`, resolved `spoken` from config (null when `aria: false`, otherwise spokenPreset or default)
+- Added `beatUnit` and `spoken` parameters to `renderRow` signature and wired them through from `render()`
