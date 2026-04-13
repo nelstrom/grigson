@@ -481,7 +481,7 @@ describe('HtmlRenderer', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n'));
       expect(html).toContain('part="dot"');
       // dot content is "/"
-      expect(html).toMatch(/part="dot"[^>]*>\/</);
+      expect(html).toMatch(/part="dot"[^>]*><span aria-hidden="true">\/</);
     });
 
     it('dot slot has correct grid-column (col 4 for second slot)', () => {
@@ -513,8 +513,12 @@ describe('HtmlRenderer', () => {
     it('time-sig-num and time-sig-den contain the correct Math Bold digits', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
       // Time sig digits are rendered as Math Bold codepoints: U+1D7D0 = '2', U+1D7D2 = '4'
-      expect(html).toContain(`part="time-sig-num">${String.fromCodePoint(0x1d7d0)}<`);
-      expect(html).toContain(`part="time-sig-den">${String.fromCodePoint(0x1d7d2)}<`);
+      expect(html).toContain(
+        `part="time-sig-num" aria-hidden="true">${String.fromCodePoint(0x1d7d0)}<`,
+      );
+      expect(html).toContain(
+        `part="time-sig-den" aria-hidden="true">${String.fromCodePoint(0x1d7d2)}<`,
+      );
     });
 
     it('shows time-sig on bar 0 when song.meter is set and bar has no explicit timeSignature', () => {

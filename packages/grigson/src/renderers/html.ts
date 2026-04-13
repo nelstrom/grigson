@@ -466,11 +466,12 @@ function smuflDigits(n: number): string {
     .join('');
 }
 
-function renderTimeSig(ts: TimeSignature): string {
+function renderTimeSig(ts: TimeSignature, spoken: SpokenPreset | null): string {
+  const ariaLabel = spoken ? ` aria-label="${spoken.timeSig(ts.numerator, ts.denominator)}"` : '';
   return (
-    `<span part="time-sig">` +
-    `<span part="time-sig-num">${smuflDigits(ts.numerator)}</span>` +
-    `<span part="time-sig-den">${smuflDigits(ts.denominator)}</span>` +
+    `<span part="time-sig"${ariaLabel}>` +
+    `<span part="time-sig-num" aria-hidden="true">${smuflDigits(ts.numerator)}</span>` +
+    `<span part="time-sig-den" aria-hidden="true">${smuflDigits(ts.denominator)}</span>` +
     `</span>`
   );
 }
@@ -528,7 +529,9 @@ function renderRow(
     if (isSimile) {
       const startCol = barLayout.slots[0]?.col ?? barLayout.closeBarlineCol - 1;
       const span = barLayout.closeBarlineCol - startCol;
-      html += `<span part="simile bar-start" style="grid-column: ${startCol} / span ${span}">${SIMILE_CHAR}</span>`;
+      const simileAriaAttr = spoken ? ` aria-label="${spoken.simile}"` : '';
+      const simileGlyph = spoken ? `<span aria-hidden="true">${SIMILE_CHAR}</span>` : SIMILE_CHAR;
+      html += `<span part="simile bar-start" style="grid-column: ${startCol} / span ${span}"${simileAriaAttr}>${simileGlyph}</span>`;
     } else {
       for (let slotIdx = 0; slotIdx < barLayout.slots.length; slotIdx++) {
         const slotLayout = barLayout.slots[slotIdx];
@@ -536,12 +539,14 @@ function renderRow(
         const srcIdx = slotLayout.sourceSlotIdx ?? slotIdx;
         const slot: BeatSlot | undefined = bar.slots[srcIdx];
         const timeSigPrefix =
-          slotIdx === 0 && barLayout.showTimeSig ? renderTimeSig(barLayout.showTimeSig) : '';
+          slotIdx === 0 && barLayout.showTimeSig
+            ? renderTimeSig(barLayout.showTimeSig, spoken)
+            : '';
         const isBarStart = slotIdx === 0;
 
         if (slotLayout.implicit || slot?.type === 'dot') {
           const dotPart = isBarStart ? 'dot bar-start' : 'dot';
-          html += `<span part="${dotPart}" style="grid-column: ${col} / span 1">${timeSigPrefix}/</span>`;
+          html += `<span part="${dotPart}" style="grid-column: ${col} / span 1">${timeSigPrefix}<span aria-hidden="true">/</span></span>`;
         } else if (slot) {
           // chord slot
           const effectiveBeats = (slotLayout.span + 1) / 2;

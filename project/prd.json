@@ -2450,7 +2450,8 @@
       "Pass spoken to the renderTimeSig call in renderRow",
       "In renderRow simile rendering, when spoken is not null add aria-label=\"${spoken.simile}\" to the simile span and wrap SIMILE_CHAR in <span aria-hidden=\"true\">",
       "In renderRow dot slot rendering, wrap the literal '/' in <span aria-hidden=\"true\"> unconditionally"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-tests",

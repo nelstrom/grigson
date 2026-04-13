@@ -662,3 +662,14 @@ Added ARIA attributes to chord rendering in `packages/grigson/src/renderers/html
 
 ## accessibility-barline-aria
 Modified `renderBarline` in `packages/grigson/src/renderers/html.ts` to accept a `spoken: SpokenPreset | null` parameter. When spoken is not null, calls `spoken.barline(kind, repeatCount)`: decorative barlines (single/double/final → null) get `aria-hidden="true"` on the outer span; repeat barlines (startRepeat/endRepeat/endRepeatStartRepeat → string) get `aria-label` on the outer span and `aria-hidden="true"` on the `barline-glyph` and `barline-repeat-count` child spans. When spoken is null, no aria attributes are emitted. Both `renderBarline` call sites in `renderRow` (open barline and close barline) now pass `spoken`.
+
+## accessibility-timesig-simile-dot
+
+Applied ARIA attributes to time signatures, simile marks, and dot slots in `packages/grigson/src/renderers/html.ts`:
+
+- `renderTimeSig` now accepts `spoken: SpokenPreset | null`. When spoken is not null, the outer `<span part="time-sig">` gains `aria-label="${spoken.timeSig(n, d)}"`. The inner `time-sig-num` and `time-sig-den` spans always carry `aria-hidden="true"` (Math Bold digits are unreliable with screen readers regardless of aria mode).
+- `renderTimeSig` call in `renderRow` updated to pass `spoken`.
+- Simile rendering: when `spoken` is not null, the simile span gets `aria-label="${spoken.simile}"` and `SIMILE_CHAR` is wrapped in `<span aria-hidden="true">`.
+- Dot slot rendering: the literal `/` is always wrapped in `<span aria-hidden="true">` (purely visual in all cases).
+
+Updated two existing tests in `html.test.ts` to match the new `aria-hidden="true"` on time-sig inner spans and the wrapped `/` in dot slots. All 535 tests pass.
