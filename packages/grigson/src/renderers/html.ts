@@ -51,6 +51,8 @@ export interface RowLayout {
     closeBarlineCol: number;
     /** Time signature to display at this bar's open barline (in the gap cell). */
     showTimeSig?: TimeSignature;
+    /** The active time signature for this bar (used for duration calculations). */
+    activeTSig: TimeSignature;
   }>;
 }
 
@@ -234,6 +236,7 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
           slots,
           closeBarlineCol: 2 * beatOffset + 1,
           showTimeSig: barTimeSig,
+          activeTSig,
         });
       }
 

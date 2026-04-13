@@ -2388,7 +2388,8 @@
     "steps": [
       "In the RowLayout interface, add activeTSig: TimeSignature to the bars array item type alongside showTimeSig",
       "In computeGlobalLayout, include activeTSig in the object passed to rowLayout.bars.push()"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-helpers",
