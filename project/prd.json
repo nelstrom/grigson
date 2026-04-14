@@ -2470,7 +2470,8 @@
       "Add integration test: simile span gets aria-label=\"repeat bar\"",
       "Add integration test: { aria: false } config produces rendered HTML with no aria-label or aria-hidden attributes",
       "Add integration test: custom spokenPreset with overridden quality labels produces those labels in rendered HTML"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-website-page",

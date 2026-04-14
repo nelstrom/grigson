@@ -736,6 +736,75 @@ layout: {
 
 ---
 
+### `aria` and `spokenPreset` (HTML renderer only)
+
+The HTML renderer emits ARIA attributes by default so screen readers can announce chord names, durations, repeat markers, time signatures, and simile marks without any extra configuration.
+
+#### Disabling ARIA output
+
+```javascript
+const renderer = new HtmlRenderer({ aria: false });
+```
+
+Use `aria: false` when you are managing the accessibility layer yourself, generating test fixtures where leaner markup is preferable, or embedding the HTML in a context where ARIA attributes would interfere with an outer accessible component.
+
+#### Customising spoken labels (`spokenPreset`)
+
+Spoken labels come from a `SpokenPreset` object. The built-in English preset is exported as `DEFAULT_SPOKEN_PRESET`:
+
+```typescript
+import { DEFAULT_SPOKEN_PRESET } from 'grigson';
+```
+
+To override specific labels — for example to support a different language — spread the default and replace what you need:
+
+```typescript
+import { HtmlRenderer, DEFAULT_SPOKEN_PRESET } from 'grigson';
+
+const frenchPreset = {
+  ...DEFAULT_SPOKEN_PRESET,
+  qualities: {
+    major: '',
+    minor: 'mineur',
+    dominant7: 'septième de dominante',
+    halfDiminished: 'demi-diminué',
+    diminished: 'diminué',
+    maj7: 'majeur septième',
+    min7: 'mineur septième',
+    dim7: 'diminué septième',
+    dom7flat5: 'septième bémol cinq',
+  },
+  duration: (beats: number, isWholeBar: boolean) =>
+    isWholeBar ? 'mesure entière' : `${beats} temps`,
+  simile: 'répéter la mesure',
+};
+
+const renderer = new HtmlRenderer({ spokenPreset: frenchPreset });
+```
+
+#### `SpokenPreset` interface
+
+| Field       | Type                                     | Description                                                           |
+| ----------- | ---------------------------------------- | --------------------------------------------------------------------- |
+| `qualities` | `Record<string, string>`                 | Spoken suffix for each quality (empty string = root only, i.e. major) |
+| `duration`  | `(beats, isWholeBar) => string`          | Formats the duration part of a chord label                            |
+| `barline`   | `(kind, repeatCount?) => string \| null` | Label for a barline; `null` hides it with `aria-hidden`               |
+| `timeSig`   | `(numerator, denominator) => string`     | Label for a time signature                                            |
+| `simile`    | `string`                                 | Label for a simile (bar repeat) mark                                  |
+
+#### `chordAriaLabel` helper
+
+`chordAriaLabel` is exported for use in custom renderers or tests:
+
+```typescript
+import { chordAriaLabel, DEFAULT_SPOKEN_PRESET } from 'grigson';
+
+chordAriaLabel({ type: 'chord', root: 'Bb', quality: 'dominant7', bass: 'F' }, 2, false, DEFAULT_SPOKEN_PRESET);
+// → "B flat dominant 7 over F, 2 beats"
+```
+
+---
+
 ## Rendering the Same Chart Multiple Ways
 
 Because transposition and notation are renderer concerns, the same parsed song tree can be rendered into multiple output variations without re-parsing. This works across renderer types too — you can produce a transposed `.chart` file with the text renderer and an SVG with the SVG renderer from the same parse result:

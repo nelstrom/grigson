@@ -308,7 +308,7 @@ function spokenNote(note: string): string {
   return acc ? `${m[1]} ${acc}` : m[1];
 }
 
-function chordAriaLabel(
+export function chordAriaLabel(
   chord: Chord,
   tsBeats: number,
   isWholeBar: boolean,

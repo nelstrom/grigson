@@ -1,7 +1,12 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
 import { parseSong } from '../parser/parser.js';
-import { computeGlobalLayout, HtmlRenderer } from './html.js';
+import {
+  computeGlobalLayout,
+  HtmlRenderer,
+  chordAriaLabel,
+  DEFAULT_SPOKEN_PRESET,
+} from './html.js';
 import type { Song } from '../parser/types.js';
 
 describe('computeGlobalLayout', () => {
@@ -689,6 +694,244 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('part="song-title"');
       expect(html).toContain('My Song');
       expect(html).toContain('part="song-key"');
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Accessibility
+// ---------------------------------------------------------------------------
+
+describe('chordAriaLabel', () => {
+  const preset = DEFAULT_SPOKEN_PRESET;
+
+  describe('all 9 quality values', () => {
+    it('major: "C, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 4, true, preset)).toBe(
+        'C, whole bar',
+      );
+    });
+
+    it('minor: "A minor, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'A', quality: 'minor' }, 4, true, preset)).toBe(
+        'A minor, whole bar',
+      );
+    });
+
+    it('dominant7: "G dominant 7, whole bar"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'G', quality: 'dominant7' }, 4, true, preset),
+      ).toBe('G dominant 7, whole bar');
+    });
+
+    it('halfDiminished: "B half diminished 7, whole bar"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'B', quality: 'halfDiminished' }, 4, true, preset),
+      ).toBe('B half diminished 7, whole bar');
+    });
+
+    it('diminished: "D diminished, whole bar"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'D', quality: 'diminished' }, 4, true, preset),
+      ).toBe('D diminished, whole bar');
+    });
+
+    it('maj7: "C major 7, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'C', quality: 'maj7' }, 4, true, preset)).toBe(
+        'C major 7, whole bar',
+      );
+    });
+
+    it('min7: "F minor 7, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'F', quality: 'min7' }, 4, true, preset)).toBe(
+        'F minor 7, whole bar',
+      );
+    });
+
+    it('dim7: "B diminished 7, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'B', quality: 'dim7' }, 4, true, preset)).toBe(
+        'B diminished 7, whole bar',
+      );
+    });
+
+    it('dom7flat5: "C dominant 7 flat 5, whole bar"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'dom7flat5' }, 4, true, preset),
+      ).toBe('C dominant 7 flat 5, whole bar');
+    });
+  });
+
+  describe('accidentals in root', () => {
+    it('flat root: Bb → "B flat, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'Bb', quality: 'major' }, 4, true, preset)).toBe(
+        'B flat, whole bar',
+      );
+    });
+
+    it('sharp root: F# → "F sharp minor, whole bar"', () => {
+      expect(chordAriaLabel({ type: 'chord', root: 'F#', quality: 'minor' }, 4, true, preset)).toBe(
+        'F sharp minor, whole bar',
+      );
+    });
+  });
+
+  describe('slash chord', () => {
+    it('G/B → "G over B, whole bar"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'G', quality: 'major', bass: 'B' }, 4, true, preset),
+      ).toBe('G over B, whole bar');
+    });
+
+    it('Bb7/F → "B flat dominant 7 over F, 2 beats"', () => {
+      expect(
+        chordAriaLabel(
+          { type: 'chord', root: 'Bb', quality: 'dominant7', bass: 'F' },
+          2,
+          false,
+          preset,
+        ),
+      ).toBe('B flat dominant 7 over F, 2 beats');
+    });
+  });
+
+  describe('duration', () => {
+    it('isWholeBar=true → "whole bar"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 4, true, preset),
+      ).toContain('whole bar');
+    });
+
+    it('isWholeBar=false, 2 beats → "2 beats"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 2, false, preset),
+      ).toContain('2 beats');
+    });
+
+    it('isWholeBar=false, 1 beat → "1 beat" (singular)', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 1, false, preset),
+      ).toContain('1 beat');
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 1, false, preset),
+      ).not.toContain('1 beats');
+    });
+  });
+});
+
+describe('HtmlRenderer – aria integration', () => {
+  describe('chord aria-label', () => {
+    it('single-chord 4/4 bar gets aria-label="C, whole bar"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| C |\n'));
+      expect(html).toContain('aria-label="C, whole bar"');
+    });
+
+    it('two-chord 4/4 bar: F gets "F, 2 beats" and G gets "G, 2 beats"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| F G |\n'));
+      expect(html).toContain('aria-label="F, 2 beats"');
+      expect(html).toContain('aria-label="G, 2 beats"');
+    });
+  });
+
+  describe('barline aria attributes', () => {
+    it('single barline gets aria-hidden="true"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| C |\n'));
+      expect(html).toMatch(/part="barline barline-single[^"]*"[^>]*aria-hidden="true"/);
+    });
+
+    it('startRepeat barline gets aria-label="start repeat"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n||: C |\n'));
+      expect(html).toContain('aria-label="start repeat"');
+    });
+
+    it('endRepeat barline (count ≤ 2) gets aria-label="end repeat"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| C :||'));
+      expect(html).toContain('aria-label="end repeat"');
+    });
+
+    it('endRepeat barline with count 3 gets aria-label="end repeat, play 3 times"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| C :||x3'));
+      expect(html).toContain('aria-label="end repeat, play 3 times"');
+    });
+  });
+
+  describe('time signature aria-label', () => {
+    it('time-sig span gets aria-label="4/4 time"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| C |\n'));
+      expect(html).toContain('aria-label="4/4 time"');
+    });
+
+    it('time-sig-num and time-sig-den have aria-hidden="true"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| C |\n'));
+      expect(html).toContain('part="time-sig-num" aria-hidden="true"');
+      expect(html).toContain('part="time-sig-den" aria-hidden="true"');
+    });
+  });
+
+  describe('simile aria-label', () => {
+    it('simile span gets aria-label="repeat bar"', () => {
+      const html = new HtmlRenderer({ simile: { output: 'shorthand' } }).render(
+        parseSong('---\nmeter: 4/4\n---\n| C | C |\n'),
+      );
+      expect(html).toContain('aria-label="repeat bar"');
+    });
+
+    it('simile glyph is wrapped in aria-hidden span', () => {
+      const html = new HtmlRenderer({ simile: { output: 'shorthand' } }).render(
+        parseSong('---\nmeter: 4/4\n---\n| C | C |\n'),
+      );
+      expect(html).toContain(`<span aria-hidden="true">${String.fromCodePoint(0xe500)}</span>`);
+    });
+  });
+
+  describe('aria: false config', () => {
+    it('produces no aria-label attributes', () => {
+      const html = new HtmlRenderer({ aria: false }).render(
+        parseSong('---\nmeter: 4/4\n---\n||: C | F :||x3\n'),
+      );
+      expect(html).not.toContain('aria-label');
+    });
+
+    it('barline outer spans have no aria attributes (neither label nor hidden)', () => {
+      const html = new HtmlRenderer({ aria: false }).render(
+        parseSong('---\nmeter: 4/4\n---\n| C |\n'),
+      );
+      // Barline spans should have no aria-label and no aria-hidden on the outer span
+      expect(html).not.toMatch(/part="barline[^"]*"[^>]*aria-/);
+    });
+
+    it('chord spans have no aria-label', () => {
+      const html = new HtmlRenderer({ aria: false }).render(
+        parseSong('---\nmeter: 4/4\n---\n| C |\n'),
+      );
+      expect(html).not.toMatch(/part="chord[^"]*"[^>]*aria-label/);
+    });
+  });
+
+  describe('custom spokenPreset', () => {
+    it('overridden quality labels appear in rendered chord aria-label', () => {
+      const frenchPreset = {
+        ...DEFAULT_SPOKEN_PRESET,
+        qualities: {
+          ...DEFAULT_SPOKEN_PRESET.qualities,
+          minor: 'mineur',
+        },
+      };
+      const html = new HtmlRenderer({ spokenPreset: frenchPreset }).render(
+        parseSong('---\nmeter: 4/4\n---\n| Am |\n'),
+      );
+      expect(html).toContain('aria-label="A mineur, whole bar"');
+    });
+
+    it('overridden simile label appears in rendered simile span', () => {
+      const frenchPreset = {
+        ...DEFAULT_SPOKEN_PRESET,
+        simile: 'répéter la mesure',
+      };
+      const html = new HtmlRenderer({
+        simile: { output: 'shorthand' },
+        spokenPreset: frenchPreset,
+      }).render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
+      expect(html).toContain('aria-label="répéter la mesure"');
     });
   });
 });

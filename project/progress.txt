@@ -673,3 +673,6 @@ Applied ARIA attributes to time signatures, simile marks, and dot slots in `pack
 - Dot slot rendering: the literal `/` is always wrapped in `<span aria-hidden="true">` (purely visual in all cases).
 
 Updated two existing tests in `html.test.ts` to match the new `aria-hidden="true"` on time-sig inner spans and the wrapped `/` in dot slots. All 535 tests pass.
+
+## accessibility-tests
+Added ARIA accessibility tests to packages/grigson/src/renderers/html.test.ts. Exported `chordAriaLabel` and `DEFAULT_SPOKEN_PRESET` from html.ts (and re-exported via index.ts along with `SpokenPreset` type). Unit tests cover all 9 quality values, flat/sharp roots, slash chords, and whole-bar vs partial duration using `chordAriaLabel` directly. Integration tests assert: single-chord 4/4 bar gets `aria-label="C, whole bar"`; two-chord bar gets "F, 2 beats" and "G, 2 beats"; single/startRepeat/endRepeat barlines get correct aria attributes; time-sig span gets `aria-label="4/4 time"`; simile span gets `aria-label="repeat bar"`; `aria: false` config suppresses aria-label and barline aria attributes; custom spokenPreset produces overridden labels. 566 tests pass.
