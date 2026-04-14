@@ -52,13 +52,14 @@ When `aria` is `false`, no `aria-label` or `aria-hidden` attributes are emitted 
 
 All spoken labels come from a `SpokenPreset` object. The built-in preset is English. The interface is:
 
-| Field       | Type                                         | Purpose                                                                                                                  |
-| ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `qualities` | `Record<string, string>`                     | Spoken suffix for each chord quality. Empty string = root only (used for major chords).                                  |
-| `duration`  | `(beats, isWholeBar, denominator) => string` | Formats the duration part of a chord label. `denominator` is the time-signature denominator (e.g. 4 for 4/4, 8 for 6/8). |
-| `barline`   | `(kind, repeatCount?) => string \| null`     | Returns a label for a repeat barline, or `null` to hide decorative barlines with `aria-hidden`.                          |
-| `timeSig`   | `(numerator, denominator) => string`         | Returns a label for a time signature span.                                                                               |
-| `simile`    | `string`                                     | Label for a simile (bar repeat) mark.                                                                                    |
+| Field       | Type                                         | Purpose                                                                                                                                                                       |
+| ----------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qualities` | `Record<string, string>`                     | Spoken suffix for each chord quality. Empty string = root only (used for major chords).                                                                                       |
+| `note`      | `(letter, accidental) => string`             | Spoken name for a note. `letter` is one of A–G; `accidental` is an already-expanded word (`'flat'`, `'sharp'`, `'double flat'`, `'double sharp'`) or `''` for a natural note. |
+| `duration`  | `(beats, isWholeBar, denominator) => string` | Formats the duration part of a chord label. `denominator` is the time-signature denominator (e.g. 4 for 4/4, 8 for 6/8).                                                      |
+| `barline`   | `(kind, repeatCount?) => string \| null`     | Returns a label for a repeat barline, or `null` to hide decorative barlines with `aria-hidden`.                                                                               |
+| `timeSig`   | `(numerator, denominator) => string`         | Returns a label for a time signature span.                                                                                                                                    |
+| `simile`    | `string`                                     | Label for a simile (bar repeat) mark.                                                                                                                                         |
 
 The default English preset (`DEFAULT_SPOKEN_PRESET`, exported from `grigson`) is:
 
@@ -77,6 +78,11 @@ import { DEFAULT_SPOKEN_PRESET } from 'grigson';
     min7: 'minor 7',
     dim7: 'diminished 7',
     dom7flat5: 'dominant 7 flat 5',
+  },
+  // 'A' reads as the article "a" (ah) before a quality word, so spell it phonetically.
+  note: (letter, accidental) => {
+    const name = letter === 'A' ? 'Ay' : letter;
+    return accidental ? `${name} ${accidental}` : name;
   },
   duration: (beats, isWholeBar, denominator) => {
     if (isWholeBar) return 'whole bar';
@@ -100,10 +106,13 @@ import { DEFAULT_SPOKEN_PRESET } from 'grigson';
 
 If your audience uses a language other than English, create a `SpokenPreset` and pass it as `spokenPreset` in the renderer config. You only need to override the fields you want to change — spread `DEFAULT_SPOKEN_PRESET` to inherit the rest.
 
-Here is a French example:
+Here is a French example. French uses fixed-do solfège for note names (do, ré, mi, fa, sol, la, si) and its own words for accidentals:
 
 ```js
 import { HtmlRenderer, DEFAULT_SPOKEN_PRESET } from 'grigson';
+
+const SOLFEGE = { C: 'do', D: 'ré', E: 'mi', F: 'fa', G: 'sol', A: 'la', B: 'si' };
+const FR_ACC = { flat: 'bémol', sharp: 'dièse', 'double flat': 'double bémol', 'double sharp': 'double dièse' };
 
 const frenchPreset = {
   ...DEFAULT_SPOKEN_PRESET,
@@ -118,6 +127,10 @@ const frenchPreset = {
     dim7: 'diminué septième',
     dom7flat5: 'septième bémol cinq',
   },
+  note: (letter, accidental) => {
+    const name = SOLFEGE[letter] ?? letter;
+    return accidental ? `${name} ${FR_ACC[accidental] ?? accidental}` : name;
+  },
   duration: (beats, isWholeBar) =>
     isWholeBar ? 'mesure entière' : `${beats} temps`,
   simile: 'répéter la mesure',
@@ -126,7 +139,7 @@ const frenchPreset = {
 const renderer = new HtmlRenderer({ spokenPreset: frenchPreset });
 ```
 
-The result: a C minor chord lasting a whole bar is announced "C mineur, mesure entière".
+The result: a C minor chord lasting a whole bar is announced "do mineur, mesure entière".
 
 ### Using a preset with the custom element
 

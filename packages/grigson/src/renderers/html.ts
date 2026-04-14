@@ -297,15 +297,18 @@ function renderChordRoot(
 // Accessibility helpers
 // ---------------------------------------------------------------------------
 
-function spokenNote(note: string): string {
-  const m = note.match(/^([A-G])(b+|#+)?$/);
-  if (!m) return note;
-  const acc = (m[2] ?? '')
+function expandAccidental(raw: string): string {
+  return raw
     .replace(/bb/g, 'double flat')
     .replace(/b/g, 'flat')
     .replace(/##/g, 'double sharp')
     .replace(/#/g, 'sharp');
-  return acc ? `${m[1]} ${acc}` : m[1];
+}
+
+function spokenNote(note: string, spoken: SpokenPreset): string {
+  const m = note.match(/^([A-G])(b+|#+)?$/);
+  if (!m) return note;
+  return spoken.note(m[1], expandAccidental(m[2] ?? ''));
 }
 
 export function chordAriaLabel(
@@ -315,10 +318,10 @@ export function chordAriaLabel(
   spoken: SpokenPreset,
   denominator: number,
 ): string {
-  const root = spokenNote(chord.root);
+  const root = spokenNote(chord.root, spoken);
   const quality = spoken.qualities[chord.quality] ?? '';
   const base = quality ? `${root} ${quality}` : root;
-  const named = chord.bass ? `${base} over ${spokenNote(chord.bass)}` : base;
+  const named = chord.bass ? `${base} over ${spokenNote(chord.bass, spoken)}` : base;
   return `${named}, ${spoken.duration(tsBeats, isWholeBar, denominator)}`;
 }
 
@@ -333,6 +336,11 @@ export const DEFAULT_SPOKEN_PRESET: SpokenPreset = {
     min7: 'minor 7',
     dim7: 'diminished 7',
     dom7flat5: 'dominant 7 flat 5',
+  },
+  note: (letter, accidental) => {
+    // 'A' reads as the article "a" (ah) before a quality word, so spell it phonetically.
+    const name = letter === 'A' ? 'Ay' : letter;
+    return accidental ? `${name} ${accidental}` : name;
   },
   duration: (beats, isWholeBar, denominator) => {
     if (isWholeBar) return 'whole bar';

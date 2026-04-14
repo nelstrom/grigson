@@ -712,10 +712,10 @@ describe('chordAriaLabel', () => {
       ).toBe('C, whole bar');
     });
 
-    it('minor: "A minor, whole bar"', () => {
+    it('minor: "Ay minor, whole bar" (A spelled phonetically to avoid article misreading)', () => {
       expect(
         chordAriaLabel({ type: 'chord', root: 'A', quality: 'minor' }, 4, true, preset, 4),
-      ).toBe('A minor, whole bar');
+      ).toBe('Ay minor, whole bar');
     });
 
     it('dominant7: "G dominant 7, whole bar"', () => {
@@ -955,7 +955,55 @@ describe('HtmlRenderer – aria integration', () => {
       const html = new HtmlRenderer({ spokenPreset: frenchPreset }).render(
         parseSong('---\nmeter: 4/4\n---\n| Am |\n'),
       );
-      expect(html).toContain('aria-label="A mineur, whole bar"');
+      expect(html).toContain('aria-label="Ay mineur, whole bar"');
+    });
+
+    it('overridden note function uses fixed-do solfège names', () => {
+      const SOLFEGE: Record<string, string> = {
+        C: 'do',
+        D: 'ré',
+        E: 'mi',
+        F: 'fa',
+        G: 'sol',
+        A: 'la',
+        B: 'si',
+      };
+      const frenchPreset = {
+        ...DEFAULT_SPOKEN_PRESET,
+        qualities: { ...DEFAULT_SPOKEN_PRESET.qualities, minor: 'mineur' },
+        note: (letter: string, accidental: string) => {
+          const name = SOLFEGE[letter] ?? letter;
+          return accidental ? `${name} ${accidental}` : name;
+        },
+      };
+      const html = new HtmlRenderer({ spokenPreset: frenchPreset }).render(
+        parseSong('---\nmeter: 4/4\n---\n| Am |\n'),
+      );
+      expect(html).toContain('aria-label="la mineur, whole bar"');
+    });
+
+    it('overridden note function handles accidentals (Bb → "si bémol")', () => {
+      const frenchPreset = {
+        ...DEFAULT_SPOKEN_PRESET,
+        note: (letter: string, accidental: string) => {
+          const solfege: Record<string, string> = {
+            C: 'do',
+            D: 'ré',
+            E: 'mi',
+            F: 'fa',
+            G: 'sol',
+            A: 'la',
+            B: 'si',
+          };
+          const frAcc: Record<string, string> = { flat: 'bémol', sharp: 'dièse' };
+          const name = solfege[letter] ?? letter;
+          return accidental ? `${name} ${frAcc[accidental] ?? accidental}` : name;
+        },
+      };
+      const html = new HtmlRenderer({ spokenPreset: frenchPreset }).render(
+        parseSong('---\nmeter: 4/4\n---\n| Bbm |\n'),
+      );
+      expect(html).toContain('aria-label="si bémol minor, whole bar"');
     });
 
     it('overridden simile label appears in rendered simile span', () => {

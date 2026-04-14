@@ -8,6 +8,9 @@ export interface GrigsonRenderer {
 export interface SpokenPreset {
   /** Spoken suffix for each quality. Empty string = root only (major chord). */
   qualities: Record<string, string>;
+  /** Spoken name for a note. `letter` is one of A–G; `accidental` is an already-expanded
+   *  English word ('flat', 'sharp', 'double flat', 'double sharp') or '' for a natural note. */
+  note(letter: string, accidental: string): string;
   /** Format the duration part of a chord label. `denominator` is the active time-signature denominator (e.g. 4 for 4/4, 8 for 6/8). */
   duration(beats: number, isWholeBar: boolean, denominator: number): string;
   /** Label for a barline (null = hide with aria-hidden). */
