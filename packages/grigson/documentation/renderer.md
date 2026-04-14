@@ -774,7 +774,7 @@ const frenchPreset = {
     dim7: 'diminué septième',
     dom7flat5: 'septième bémol cinq',
   },
-  duration: (beats: number, isWholeBar: boolean) =>
+  duration: (beats: number, isWholeBar: boolean, _denominator: number) =>
     isWholeBar ? 'mesure entière' : `${beats} temps`,
   simile: 'répéter la mesure',
 };
@@ -784,13 +784,13 @@ const renderer = new HtmlRenderer({ spokenPreset: frenchPreset });
 
 #### `SpokenPreset` interface
 
-| Field       | Type                                     | Description                                                           |
-| ----------- | ---------------------------------------- | --------------------------------------------------------------------- |
-| `qualities` | `Record<string, string>`                 | Spoken suffix for each quality (empty string = root only, i.e. major) |
-| `duration`  | `(beats, isWholeBar) => string`          | Formats the duration part of a chord label                            |
-| `barline`   | `(kind, repeatCount?) => string \| null` | Label for a barline; `null` hides it with `aria-hidden`               |
-| `timeSig`   | `(numerator, denominator) => string`     | Label for a time signature                                            |
-| `simile`    | `string`                                 | Label for a simile (bar repeat) mark                                  |
+| Field       | Type                                         | Description                                                                                                                     |
+| ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `qualities` | `Record<string, string>`                     | Spoken suffix for each quality (empty string = root only, i.e. major)                                                           |
+| `duration`  | `(beats, isWholeBar, denominator) => string` | Formats the duration part of a chord label; `denominator` is the active time-signature denominator (4 for 4/4, 8 for 6/8, etc.) |
+| `barline`   | `(kind, repeatCount?) => string \| null`     | Label for a barline; `null` hides it with `aria-hidden`                                                                         |
+| `timeSig`   | `(numerator, denominator) => string`         | Label for a time signature                                                                                                      |
+| `simile`    | `string`                                     | Label for a simile (bar repeat) mark                                                                                            |
 
 #### `chordAriaLabel` helper
 
@@ -799,8 +799,8 @@ const renderer = new HtmlRenderer({ spokenPreset: frenchPreset });
 ```typescript
 import { chordAriaLabel, DEFAULT_SPOKEN_PRESET } from 'grigson';
 
-chordAriaLabel({ type: 'chord', root: 'Bb', quality: 'dominant7', bass: 'F' }, 2, false, DEFAULT_SPOKEN_PRESET);
-// → "B flat dominant 7 over F, 2 beats"
+chordAriaLabel({ type: 'chord', root: 'Bb', quality: 'dominant7', bass: 'F' }, 2, false, DEFAULT_SPOKEN_PRESET, 4);
+// → "B flat dominant 7 over F, 2 crotchets"
 ```
 
 ---

@@ -313,12 +313,13 @@ export function chordAriaLabel(
   tsBeats: number,
   isWholeBar: boolean,
   spoken: SpokenPreset,
+  denominator: number,
 ): string {
   const root = spokenNote(chord.root);
   const quality = spoken.qualities[chord.quality] ?? '';
   const base = quality ? `${root} ${quality}` : root;
   const named = chord.bass ? `${base} over ${spokenNote(chord.bass)}` : base;
-  return `${named}, ${spoken.duration(tsBeats, isWholeBar)}`;
+  return `${named}, ${spoken.duration(tsBeats, isWholeBar, denominator)}`;
 }
 
 export const DEFAULT_SPOKEN_PRESET: SpokenPreset = {
@@ -333,8 +334,11 @@ export const DEFAULT_SPOKEN_PRESET: SpokenPreset = {
     dim7: 'diminished 7',
     dom7flat5: 'dominant 7 flat 5',
   },
-  duration: (beats, isWholeBar) =>
-    isWholeBar ? 'whole bar' : `${beats} beat${beats !== 1 ? 's' : ''}`,
+  duration: (beats, isWholeBar, denominator) => {
+    if (isWholeBar) return 'whole bar';
+    const name = denominator === 4 ? 'crotchet' : denominator === 8 ? 'quaver' : 'beat';
+    return `${beats} ${name}${beats !== 1 ? 's' : ''}`;
+  },
   barline: (kind, repeatCount) => {
     const playN = repeatCount !== undefined && repeatCount > 2 ? `, play ${repeatCount} times` : '';
     if (kind === 'startRepeat') return 'start repeat';
@@ -371,10 +375,11 @@ function renderChord(
   slashStyle: SlashStyle = 'horizontal',
   tsBeats: number = 1,
   isWholeBar: boolean = false,
+  denominator: number = 4,
   spoken: SpokenPreset | null = null,
 ): string {
   const ariaLabelAttr = spoken
-    ? ` aria-label="${chordAriaLabel(chord, tsBeats, isWholeBar, spoken)}"`
+    ? ` aria-label="${chordAriaLabel(chord, tsBeats, isWholeBar, spoken, denominator)}"`
     : '';
   if (chord.bass) {
     const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
@@ -561,6 +566,7 @@ function renderRow(
             slashStyle,
             tsBeats,
             isWholeBar,
+            barLayout.activeTSig.denominator,
             spoken,
           );
           const slotPart = isBarStart ? 'slot bar-start' : 'slot';

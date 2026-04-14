@@ -8,8 +8,8 @@ export interface GrigsonRenderer {
 export interface SpokenPreset {
   /** Spoken suffix for each quality. Empty string = root only (major chord). */
   qualities: Record<string, string>;
-  /** Format the duration part of a chord label. */
-  duration(beats: number, isWholeBar: boolean): string;
+  /** Format the duration part of a chord label. `denominator` is the active time-signature denominator (e.g. 4 for 4/4, 8 for 6/8). */
+  duration(beats: number, isWholeBar: boolean, denominator: number): string;
   /** Label for a barline (null = hide with aria-hidden). */
   barline(kind: BarlineKind, repeatCount?: number): string | null;
   /** Label for a time signature. */

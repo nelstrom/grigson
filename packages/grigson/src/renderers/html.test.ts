@@ -707,113 +707,135 @@ describe('chordAriaLabel', () => {
 
   describe('all 9 quality values', () => {
     it('major: "C, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 4, true, preset)).toBe(
-        'C, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 4, true, preset, 4),
+      ).toBe('C, whole bar');
     });
 
     it('minor: "A minor, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'A', quality: 'minor' }, 4, true, preset)).toBe(
-        'A minor, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'A', quality: 'minor' }, 4, true, preset, 4),
+      ).toBe('A minor, whole bar');
     });
 
     it('dominant7: "G dominant 7, whole bar"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'G', quality: 'dominant7' }, 4, true, preset),
+        chordAriaLabel({ type: 'chord', root: 'G', quality: 'dominant7' }, 4, true, preset, 4),
       ).toBe('G dominant 7, whole bar');
     });
 
     it('halfDiminished: "B half diminished 7, whole bar"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'B', quality: 'halfDiminished' }, 4, true, preset),
+        chordAriaLabel({ type: 'chord', root: 'B', quality: 'halfDiminished' }, 4, true, preset, 4),
       ).toBe('B half diminished 7, whole bar');
     });
 
     it('diminished: "D diminished, whole bar"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'D', quality: 'diminished' }, 4, true, preset),
+        chordAriaLabel({ type: 'chord', root: 'D', quality: 'diminished' }, 4, true, preset, 4),
       ).toBe('D diminished, whole bar');
     });
 
     it('maj7: "C major 7, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'C', quality: 'maj7' }, 4, true, preset)).toBe(
-        'C major 7, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'maj7' }, 4, true, preset, 4),
+      ).toBe('C major 7, whole bar');
     });
 
     it('min7: "F minor 7, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'F', quality: 'min7' }, 4, true, preset)).toBe(
-        'F minor 7, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'F', quality: 'min7' }, 4, true, preset, 4),
+      ).toBe('F minor 7, whole bar');
     });
 
     it('dim7: "B diminished 7, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'B', quality: 'dim7' }, 4, true, preset)).toBe(
-        'B diminished 7, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'B', quality: 'dim7' }, 4, true, preset, 4),
+      ).toBe('B diminished 7, whole bar');
     });
 
     it('dom7flat5: "C dominant 7 flat 5, whole bar"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'C', quality: 'dom7flat5' }, 4, true, preset),
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'dom7flat5' }, 4, true, preset, 4),
       ).toBe('C dominant 7 flat 5, whole bar');
     });
   });
 
   describe('accidentals in root', () => {
     it('flat root: Bb → "B flat, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'Bb', quality: 'major' }, 4, true, preset)).toBe(
-        'B flat, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'Bb', quality: 'major' }, 4, true, preset, 4),
+      ).toBe('B flat, whole bar');
     });
 
     it('sharp root: F# → "F sharp minor, whole bar"', () => {
-      expect(chordAriaLabel({ type: 'chord', root: 'F#', quality: 'minor' }, 4, true, preset)).toBe(
-        'F sharp minor, whole bar',
-      );
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'F#', quality: 'minor' }, 4, true, preset, 4),
+      ).toBe('F sharp minor, whole bar');
     });
   });
 
   describe('slash chord', () => {
     it('G/B → "G over B, whole bar"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'G', quality: 'major', bass: 'B' }, 4, true, preset),
+        chordAriaLabel(
+          { type: 'chord', root: 'G', quality: 'major', bass: 'B' },
+          4,
+          true,
+          preset,
+          4,
+        ),
       ).toBe('G over B, whole bar');
     });
 
-    it('Bb7/F → "B flat dominant 7 over F, 2 beats"', () => {
+    it('Bb7/F → "B flat dominant 7 over F, 2 crotchets"', () => {
       expect(
         chordAriaLabel(
           { type: 'chord', root: 'Bb', quality: 'dominant7', bass: 'F' },
           2,
           false,
           preset,
+          4,
         ),
-      ).toBe('B flat dominant 7 over F, 2 beats');
+      ).toBe('B flat dominant 7 over F, 2 crotchets');
     });
   });
 
   describe('duration', () => {
     it('isWholeBar=true → "whole bar"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 4, true, preset),
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 4, true, preset, 4),
       ).toContain('whole bar');
     });
 
-    it('isWholeBar=false, 2 beats → "2 beats"', () => {
+    it('denominator=4 (crotchet), 2 beats → "2 crotchets"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 2, false, preset),
-      ).toContain('2 beats');
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 2, false, preset, 4),
+      ).toBe('C, 2 crotchets');
     });
 
-    it('isWholeBar=false, 1 beat → "1 beat" (singular)', () => {
+    it('denominator=8 (quaver), 3 beats → "3 quavers"', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 1, false, preset),
-      ).toContain('1 beat');
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 3, false, preset, 8),
+      ).toBe('C, 3 quavers');
+    });
+
+    it('denominator=4, 1 beat → "1 crotchet" (singular)', () => {
       expect(
-        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 1, false, preset),
-      ).not.toContain('1 beats');
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 1, false, preset, 4),
+      ).toBe('C, 1 crotchet');
+    });
+
+    it('denominator=8, 1 beat → "1 quaver" (singular)', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 1, false, preset, 8),
+      ).toBe('C, 1 quaver');
+    });
+
+    it('unknown denominator falls back to "beat(s)"', () => {
+      expect(
+        chordAriaLabel({ type: 'chord', root: 'C', quality: 'major' }, 3, false, preset, 16),
+      ).toBe('C, 3 beats');
     });
   });
 });
@@ -825,10 +847,24 @@ describe('HtmlRenderer – aria integration', () => {
       expect(html).toContain('aria-label="C, whole bar"');
     });
 
-    it('two-chord 4/4 bar: F gets "F, 2 beats" and G gets "G, 2 beats"', () => {
+    it('two-chord 4/4 bar: F gets "F, 2 crotchets" and G gets "G, 2 crotchets"', () => {
       const html = new HtmlRenderer().render(parseSong('---\nmeter: 4/4\n---\n| F G |\n'));
-      expect(html).toContain('aria-label="F, 2 beats"');
-      expect(html).toContain('aria-label="G, 2 beats"');
+      expect(html).toContain('aria-label="F, 2 crotchets"');
+      expect(html).toContain('aria-label="G, 2 crotchets"');
+    });
+
+    it('two-chord 6/8 bar: each chord gets "3 quavers"', () => {
+      const html = new HtmlRenderer().render(parseSong('---\nmeter: 6/8\n---\n| F G |\n'));
+      expect(html).toContain('aria-label="F, 3 quavers"');
+      expect(html).toContain('aria-label="G, 3 quavers"');
+    });
+
+    it('mixed 4/4 and 6/8: crotchets in 4/4 bars, quavers in 6/8 bars', () => {
+      const html = new HtmlRenderer().render(
+        parseSong('---\nmeter: 4/4\n---\n| F G | (6/8) C D |\n'),
+      );
+      expect(html).toContain('aria-label="F, 2 crotchets"');
+      expect(html).toContain('aria-label="C, 3 quavers"');
     });
   });
 
