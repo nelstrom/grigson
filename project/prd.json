@@ -2487,7 +2487,8 @@
       "Write 'Creating a preset for another language' subsection with the French preset example (spread DEFAULT_SPOKEN_PRESET, override qualities, duration, simile)",
       "Write 'Using a preset with the custom element' subsection",
       "Write 'Notes for assistive technology authors' section listing aria-label and aria-hidden elements"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "accessibility-website-nav",
@@ -2497,6 +2498,7 @@
     "steps": [
       "In packages/website/_includes/base.njk, add <a href=\"{{ '/accessibility/' | url }}\">Accessibility</a> and a | separator between the Renderers and CLI nav links",
       "In packages/website/content/index.njk, add a <li> to the 'What's in the toolkit' ul after the custom elements bullet, linking to /accessibility/ with a one-line description"
-    ]
+    ],
+    "passes": true
   }
 ]
