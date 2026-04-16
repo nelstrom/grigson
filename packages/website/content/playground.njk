@@ -88,6 +88,32 @@ permalink: /playground/
       <option value="html">HTML</option>
       <option value="text">Text</option>
     </select>
+    <label for="transpose-select">Transpose:</label>
+    <select id="transpose-select">
+      <option value="11">Up 11 semitones</option>
+      <option value="10">Up 10 semitones</option>
+      <option value="9">Up 9 semitones</option>
+      <option value="8">Up 8 semitones</option>
+      <option value="7">Up 7 semitones</option>
+      <option value="6">Up 6 semitones</option>
+      <option value="5">Up 5 semitones</option>
+      <option value="4">Up 4 semitones</option>
+      <option value="3">Up 3 semitones</option>
+      <option value="2">Up 2 semitones</option>
+      <option value="1">Up 1 semitone</option>
+      <option value="0" selected>None (default)</option>
+      <option value="-1">Down 1 semitone</option>
+      <option value="-2">Down 2 semitones</option>
+      <option value="-3">Down 3 semitones</option>
+      <option value="-4">Down 4 semitones</option>
+      <option value="-5">Down 5 semitones</option>
+      <option value="-6">Down 6 semitones</option>
+      <option value="-7">Down 7 semitones</option>
+      <option value="-8">Down 8 semitones</option>
+      <option value="-9">Down 9 semitones</option>
+      <option value="-10">Down 10 semitones</option>
+      <option value="-11">Down 11 semitones</option>
+    </select>
     <span id="html-options">
       <label for="typeface-select">Typeface:</label>
       <select id="typeface-select">
@@ -139,8 +165,12 @@ permalink: /playground/
       simileOutput: z.enum(['shorthand', 'longhand']).optional(),
       accidentals: z.enum(['ascii', 'unicode']).optional(),
       slashStyle: z.enum(['horizontal', 'diagonal', 'ascii']).optional(),
+      transposeSemitones: z.number().int().min(-11).max(11).optional(),
     }),
-    z.object({ name: z.literal('text') }),
+    z.object({
+      name: z.literal('text'),
+      transposeSemitones: z.number().int().min(-11).max(11).optional(),
+    }),
   ]);
 
   // lz-string.min.js is loaded as a plain script before Monaco's AMD loader,
@@ -183,6 +213,7 @@ meter: 4/4
 
     const outputElement = document.getElementById('playground-output');
     const rendererSelect = document.getElementById('renderer-select');
+    const transposeSelect = document.getElementById('transpose-select');
     const typefaceSelect = document.getElementById('typeface-select');
     const notationPresetSelect = document.getElementById('notation-preset-select');
     const simileOutputSelect = document.getElementById('simile-output-select');
@@ -289,8 +320,10 @@ meter: 4/4
           if (accidentalsSelect.value) config.accidentals = accidentalsSelect.value;
           if (slashStyleSelect.value) config.slashStyle = slashStyleSelect.value;
         }
+        const semitones = parseInt(transposeSelect.value, 10);
+        if (semitones !== 0) config.transposeSemitones = semitones;
         const params = new URLSearchParams();
-        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals || config.slashStyle) {
+        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals || config.slashStyle || config.transposeSemitones) {
           params.set('renderer-config', JSON.stringify(config));
         }
         const compressed = compressToEncodedURIComponent(editor.getValue());
@@ -326,11 +359,14 @@ meter: 4/4
     // Initialize renderer selects from URL and apply the renderer
     const initialConfig = readRendererConfig();
     rendererSelect.value = initialConfig.name;
+    transposeSelect.value = String(initialConfig.transposeSemitones ?? 0);
     typefaceSelect.value = initialConfig.typeface ?? 'sans';
     notationPresetSelect.value = initialConfig.preset ?? '';
     simileOutputSelect.value = initialConfig.simileOutput ?? '';
     accidentalsSelect.value = initialConfig.accidentals ?? '';
     slashStyleSelect.value = initialConfig.slashStyle ?? '';
+    const initialSemitones = initialConfig.transposeSemitones ?? 0;
+    if (initialSemitones !== 0) outputElement.setAttribute('transpose-semitones', String(initialSemitones));
     applyRenderer();
 
     editor.onDidChangeModelContent(update);
@@ -338,6 +374,14 @@ meter: 4/4
 
     rendererSelect.addEventListener('change', () => {
       applyRenderer();
+      outputElement.update();
+      updateURL();
+    });
+
+    transposeSelect.addEventListener('change', () => {
+      const semitones = parseInt(transposeSelect.value, 10);
+      if (semitones !== 0) outputElement.setAttribute('transpose-semitones', String(semitones));
+      else outputElement.removeAttribute('transpose-semitones');
       outputElement.update();
       updateURL();
     });
