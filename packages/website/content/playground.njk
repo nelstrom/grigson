@@ -46,12 +46,18 @@ permalink: /playground/
     gap: 0.25rem;
   }
   #renderer-toolbar {
-    display: flex;
+    display: grid;
+    grid-template-columns: max-content 1fr;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.25rem 0;
+    column-gap: 0.5rem;
+    row-gap: 0.35rem;
     font-size: 0.85rem;
+  }
+  #html-options {
+    display: contents;
+  }
+  #html-options[hidden] {
+    display: none !important;
   }
   #output-container {
     border: 1px solid var(--color-border-subtle);
@@ -97,11 +103,6 @@ permalink: /playground/
 
   <div id="output-section">
     <div id="renderer-toolbar">
-    <label for="renderer-select">Renderer:</label>
-    <select id="renderer-select">
-      <option value="html">HTML</option>
-      <option value="text">Text</option>
-    </select>
     <label for="transpose-select">Transpose:</label>
     <select id="transpose-select">
       <option value="11">Up 11 semitones</option>
@@ -127,6 +128,11 @@ permalink: /playground/
       <option value="-9">Down 9 semitones</option>
       <option value="-10">Down 10 semitones</option>
       <option value="-11">Down 11 semitones</option>
+    </select>
+    <label for="renderer-select">Renderer:</label>
+    <select id="renderer-select">
+      <option value="html">HTML</option>
+      <option value="text">Text</option>
     </select>
     <span id="html-options">
       <label for="typeface-select">Typeface:</label>
