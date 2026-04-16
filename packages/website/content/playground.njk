@@ -202,14 +202,19 @@ permalink: /playground/
 
   require(['vs/editor/editor.main'], function () {
     const DEFAULT_VALUE = `---
-title: "Chord Quality Reference"
-key: C major
+title: "Demo chart"
+key: F# major
 meter: 4/4
 ---
 
-| C | Cm | C7 | Cmaj7 ||
-||: Cm7 | Cdim :||: Cdim7 | Cm7b5 :||
-| C7b5 | C7b5 ||.
+# This is a comment line
+| F# | B | C#7 | D#m |
+| G#m | C#7 | F# | Bm7b5 |
+| A Bb | C7 Dm | Em7b5 F | G Am G7 . |
+| Cmaj7  | Bdim7 Am7 | Fmaj7 | Cmaj7 |
+| G7b5 | F#7b5 | Cm7 | Bbm7 |
+||: C | F :||: G | C :||
+| F/C | Am/E | Cm7/Bb | G/B ||.
 `;
 
     function readHash() {
