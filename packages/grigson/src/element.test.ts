@@ -315,6 +315,47 @@ key: C
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it('wraps renderer output in a div with the renderer element class when set', async () => {
+    class ClassedRenderer extends HTMLElement {
+      renderChart() {
+        const div = document.createElement('div');
+        div.setAttribute('data-classed', 'true');
+        return div;
+      }
+    }
+    if (!customElements.get('classed-renderer')) {
+      customElements.define('classed-renderer', ClassedRenderer);
+    }
+
+    document.body.innerHTML = `
+      <grigson-chart>
+        <classed-renderer class="my-renderer"></classed-renderer>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    const wrapper = shadowRoot.querySelector('div.my-renderer');
+    expect(wrapper).not.toBeNull();
+    expect(wrapper!.querySelector('[data-classed="true"]')).not.toBeNull();
+  });
+
+  it('injects <style> children into the shadow root', async () => {
+    document.body.innerHTML = `
+      <grigson-chart>
+        <style data-user-style>div { color: red; }</style>
+        <template>| C |</template>
+      </grigson-chart>
+    `;
+    await wait();
+    const element = document.querySelector('grigson-chart')!;
+    const shadowRoot = element.shadowRoot!;
+    const injected = shadowRoot.querySelector('style[data-user-style]');
+    expect(injected).not.toBeNull();
+    expect(injected!.textContent).toContain('color: red');
+  });
+
   it(':host style contains container-type: inline-size', async () => {
     document.body.innerHTML = `<grigson-chart><template>| C |</template></grigson-chart>`;
     await wait();

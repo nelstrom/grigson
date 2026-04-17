@@ -123,10 +123,23 @@ export class GrigsonChart extends HTMLElement {
         }
       }
 
+      const userStyles = Array.from(this.children)
+        .filter((c): c is HTMLStyleElement => c.tagName === 'STYLE')
+        .map((s) => s.cloneNode(true) as HTMLStyleElement);
+
       const rendered: Element[] = [];
       for (const renderer of renderers) {
         try {
-          rendered.push(renderer.renderChart(song));
+          const output = renderer.renderChart(song);
+          const cls = (renderer as unknown as Element).className;
+          if (cls) {
+            const wrapper = document.createElement('div');
+            wrapper.className = cls;
+            wrapper.appendChild(output);
+            rendered.push(wrapper);
+          } else {
+            rendered.push(output);
+          }
         } catch (renderError) {
           const div = document.createElement('div');
           div.textContent =
@@ -137,7 +150,7 @@ export class GrigsonChart extends HTMLElement {
         }
       }
 
-      this._root.replaceChildren(this._style, ...rendered);
+      this._root.replaceChildren(this._style, ...userStyles, ...rendered);
     } catch (parseError) {
       const div = document.createElement('div');
       div.textContent = parseError instanceof Error ? parseError.message : String(parseError);

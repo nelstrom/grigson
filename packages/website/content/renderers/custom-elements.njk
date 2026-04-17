@@ -260,32 +260,30 @@ grigson-chart {
   on narrow ones:
 </p>
 <pre><code>&lt;grigson-chart normalise&gt;
+  &lt;style&gt;
+    .chart-wide   { display: none;  }
+    .chart-narrow { display: block; }
+
+    @container (min-width: 500px) {
+      .chart-wide   { display: block; }
+      .chart-narrow { display: none;  }
+    }
+  &lt;/style&gt;
   &lt;grigson-html-renderer class="chart-wide"&gt;&lt;/grigson-html-renderer&gt;
   &lt;grigson-text-renderer class="chart-narrow"&gt;&lt;/grigson-text-renderer&gt;
   &lt;template&gt;...&lt;/template&gt;
-&lt;/grigson-chart&gt;
-
-&lt;style&gt;
-  .chart-wide   { display: none;  }
-  .chart-narrow { display: block; }
-
-  @container (min-width: 500px) {
-    .chart-wide   { display: block; }
-    .chart-narrow { display: none;  }
-  }
-&lt;/style&gt;</code></pre>
-
-<style>
-  .chart-wide   { display: none;  }
-  .chart-narrow { display: block; }
-
-  @container (min-width: 500px) {
-    .chart-wide   { display: block; }
-    .chart-narrow { display: none;  }
-  }
-</style>
+&lt;/grigson-chart&gt;</code></pre>
 
 <grigson-chart normalise>
+  <style>
+    .chart-wide   { display: none;  }
+    .chart-narrow { display: block; }
+
+    @container (min-width: 500px) {
+      .chart-wide   { display: block; }
+      .chart-narrow { display: none;  }
+    }
+  </style>
   <grigson-html-renderer class="chart-wide"></grigson-html-renderer>
   <grigson-text-renderer class="chart-narrow"></grigson-text-renderer>
   <template>
