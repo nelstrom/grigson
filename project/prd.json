@@ -2500,5 +2500,31 @@
       "In packages/website/content/index.njk, add a <li> to the 'What's in the toolkit' ul after the custom elements bullet, linking to /accessibility/ with a one-line description"
     ],
     "passes": true
+  },
+  {
+    "id": "dsd-export-renderer-css",
+    "category": "functional",
+    "description": "Export renderer styles and font-face CSS as standalone functions from the grigson package",
+    "detail": "Extract the private `_getStyles()` and `_ensureFontFaces()` methods in `packages/grigson/src/renderers/html-element.ts` into exported standalone functions — `getRendererStyles(typeface?: string): string` and `getRendererFontFaceCSS(): string` — so they can be called from Node.js build tools without a DOM. Update `_getStyles()` and `_ensureFontFaces()` to delegate to these new functions. Export both from `packages/grigson/src/index.ts`. Add unit tests confirming the functions return non-empty CSS strings containing expected markers (e.g. `@font-face`, `part=\"song\"`). See project/plans/declarative-shadow-dom.md for full context.",
+    "steps": [
+      "In `packages/grigson/src/renderers/html-element.ts`, add exported function `getRendererFontFaceCSS(): string` that returns the font-face CSS string currently built inline in `_ensureFontFaces()`; update `_ensureFontFaces()` to call it",
+      "Add exported function `getRendererStyles(typeface?: string): string` containing the CSS template currently in `_getStyles()`; update `_getStyles()` to delegate to it",
+      "Export both functions from `packages/grigson/src/index.ts`",
+      "Add tests in the grigson package verifying both functions return strings with expected CSS content",
+      "Run `pnpm build && pnpm test` and confirm everything passes"
+    ]
+  },
+  {
+    "id": "dsd-build-time-demo",
+    "category": "functional",
+    "description": "Add a grigsonChartDSD Eleventy shortcode and build-time rendering demo page to the website",
+    "detail": "Add a `grigsonChartDSD` paired shortcode to `packages/website/.eleventy.js` that parses and pre-renders a chart at build time using `parseSong`, `normaliseSong`, `HtmlRenderer`, `getRendererStyles`, and `getRendererFontFaceCSS` from the grigson package, wrapping the output in a `<template shadowrootmode=\"open\">` inside `<grigson-chart>`. Create `packages/website/content/renderers/ssr.njk` as a demo page (permalink `/renderers/build-time/`) that uses the shortcode with the Blues in F example, explains how DSD works, shows a code example of the shortcode usage, and notes the font behaviour. Add a link to the new page in `packages/website/content/renderers/index.md`. See project/plans/declarative-shadow-dom.md for full context.",
+    "steps": [
+      "Import `parseSong`, `normaliseSong`, `HtmlRenderer`, `getRendererStyles`, `getRendererFontFaceCSS` from `grigson` in `.eleventy.js`; precompute `fontFaceCSS` and `defaultStyles` once; register the `grigsonChartDSD` paired shortcode",
+      "Create `packages/website/content/renderers/ssr.njk` with frontmatter (`layout: base.njk`, `title: Build-time rendering`, `permalink: /renderers/build-time/`) and sections: intro, live demo using the shortcode, how-it-works explanation, code example using the existing `highlight` shortcode, font note",
+      "Add the Blues in F chart from the plan as the demo chart in the new page",
+      "Add a bullet for the new page to the renderer list in `packages/website/content/renderers/index.md`",
+      "Run `pnpm build` from the repo root and verify the site builds; serve locally and confirm the chart renders with JS disabled"
+    ]
   }
 ]
