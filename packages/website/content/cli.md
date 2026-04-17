@@ -226,3 +226,154 @@ grigson-html-renderer song.chart                                    # default no
 grigson-html-renderer --notation-preset-file ./preset.json song.chart
 cat song.chart | grigson normalise | grigson-html-renderer > out.html
 ```
+
+---
+
+## Demonstration
+
+Each example below shows the command and its output together so you can see what the tools actually do.
+
+### Normalisation
+
+#### Fixing accidental spelling
+
+The normaliser detects the key and rewrites enharmonic spellings to match. Here `A#` is wrong in F major — it should be `Bb`:
+
+```sh
+$ echo '| F | A# | C | F |' | grigson normalise
+---
+key: F major
+meter: 4/4
+---
+
+| F | Bb | C | F |
+```
+
+The `key` and `meter` fields are added to the front matter when they are not already present.
+
+#### Tidying whitespace
+
+The output format is always regularised, regardless of how compact the input is:
+
+```sh
+$ echo '|F|Bb|C|F|' | grigson normalise
+---
+key: F major
+meter: 4/4
+---
+
+| F | Bb | C | F |
+```
+
+---
+
+### Transposition
+
+All four examples start from the same chart in F# major. The accidental spelling adapts to each target key automatically — sharps in sharp keys, flats in flat keys.
+
+```sh
+$ cat song.chart
+---
+key: F# major
+---
+| F# | A#m | B | C#7 |
+```
+
+**Up to G major** — sharps throughout:
+
+```sh
+$ grigson transpose --to G song.chart
+---
+key: G
+---
+
+| G | Bm | C | D7 |
+```
+
+**Up to Ab major** — switches to flat spelling:
+
+```sh
+$ grigson transpose --to Ab song.chart
+---
+key: Ab
+---
+
+| Ab | Cm | Db | Eb7 |
+```
+
+**Up to Bb major** — also flat:
+
+```sh
+$ grigson transpose --to Bb song.chart
+---
+key: Bb
+---
+
+| Bb | Dm | Eb | F7 |
+```
+
+**Down 3 semitones to Eb major:**
+
+```sh
+$ grigson transpose --lower 3 song.chart
+---
+key: Eb
+---
+
+| Eb | Gm | Ab | Bb7 |
+```
+
+---
+
+### Validation
+
+#### Valid chart
+
+A valid chart produces no output and exits with code 0:
+
+```sh
+$ echo '| C | Am | F | G |' | grigson validate
+$ echo $?
+0
+```
+
+#### Parse error — unrecognised chord symbol
+
+Chord roots must be a note name A–G. Anything else is a parse error:
+
+```sh
+$ echo '| C | Pm | F | G |' | grigson validate
+<stdin>:1:7: error: Expected "#", "%", "(", ".", ":||", ":||:", "[", "\n", "\r\n", "|", "||", "||:", [ \t], [A-G], or end of input but "P" found.
+$ echo $?
+1
+```
+
+The error points to the exact position in the input (`line:character`).
+
+#### Semantic warning — beat balance
+
+Parse errors catch syntax problems; semantic warnings catch musical logic errors that the parser accepts. A bar with dot slots must have exactly as many slots as the time signature's numerator:
+
+```sh
+$ echo '| (4/4) C . . G . |' | grigson validate
+<stdin>:1:3: warning: Bar has 5 slots but time signature is 4/4 (expected 4)
+$ echo $?
+1
+```
+
+---
+
+### HTML rendering
+
+`grigson-html-renderer` reads a chart and writes a `<div>` tree to stdout, using `part` attributes for styling:
+
+```sh
+$ echo '| C | Am | F | G |' | grigson-html-renderer
+<div part="song" style="--beat-cols: 16; --min-beat-width: 1.00em"><div part="song-grid"><section part="section" style="display: contents"><div part="row" style="grid-column: 1 / 34"><span part="barline barline-single barline-position-start" aria-hidden="true" style="grid-column: 1">…</span><span part="slot bar-start" style="grid-column: 2 / span 7"><span part="chord" aria-label="C, whole bar"><span part="chord-root" aria-hidden="true">C</span></span></span>…</div></section></div></div>
+```
+
+The output is unstyled markup. It can be piped into a file and served alongside the grigson stylesheet, or it can be passed through a normalise/transpose step first:
+
+```sh
+$ cat song.chart | grigson normalise | grigson transpose --to G | grigson-html-renderer > out.html
+```
