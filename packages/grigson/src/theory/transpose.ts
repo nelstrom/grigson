@@ -28,7 +28,17 @@ function shiftChord(chord: Chord, semitones: number): Chord {
     return chord;
   }
   const newPC = (((pc + semitones) % 12) + 12) % 12;
-  return { ...chord, root: PC_TO_FLAT[newPC] };
+  const shifted: Chord = { ...chord, root: PC_TO_FLAT[newPC] };
+  if (chord.bass !== undefined) {
+    try {
+      const bassPC = rootToPitchClass(chord.bass);
+      const newBassPC = (((bassPC + semitones) % 12) + 12) % 12;
+      shifted.bass = PC_TO_FLAT[newBassPC];
+    } catch {
+      // leave bass unchanged if unrecognised
+    }
+  }
+  return shifted;
 }
 
 function transposeSectionInternal(

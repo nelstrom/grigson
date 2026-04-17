@@ -6,6 +6,10 @@ function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
   return { type: 'chord', root, quality };
 }
 
+function chSlash(root: string, bass: string, quality: Chord['quality'] = 'major'): Chord {
+  return { type: 'chord', root, quality, bass };
+}
+
 function bar(c: Chord): Bar {
   return { type: 'bar', slots: [{ type: 'chord', chord: c }], closeBarline: { kind: 'single' } };
 }
@@ -37,6 +41,16 @@ function getQualities(result: Song): Chord['quality'][] {
     sec.rows.flatMap((r) =>
       r.bars.flatMap((b) =>
         b.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord.quality),
+      ),
+    ),
+  );
+}
+
+function getBassNotes(result: Song): (string | undefined)[] {
+  return result.sections.flatMap((sec) =>
+    sec.rows.flatMap((r) =>
+      r.bars.flatMap((b) =>
+        b.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord.bass),
       ),
     ),
   );
@@ -93,6 +107,29 @@ describe('transpose-rewrite', () => {
         'dominant7',
         'major',
       ]);
+    });
+  });
+
+  describe('slash chords — bass note transposition', () => {
+    it('T-slash-1: G/B +2 → A/C# (bass B shifts to C#)', () => {
+      const s = song([row(chSlash('G', 'B'))]);
+      const result = transposeSong(s, 2);
+      expect(getRoots(result)).toEqual(['A']);
+      expect(getBassNotes(result)).toEqual(['C#']);
+    });
+
+    it('T-slash-2: C/E +7 → G/B (bass E shifts to B)', () => {
+      const s = song([row(chSlash('C', 'E'))]);
+      const result = transposeSong(s, 7);
+      expect(getRoots(result)).toEqual(['G']);
+      expect(getBassNotes(result)).toEqual(['B']);
+    });
+
+    it('T-slash-3: F/A +2 → G/B (bass A shifts to B)', () => {
+      const s = song([row(chSlash('F', 'A'))]);
+      const result = transposeSong(s, 2);
+      expect(getRoots(result)).toEqual(['G']);
+      expect(getBassNotes(result)).toEqual(['B']);
     });
   });
 
