@@ -1,4 +1,4 @@
-import type { Song, Section, Row, Bar, Chord, ChordSlot } from '../parser/types.js';
+import type { Song, Section, Row, Bar, Chord, ChordSlot, Quality } from '../parser/types.js';
 import { detectKey, type DetectKeyConfig } from './keyDetector.js';
 import { KEYS, resolveKey } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
@@ -23,31 +23,56 @@ function buildPCToNote(key: string): Map<number, string> {
   return map;
 }
 
+function canonicalNote(
+  note: string,
+  homePCToNote: Map<number, string>,
+  currentPCToNote: Map<number, string>,
+): string {
+  let pc: number;
+  try {
+    pc = rootToPitchClass(note);
+  } catch {
+    return note;
+  }
+  // Prefer homeKey spelling; fall back to currentKey spelling; keep original if neither matches
+  return homePCToNote.get(pc) ?? currentPCToNote.get(pc) ?? note;
+}
+
+const MINOR_QUALITIES = new Set<Quality>(['minor', 'min7', 'halfDiminished', 'dim7', 'diminished']);
+
 function normaliseChord(
   chord: Chord,
   homePCToNote: Map<number, string>,
   currentPCToNote: Map<number, string>,
 ): Chord {
-  let pc: number;
-  try {
-    pc = rootToPitchClass(chord.root);
-  } catch {
-    return chord;
+  const newRoot = canonicalNote(chord.root, homePCToNote, currentPCToNote);
+
+  let newBass = chord.bass;
+  if (chord.bass !== undefined) {
+    let rootPC: number | undefined;
+    try {
+      rootPC = rootToPitchClass(newRoot);
+    } catch {
+      // ignore
+    }
+
+    if (rootPC !== undefined && !homePCToNote.has(rootPC)) {
+      // Borrowed chord: the root isn't diatonic to the home key, so don't use the home key
+      // to spell the bass. Instead derive the spelling from the chord root's own key so that,
+      // e.g., A/Db (borrowed in Ab major) → A/C# (C# is the major 3rd of A, not Db).
+      const chordKeyStr = MINOR_QUALITIES.has(chord.quality) ? newRoot + 'm' : newRoot;
+      const chordPCToNote = buildPCToNote(chordKeyStr);
+      newBass = canonicalNote(chord.bass, chordPCToNote, currentPCToNote);
+    } else {
+      newBass = canonicalNote(chord.bass, homePCToNote, currentPCToNote);
+    }
   }
 
-  // Prefer homeKey spelling for enharmonically diatonic chords (e.g. C# → Db in Db major)
-  const homeCanonical = homePCToNote.get(pc);
-  if (homeCanonical !== undefined) {
-    return homeCanonical !== chord.root ? { ...chord, root: homeCanonical } : chord;
-  }
+  if (newRoot === chord.root && newBass === chord.bass) return chord;
 
-  // For pitch classes not in homeKey, use the currentKey spelling from harmonic analysis
-  const currentCanonical = currentPCToNote.get(pc);
-  if (currentCanonical !== undefined) {
-    return currentCanonical !== chord.root ? { ...chord, root: currentCanonical } : chord;
-  }
-
-  return chord;
+  const result: Chord = { ...chord, root: newRoot };
+  if (newBass !== undefined) result.bass = newBass;
+  return result;
 }
 
 export function normaliseSection(

@@ -6,6 +6,10 @@ function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
   return { type: 'chord', root, quality };
 }
 
+function chSlash(root: string, bass: string, quality: Chord['quality'] = 'major'): Chord {
+  return { type: 'chord', root, quality, bass };
+}
+
 function bar(c: Chord, timeSignature?: { numerator: number; denominator: number }): Bar {
   const b: Bar = {
     type: 'bar',
@@ -503,5 +507,62 @@ describe('normaliseSong — bar timeSignature stripping', () => {
       numerator: 4,
       denominator: 4,
     });
+  });
+});
+
+describe('normaliseSection — slash chord bass note normalisation', () => {
+  it('A/Db → A/C# when home key is A major (diatonic root, home key maps pc=1 to C#)', () => {
+    const chords = [ch('A'), ch('E'), chSlash('A', 'Db'), ch('E')];
+    const { chords: out } = normaliseSection(chords);
+    expect(out[2].root).toBe('A');
+    expect(out[2].bass).toBe('C#');
+  });
+
+  it('A/Db → A/C# when home key is Ab major (borrowed root — use A major for bass spelling)', () => {
+    // Home key is Ab major (has Db, not C#), but the A chord is borrowed.
+    // The bass should be spelled from A major's perspective: C#, not Db.
+    const chords = [
+      ch('Ab'),
+      ch('Db'),
+      ch('Eb'),
+      ch('Fm'),
+      ch('Bbm'),
+      ch('Eb'),
+      ch('Ab'),
+      chSlash('A', 'Db'),
+    ];
+    const { chords: out } = normaliseSection(chords);
+    expect(out[7].root).toBe('A');
+    expect(out[7].bass).toBe('C#');
+  });
+
+  it('Bm/Gb → Bm/F# when home key is Ab major (borrowed root — use B minor for bass spelling)', () => {
+    const chords = [
+      ch('Ab'),
+      ch('Db'),
+      ch('Eb'),
+      ch('Fm'),
+      ch('Bbm'),
+      ch('Eb'),
+      ch('Ab'),
+      chSlash('B', 'Gb', 'minor'),
+    ];
+    const { chords: out } = normaliseSection(chords);
+    expect(out[7].root).toBe('B');
+    expect(out[7].bass).toBe('F#');
+  });
+
+  it('F/A# → F/Bb when root is diatonic (F is in F major — use home key for bass)', () => {
+    const chords = [ch('F'), chSlash('F', 'A#'), ch('C')];
+    const { chords: out } = normaliseSection(chords);
+    expect(out[1].root).toBe('F');
+    expect(out[1].bass).toBe('Bb');
+  });
+
+  it('chords without bass are unaffected', () => {
+    const chords = [ch('F'), ch('A#'), ch('C')];
+    const { chords: out } = normaliseSection(chords);
+    expect(out[1].root).toBe('Bb');
+    expect(out[1].bass).toBeUndefined();
   });
 });
