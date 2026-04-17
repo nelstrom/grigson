@@ -18,8 +18,9 @@ permalink: /renderers/custom-elements/
   Place the chart source in a <code>&lt;template&gt;</code> child. The
   <code>normalise</code> attribute corrects enharmonic spelling for the detected key.
 </p>
-<pre><code>&lt;grigson-chart normalise&gt;
-  &lt;template&gt;
+{% highlight "html" %}
+<grigson-chart normalise>
+  <template>
 ---
 title: Autumn Leaves
 key: Gm
@@ -30,8 +31,9 @@ key: Gm
 [B]
 | Cm7 | F7 | Bbmaj7 | Bbmaj7 |
 | Am7b5 | D7 | Gm | Gm |
-  &lt;/template&gt;
-&lt;/grigson-chart&gt;</code></pre>
+  </template>
+</grigson-chart>
+{% endhighlight %}
 
 <grigson-chart normalise>
   <template>
@@ -59,7 +61,8 @@ key: Gm
   <li><strong>Bb instruments</strong> (trumpet, clarinet, tenor sax) — sound a major 2nd lower than written, so transpose up 2 semitones</li>
   <li><strong>Eb instruments</strong> (alto sax, baritone sax) — sound a major 6th lower than written, so transpose up 9 semitones</li>
 </ul>
-<pre><code>&lt;template id="autumn-leaves"&gt;
+{% highlight "html" %}
+<template id="autumn-leaves">
 ---
 title: Autumn Leaves
 key: Gm
@@ -67,16 +70,17 @@ key: Gm
 [A]
 | Am7b5 | D7 | Gm | Gm |
 ...
-&lt;/template&gt;
+</template>
 
-&lt;!-- Concert pitch --&gt;
-&lt;grigson-chart template="autumn-leaves" normalise&gt;&lt;/grigson-chart&gt;
+<!-- Concert pitch -->
+<grigson-chart template="autumn-leaves" normalise></grigson-chart>
 
-&lt;!-- Bb instruments: transpose +2 semitones --&gt;
-&lt;grigson-chart template="autumn-leaves" normalise transpose-semitones="2"&gt;&lt;/grigson-chart&gt;
+<!-- Bb instruments: transpose +2 semitones -->
+<grigson-chart template="autumn-leaves" normalise transpose-semitones="2"></grigson-chart>
 
-&lt;!-- Eb instruments: transpose +9 semitones --&gt;
-&lt;grigson-chart template="autumn-leaves" normalise transpose-semitones="9"&gt;&lt;/grigson-chart&gt;</code></pre>
+<!-- Eb instruments: transpose +9 semitones -->
+<grigson-chart template="autumn-leaves" normalise transpose-semitones="9"></grigson-chart>
+{% endhighlight %}
 
 <template id="autumn-leaves">
 ---
@@ -106,12 +110,13 @@ key: Gm
   You can make it explicit by adding a <code>&lt;grigson-html-renderer&gt;</code> child,
   which lets you target its CSS custom properties and shadow parts directly.
 </p>
-<pre><code>&lt;grigson-chart normalise&gt;
-  &lt;grigson-html-renderer style="
+{% highlight "html" %}
+<grigson-chart normalise>
+  <grigson-html-renderer style="
     --grigson-chord-root-color: steelblue;
     --grigson-chord-suffix-color: tomato;
-  "&gt;&lt;/grigson-html-renderer&gt;
-  &lt;template&gt;
+  "></grigson-html-renderer>
+  <template>
 ---
 title: All The Things You Are
 key: Ab
@@ -119,8 +124,9 @@ key: Ab
 [A]
 | Fm7 | Bbm7 | Eb7 | Abmaj7 |
 | Dbmaj7 | G7 | Cmaj7 | Cmaj7 |
-  &lt;/template&gt;
-&lt;/grigson-chart&gt;</code></pre>
+  </template>
+</grigson-chart>
+{% endhighlight %}
 
 <grigson-chart normalise>
   <grigson-html-renderer style="
@@ -144,20 +150,22 @@ key: Ab
   the renderer. <code>&lt;grigson-text-renderer&gt;</code> is a separate package that renders
   charts as plain text inside a <code>&lt;pre&gt;</code> element.
 </p>
-<pre><code>&lt;!-- Load the separate package --&gt;
-&lt;script src="/js/grigson-text-renderer-register.iife.js"&gt;&lt;/script&gt;
+{% highlight "html" %}
+<!-- Load the separate package -->
+<script src="/js/grigson-text-renderer-register.iife.js"></script>
 
-&lt;grigson-chart normalise&gt;
-  &lt;grigson-text-renderer&gt;&lt;/grigson-text-renderer&gt;
-  &lt;template&gt;
+<grigson-chart normalise>
+  <grigson-text-renderer></grigson-text-renderer>
+  <template>
 ---
 title: Autumn Leaves
 key: Gm
 ---
 [A]
 | Am7b5 | D7 | Gm | Gm |
-  &lt;/template&gt;
-&lt;/grigson-chart&gt;</code></pre>
+  </template>
+</grigson-chart>
+{% endhighlight %}
 
 <grigson-chart normalise>
   <grigson-text-renderer></grigson-text-renderer>
@@ -242,14 +250,16 @@ key: Gm
   </tbody>
 </table>
 
-<pre><code>grigson-chart::part(chord-root) {
+{% highlight "css" %}
+grigson-chart::part(chord-root) {
   color: #d33;
   font-weight: bold;
 }
 
 grigson-chart {
   --grigson-font-family: 'Fira Code', monospace;
-}</code></pre>
+}
+{% endhighlight %}
 
 <h2>Responsive layout</h2>
 <p>
@@ -259,8 +269,9 @@ grigson-chart {
   appropriate one. Here the HTML renderer is used on wide layouts and the plain-text renderer
   on narrow ones:
 </p>
-<pre><code>&lt;grigson-chart normalise&gt;
-  &lt;style&gt;
+{% highlight "html" %}
+<grigson-chart normalise>
+  <style>
     .chart-wide   { display: none;  }
     .chart-narrow { display: block; }
 
@@ -268,11 +279,12 @@ grigson-chart {
       .chart-wide   { display: block; }
       .chart-narrow { display: none;  }
     }
-  &lt;/style&gt;
-  &lt;grigson-html-renderer class="chart-wide"&gt;&lt;/grigson-html-renderer&gt;
-  &lt;grigson-text-renderer class="chart-narrow"&gt;&lt;/grigson-text-renderer&gt;
-  &lt;template&gt;...&lt;/template&gt;
-&lt;/grigson-chart&gt;</code></pre>
+  </style>
+  <grigson-html-renderer class="chart-wide"></grigson-html-renderer>
+  <grigson-text-renderer class="chart-narrow"></grigson-text-renderer>
+  <template>...</template>
+</grigson-chart>
+{% endhighlight %}
 
 <grigson-chart normalise>
   <style>
