@@ -255,26 +255,54 @@ grigson-chart {
 <p>
   <code>&lt;grigson-chart&gt;</code> sets <code>container-type: inline-size</code> on itself
   by default, so <code>@container</code> rules targeting its children work without any extra
-  CSS. You can place multiple renderer configurations inside one chart and use container
-  queries to show the appropriate one:
+  CSS. Place multiple renderers inside one chart and use container queries to show the
+  appropriate one. Here the HTML renderer is used on wide layouts and the plain-text renderer
+  on narrow ones:
 </p>
-<pre><code>&lt;grigson-chart&gt;
-  &lt;template&gt;| C | Am | F | G |&lt;/template&gt;
-  &lt;grigson-html-renderer class="narrow"&gt;&lt;/grigson-html-renderer&gt;
-  &lt;grigson-html-renderer class="wide"&gt;&lt;/grigson-html-renderer&gt;
+<pre><code>&lt;grigson-chart normalise&gt;
+  &lt;grigson-html-renderer class="chart-wide"&gt;&lt;/grigson-html-renderer&gt;
+  &lt;grigson-text-renderer class="chart-narrow"&gt;&lt;/grigson-text-renderer&gt;
+  &lt;template&gt;...&lt;/template&gt;
 &lt;/grigson-chart&gt;
 
 &lt;style&gt;
-  .narrow { display: block; }
-  .wide   { display: none;  }
+  .chart-wide   { display: none;  }
+  .chart-narrow { display: block; }
 
-  @container (min-width: 600px) {
-    .narrow { display: none;  }
-    .wide   { display: block; }
+  @container (min-width: 500px) {
+    .chart-wide   { display: block; }
+    .chart-narrow { display: none;  }
   }
 &lt;/style&gt;</code></pre>
 
-<p>Opt out of containment with <code>container-type: normal</code> on the element if needed.</p>
+<style>
+  .chart-wide   { display: none;  }
+  .chart-narrow { display: block; }
+
+  @container (min-width: 500px) {
+    .chart-wide   { display: block; }
+    .chart-narrow { display: none;  }
+  }
+</style>
+
+<grigson-chart normalise>
+  <grigson-html-renderer class="chart-wide"></grigson-html-renderer>
+  <grigson-text-renderer class="chart-narrow"></grigson-text-renderer>
+  <template>
+---
+title: Autumn Leaves
+key: Gm
+---
+[A]
+| Am7b5 | D7 | Gm | Gm |
+| Am7b5 | D7 | Gm | Gm |
+[B]
+| Cm7 | F7 | Bbmaj7 | Bbmaj7 |
+| Am7b5 | D7 | Gm | Gm |
+  </template>
+</grigson-chart>
+
+<p>Resize the browser window to see it switch between renderers. Opt out of containment with <code>container-type: normal</code> on the element if needed.</p>
 
 <h2>Building a custom renderer element</h2>
 <p>
