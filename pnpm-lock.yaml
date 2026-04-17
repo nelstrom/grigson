@@ -167,6 +167,9 @@ importers:
       grigson:
         specifier: workspace:*
         version: link:../grigson
+      grigson-text-renderer:
+        specifier: workspace:*
+        version: link:../grigson-text-renderer
     devDependencies:
       '@11ty/eleventy':
         specifier: ^3.0.0
