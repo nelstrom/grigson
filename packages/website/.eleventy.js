@@ -5,8 +5,8 @@ import { createHighlighter } from 'shiki';
 export default async function (eleventyConfig) {
   // Initialise Shiki once and reuse across all pages
   const highlighter = await createHighlighter({
-    themes: ['nord'],
-    langs: [],
+    themes: ['nord', 'github-light'],
+    langs: ['html', 'css'],
   });
   await highlighter.loadLanguage({
     ...JSON.parse(
@@ -23,11 +23,20 @@ export default async function (eleventyConfig) {
     return fs.readFileSync(filePath, 'utf8').trim();
   });
 
+  const shikiOptions = {
+    themes: { light: 'github-light', dark: 'nord' },
+    defaultColor: 'light',
+  };
+
   eleventyConfig.addAsyncFilter('highlightChart', async (name) => {
     const source = fs
       .readFileSync(path.join(import.meta.dirname, 'charts', `${name}.chart`), 'utf8')
       .trim();
-    return highlighter.codeToHtml(source, { lang: 'grigson', theme: 'nord' });
+    return highlighter.codeToHtml(source, { lang: 'grigson', ...shikiOptions });
+  });
+
+  eleventyConfig.addPairedShortcode('highlight', (code, language) => {
+    return highlighter.codeToHtml(code.trim(), { lang: language, ...shikiOptions });
   });
 
   eleventyConfig.addFilter('indexOf', (arr, page) =>

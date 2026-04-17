@@ -86,6 +86,13 @@
         background: none;
         padding: 0;
       }
+
+      @media (prefers-color-scheme: dark) {
+        .shiki, .shiki span {
+          color: var(--shiki-dark) !important;
+          background-color: var(--shiki-dark-bg) !important;
+        }
+      }
     </style>
     {% block scripts %}
     <script src="{{ '/js/grigson.iife.js' | url }}"></script>
