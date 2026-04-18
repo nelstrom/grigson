@@ -9,7 +9,15 @@ export { getRendererFontFaceCSS, getRendererStyles };
 
 export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset', 'simile-output', 'typeface', 'accidentals', 'slash-style'];
+    return [
+      'notation-preset',
+      'simile-output',
+      'typeface',
+      'accidentals',
+      'slash-style',
+      'bars-per-line',
+      'max-bars-per-line',
+    ];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
@@ -51,6 +59,14 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     const slashStyle = this.getAttribute('slash-style');
     if (slashStyle === 'horizontal' || slashStyle === 'diagonal' || slashStyle === 'ascii') {
       config.slashStyle = slashStyle;
+    }
+    const barsPerLine = parseInt(this.getAttribute('bars-per-line') ?? '', 10);
+    if (barsPerLine > 0) {
+      config.barsPerLine = barsPerLine;
+    }
+    const maxBarsPerLine = parseInt(this.getAttribute('max-bars-per-line') ?? '', 10);
+    if (maxBarsPerLine > 0) {
+      config.maxBarsPerLine = maxBarsPerLine;
     }
 
     const renderer = new HtmlRenderer(config);

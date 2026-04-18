@@ -2551,6 +2551,7 @@
       "Add 'bars-per-line' and 'max-bars-per-line' to observedAttributes in html-element.ts",
       "In renderChart(), parse each attribute with parseInt and set config.barsPerLine / config.maxBarsPerLine if the parsed value is a positive integer",
       "Update packages/grigson/README.md to document both new attributes with a short example showing the responsive layout pattern (bars-per-line for wide, max-bars-per-line for narrow)"
-    ]
+    ],
+    "passes": true
   }
 ]

@@ -144,9 +144,41 @@ Authors can opt out of containment with `container-type: normal` on the element 
 
 The built-in renderer element. Accepts:
 
-| Attribute         | Description                                                   |
-| ----------------- | ------------------------------------------------------------- |
-| `notation-preset` | Chord notation style: `jazz` (default), `pop`, or `symbolic`. |
+| Attribute           | Description                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `notation-preset`   | Chord notation style: `jazz` (default), `pop`, or `symbolic`.                                                              |
+| `simile-output`     | How simile bars are rendered: `shorthand` (default) or `longhand`.                                                         |
+| `typeface`          | Font style: `sans` (default) or `mono`.                                                                                    |
+| `accidentals`       | Accidental rendering: `unicode` (default) or `ascii`.                                                                      |
+| `slash-style`       | Style of slash chords: `horizontal` (default), `diagonal`, or `ascii`.                                                     |
+| `bars-per-line`     | Reflow all bars in each section into rows of exactly N, ignoring source row breaks. Use for uniform songs on wide layouts. |
+| `max-bars-per-line` | Split source rows that exceed N bars while preserving phrase boundaries. Use for irregular-phrase songs on narrow layouts. |
+
+`bars-per-line` and `max-bars-per-line` are mutually exclusive — if both are set, `bars-per-line` takes precedence.
+
+#### Responsive layout example
+
+```html
+<grigson-chart>
+  <template>
+    | C | Am | F | G | C | Am | F | G |
+  </template>
+  <!-- Wide: merge into 8-bar rows -->
+  <grigson-html-renderer class="wide" bars-per-line="8"></grigson-html-renderer>
+  <!-- Narrow: split into 4-bar rows -->
+  <grigson-html-renderer class="narrow" max-bars-per-line="4"></grigson-html-renderer>
+</grigson-chart>
+
+<style>
+  .narrow { display: block; }
+  .wide   { display: none;  }
+
+  @container (min-width: 600px) {
+    .narrow { display: none;  }
+    .wide   { display: block; }
+  }
+</style>
+```
 
 When `notation-preset` changes, `<grigson-html-renderer>` dispatches a `grigson:renderer-update` event which causes `<grigson-chart>` to re-render.
 

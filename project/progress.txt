@@ -690,3 +690,6 @@ Extracted the CSS generation logic from `GrigsonHtmlRenderer` into two exported 
 ## html-renderer-reflow-core
 
 Added `barsPerLine` and `maxBarsPerLine` to `TextRendererConfig` in `text.ts`. Implemented and exported `reflowSong()` (flat reflow: flatten all section bars then rechunk into rows of N, ignoring source row breaks) and `splitRows()` (phrase-aware: split source rows exceeding N bars but never merge across row boundaries) in `html.ts`. Wired both into `HtmlRenderer.render()` so the correct transform is applied before `computeGlobalLayout`. Added 16 unit tests covering all cases from the plan table (no-op, merge, split, short last row, open barline inheritance, phrase-boundary preservation) plus 3 smoke tests for the renderer. Updated `documentation/renderer.md` with a new `barsPerLine` / `maxBarsPerLine` section.
+
+## html-renderer-reflow-element
+Added `bars-per-line` and `max-bars-per-line` to `observedAttributes` on `GrigsonHtmlRenderer`. In `renderChart()`, both attributes are parsed with `parseInt` and set on the config as `barsPerLine`/`maxBarsPerLine` when the parsed value is a positive integer. Updated `documentation/browser-bundle.md` to document all renderer attributes including the two new ones, with a responsive layout example showing how to use them together with container queries.
