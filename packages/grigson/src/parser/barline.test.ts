@@ -24,9 +24,8 @@ describe('extended barlines', () => {
       expect(row.openBarline).toEqual({ kind: 'endRepeat' });
     });
 
-    it('parses a :||: endRepeatStartRepeat opening barline', () => {
-      const row = parseRow(':||: C |');
-      expect(row.openBarline).toEqual({ kind: 'endRepeatStartRepeat' });
+    it('rejects :||: as an opening barline', () => {
+      expect(() => parseRow(':||: C |')).toThrow();
     });
   });
 

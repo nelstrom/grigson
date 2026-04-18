@@ -503,7 +503,7 @@ function peg$parse(input, options) {
     return bar;
   }
   function peg$f12() {
-    return { kind: 'endRepeatStartRepeat' };
+    error(':||: cannot appear at the start of a line; use ||: to start a repeat');
   }
   function peg$f13() {
     return { kind: 'endRepeat' };

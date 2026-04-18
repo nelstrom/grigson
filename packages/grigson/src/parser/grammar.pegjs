@@ -172,7 +172,7 @@ Bar
 
 // A barline that can open a row (longest alternatives first)
 OpenBarline
-  = ":||:" { return { kind: "endRepeatStartRepeat" }; }
+  = ":||:" { error(":||: cannot appear at the start of a line; use ||: to start a repeat") }
   / ":||"  { return { kind: "endRepeat" }; }
   / "||:"  { return { kind: "startRepeat" }; }
   / "||"   { return { kind: "double" }; }

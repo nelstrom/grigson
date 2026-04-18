@@ -56,6 +56,15 @@ function semanticChecks(song: Song): Diagnostic[] {
 
   for (const section of song.sections) {
     for (const row of section.rows) {
+      const lastBar = row.bars[row.bars.length - 1];
+      if (lastBar?.closeBarline.kind === 'endRepeatStartRepeat') {
+        diagnostics.push({
+          range: barRange(lastBar),
+          severity: 'error',
+          message: ':||: cannot appear at the end of a line; use :|| instead',
+          source: 'grigson',
+        });
+      }
       for (const bar of row.bars) {
         if (bar.timeSignature) {
           effectiveTimeSig = bar.timeSignature;

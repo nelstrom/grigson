@@ -111,12 +111,23 @@ export function reflowSong(song: Song, barsPerLine: number): Song {
     }
 
     const newRows: Row[] = [];
+    let nextOpenBarline: Barline = firstOpenBarline;
     for (let i = 0; i < allBars.length; i += barsPerLine) {
-      newRows.push({
-        type: 'row',
-        openBarline: i === 0 ? firstOpenBarline : { kind: 'single' },
-        bars: allBars.slice(i, i + barsPerLine),
-      });
+      let chunkBars = allBars.slice(i, i + barsPerLine);
+      const openBarline = nextOpenBarline;
+      nextOpenBarline = { kind: 'single' };
+      const lastBar = chunkBars[chunkBars.length - 1];
+      if (lastBar.closeBarline.kind === 'endRepeatStartRepeat') {
+        chunkBars = [
+          ...chunkBars.slice(0, -1),
+          {
+            ...lastBar,
+            closeBarline: { kind: 'endRepeat', repeatCount: lastBar.closeBarline.repeatCount },
+          },
+        ];
+        nextOpenBarline = { kind: 'startRepeat' };
+      }
+      newRows.push({ type: 'row', openBarline, bars: chunkBars });
     }
 
     return { ...section, rows: newRows, content: undefined };
@@ -134,12 +145,23 @@ export function splitRows(song: Song, maxBarsPerLine: number): Song {
       if (row.bars.length <= maxBarsPerLine) {
         newRows.push(row);
       } else {
+        let nextOpenBarline: Barline = row.openBarline;
         for (let i = 0; i < row.bars.length; i += maxBarsPerLine) {
-          newRows.push({
-            type: 'row',
-            openBarline: i === 0 ? row.openBarline : { kind: 'single' },
-            bars: row.bars.slice(i, i + maxBarsPerLine),
-          });
+          let chunkBars = row.bars.slice(i, i + maxBarsPerLine);
+          const openBarline = nextOpenBarline;
+          nextOpenBarline = { kind: 'single' };
+          const lastBar = chunkBars[chunkBars.length - 1];
+          if (lastBar.closeBarline.kind === 'endRepeatStartRepeat') {
+            chunkBars = [
+              ...chunkBars.slice(0, -1),
+              {
+                ...lastBar,
+                closeBarline: { kind: 'endRepeat', repeatCount: lastBar.closeBarline.repeatCount },
+              },
+            ];
+            nextOpenBarline = { kind: 'startRepeat' };
+          }
+          newRows.push({ type: 'row', openBarline, bars: chunkBars });
         }
       }
     }
