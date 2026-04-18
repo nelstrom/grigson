@@ -40,6 +40,14 @@ export class GrigsonChart extends HTMLElement {
   connectedCallback() {
     this._isInitialized = true;
 
+    // Remove any declarative shadow root template elements left in the light DOM
+    // after HTML parsing. The shadow root has already been created from them;
+    // leaving them in place causes "A second declarative shadow root cannot be
+    // created on a host" errors when the page is live-reloaded or innerHTML is
+    // used to update a parent. Must happen before _childObserver is set up so
+    // the removal does not trigger a spurious update().
+    this.querySelectorAll(':scope > template[shadowrootmode]').forEach((t) => t.remove());
+
     this._childObserver = new MutationObserver(() => this.update());
     this._childObserver.observe(this, { childList: true });
 
