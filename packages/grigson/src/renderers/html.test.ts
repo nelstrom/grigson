@@ -6,6 +6,8 @@ import {
   HtmlRenderer,
   chordAriaLabel,
   DEFAULT_SPOKEN_PRESET,
+  reflowSong,
+  splitRows,
 } from './html.js';
 import { getRendererFontFaceCSS, getRendererStyles } from './renderer-css.js';
 import type { Song } from '../parser/types.js';
@@ -1040,6 +1042,142 @@ describe('getRendererFontFaceCSS', () => {
     expect(css).toContain('GrigsonSerif');
     expect(css).toContain('GrigsonNotation');
     expect(css).toContain('GrigsonCursive');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// reflowSong and splitRows
+// ---------------------------------------------------------------------------
+
+function countRows(song: ReturnType<typeof parseSong>): number {
+  return song.sections.reduce((sum, s) => sum + s.rows.length, 0);
+}
+
+describe('reflowSong', () => {
+  it('no-op when rows already have N bars each', () => {
+    // 2 rows × 4 bars = 8 bars total → barsPerLine=4 gives same 2 rows
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G |\n| C | Am | F | G |\n');
+    const result = reflowSong(song, 4);
+    expect(result.sections[0].rows).toHaveLength(2);
+    expect(result.sections[0].rows[0].bars).toHaveLength(4);
+    expect(result.sections[0].rows[1].bars).toHaveLength(4);
+  });
+
+  it('merges two 4-bar rows into one 8-bar row when barsPerLine=8', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G |\n| C | Am | F | G |\n');
+    const result = reflowSong(song, 8);
+    expect(result.sections[0].rows).toHaveLength(1);
+    expect(result.sections[0].rows[0].bars).toHaveLength(8);
+  });
+
+  it('splits a single 8-bar row into two 4-bar rows when barsPerLine=4', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G | C | Am | F | G |\n');
+    const result = reflowSong(song, 4);
+    expect(result.sections[0].rows).toHaveLength(2);
+    expect(result.sections[0].rows[0].bars).toHaveLength(4);
+    expect(result.sections[0].rows[1].bars).toHaveLength(4);
+  });
+
+  it('short last row: 6 bars with barsPerLine=4 → [4][2]', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G | C | Am |\n');
+    const result = reflowSong(song, 4);
+    expect(result.sections[0].rows).toHaveLength(2);
+    expect(result.sections[0].rows[0].bars).toHaveLength(4);
+    expect(result.sections[0].rows[1].bars).toHaveLength(2);
+  });
+
+  it('first virtual row inherits the original open barline', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n||: C | Am | F | G | C | Am | F | G :||');
+    const result = reflowSong(song, 4);
+    expect(result.sections[0].rows[0].openBarline.kind).toBe('startRepeat');
+  });
+
+  it('subsequent rows get single open barline', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n||: C | Am | F | G | C | Am | F | G :||');
+    const result = reflowSong(song, 4);
+    expect(result.sections[0].rows[1].openBarline.kind).toBe('single');
+  });
+
+  it('clears section content so rowsOfSection uses rows', () => {
+    const song = parseSong('[Verse]\n| C | Am | F | G |\n');
+    const result = reflowSong(song, 4);
+    expect(result.sections[0].content).toBeUndefined();
+  });
+});
+
+describe('splitRows', () => {
+  it('no-op when rows are at or below N', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G |\n| C | Am | F | G |\n');
+    const result = splitRows(song, 4);
+    expect(result.sections[0].rows).toHaveLength(2);
+    expect(result.sections[0].rows[0].bars).toHaveLength(4);
+  });
+
+  it('no-op when limit is wider than any row (never merges)', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G |\n| C | Am | F | G |\n');
+    const result = splitRows(song, 8);
+    // rows are NOT merged — still 2 rows of 4
+    expect(result.sections[0].rows).toHaveLength(2);
+    expect(result.sections[0].rows[0].bars).toHaveLength(4);
+  });
+
+  it('splits a 5-bar source row into [2][2][1] when maxBarsPerLine=2', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G | C |\n');
+    const result = splitRows(song, 2);
+    expect(result.sections[0].rows).toHaveLength(3);
+    expect(result.sections[0].rows[0].bars).toHaveLength(2);
+    expect(result.sections[0].rows[1].bars).toHaveLength(2);
+    expect(result.sections[0].rows[2].bars).toHaveLength(1);
+  });
+
+  it('preserves phrase boundaries: two 5-bar rows → [2][2][1][2][2][1]', () => {
+    const song = parseSong(
+      '---\nmeter: 4/4\n---\n| C | Am | F | G | C |\n| Am | F | G | C | Am |\n',
+    );
+    const result = splitRows(song, 2);
+    expect(result.sections[0].rows).toHaveLength(6);
+    expect(result.sections[0].rows[0].bars).toHaveLength(2);
+    expect(result.sections[0].rows[1].bars).toHaveLength(2);
+    expect(result.sections[0].rows[2].bars).toHaveLength(1);
+    expect(result.sections[0].rows[3].bars).toHaveLength(2);
+    expect(result.sections[0].rows[4].bars).toHaveLength(2);
+    expect(result.sections[0].rows[5].bars).toHaveLength(1);
+  });
+
+  it('first chunk inherits the source row open barline', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n||: C | Am | F | G | C :||');
+    const result = splitRows(song, 2);
+    expect(result.sections[0].rows[0].openBarline.kind).toBe('startRepeat');
+  });
+
+  it('subsequent chunks of a split row get single open barline', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n||: C | Am | F | G | C :||');
+    const result = splitRows(song, 2);
+    expect(result.sections[0].rows[1].openBarline.kind).toBe('single');
+    expect(result.sections[0].rows[2].openBarline.kind).toBe('single');
+  });
+});
+
+describe('HtmlRenderer – reflow smoke tests', () => {
+  it('barsPerLine=4 changes part="row" count: 8 bars in 2 rows → 2 rows', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G |\n| C | Am | F | G |\n');
+    const html = new HtmlRenderer({ barsPerLine: 4 }).render(song);
+    const rowMatches = [...html.matchAll(/part="row"/g)];
+    expect(rowMatches.length).toBe(2);
+  });
+
+  it('barsPerLine=8 merges 2 source rows into 1 display row', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G |\n| C | Am | F | G |\n');
+    const html = new HtmlRenderer({ barsPerLine: 8 }).render(song);
+    const rowMatches = [...html.matchAll(/part="row"/g)];
+    expect(rowMatches.length).toBe(1);
+  });
+
+  it('maxBarsPerLine=2 splits a 5-bar source row into 3 display rows', () => {
+    const song = parseSong('---\nmeter: 4/4\n---\n| C | Am | F | G | C |\n');
+    const html = new HtmlRenderer({ maxBarsPerLine: 2 }).render(song);
+    const rowMatches = [...html.matchAll(/part="row"/g)];
+    expect(rowMatches.length).toBe(3);
   });
 });
 

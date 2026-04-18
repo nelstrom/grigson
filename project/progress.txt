@@ -686,3 +686,7 @@ Extracted the CSS generation logic from `GrigsonHtmlRenderer` into two exported 
 - `getRendererStyles(typeface?: string): string` — returns the full shadow DOM stylesheet; typeface defaults to 'sans'
 
 `html-element.ts` imports and re-exports both functions, with `_ensureFontFaces()` now calling `getRendererFontFaceCSS()` and `_getStyles()` delegating to `getRendererStyles()`. Both functions are exported from `packages/grigson/src/index.ts` via the new `renderer-css.js` module (keeping the main entry point DOM-free). Tests added to `html.test.ts` covering non-empty output, @font-face presence, all five font family names, and all three typeface variants. 591 tests pass.
+
+## html-renderer-reflow-core
+
+Added `barsPerLine` and `maxBarsPerLine` to `TextRendererConfig` in `text.ts`. Implemented and exported `reflowSong()` (flat reflow: flatten all section bars then rechunk into rows of N, ignoring source row breaks) and `splitRows()` (phrase-aware: split source rows exceeding N bars but never merge across row boundaries) in `html.ts`. Wired both into `HtmlRenderer.render()` so the correct transform is applied before `computeGlobalLayout`. Added 16 unit tests covering all cases from the plan table (no-op, merge, split, short last row, open barline inheritance, phrase-boundary preservation) plus 3 smoke tests for the renderer. Updated `documentation/renderer.md` with a new `barsPerLine` / `maxBarsPerLine` section.

@@ -2539,7 +2539,8 @@
       "Implement and export splitRows(song, maxBarsPerLine) in html.ts: per source row, if bars.length > N split into chunks preserving open barline on first chunk; never merge across source rows",
       "In HtmlRenderer.render(), apply reflowSong if barsPerLine is set, else splitRows if maxBarsPerLine is set, before calling computeGlobalLayout; use the transformed song for all subsequent iteration",
       "Add describe('reflowSong') and describe('splitRows') test blocks in html.test.ts covering all cases from the plan table, plus a smoke test verifying part='row' count changes correctly for both config keys"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "html-renderer-reflow-element",

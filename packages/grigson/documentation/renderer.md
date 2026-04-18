@@ -678,6 +678,41 @@ The diagonal style exposes three CSS custom properties for fine-tuning:
 | `--grigson-slash-chord-offset` | `-0.25em` | Vertical nudge applied to the chord part (negative = up)  |
 | `--grigson-slash-bass-offset`  | `0.25em`  | Vertical nudge applied to the bass note (positive = down) |
 
+### `barsPerLine` and `maxBarsPerLine` (HTML renderer only)
+
+These two options reflow bars independently of the source row breaks in the `.chart` file. They are mutually exclusive — if both are set, `barsPerLine` takes precedence.
+
+| Config key       | Attribute           | Behaviour                                                                                                                          |
+| ---------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `barsPerLine`    | `bars-per-line`     | **Flat reflow.** Flatten all bars in each section into one pool and rechunk into rows of exactly N. Source row breaks are ignored. |
+| `maxBarsPerLine` | `max-bars-per-line` | **Phrase-aware split.** Split source rows that exceed N bars, but never merge across source-row boundaries.                        |
+
+Use `barsPerLine` when the song has uniform bar lengths and you want a fixed layout (e.g. 8 bars per row on a wide screen). Use `maxBarsPerLine` when source rows represent musical phrases (e.g. 5-bar phrases) and you want to split them for narrow screens without mixing phrase content across display rows.
+
+```javascript
+// Flat reflow: always 4 bars per display row
+const html = new HtmlRenderer({ barsPerLine: 4 }).render(song);
+
+// Phrase-aware split: never more than 2 bars per row, phrase boundaries preserved
+const html = new HtmlRenderer({ maxBarsPerLine: 2 }).render(song);
+```
+
+```html
+<!-- Responsive layout pattern: wide = 8 per row, narrow = 4 per row -->
+<grigson-chart>
+  <grigson-html-renderer bars-per-line="8"></grigson-html-renderer>
+  | C | Am | F | G | C | Am | F | G |
+</grigson-chart>
+
+<!-- Phrase-aware: split 5-bar phrases without merging them -->
+<grigson-chart>
+  <grigson-html-renderer max-bars-per-line="2"></grigson-html-renderer>
+  | C | Am | F | G | C |
+</grigson-chart>
+```
+
+---
+
 ### `repeats`
 
 Controls whether repeat barlines and volta brackets are rendered as written or expanded into linear (through-composed) form.

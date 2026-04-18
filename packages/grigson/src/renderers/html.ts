@@ -95,6 +95,61 @@ function rowsOfSection(section: Section): Row[] {
   return section.rows;
 }
 
+export function reflowSong(song: Song, barsPerLine: number): Song {
+  const newSections = song.sections.map((section) => {
+    const allRows = rowsOfSection(section);
+    const allBars: Bar[] = [];
+    const firstOpenBarline: Barline =
+      allRows.length > 0 ? allRows[0].openBarline : { kind: 'single' };
+
+    for (const row of allRows) {
+      allBars.push(...row.bars);
+    }
+
+    if (allBars.length === 0) {
+      return { ...section, rows: [], content: undefined };
+    }
+
+    const newRows: Row[] = [];
+    for (let i = 0; i < allBars.length; i += barsPerLine) {
+      newRows.push({
+        type: 'row',
+        openBarline: i === 0 ? firstOpenBarline : { kind: 'single' },
+        bars: allBars.slice(i, i + barsPerLine),
+      });
+    }
+
+    return { ...section, rows: newRows, content: undefined };
+  });
+
+  return { ...song, sections: newSections };
+}
+
+export function splitRows(song: Song, maxBarsPerLine: number): Song {
+  const newSections = song.sections.map((section) => {
+    const allRows = rowsOfSection(section);
+    const newRows: Row[] = [];
+
+    for (const row of allRows) {
+      if (row.bars.length <= maxBarsPerLine) {
+        newRows.push(row);
+      } else {
+        for (let i = 0; i < row.bars.length; i += maxBarsPerLine) {
+          newRows.push({
+            type: 'row',
+            openBarline: i === 0 ? row.openBarline : { kind: 'single' },
+            bars: row.bars.slice(i, i + maxBarsPerLine),
+          });
+        }
+      }
+    }
+
+    return { ...section, rows: newRows, content: undefined };
+  });
+
+  return { ...song, sections: newSections };
+}
+
 function parseMeterToTimeSig(meter: string | null): TimeSignature {
   if (meter && meter !== 'mixed') {
     const [n, d] = meter.split('/').map(Number);
@@ -626,20 +681,26 @@ export class HtmlRenderer implements GrigsonRenderer {
     const slashStyle: SlashStyle = this.config.slashStyle ?? 'diagonal';
     const flatChar = mode === 'unicode' ? '♭' : 'b';
     const sharpChar = mode === 'unicode' ? '♯' : '#';
-    const layout = computeGlobalLayout(song);
+    let source = song;
+    if (this.config.barsPerLine) {
+      source = reflowSong(source, this.config.barsPerLine);
+    } else if (this.config.maxBarsPerLine) {
+      source = splitRows(source, this.config.maxBarsPerLine);
+    }
+    const layout = computeGlobalLayout(source);
     const { beatCols, minBeatWidth } = layout;
     const spoken =
       this.config.aria === false ? null : (this.config.spokenPreset ?? DEFAULT_SPOKEN_PRESET);
 
     let html = `<div part="song" style="--beat-cols: ${beatCols}; --min-beat-width: ${minBeatWidth}">`;
 
-    if (song.title !== null || song.key !== null) {
-      html += renderFrontMatter(song);
+    if (source.title !== null || source.key !== null) {
+      html += renderFrontMatter(source);
     }
 
     html += `<div part="song-grid">`;
 
-    for (const section of song.sections) {
+    for (const section of source.sections) {
       html += `<section part="section" style="display: contents">`;
 
       if (section.label !== null) {

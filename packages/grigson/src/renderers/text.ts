@@ -30,6 +30,10 @@ export interface TextRendererConfig {
   };
   accidentals?: 'unicode' | 'ascii';
   slashStyle?: 'horizontal' | 'diagonal' | 'ascii';
+  /** Reflow bars into rows of exactly this many bars (HTML only). Ignores source row breaks. */
+  barsPerLine?: number;
+  /** Split source rows that exceed this many bars (HTML only). Source row breaks are preserved as hard boundaries. */
+  maxBarsPerLine?: number;
   /** Set false to suppress all aria-* attributes. Default: true. */
   aria?: boolean;
   /** Override the spoken-word labels used in aria attributes. Defaults to English. */
