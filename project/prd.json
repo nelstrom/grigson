@@ -2512,7 +2512,8 @@
       "Export both functions from `packages/grigson/src/index.ts`",
       "Add tests in the grigson package verifying both functions return strings with expected CSS content",
       "Run `pnpm build && pnpm test` and confirm everything passes"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "dsd-build-time-demo",
@@ -2525,6 +2526,30 @@
       "Add the Blues in F chart from the plan as the demo chart in the new page",
       "Add a bullet for the new page to the renderer list in `packages/website/content/renderers/index.md`",
       "Run `pnpm build` from the repo root and verify the site builds; serve locally and confirm the chart renders with JS disabled"
+    ]
+  },
+  {
+    "id": "html-renderer-reflow-core",
+    "category": "functional",
+    "description": "Add reflowSong and splitRows reflow functions to the HTML renderer",
+    "detail": "Add barsPerLine and maxBarsPerLine to TextRendererConfig. Implement and export reflowSong() (flat reflow: flatten all section bars then rechunk into rows of N, ignoring source row breaks) and splitRows() (phrase-aware: split source rows that exceed N bars but never merge across row boundaries) in html.ts. Wire both into HtmlRenderer.render() so the correct transform is applied before computeGlobalLayout. Include unit tests for both functions covering: no-op, merging, splitting, short last row, open barline inheritance, and phrase-boundary preservation. See project/plans/reflow-renderer.md for full context.",
+    "steps": [
+      "Add barsPerLine?: number and maxBarsPerLine?: number to TextRendererConfig in packages/grigson/src/renderers/text.ts",
+      "Implement and export reflowSong(song, barsPerLine) in html.ts: collect all bars per section, chunk into rows of N, first chunk inherits original open barline, subsequent chunks get { kind: 'single' }, content set to undefined",
+      "Implement and export splitRows(song, maxBarsPerLine) in html.ts: per source row, if bars.length > N split into chunks preserving open barline on first chunk; never merge across source rows",
+      "In HtmlRenderer.render(), apply reflowSong if barsPerLine is set, else splitRows if maxBarsPerLine is set, before calling computeGlobalLayout; use the transformed song for all subsequent iteration",
+      "Add describe('reflowSong') and describe('splitRows') test blocks in html.test.ts covering all cases from the plan table, plus a smoke test verifying part='row' count changes correctly for both config keys"
+    ]
+  },
+  {
+    "id": "html-renderer-reflow-element",
+    "category": "functional",
+    "description": "Expose bars-per-line and max-bars-per-line attributes on GrigsonHtmlRenderer",
+    "detail": "Add bars-per-line and max-bars-per-line to the observedAttributes list on GrigsonHtmlRenderer and parse them as positive integers in renderChart(), mapping to barsPerLine and maxBarsPerLine in the renderer config. Update the grigson package README to document both attributes alongside the existing ones. See project/plans/reflow-renderer.md for full context.",
+    "steps": [
+      "Add 'bars-per-line' and 'max-bars-per-line' to observedAttributes in html-element.ts",
+      "In renderChart(), parse each attribute with parseInt and set config.barsPerLine / config.maxBarsPerLine if the parsed value is a positive integer",
+      "Update packages/grigson/README.md to document both new attributes with a short example showing the responsive layout pattern (bars-per-line for wide, max-bars-per-line for narrow)"
     ]
   }
 ]
