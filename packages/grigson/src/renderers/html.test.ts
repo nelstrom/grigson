@@ -7,6 +7,7 @@ import {
   chordAriaLabel,
   DEFAULT_SPOKEN_PRESET,
 } from './html.js';
+import { getRendererFontFaceCSS, getRendererStyles } from './renderer-css.js';
 import type { Song } from '../parser/types.js';
 
 describe('computeGlobalLayout', () => {
@@ -1017,5 +1018,58 @@ describe('HtmlRenderer – aria integration', () => {
       }).render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
       expect(html).toContain('aria-label="répéter la mesure"');
     });
+  });
+});
+
+describe('getRendererFontFaceCSS', () => {
+  it('returns a non-empty string', () => {
+    const css = getRendererFontFaceCSS();
+    expect(typeof css).toBe('string');
+    expect(css.length).toBeGreaterThan(0);
+  });
+
+  it('contains @font-face declarations', () => {
+    const css = getRendererFontFaceCSS();
+    expect(css).toContain('@font-face');
+  });
+
+  it('includes all expected font families', () => {
+    const css = getRendererFontFaceCSS();
+    expect(css).toContain('GrigsonTimeSig');
+    expect(css).toContain('GrigsonSans');
+    expect(css).toContain('GrigsonSerif');
+    expect(css).toContain('GrigsonNotation');
+    expect(css).toContain('GrigsonCursive');
+  });
+});
+
+describe('getRendererStyles', () => {
+  it('returns a non-empty string', () => {
+    const css = getRendererStyles();
+    expect(typeof css).toBe('string');
+    expect(css.length).toBeGreaterThan(0);
+  });
+
+  it('contains part="song" selector', () => {
+    const css = getRendererStyles();
+    expect(css).toContain('part=');
+  });
+
+  it('defaults to sans-serif font family', () => {
+    const css = getRendererStyles();
+    expect(css).toContain('GrigsonSans');
+    expect(css).toContain('sans-serif');
+  });
+
+  it('uses serif font family when typeface is serif', () => {
+    const css = getRendererStyles('serif');
+    expect(css).toContain('GrigsonSerif');
+    expect(css).toContain(', serif');
+  });
+
+  it('uses cursive font family when typeface is cursive', () => {
+    const css = getRendererStyles('cursive');
+    expect(css).toContain('GrigsonCursive');
+    expect(css).toContain(', cursive');
   });
 });

@@ -24,6 +24,7 @@ export type {
 export type { GrigsonRenderer, SpokenPreset } from './renderers/text.js';
 export { TextRenderer } from './renderers/text.js';
 export { HtmlRenderer, DEFAULT_SPOKEN_PRESET, chordAriaLabel } from './renderers/html.js';
+export { getRendererStyles, getRendererFontFaceCSS } from './renderers/renderer-css.js';
 
 // Normaliser
 export { normaliseSong, normaliseSection } from './theory/normalise.js';

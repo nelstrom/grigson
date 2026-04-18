@@ -679,3 +679,10 @@ Added ARIA accessibility tests to packages/grigson/src/renderers/html.test.ts. E
 
 ## accessibility-website-page + accessibility-website-nav
 Created packages/website/content/accessibility.md with frontmatter (layout base.njk, permalink /accessibility/). Page covers: intro (ARIA on by default), "What screen readers hear" with Blues-in-F source-to-spoken walkthrough, "Enabling and disabling" with aria: false snippet, "Spoken presets" section showing the SpokenPreset interface as a table and DEFAULT_SPOKEN_PRESET in full, "Creating a preset for another language" with French example using spread-and-override, "Using a preset with the custom element", and "Notes for assistive technology authors" listing aria-label vs aria-hidden elements. Updated base.njk to add Accessibility nav link between Renderers and CLI. Updated index.njk to add accessibility bullet to the "What's in the toolkit" list after the custom elements bullet. All tests pass.
+
+## dsd-export-renderer-css
+Extracted the CSS generation logic from `GrigsonHtmlRenderer` into two exported standalone functions in a new `packages/grigson/src/renderers/renderer-css.ts` module (no DOM dependency):
+- `getRendererFontFaceCSS(): string` — returns all @font-face rules for GrigsonTimeSig, GrigsonSans, GrigsonSerif, GrigsonNotation, and GrigsonCursive font families as a single CSS string
+- `getRendererStyles(typeface?: string): string` — returns the full shadow DOM stylesheet; typeface defaults to 'sans'
+
+`html-element.ts` imports and re-exports both functions, with `_ensureFontFaces()` now calling `getRendererFontFaceCSS()` and `_getStyles()` delegating to `getRendererStyles()`. Both functions are exported from `packages/grigson/src/index.ts` via the new `renderer-css.js` module (keeping the main entry point DOM-free). Tests added to `html.test.ts` covering non-empty output, @font-face presence, all five font family names, and all three typeface variants. 591 tests pass.
