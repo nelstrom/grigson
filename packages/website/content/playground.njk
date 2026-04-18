@@ -162,6 +162,36 @@ permalink: /playground/
         <option value="horizontal">Horizontal</option>
         <option value="ascii">ASCII /</option>
       </select>
+      <label for="line-length-select">Line length:</label>
+      <select id="line-length-select">
+        <option value="">Auto (default)</option>
+        <optgroup label="Max bars per line">
+          <option value="max:2">Max 2</option>
+          <option value="max:3">Max 3</option>
+          <option value="max:4">Max 4</option>
+          <option value="max:5">Max 5</option>
+          <option value="max:6">Max 6</option>
+          <option value="max:7">Max 7</option>
+          <option value="max:8">Max 8</option>
+          <option value="max:9">Max 9</option>
+          <option value="max:10">Max 10</option>
+          <option value="max:11">Max 11</option>
+          <option value="max:12">Max 12</option>
+        </optgroup>
+        <optgroup label="Fixed bars per line">
+          <option value="fixed:2">Fixed 2</option>
+          <option value="fixed:3">Fixed 3</option>
+          <option value="fixed:4">Fixed 4</option>
+          <option value="fixed:5">Fixed 5</option>
+          <option value="fixed:6">Fixed 6</option>
+          <option value="fixed:7">Fixed 7</option>
+          <option value="fixed:8">Fixed 8</option>
+          <option value="fixed:9">Fixed 9</option>
+          <option value="fixed:10">Fixed 10</option>
+          <option value="fixed:11">Fixed 11</option>
+          <option value="fixed:12">Fixed 12</option>
+        </optgroup>
+      </select>
     </span>
     </div>
 
@@ -186,6 +216,8 @@ permalink: /playground/
       simileOutput: z.enum(['shorthand', 'longhand']).optional(),
       accidentals: z.enum(['ascii', 'unicode']).optional(),
       slashStyle: z.enum(['horizontal', 'diagonal', 'ascii']).optional(),
+      barsPerLine: z.number().int().min(1).optional(),
+      maxBarsPerLine: z.number().int().min(1).optional(),
       transposeSemitones: z.number().int().min(-11).max(11).optional(),
     }),
     z.object({
@@ -245,7 +277,18 @@ meter: 4/4
     const simileOutputSelect = document.getElementById('simile-output-select');
     const accidentalsSelect = document.getElementById('accidentals-select');
     const slashStyleSelect = document.getElementById('slash-style-select');
+    const lineLengthSelect = document.getElementById('line-length-select');
     const htmlOptions = document.getElementById('html-options');
+
+    function applyLineLength(renderer) {
+      const val = lineLengthSelect.value;
+      renderer.removeAttribute('bars-per-line');
+      renderer.removeAttribute('max-bars-per-line');
+      if (!val) return;
+      const [mode, n] = val.split(':');
+      if (mode === 'fixed') renderer.setAttribute('bars-per-line', n);
+      else if (mode === 'max') renderer.setAttribute('max-bars-per-line', n);
+    }
 
     let currentRenderer = null;
 
@@ -269,6 +312,7 @@ meter: 4/4
         if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
         const slashStyle = slashStyleSelect.value;
         if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
+        applyLineLength(currentRenderer);
         htmlOptions.hidden = false;
       }
 
@@ -345,11 +389,17 @@ meter: 4/4
           if (simileOutputSelect.value) config.simileOutput = simileOutputSelect.value;
           if (accidentalsSelect.value) config.accidentals = accidentalsSelect.value;
           if (slashStyleSelect.value) config.slashStyle = slashStyleSelect.value;
+          const llVal = lineLengthSelect.value;
+          if (llVal) {
+            const [mode, n] = llVal.split(':');
+            if (mode === 'fixed') config.barsPerLine = parseInt(n, 10);
+            else if (mode === 'max') config.maxBarsPerLine = parseInt(n, 10);
+          }
         }
         const semitones = parseInt(transposeSelect.value, 10);
         if (semitones !== 0) config.transposeSemitones = semitones;
         const params = new URLSearchParams();
-        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals || config.slashStyle || config.transposeSemitones) {
+        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals || config.slashStyle || config.barsPerLine || config.maxBarsPerLine || config.transposeSemitones) {
           params.set('renderer-config', JSON.stringify(config));
         }
         const compressed = compressToEncodedURIComponent(editor.getValue());
@@ -391,6 +441,9 @@ meter: 4/4
     simileOutputSelect.value = initialConfig.simileOutput ?? '';
     accidentalsSelect.value = initialConfig.accidentals ?? '';
     slashStyleSelect.value = initialConfig.slashStyle ?? '';
+    if (initialConfig.barsPerLine) lineLengthSelect.value = `fixed:${initialConfig.barsPerLine}`;
+    else if (initialConfig.maxBarsPerLine) lineLengthSelect.value = `max:${initialConfig.maxBarsPerLine}`;
+    else lineLengthSelect.value = '';
     const initialSemitones = initialConfig.transposeSemitones ?? 0;
     if (initialSemitones !== 0) outputElement.setAttribute('transpose-semitones', String(initialSemitones));
     applyRenderer();
@@ -455,6 +508,14 @@ meter: 4/4
         const slashStyle = slashStyleSelect.value;
         if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
         else currentRenderer.removeAttribute('slash-style');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    lineLengthSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'html') {
+        applyLineLength(currentRenderer);
         outputElement.update();
       }
       updateURL();
