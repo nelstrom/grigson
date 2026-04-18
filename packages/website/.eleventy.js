@@ -1,6 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHighlighter } from 'shiki';
+import {
+  parseSong,
+  normaliseSong,
+  HtmlRenderer,
+  getRendererStyles,
+  getRendererFontFaceCSS,
+} from 'grigson';
+
+// Precompute once — font data URIs are large
+const fontFaceCSS = getRendererFontFaceCSS();
+const defaultStyles = getRendererStyles('sans');
 
 export default async function (eleventyConfig) {
   // Initialise Shiki once and reuse across all pages
@@ -37,6 +48,26 @@ export default async function (eleventyConfig) {
 
   eleventyConfig.addPairedShortcode('highlight', (code, language) => {
     return highlighter.codeToHtml(code.trim(), { lang: language, ...shikiOptions });
+  });
+
+  eleventyConfig.addPairedShortcode('grigsonChartDSD', (source, normalise = true) => {
+    let song = parseSong(source.trim());
+    if (normalise) song = normaliseSong(song);
+    const chartHTML = new HtmlRenderer().render(song);
+    const attrs = normalise ? ' normalise' : '';
+    // Font-face declarations go in the main document (not the shadow root) so that
+    // browsers reliably load the unicode-range sub-faces.  Component styles go
+    // inside the shadow root where they belong.
+    return [
+      `<style>${fontFaceCSS}</style>`,
+      `<grigson-chart${attrs}>`,
+      `  <template shadowrootmode="open">`,
+      `    <style>${defaultStyles}</style>`,
+      `    ${chartHTML}`,
+      `  </template>`,
+      `  <template>${source.trim()}</template>`,
+      `</grigson-chart>`,
+    ].join('\n');
   });
 
   eleventyConfig.addFilter('indexOf', (arr, page) =>

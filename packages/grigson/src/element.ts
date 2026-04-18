@@ -23,7 +23,8 @@ export class GrigsonChart extends HTMLElement {
 
   constructor() {
     super();
-    this._root = this.attachShadow({ mode: 'open' });
+    // Use an existing DSD shadow root if the HTML parser created one; otherwise create our own.
+    this._root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
     this._style = document.createElement('style');
     this._style.textContent = ':host { display: block; container-type: inline-size; }';
     this._root.appendChild(this._style);
@@ -69,7 +70,7 @@ export class GrigsonChart extends HTMLElement {
   }
 
   private _resolveTemplate(): HTMLTemplateElement | null {
-    const inline = this.querySelector('template');
+    const inline = this.querySelector('template:not([shadowrootmode])');
     if (inline) return inline as HTMLTemplateElement;
 
     const refId = this.getAttribute('template');

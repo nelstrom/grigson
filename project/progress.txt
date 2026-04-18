@@ -693,3 +693,10 @@ Added `barsPerLine` and `maxBarsPerLine` to `TextRendererConfig` in `text.ts`. I
 
 ## html-renderer-reflow-element
 Added `bars-per-line` and `max-bars-per-line` to `observedAttributes` on `GrigsonHtmlRenderer`. In `renderChart()`, both attributes are parsed with `parseInt` and set on the config as `barsPerLine`/`maxBarsPerLine` when the parsed value is a positive integer. Updated `documentation/browser-bundle.md` to document all renderer attributes including the two new ones, with a responsive layout example showing how to use them together with container queries.
+
+## dsd-build-time-demo
+Added a `grigsonChartDSD` paired shortcode to `packages/website/.eleventy.js` that pre-renders charts at build time using `parseSong`, `normaliseSong`, `HtmlRenderer`, `getRendererStyles`, and `getRendererFontFaceCSS`. The shortcode wraps rendered HTML in `<template shadowrootmode="open">` for Declarative Shadow DOM, with a second `<template>` holding the original chart source for JS re-rendering. Font-face declarations are emitted into the main document (not the shadow root) to work around Chrome's limitations with multiple unicode-range `@font-face` rules inside shadow roots.
+
+Fixed two bugs discovered during implementation: (1) `GrigsonChart` constructor now uses `this.shadowRoot ?? this.attachShadow()` so that when the HTML parser creates a DSD shadow root before the element is defined, the constructor reuses it rather than replacing it. (2) `_resolveTemplate()` now uses `querySelector('template:not([shadowrootmode])')` to skip DSD templates that may remain in the light DOM, ensuring only the chart source template is used for JS re-rendering.
+
+Created `packages/website/content/renderers/ssr.njk` (permalink `/renderers/build-time/`) with a Blues in F demo, how-it-works explanation, shortcode usage example, and font note. Added a link to the new page in `packages/website/content/renderers/index.md`.

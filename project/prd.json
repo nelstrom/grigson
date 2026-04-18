@@ -2526,7 +2526,8 @@
       "Add the Blues in F chart from the plan as the demo chart in the new page",
       "Add a bullet for the new page to the renderer list in `packages/website/content/renderers/index.md`",
       "Run `pnpm build` from the repo root and verify the site builds; serve locally and confirm the chart renders with JS disabled"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "html-renderer-reflow-core",

@@ -1,0 +1,106 @@
+---
+layout: base.njk
+title: Build-time rendering
+permalink: /renderers/build-time/
+---
+
+<h1>Build-time rendering</h1>
+<p>
+  Grigson charts can be pre-rendered at build time using
+  <a href="https://developer.chrome.com/docs/css-ui/declarative-shadow-dom">Declarative Shadow DOM (DSD)</a>.
+  The chart is fully visible in the browser before any JavaScript runs — useful for static sites,
+  SSR frameworks, and environments where JS may be disabled or slow to load.
+</p>
+
+<h2>Live demo</h2>
+<p>
+  The chart below was rendered at Eleventy build time. Try disabling JavaScript in DevTools and
+  reloading — it will still render correctly.
+</p>
+
+{% grigsonChartDSD %}
+---
+title: Blues in F
+key: F
+---
+[Head]
+| F7 | F7 | F7 | F7 |
+| Bb7 | Bb7 | F7 | F7 |
+| C7 | Bb7 | F7 | C7 |
+{% endgrigsonChartDSD %}
+
+<h2>How it works</h2>
+<p>
+  An Eleventy paired shortcode calls <code>parseSong</code> and <code>HtmlRenderer.render()</code>
+  from the <code>grigson</code> package at build time (Node.js). The resulting HTML string is placed
+  inside a <code>&lt;template shadowrootmode="open"&gt;</code>:
+</p>
+{% highlight "html" %}
+<grigson-chart normalise>
+  <template shadowrootmode="open">
+    <style>/* @font-face + component CSS */</style>
+    <!-- pre-rendered chart HTML -->
+  </template>
+  <template><!-- original .chart source --></template>
+</grigson-chart>
+{% endhighlight %}
+<p>
+  When the browser parses this HTML it immediately attaches the shadow root — no script required.
+  If JavaScript is enabled, the <code>&lt;grigson-chart&gt;</code> custom element upgrades later
+  and may re-render from the <code>&lt;template&gt;</code> source, but the DSD content is already
+  visible by that point.
+</p>
+
+<h2>Shortcode usage</h2>
+<p>Add the shortcode to any Eleventy template (Nunjucks, Liquid, etc.):</p>
+<pre><code>&#123;% grigsonChartDSD %&#125;
+---
+title: Blues in F
+key: F
+---
+[Head]
+| F7 | F7 | F7 | F7 |
+| Bb7 | Bb7 | F7 | F7 |
+| C7 | Bb7 | F7 | C7 |
+&#123;% endgrigsonChartDSD %&#125;</code></pre>
+
+<p>Register the shortcode in <code>.eleventy.js</code>:</p>
+{% highlight "html" %}
+import {
+  parseSong,
+  normaliseSong,
+  HtmlRenderer,
+  getRendererStyles,
+  getRendererFontFaceCSS,
+} from 'grigson';
+
+const fontFaceCSS = getRendererFontFaceCSS();
+const defaultStyles = getRendererStyles('sans');
+
+eleventyConfig.addPairedShortcode('grigsonChartDSD', (source, normalise = true) => {
+  let song = parseSong(source.trim());
+  if (normalise) song = normaliseSong(song);
+  const chartHTML = new HtmlRenderer().render(song);
+  const attrs = normalise ? ' normalise' : '';
+  return [
+    '<style>' + fontFaceCSS + '</style>',
+    '<grigson-chart' + attrs + '>',
+    '  <template shadowrootmode="open">',
+    '    <style>' + defaultStyles + '</style>',
+    '    ' + chartHTML,
+    '  </template>',
+    '  <template>' + source.trim() + '</template>',
+    '</grigson-chart>',
+  ].join('\n');
+});
+{% endhighlight %}
+
+<h2>Font note</h2>
+<p>
+  <code>getRendererFontFaceCSS()</code> returns <code>@font-face</code> rules with the notation
+  fonts embedded as data URIs. These are emitted into the <em>main document</em> (not the shadow
+  root) so that browsers reliably load the unicode-range sub-faces — browsers have known
+  limitations with multiple <code>@font-face</code> rules sharing a family name inside shadow roots.
+  Because the declarations use data URIs, no network requests are made. The component styles go
+  inside the shadow root where they are properly scoped.
+</p>

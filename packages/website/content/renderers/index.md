@@ -41,5 +41,6 @@ const capoSvg = new SvgRenderer({ transpose: { semitones: -2 } }).render(song);
 - [Custom elements](/grigson/renderers/custom-elements/) — `<grigson-chart>` and `<grigson-html-renderer>` for declarative HTML embedding
 - [Browser bundles](/grigson/renderers/browser/) — loading grigson in a browser via IIFE or ES module
 - [Notation presets](/grigson/renderers/presets/) — customising chord symbol rendering with `definePreset()`
+- [Build-time rendering](/grigson/renderers/build-time/) — pre-render charts into Declarative Shadow DOM at build time for zero-JS display
 
 For building your own renderer, see the [API Reference](/api/renderer-interface/).
