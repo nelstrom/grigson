@@ -266,38 +266,38 @@ grigson-chart {
   <code>&lt;grigson-chart&gt;</code> sets <code>container-type: inline-size</code> on itself
   by default, so <code>@container</code> rules targeting its children work without any extra
   CSS. Place multiple renderers inside one chart and use container queries to show the
-  appropriate one. Here the HTML renderer is used on wide layouts and the plain-text renderer
-  on narrow ones:
+  appropriate one. Here two HTML renderers are used — 4 bars per line on wide layouts and
+  2 bars per line on narrow ones:
 </p>
 {% highlight "html" %}
 <grigson-chart normalise>
   <style>
-    .chart-wide   { display: none;  }
-    .chart-narrow { display: block; }
+    .chart-4bar { display: none;  }
+    .chart-2bar { display: block; }
 
     @container (min-width: 500px) {
-      .chart-wide   { display: block; }
-      .chart-narrow { display: none;  }
+      .chart-4bar { display: block; }
+      .chart-2bar { display: none;  }
     }
   </style>
-  <grigson-html-renderer class="chart-wide"></grigson-html-renderer>
-  <grigson-text-renderer class="chart-narrow"></grigson-text-renderer>
+  <grigson-html-renderer class="chart-4bar" bars-per-line="4"></grigson-html-renderer>
+  <grigson-html-renderer class="chart-2bar" bars-per-line="2"></grigson-html-renderer>
   <template>...</template>
 </grigson-chart>
 {% endhighlight %}
 
 <grigson-chart normalise>
   <style>
-    .chart-wide   { display: none;  }
-    .chart-narrow { display: block; }
+    .chart-4bar { display: none;  }
+    .chart-2bar { display: block; }
 
     @container (min-width: 500px) {
-      .chart-wide   { display: block; }
-      .chart-narrow { display: none;  }
+      .chart-4bar { display: block; }
+      .chart-2bar { display: none;  }
     }
   </style>
-  <grigson-html-renderer class="chart-wide"></grigson-html-renderer>
-  <grigson-text-renderer class="chart-narrow"></grigson-text-renderer>
+  <grigson-html-renderer class="chart-4bar" bars-per-line="4"></grigson-html-renderer>
+  <grigson-html-renderer class="chart-2bar" bars-per-line="2"></grigson-html-renderer>
   <template>
 ---
 title: Autumn Leaves
@@ -312,7 +312,7 @@ key: Gm
   </template>
 </grigson-chart>
 
-<p>Resize the browser window to see it switch between renderers. Opt out of containment with <code>container-type: normal</code> on the element if needed.</p>
+<p>Resize the browser window to see it switch between layouts. Opt out of containment with <code>container-type: normal</code> on the element if needed.</p>
 
 <h2>Building a custom renderer element</h2>
 <p>
