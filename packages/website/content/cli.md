@@ -199,11 +199,25 @@ grigson-html-renderer [options] [file]
 
 **Options**
 
-| Option                          | Description                                                         |
-| ------------------------------- | ------------------------------------------------------------------- |
-| `--notation-preset <name>`      | Named notation preset (must be pre-registered via `definePreset()`) |
-| `--notation-preset-file <path>` | Path to a JSON file containing a partial `NotationPreset` object    |
-| `--help`, `-h`                  | Show help and exit                                                  |
+| Option                          | Description                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------------- |
+| `--format <format>`             | Output format: `html` (default), `css`, or `standalone`                          |
+| `--typeface <typeface>`         | Typeface for `css`/`standalone` formats: `sans` (default), `serif`, or `cursive` |
+| `--notation-preset <name>`      | Named notation preset (must be pre-registered via `definePreset()`)              |
+| `--notation-preset-file <path>` | Path to a JSON file containing a partial `NotationPreset` object                 |
+| `--help`, `-h`                  | Show help and exit                                                               |
+
+**Output formats**
+
+| Format       | Description                                                      | Chart input required |
+| ------------ | ---------------------------------------------------------------- | -------------------- |
+| `html`       | Bare `<div>` fragment (default, pipe-friendly)                   | Yes                  |
+| `css`        | Font-face declarations and component styles as a CSS string      | No                   |
+| `standalone` | Complete `<!DOCTYPE html>` page with embedded CSS and chart HTML | Yes                  |
+
+`--format css` does not read chart input — it outputs the stylesheet only. Combine with `--typeface` to select the typeface variant.
+
+`--format standalone` produces a self-contained HTML file that opens directly in any browser. The CSS is embedded in a `<style>` block so no separate stylesheet is needed.
 
 **`--notation-preset-file`** reads a JSON file whose fields override the defaults. Only the fields you specify are changed; all others keep their default values.
 
@@ -213,16 +227,21 @@ Example `my-preset.json`:
 
 ```json
 {
-  "flat": "b",
-  "sharp": "#",
-  "halfDiminished": "m7b5"
+  "minor": "m",
+  "dominant7": "7",
+  "halfDiminished": "m7b5",
+  "diminished": "dim",
+  "maj7": "maj7"
 }
 ```
 
 **Examples**
 
 ```sh
-grigson-html-renderer song.chart                                    # default notation
+grigson-html-renderer song.chart                                     # HTML fragment (default)
+grigson-html-renderer --format css                                   # CSS only, no chart needed
+grigson-html-renderer --format css --typeface cursive                # cursive typeface CSS
+grigson-html-renderer --format standalone song.chart > out.html      # self-contained HTML page
 grigson-html-renderer --notation-preset-file ./preset.json song.chart
 cat song.chart | grigson normalise | grigson-html-renderer > out.html
 ```
@@ -368,11 +387,10 @@ $ echo $?
 `grigson-html-renderer` reads a chart and writes a `<div>` tree to stdout, using `part` attributes for styling:
 
 ```sh
-$ echo '| C | Am | F | G |' | grigson-html-renderer
-<div part="song" style="--beat-cols: 16; --min-beat-width: 1.00em"><div part="song-grid"><section part="section" style="display: contents"><div part="row" style="grid-column: 1 / 34"><span part="barline barline-single barline-position-start" aria-hidden="true" style="grid-column: 1">…</span><span part="slot bar-start" style="grid-column: 2 / span 7"><span part="chord" aria-label="C, whole bar"><span part="chord-root" aria-hidden="true">C</span></span></span>…</div></section></div></div>
+$ echo '| C | Am | F | G |' | grigson-html-renderer --format standalone > out.html
 ```
 
-The output is unstyled markup. It can be piped into a file and served alongside the grigson stylesheet, or it can be passed through a normalise/transpose step first:
+This produces a self-contained HTML file that opens directly in any browser, with all CSS and fonts embedded. It can also be passed through a normalise/transpose step first:
 
 ```sh
 $ cat song.chart | grigson normalise | grigson transpose --to G | grigson-html-renderer > out.html
