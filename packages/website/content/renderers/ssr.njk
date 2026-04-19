@@ -40,6 +40,7 @@ key: F
 {% highlight "html" %}
 <grigson-chart normalise>
   <template shadowrootmode="open">
+    <style>:host{display:block;container-type:inline-size}</style>
     <style>/* component CSS */</style>
     <!-- pre-rendered chart HTML -->
   </template>
@@ -51,6 +52,12 @@ key: F
   When JavaScript loads, <code>&lt;grigson-chart&gt;</code> upgrades and detects the existing
   shadow root, adopting it rather than re-rendering. The element only re-renders if an attribute
   changes or the source template is mutated.
+</p>
+<p>
+  The <code>:host{display:block;container-type:inline-size}</code> rule is included in the DSD
+  template even though <code>&lt;grigson-chart&gt;</code> also sets it via JavaScript. Without it,
+  <code>@container</code> queries inside the shadow root would not fire until after JS upgrades the
+  element — breaking responsive layouts when JS is disabled or slow to load.
 </p>
 
 <h2>Transform registration</h2>
@@ -67,6 +74,8 @@ import {
 
 const fontFaceCSS = getRendererFontFaceCSS();
 const defaultStyles = getRendererStyles('sans');
+// Included in every DSD template so container queries work without JS
+const hostStyle = '<style>:host{display:block;container-type:inline-size}</style>';
 
 eleventyConfig.addTransform('grigson-dsd', async function (content, outputPath) {
   if (!outputPath?.endsWith('.html')) return content;
@@ -76,20 +85,32 @@ eleventyConfig.addTransform('grigson-dsd', async function (content, outputPath) 
   let anyProcessed = false;
   for (const chart of charts) {
     if (chart.querySelector('template[shadowrootmode]')) continue;
-    if (chart.hasAttribute('template')) continue;
-    if (chart.querySelector('grigson-html-renderer')) continue;
+
+    // Resolve source — inline template or external template reference
     const inlineTmpl = chart.querySelector('template:not([shadowrootmode])');
-    if (!inlineTmpl) continue;
-    const source = inlineTmpl.innerHTML.trim();
+    let source;
+    if (inlineTmpl) {
+      source = inlineTmpl.innerHTML.trim();
+    } else {
+      const refId = chart.getAttribute('template');
+      if (refId) source = document.getElementById(refId)?.innerHTML.trim();
+    }
     if (!source) continue;
+
+    // Skip charts with unknown renderer children (e.g. grigson-text-renderer)
+    const hasUnknownChildren = Array.from(chart.children).some(
+      (c) => c.tagName !== 'TEMPLATE' && c.tagName !== 'STYLE' && c.tagName !== 'GRIGSON-HTML-RENDERER',
+    );
+    if (hasUnknownChildren) continue;
+
     try {
       let song = parseSong(source);
       if (chart.hasAttribute('normalise')) song = normaliseSong(song);
-      // transpose-key / transpose-semitones are also handled here (omitted for brevity)
+      // transpose-key / transpose-semitones handled here (omitted for brevity)
       const chartHTML = new HtmlRenderer().render(song);
       chart.insertAdjacentHTML(
         'afterbegin',
-        '<template shadowrootmode="open"><style>' + defaultStyles + '</style>' + chartHTML + '</template>',
+        '<template shadowrootmode="open">' + hostStyle + '<style>' + defaultStyles + '</style>' + chartHTML + '</template>',
       );
       anyProcessed = true;
     } catch (err) { /* skip invalid charts */ }
