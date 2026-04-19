@@ -165,9 +165,12 @@ export default async function (eleventyConfig) {
           shadowContent = parts.join('');
         }
 
+        // The host style is normally injected by the element constructor (JS).
+        // Include it in the DSD so container queries work without JS too.
+        const hostStyle = '<style>:host{display:block;container-type:inline-size}</style>';
         chart.insertAdjacentHTML(
           'afterbegin',
-          `<template shadowrootmode="open">${shadowContent}</template>`,
+          `<template shadowrootmode="open">${hostStyle}${shadowContent}</template>`,
         );
         anyProcessed = true;
       } catch (err) {
