@@ -85,7 +85,12 @@ export default async function (eleventyConfig) {
     for (const chart of charts) {
       if (chart.querySelector('template[shadowrootmode]')) continue; // already has DSD
       if (chart.hasAttribute('template')) continue; // external template ref — skip
-      if (chart.querySelector('grigson-html-renderer')) continue; // custom renderer — skip
+      // Skip charts with any non-template, non-style children — these use custom renderers
+      // whose behaviour (class names, attributes, etc.) can't be replicated at build time.
+      const hasCustomChildren = Array.from(chart.children).some(
+        (child) => child.tagName !== 'TEMPLATE' && child.tagName !== 'STYLE',
+      );
+      if (hasCustomChildren) continue;
 
       const inlineTmpl = chart.querySelector('template:not([shadowrootmode])');
       if (!inlineTmpl) continue;
