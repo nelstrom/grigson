@@ -3,7 +3,7 @@ layout: base.njk
 title: Custom Elements
 permalink: /renderers/custom-elements/
 ---
-<script src="{{ '/js/grigson-text-renderer-register.iife.js' | url }}"></script>
+<script defer src="{{ '/js/grigson-text-renderer-register.iife.js' | url }}"></script>
 
 <h1>Custom Elements</h1>
 <p>
@@ -152,7 +152,7 @@ key: Ab
 </p>
 {% highlight "html" %}
 <!-- Load the separate package -->
-<script src="/js/grigson-text-renderer-register.iife.js"></script>
+<script defer src="/js/grigson-text-renderer-register.iife.js"></script>
 
 <grigson-chart normalise>
   <grigson-text-renderer></grigson-text-renderer>

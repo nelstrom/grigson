@@ -37,16 +37,29 @@ The CLI code is **not** included in the browser bundle.
 
 ## Using the IIFE bundle
 
-Add a `<script>` tag pointing to the IIFE file. The `grigson` global is then available on the page:
+Add a `<script defer>` tag pointing to the IIFE file. The `grigson` global is available once the script has executed. Because `defer` delays execution until after HTML parsing, any inline script that uses the global must wait for `DOMContentLoaded` (which fires after all deferred scripts have run):
 
 ```html
-<script src="/js/grigson.iife.js"></script>
+<script defer src="/js/grigson.iife.js"></script>
 <script>
-  const song = grigson.parseSong('| C | Am | F | G |');
-  const normalised = grigson.normaliseSong(song);
-  const output = new grigson.TextRenderer().render(normalised);
-  console.log(output);
+  document.addEventListener('DOMContentLoaded', () => {
+    const song = grigson.parseSong('| C | Am | F | G |');
+    const normalised = grigson.normaliseSong(song);
+    const output = new grigson.TextRenderer().render(normalised);
+    console.log(output);
+  });
 </script>
+```
+
+Alternatively, use the ESM bundle with `type="module"` — modules are deferred by default and can import directly without a global:
+
+```js
+import { parseSong, normaliseSong, TextRenderer } from './grigson.esm.js';
+
+const song = parseSong('| C | Am | F | G |');
+const normalised = normaliseSong(song);
+const output = new TextRenderer().render(normalised);
+console.log(output);
 ```
 
 ---
@@ -63,15 +76,19 @@ import { parseSong, normaliseSong, TextRenderer } from './grigson.esm.js';
 
 ## Loading the custom elements
 
-To use `<grigson-chart>` and `<grigson-html-renderer>`, load the auto-registering bundle:
+To use `<grigson-chart>` and `<grigson-html-renderer>`, load the auto-registering bundle with `defer`:
 
 ```html
-<script src="/js/grigson-register.iife.js"></script>
+<script defer src="/js/grigson-register.iife.js"></script>
 <grigson-chart normalise>
   <template>
     | C | Am | F | G |
   </template>
 </grigson-chart>
 ```
+
+`defer` is important: without it the script blocks HTML parsing, so the custom element is registered before the browser has parsed the elements in the page. Deferred scripts run after parsing completes, which ensures the element upgrades correctly.
+
+If you use `type="module"` instead of IIFE, `defer` is implicit — no attribute needed.
 
 See [Custom Elements](/renderers/custom-elements/) for the full element documentation.
