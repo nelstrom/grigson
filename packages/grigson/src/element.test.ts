@@ -473,6 +473,64 @@ key: C
   });
 });
 
+describe('GrigsonChart DSD adoption', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const wait = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  // happy-dom runs the custom element constructor synchronously on createElement,
+  // so we can't attach a shadow root before the constructor (as the browser's DSD
+  // parser does). Instead we add content to the existing shadow root and force
+  // _hasDSDContent = true before connecting to simulate DSD adoption.
+  const makeElementWithDSD = () => {
+    const el = document.createElement('grigson-chart') as any;
+    const sentinel = document.createElement('div');
+    sentinel.setAttribute('data-dsd', 'true');
+    el.shadowRoot.appendChild(sentinel);
+    el._hasDSDContent = true;
+    return el as GrigsonChart;
+  };
+
+  it('adopts a DSD shadow root without re-rendering', async () => {
+    const el = makeElementWithDSD();
+    const tmpl = document.createElement('template');
+    tmpl.innerHTML = '| C |';
+    el.appendChild(tmpl);
+    document.body.appendChild(el);
+    await wait();
+    // Sentinel must survive — update() must not have been called
+    expect(el.shadowRoot!.querySelector('[data-dsd]')).not.toBeNull();
+  });
+
+  it('re-renders on attribute change after DSD adoption', async () => {
+    const el = makeElementWithDSD();
+    const tmpl = document.createElement('template');
+    tmpl.innerHTML = '| C |';
+    el.appendChild(tmpl);
+    document.body.appendChild(el);
+    await wait();
+    el.setAttribute('normalise', '');
+    await wait();
+    expect(el.shadowRoot!.querySelector('[part="song"]')).not.toBeNull();
+  });
+
+  it('re-renders on template content change after DSD adoption', async () => {
+    const el = makeElementWithDSD();
+    const tmpl = document.createElement('template');
+    tmpl.innerHTML = '| C |';
+    el.appendChild(tmpl);
+    document.body.appendChild(el);
+    await wait();
+    // Mutate template content — _templateObserver must fire update()
+    tmpl.innerHTML = '| Am |';
+    await wait();
+    const chordRoot = el.shadowRoot!.querySelector('[part="chord-root"]');
+    expect(chordRoot?.textContent).toBe('A');
+  });
+});
+
 describe('GrigsonHtmlRenderer', () => {
   it('renderChart() returns an Element containing expected shadow parts', () => {
     const song = parseSong('| C | G | Am | F |');

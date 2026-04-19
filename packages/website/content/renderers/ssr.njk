@@ -18,27 +18,29 @@ permalink: /renderers/build-time/
   reloading — it will still render correctly.
 </p>
 
-{% grigsonChartDSD %}
----
+<grigson-chart normalise>
+  <template>---
 title: Blues in F
 key: F
 ---
 [Head]
 | F7 | F7 | F7 | F7 |
 | Bb7 | Bb7 | F7 | F7 |
-| C7 | Bb7 | F7 | C7 |
-{% endgrigsonChartDSD %}
+| C7 | Bb7 | F7 | C7 |</template>
+</grigson-chart>
 
 <h2>How it works</h2>
 <p>
-  An Eleventy paired shortcode calls <code>parseSong</code> and <code>HtmlRenderer.render()</code>
-  from the <code>grigson</code> package at build time (Node.js). The resulting HTML string is placed
-  inside a <code>&lt;template shadowrootmode="open"&gt;</code>:
+  An Eleventy transform post-processes every <code>.html</code> output file. It finds each
+  <code>&lt;grigson-chart&gt;</code> element and calls <code>parseSong</code> and
+  <code>HtmlRenderer.render()</code> from the <code>grigson</code> package at build time (Node.js).
+  The resulting HTML string is placed inside a <code>&lt;template shadowrootmode="open"&gt;</code>
+  injected as the first child of the element:
 </p>
 {% highlight "html" %}
 <grigson-chart normalise>
   <template shadowrootmode="open">
-    <style>/* @font-face + component CSS */</style>
+    <style>/* component CSS */</style>
     <!-- pre-rendered chart HTML -->
   </template>
   <template><!-- original .chart source --></template>
@@ -46,52 +48,57 @@ key: F
 {% endhighlight %}
 <p>
   When the browser parses this HTML it immediately attaches the shadow root — no script required.
-  If JavaScript is enabled, the <code>&lt;grigson-chart&gt;</code> custom element upgrades later
-  and may re-render from the <code>&lt;template&gt;</code> source, but the DSD content is already
-  visible by that point.
+  When JavaScript loads, <code>&lt;grigson-chart&gt;</code> upgrades and detects the existing
+  shadow root, adopting it rather than re-rendering. The element only re-renders if an attribute
+  changes or the source template is mutated.
 </p>
 
-<h2>Shortcode usage</h2>
-<p>Add the shortcode to any Eleventy template (Nunjucks, Liquid, etc.):</p>
-<pre><code>&#123;% grigsonChartDSD %&#125;
----
-title: Blues in F
-key: F
----
-[Head]
-| F7 | F7 | F7 | F7 |
-| Bb7 | Bb7 | F7 | F7 |
-| C7 | Bb7 | F7 | C7 |
-&#123;% endgrigsonChartDSD %&#125;</code></pre>
-
-<p>Register the shortcode in <code>.eleventy.js</code>:</p>
+<h2>Transform registration</h2>
+<p>
+  Register the transform in <code>.eleventy.js</code>. It runs automatically on every page —
+  no per-element markup changes are needed.
+</p>
 {% highlight "html" %}
+import { parseHTML } from 'linkedom';
 import {
-  parseSong,
-  normaliseSong,
-  HtmlRenderer,
-  getRendererStyles,
-  getRendererFontFaceCSS,
+  parseSong, normaliseSong, transposeSong, transposeSongToKey,
+  HtmlRenderer, getRendererStyles, getRendererFontFaceCSS,
 } from 'grigson';
 
 const fontFaceCSS = getRendererFontFaceCSS();
 const defaultStyles = getRendererStyles('sans');
 
-eleventyConfig.addPairedShortcode('grigsonChartDSD', (source, normalise = true) => {
-  let song = parseSong(source.trim());
-  if (normalise) song = normaliseSong(song);
-  const chartHTML = new HtmlRenderer().render(song);
-  const attrs = normalise ? ' normalise' : '';
-  return [
-    '<style>' + fontFaceCSS + '</style>',
-    '<grigson-chart' + attrs + '>',
-    '  <template shadowrootmode="open">',
-    '    <style>' + defaultStyles + '</style>',
-    '    ' + chartHTML,
-    '  </template>',
-    '  <template>' + source.trim() + '</template>',
-    '</grigson-chart>',
-  ].join('\n');
+eleventyConfig.addTransform('grigson-dsd', async function (content, outputPath) {
+  if (!outputPath?.endsWith('.html')) return content;
+  const { document } = parseHTML(content);
+  const charts = document.querySelectorAll('grigson-chart');
+  if (charts.length === 0) return content;
+  let anyProcessed = false;
+  for (const chart of charts) {
+    if (chart.querySelector('template[shadowrootmode]')) continue;
+    if (chart.hasAttribute('template')) continue;
+    if (chart.querySelector('grigson-html-renderer')) continue;
+    const inlineTmpl = chart.querySelector('template:not([shadowrootmode])');
+    if (!inlineTmpl) continue;
+    const source = inlineTmpl.innerHTML.trim();
+    if (!source) continue;
+    try {
+      let song = parseSong(source);
+      if (chart.hasAttribute('normalise')) song = normaliseSong(song);
+      // transpose-key / transpose-semitones are also handled here (omitted for brevity)
+      const chartHTML = new HtmlRenderer().render(song);
+      chart.insertAdjacentHTML(
+        'afterbegin',
+        '<template shadowrootmode="open"><style>' + defaultStyles + '</style>' + chartHTML + '</template>',
+      );
+      anyProcessed = true;
+    } catch (err) { /* skip invalid charts */ }
+  }
+  if (anyProcessed && !document.querySelector('style[data-grigson-fonts]')) {
+    document.querySelector('head')
+      ?.insertAdjacentHTML('beforeend', '<style data-grigson-fonts>' + fontFaceCSS + '</style>');
+  }
+  return document.toString();
 });
 {% endhighlight %}
 

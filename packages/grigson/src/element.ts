@@ -16,6 +16,7 @@ export class GrigsonChart extends HTMLElement {
 
   private _root: ShadowRoot;
   private _style: HTMLStyleElement;
+  private _hasDSDContent = false;
   private _isInitialized = false;
   private _childObserver: MutationObserver | null = null;
   private _templateObserver: MutationObserver | null = null;
@@ -23,7 +24,8 @@ export class GrigsonChart extends HTMLElement {
 
   constructor() {
     super();
-    // Use an existing DSD shadow root if the HTML parser created one; otherwise create our own.
+    // If the HTML parser already created a DSD shadow root, adopt it rather than re-rendering.
+    this._hasDSDContent = !!this.shadowRoot;
     this._root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
     this._style = document.createElement('style');
     this._style.textContent = ':host { display: block; container-type: inline-size; }';
@@ -53,8 +55,23 @@ export class GrigsonChart extends HTMLElement {
 
     this.addEventListener(GrigsonRendererUpdateEvent.type, this._rendererUpdateListener);
 
-    // Defer update to ensure children (template) are available
-    setTimeout(() => this.update(), 0);
+    if (this._hasDSDContent) {
+      this._adoptDSD();
+    } else {
+      // Defer update to ensure children (template) are available
+      setTimeout(() => this.update(), 0);
+    }
+  }
+
+  private _adoptDSD() {
+    const template = this._resolveTemplate();
+    if (!template) return;
+    this._templateObserver = new MutationObserver(() => this.update());
+    this._templateObserver.observe(template.content, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
   }
 
   disconnectedCallback() {
