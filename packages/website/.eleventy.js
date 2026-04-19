@@ -84,18 +84,33 @@ export default async function (eleventyConfig) {
 
     for (const chart of charts) {
       if (chart.querySelector('template[shadowrootmode]')) continue; // already has DSD
-      if (chart.hasAttribute('template')) continue; // external template ref — skip
-      // Skip charts with any non-template, non-style children — these use custom renderers
-      // whose behaviour (class names, attributes, etc.) can't be replicated at build time.
-      const hasCustomChildren = Array.from(chart.children).some(
-        (child) => child.tagName !== 'TEMPLATE' && child.tagName !== 'STYLE',
-      );
-      if (hasCustomChildren) continue;
 
+      // Resolve source — prefer inline template, fall back to external template reference
       const inlineTmpl = chart.querySelector('template:not([shadowrootmode])');
-      if (!inlineTmpl) continue;
-      const source = inlineTmpl.innerHTML.trim();
+      let source;
+      if (inlineTmpl) {
+        source = inlineTmpl.innerHTML.trim();
+      } else {
+        const refId = chart.getAttribute('template');
+        if (refId) {
+          const ext = document.getElementById(refId);
+          if (ext) source = ext.innerHTML.trim();
+        }
+      }
       if (!source) continue;
+
+      // Classify children: skip charts with unknown renderer children we can't replicate
+      const children = Array.from(chart.children);
+      const hasUnknownChildren = children.some(
+        (c) =>
+          c.tagName !== 'TEMPLATE' &&
+          c.tagName !== 'STYLE' &&
+          c.tagName !== 'GRIGSON-HTML-RENDERER',
+      );
+      if (hasUnknownChildren) continue;
+
+      const htmlRenderers = children.filter((c) => c.tagName === 'GRIGSON-HTML-RENDERER');
+      const userStyles = children.filter((c) => c.tagName === 'STYLE');
 
       try {
         let song = parseSong(source);
@@ -109,10 +124,50 @@ export default async function (eleventyConfig) {
           if (!isNaN(n)) song = transposeSong(song, n);
         }
 
-        const chartHTML = new HtmlRenderer().render(song);
+        let shadowContent;
+
+        if (htmlRenderers.length === 0) {
+          // Implicit renderer
+          const chartHTML = new HtmlRenderer().render(song);
+          shadowContent = `<style>${defaultStyles}</style>${chartHTML}`;
+        } else {
+          // Explicit grigson-html-renderer children — replicate renderChart() output structure
+          const parts = userStyles.map((s) => `<style>${s.textContent}</style>`);
+
+          for (const rendererEl of htmlRenderers) {
+            const config = {};
+            const notationPreset = rendererEl.getAttribute('notation-preset');
+            if (notationPreset) config.notation = { preset: notationPreset };
+            const simileOutput = rendererEl.getAttribute('simile-output');
+            if (simileOutput === 'shorthand' || simileOutput === 'longhand')
+              config.simile = { output: simileOutput };
+            const accidentals = rendererEl.getAttribute('accidentals');
+            if (accidentals === 'ascii' || accidentals === 'unicode')
+              config.accidentals = accidentals;
+            const slashStyle = rendererEl.getAttribute('slash-style');
+            if (slashStyle === 'horizontal' || slashStyle === 'diagonal' || slashStyle === 'ascii')
+              config.slashStyle = slashStyle;
+            const barsPerLine = parseInt(rendererEl.getAttribute('bars-per-line') ?? '', 10);
+            if (barsPerLine > 0) config.barsPerLine = barsPerLine;
+            const maxBarsPerLine = parseInt(rendererEl.getAttribute('max-bars-per-line') ?? '', 10);
+            if (maxBarsPerLine > 0) config.maxBarsPerLine = maxBarsPerLine;
+
+            const typeface = rendererEl.getAttribute('typeface') ?? 'sans';
+            const styles = getRendererStyles(typeface);
+            const html = new HtmlRenderer(config).render(song);
+
+            let rendered = `<div data-typeface="${typeface}"><style>${styles}</style>${html}</div>`;
+            const cls = rendererEl.getAttribute('class');
+            if (cls) rendered = `<div class="${cls}">${rendered}</div>`;
+            parts.push(rendered);
+          }
+
+          shadowContent = parts.join('');
+        }
+
         chart.insertAdjacentHTML(
           'afterbegin',
-          `<template shadowrootmode="open"><style>${defaultStyles}</style>${chartHTML}</template>`,
+          `<template shadowrootmode="open">${shadowContent}</template>`,
         );
         anyProcessed = true;
       } catch (err) {
