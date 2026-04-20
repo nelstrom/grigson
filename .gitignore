@@ -4,6 +4,7 @@ node_modules/
 .pnpm-store
 
 # Package outputs
+packages/eleventy-plugin-grigson/dist/
 packages/grigson/dist/
 packages/grigson-text-renderer/dist/
 packages/grigson-svg-renderer/dist/

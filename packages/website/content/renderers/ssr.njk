@@ -62,65 +62,13 @@ key: F
 
 <h2>Transform registration</h2>
 <p>
-  Register the transform in <code>.eleventy.js</code>. It runs automatically on every page —
-  no per-element markup changes are needed.
+  Install <code>eleventy-plugin-grigson</code> and add it to your <code>.eleventy.js</code>.
+  The transform runs automatically on every page — no per-element markup changes are needed.
 </p>
 {% highlight "html" %}
-import { parseHTML } from 'linkedom';
-import {
-  parseSong, normaliseSong, transposeSong, transposeSongToKey,
-  HtmlRenderer, getRendererStyles, getRendererFontFaceCSS,
-} from 'grigson';
+import grigsonPlugin from 'eleventy-plugin-grigson';
 
-const fontFaceCSS = getRendererFontFaceCSS();
-const defaultStyles = getRendererStyles('sans');
-// Included in every DSD template so container queries work without JS
-const hostStyle = '<style>:host{display:block;container-type:inline-size}</style>';
-
-eleventyConfig.addTransform('grigson-dsd', async function (content, outputPath) {
-  if (!outputPath?.endsWith('.html')) return content;
-  const { document } = parseHTML(content);
-  const charts = document.querySelectorAll('grigson-chart');
-  if (charts.length === 0) return content;
-  let anyProcessed = false;
-  for (const chart of charts) {
-    if (chart.querySelector('template[shadowrootmode]')) continue;
-
-    // Resolve source — inline template or external template reference
-    const inlineTmpl = chart.querySelector('template:not([shadowrootmode])');
-    let source;
-    if (inlineTmpl) {
-      source = inlineTmpl.innerHTML.trim();
-    } else {
-      const refId = chart.getAttribute('template');
-      if (refId) source = document.getElementById(refId)?.innerHTML.trim();
-    }
-    if (!source) continue;
-
-    // Skip charts with unknown renderer children (e.g. grigson-text-renderer)
-    const hasUnknownChildren = Array.from(chart.children).some(
-      (c) => c.tagName !== 'TEMPLATE' && c.tagName !== 'STYLE' && c.tagName !== 'GRIGSON-HTML-RENDERER',
-    );
-    if (hasUnknownChildren) continue;
-
-    try {
-      let song = parseSong(source);
-      if (chart.hasAttribute('normalise')) song = normaliseSong(song);
-      // transpose-key / transpose-semitones handled here (omitted for brevity)
-      const chartHTML = new HtmlRenderer().render(song);
-      chart.insertAdjacentHTML(
-        'afterbegin',
-        '<template shadowrootmode="open">' + hostStyle + '<style>' + defaultStyles + '</style>' + chartHTML + '</template>',
-      );
-      anyProcessed = true;
-    } catch (err) { /* skip invalid charts */ }
-  }
-  if (anyProcessed && !document.querySelector('style[data-grigson-fonts]')) {
-    document.querySelector('head')
-      ?.insertAdjacentHTML('beforeend', '<style data-grigson-fonts>' + fontFaceCSS + '</style>');
-  }
-  return document.toString();
-});
+eleventyConfig.addPlugin(grigsonPlugin);
 {% endhighlight %}
 
 <h2>Font note</h2>

@@ -700,3 +700,6 @@ Added a `grigsonChartDSD` paired shortcode to `packages/website/.eleventy.js` th
 Fixed two bugs discovered during implementation: (1) `GrigsonChart` constructor now uses `this.shadowRoot ?? this.attachShadow()` so that when the HTML parser creates a DSD shadow root before the element is defined, the constructor reuses it rather than replacing it. (2) `_resolveTemplate()` now uses `querySelector('template:not([shadowrootmode])')` to skip DSD templates that may remain in the light DOM, ensuring only the chart source template is used for JS re-rendering.
 
 Created `packages/website/content/renderers/ssr.njk` (permalink `/renderers/build-time/`) with a Blues in F demo, how-it-works explanation, shortcode usage example, and font note. Added a link to the new page in `packages/website/content/renderers/index.md`.
+
+## eleventy-plugin-grigson (2026-04-20)
+Extracted the grigson-dsd Eleventy transform from packages/website/.eleventy.js into a new standalone package packages/eleventy-plugin-grigson. The plugin exports grigsonPlugin (and a default export) — consumers call eleventyConfig.addPlugin(grigsonPlugin). linkedom moved from website devDependencies to plugin dependencies. The website .eleventy.js now uses the plugin via addPlugin. ssr.njk documentation updated to show the plugin API as the primary usage pattern. All 610 tests pass.

@@ -1,0 +1,20 @@
+{
+  "name": "eleventy-plugin-grigson",
+  "version": "1.0.0",
+  "description": "Eleventy plugin: build-time grigson chart rendering via Declarative Shadow DOM",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "grigson": "workspace:*",
+    "linkedom": "^0.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
