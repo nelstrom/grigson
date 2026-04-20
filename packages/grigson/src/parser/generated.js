@@ -2,6 +2,13 @@
 //
 // https://peggyjs.org/
 
+function makeLoc(l) {
+  return {
+    start: { line: l.start.line - 1, character: l.start.column - 1 },
+    end: { line: l.end.line - 1, character: l.end.column - 1 },
+  };
+}
+
 class peg$SyntaxError extends SyntaxError {
   constructor(message, expected, found, location) {
     super(message);
@@ -282,6 +289,7 @@ function peg$parse(input, options) {
       key: frontMatter?.key ?? null,
       meter: frontMatter?.meter ?? null,
       sections,
+      loc: makeLoc(location()),
     };
   }
   function peg$f1(items) {
@@ -292,34 +300,55 @@ function peg$parse(input, options) {
     let currentRows = [];
     let currentContent = [];
     let labelSeen = false;
+    let sectionStartLoc = null;
+    let lastItemLoc = null;
 
     for (const item of items) {
       // Skip newlines (strings) and nulls
       if (typeof item !== 'object' || item === null) continue;
       if (item.type === 'sectionLabel') {
         if (currentRows.length > 0) {
-          sections.push({
+          const loc =
+            sectionStartLoc && lastItemLoc
+              ? { start: sectionStartLoc.start, end: lastItemLoc.end }
+              : undefined;
+          const sec = {
             type: 'section',
             label: pendingLabel,
             key: pendingKey,
             preamble: pendingPreamble,
             rows: currentRows,
             content: currentContent,
-          });
+          };
+          if (loc) sec.loc = loc;
+          sections.push(sec);
           currentRows = [];
           currentContent = [];
           pendingPreamble = [];
           pendingKey = null;
           labelSeen = false;
+          sectionStartLoc = item.loc ?? null;
+          lastItemLoc = item.loc ?? null;
+        } else {
+          if (!sectionStartLoc && item.loc) sectionStartLoc = item.loc;
+          if (item.loc) lastItemLoc = item.loc;
         }
         pendingLabel = item.label;
         pendingKey = item.key;
         labelSeen = true;
       } else if (item.type === 'row') {
+        if (item.loc) {
+          if (!sectionStartLoc) sectionStartLoc = item.loc;
+          lastItemLoc = item.loc;
+        }
         labelSeen = true;
         currentRows.push(item);
         currentContent.push(item);
       } else if (item.type === 'comment') {
+        if (item.loc) {
+          if (!sectionStartLoc) sectionStartLoc = item.loc;
+          lastItemLoc = item.loc;
+        }
         if (!labelSeen) {
           pendingPreamble.push(item);
         } else {
@@ -329,14 +358,20 @@ function peg$parse(input, options) {
     }
 
     // Always push the final section (ensures at least one section exists)
-    sections.push({
+    const finalLoc =
+      sectionStartLoc && lastItemLoc
+        ? { start: sectionStartLoc.start, end: lastItemLoc.end }
+        : undefined;
+    const finalSec = {
       type: 'section',
       label: pendingLabel,
       key: pendingKey,
       preamble: pendingPreamble,
       rows: currentRows,
       content: currentContent,
-    });
+    };
+    if (finalLoc) finalSec.loc = finalLoc;
+    sections.push(finalSec);
     return sections;
   }
   function peg$f2(label, value) {
@@ -378,7 +413,12 @@ function peg$parse(input, options) {
         error(`Invalid key: "${key}".`);
       }
     }
-    return { type: 'sectionLabel', label: label.trim(), key: key ?? null };
+    return {
+      type: 'sectionLabel',
+      label: label.trim(),
+      key: key ?? null,
+      loc: makeLoc(location()),
+    };
   }
   function peg$f4(fields) {
     const meta = Object.fromEntries(fields.map((f) => [f.key, f.value]));
@@ -437,6 +477,7 @@ function peg$parse(input, options) {
       title: meta.title ?? null,
       key: meta.key !== undefined ? normalizeKey(meta.key) : null,
       meter: meta.meter ?? null,
+      loc: makeLoc(location()),
     };
   }
   function peg$f5(key, value) {
@@ -459,7 +500,7 @@ function peg$parse(input, options) {
         lastSlots = bar.slots;
       }
     }
-    return { type: 'row', openBarline: open, bars };
+    return { type: 'row', openBarline: open, bars, loc: makeLoc(location()) };
   }
   function peg$f9(ts, slots, close) {
     if (!slots.some((s) => s.type === 'chord')) {
@@ -467,31 +508,13 @@ function peg$parse(input, options) {
     }
     const bar = { type: 'bar', slots, closeBarline: close };
     if (ts) bar.timeSignature = ts;
-    const loc = location();
-    Object.defineProperty(bar, '_sourceRange', {
-      value: {
-        start: { line: loc.start.line - 1, character: loc.start.column - 1 },
-        end: { line: loc.end.line - 1, character: loc.end.column - 1 },
-      },
-      enumerable: false,
-      writable: false,
-      configurable: false,
-    });
+    bar.loc = makeLoc(location());
     return bar;
   }
   function peg$f10(close) {
     // Simile mark — slots resolved by the Row action above
     const bar = { type: 'bar', simile: true, slots: [], closeBarline: close };
-    const loc = location();
-    Object.defineProperty(bar, '_sourceRange', {
-      value: {
-        start: { line: loc.start.line - 1, character: loc.start.column - 1 },
-        end: { line: loc.end.line - 1, character: loc.end.column - 1 },
-      },
-      enumerable: false,
-      writable: false,
-      configurable: false,
-    });
+    bar.loc = makeLoc(location());
     return bar;
   }
   function peg$f11(open, ts, slots, close) {
@@ -500,6 +523,7 @@ function peg$parse(input, options) {
     }
     const bar = { type: 'bar', slots, closeBarline: close };
     if (ts) bar.timeSignature = ts;
+    bar.loc = makeLoc(location());
     return bar;
   }
   function peg$f12() {
@@ -545,10 +569,10 @@ function peg$parse(input, options) {
     return [first[1], ...rest.map(([, s]) => s)];
   }
   function peg$f26(chord) {
-    return { type: 'chord', chord };
+    return { type: 'chord', chord, loc: makeLoc(location()) };
   }
   function peg$f27() {
-    return { type: 'dot' };
+    return { type: 'dot', loc: makeLoc(location()) };
   }
   function peg$f28(numerator, denominator) {
     return { numerator: parseInt(numerator, 10), denominator: parseInt(denominator, 10) };
@@ -556,6 +580,7 @@ function peg$parse(input, options) {
   function peg$f29(root, quality, bass) {
     const chord = { type: 'chord', root, quality };
     if (bass !== null) chord.bass = bass;
+    chord.loc = makeLoc(location());
     return chord;
   }
   function peg$f30(bass) {
@@ -598,7 +623,7 @@ function peg$parse(input, options) {
     return 'major';
   }
   function peg$f43(text) {
-    return { type: 'comment', text: '#' + text };
+    return { type: 'comment', text: '#' + text, loc: makeLoc(location()) };
   }
   let peg$currPos = options.peg$currPos | 0;
   let peg$savedPos = peg$currPos;

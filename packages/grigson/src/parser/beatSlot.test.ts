@@ -2,11 +2,23 @@ import { describe, it, expect } from 'vitest';
 import { parseBar, parseRow, parseSong } from './parser.js';
 import { TextRenderer } from '../renderers/text.js';
 
+function withoutLoc(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(withoutLoc);
+  if (obj && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as object)) {
+      if (k !== 'loc') result[k] = withoutLoc(v);
+    }
+    return result;
+  }
+  return obj;
+}
+
 describe('beat-slot parsing', () => {
   it('parse | C | → one ChordSlot with chord C major (single-chord backward compatibility)', () => {
     const bar = parseBar('| C |');
     expect(bar.slots).toHaveLength(1);
-    expect(bar.slots[0]).toEqual({
+    expect(bar.slots[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
@@ -15,11 +27,11 @@ describe('beat-slot parsing', () => {
   it('parse | C G | → two ChordSlots in order', () => {
     const bar = parseBar('| C G |');
     expect(bar.slots).toHaveLength(2);
-    expect(bar.slots[0]).toEqual({
+    expect(bar.slots[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
-    expect(bar.slots[1]).toEqual({
+    expect(bar.slots[1]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'G', quality: 'major' },
     });
@@ -28,13 +40,13 @@ describe('beat-slot parsing', () => {
   it('parse | C . . G | → ChordSlot(C), DotSlot, DotSlot, ChordSlot(G)', () => {
     const bar = parseBar('| C . . G |');
     expect(bar.slots).toHaveLength(4);
-    expect(bar.slots[0]).toEqual({
+    expect(bar.slots[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
-    expect(bar.slots[1]).toEqual({ type: 'dot' });
-    expect(bar.slots[2]).toEqual({ type: 'dot' });
-    expect(bar.slots[3]).toEqual({
+    expect(bar.slots[1]).toMatchObject({ type: 'dot' });
+    expect(bar.slots[2]).toMatchObject({ type: 'dot' });
+    expect(bar.slots[3]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'G', quality: 'major' },
     });
@@ -43,16 +55,16 @@ describe('beat-slot parsing', () => {
   it('parse | C G . . | → ChordSlot(C), ChordSlot(G), DotSlot, DotSlot', () => {
     const bar = parseBar('| C G . . |');
     expect(bar.slots).toHaveLength(4);
-    expect(bar.slots[0]).toEqual({
+    expect(bar.slots[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
-    expect(bar.slots[1]).toEqual({
+    expect(bar.slots[1]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'G', quality: 'major' },
     });
-    expect(bar.slots[2]).toEqual({ type: 'dot' });
-    expect(bar.slots[3]).toEqual({ type: 'dot' });
+    expect(bar.slots[2]).toMatchObject({ type: 'dot' });
+    expect(bar.slots[3]).toMatchObject({ type: 'dot' });
   });
 
   it('parse | . | (dot only, no chord) → parser rejects it', () => {
@@ -66,21 +78,21 @@ describe('beat-slot parsing', () => {
       const song1 = parseSong('| C . . G |\n');
       const rendered = renderer.render(song1);
       const song2 = parseSong(rendered);
-      expect(song2).toEqual(song1);
+      expect(withoutLoc(song2)).toEqual(withoutLoc(song1));
     });
 
     it('round-trip: | C G . . | → render → parse produces equal AST', () => {
       const song1 = parseSong('| C G . . |\n');
       const rendered = renderer.render(song1);
       const song2 = parseSong(rendered);
-      expect(song2).toEqual(song1);
+      expect(withoutLoc(song2)).toEqual(withoutLoc(song1));
     });
 
     it('round-trip: | Am . Dm G | → render → parse produces equal AST', () => {
       const song1 = parseSong('| Am . Dm G |\n');
       const rendered = renderer.render(song1);
       const song2 = parseSong(rendered);
-      expect(song2).toEqual(song1);
+      expect(withoutLoc(song2)).toEqual(withoutLoc(song1));
     });
   });
 

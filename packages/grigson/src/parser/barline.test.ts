@@ -2,6 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { parseBar, parseRow, parseSong } from './parser.js';
 import { TextRenderer } from '../renderers/text.js';
 
+function withoutLoc(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(withoutLoc);
+  if (obj && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as object)) {
+      if (k !== 'loc') result[k] = withoutLoc(v);
+    }
+    return result;
+  }
+  return obj;
+}
+
 describe('extended barlines', () => {
   describe('OpenBarline parsing', () => {
     it('parses a single | opening barline', () => {
@@ -124,21 +136,21 @@ describe('extended barlines', () => {
       const source = '||: C | Am | F | G :||';
       const ast1 = parseSong(source);
       const ast2 = parseSong(renderer.render(ast1));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
 
     it('round-trips ||. final barline', () => {
       const source = '| C | Am | F | G ||.';
       const ast1 = parseSong(source);
       const ast2 = parseSong(renderer.render(ast1));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
 
     it('round-trips :||x3 repeat count', () => {
       const source = '||: C | Am | F | G :||x3';
       const ast1 = parseSong(source);
       const ast2 = parseSong(renderer.render(ast1));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
   });
 });

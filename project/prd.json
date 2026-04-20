@@ -2571,7 +2571,8 @@
       "Update parser test files (`parser.test.ts`, `beatSlot.test.ts`, `section.test.ts`, `simile.test.ts`, `examples.test.ts`) — replace `toEqual` with `toMatchObject` on assertions that compare AST node shapes",
       "Add `SourceRange` to the export lists in `src/index.ts` and `src/index.browser.ts`",
       "Run `pnpm build && pnpm test` from the repo root and confirm everything passes"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "ast-explorer-page",

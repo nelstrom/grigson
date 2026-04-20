@@ -5,6 +5,18 @@ import { normaliseSong } from '../theory/normalise.js';
 
 const renderer = new TextRenderer();
 
+function withoutLoc(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(withoutLoc);
+  if (obj && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as object)) {
+      if (k !== 'loc') result[k] = withoutLoc(v);
+    }
+    return result;
+  }
+  return obj;
+}
+
 describe('section parsing', () => {
   it('a song with no section labels has one section with label = null containing all rows', () => {
     const song = parseSong('| C | Am | F | G |\n| Dm | G7 | C | C |\n');
@@ -70,7 +82,7 @@ describe('section parsing', () => {
     const ast1 = parseSong(source);
     const rendered = renderer.render(ast1);
     const ast2 = parseSong(rendered);
-    expect(ast2).toEqual(ast1);
+    expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
   });
 });
 
@@ -111,7 +123,7 @@ describe('section key annotation', () => {
     const ast1 = parseSong(source);
     const rendered = renderer.render(ast1);
     const ast2 = parseSong(rendered);
-    expect(ast2).toEqual(ast1);
+    expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
   });
 
   it('normaliser uses declared key: [Chorus] key: Db with C#m7 → root normalised to Db', () => {

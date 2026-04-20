@@ -2,6 +2,15 @@
 // Supports: major, minor, and dominant seventh chords only.
 // Supports: single barlines | only.
 
+{{
+  function makeLoc(l) {
+    return {
+      start: { line: l.start.line - 1, character: l.start.column - 1 },
+      end:   { line: l.end.line - 1,   character: l.end.column - 1   },
+    };
+  }
+}}
+
 Song
   = frontMatter:FrontMatter? _ sections:SongBody {
       return {
@@ -10,6 +19,7 @@ Song
         key: frontMatter?.key ?? null,
         meter: frontMatter?.meter ?? null,
         sections,
+        loc: makeLoc(location()),
       };
     }
 
@@ -22,27 +32,47 @@ SongBody
       let currentRows = [];
       let currentContent = [];
       let labelSeen = false;
+      let sectionStartLoc = null;
+      let lastItemLoc = null;
 
       for (const item of items) {
         // Skip newlines (strings) and nulls
         if (typeof item !== "object" || item === null) continue;
         if (item.type === "sectionLabel") {
           if (currentRows.length > 0) {
-            sections.push({ type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent });
+            const loc = (sectionStartLoc && lastItemLoc)
+              ? { start: sectionStartLoc.start, end: lastItemLoc.end }
+              : undefined;
+            const sec = { type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent };
+            if (loc) sec.loc = loc;
+            sections.push(sec);
             currentRows = [];
             currentContent = [];
             pendingPreamble = [];
             pendingKey = null;
             labelSeen = false;
+            sectionStartLoc = item.loc ?? null;
+            lastItemLoc = item.loc ?? null;
+          } else {
+            if (!sectionStartLoc && item.loc) sectionStartLoc = item.loc;
+            if (item.loc) lastItemLoc = item.loc;
           }
           pendingLabel = item.label;
           pendingKey = item.key;
           labelSeen = true;
         } else if (item.type === "row") {
+          if (item.loc) {
+            if (!sectionStartLoc) sectionStartLoc = item.loc;
+            lastItemLoc = item.loc;
+          }
           labelSeen = true;
           currentRows.push(item);
           currentContent.push(item);
         } else if (item.type === "comment") {
+          if (item.loc) {
+            if (!sectionStartLoc) sectionStartLoc = item.loc;
+            lastItemLoc = item.loc;
+          }
           if (!labelSeen) {
             pendingPreamble.push(item);
           } else {
@@ -52,7 +82,12 @@ SongBody
       }
 
       // Always push the final section (ensures at least one section exists)
-      sections.push({ type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent });
+      const finalLoc = (sectionStartLoc && lastItemLoc)
+        ? { start: sectionStartLoc.start, end: lastItemLoc.end }
+        : undefined;
+      const finalSec = { type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent };
+      if (finalLoc) finalSec.loc = finalLoc;
+      sections.push(finalSec);
       return sections;
     }
 
@@ -66,7 +101,7 @@ SectionLabel
           error(`Invalid key: "${key}".`);
         }
       }
-      return { type: "sectionLabel", label: label.trim(), key: key ?? null };
+      return { type: "sectionLabel", label: label.trim(), key: key ?? null, loc: makeLoc(location()) };
     }
 
 FrontMatter
@@ -100,6 +135,7 @@ FrontMatter
         title: meta.title ?? null,
         key: meta.key !== undefined ? normalizeKey(meta.key) : null,
         meter: meta.meter ?? null,
+        loc: makeLoc(location()),
       };
     }
 
@@ -124,7 +160,7 @@ Row
           lastSlots = bar.slots;
         }
       }
-      return { type: "row", openBarline: open, bars };
+      return { type: "row", openBarline: open, bars, loc: makeLoc(location()) };
     }
 
 // A bar's content plus its closing barline.
@@ -136,27 +172,13 @@ BarTail
       }
       const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
-      const loc = location();
-      Object.defineProperty(bar, '_sourceRange', {
-        value: {
-          start: { line: loc.start.line - 1, character: loc.start.column - 1 },
-          end:   { line: loc.end.line - 1,   character: loc.end.column - 1   },
-        },
-        enumerable: false, writable: false, configurable: false,
-      });
+      bar.loc = makeLoc(location());
       return bar;
     }
   / "%" _ close:CloseBarline _ {
       // Simile mark — slots resolved by the Row action above
       const bar = { type: "bar", simile: true, slots: [], closeBarline: close };
-      const loc = location();
-      Object.defineProperty(bar, '_sourceRange', {
-        value: {
-          start: { line: loc.start.line - 1, character: loc.start.column - 1 },
-          end:   { line: loc.end.line - 1,   character: loc.end.column - 1   },
-        },
-        enumerable: false, writable: false, configurable: false,
-      });
+      bar.loc = makeLoc(location());
       return bar;
     }
 
@@ -167,6 +189,7 @@ Bar
       }
       const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
+      bar.loc = makeLoc(location());
       return bar;
     }
 
@@ -195,8 +218,8 @@ BeatSlotList
     }
 
 BeatSlot
-  = chord:Chord { return { type: "chord", chord }; }
-  / "." { return { type: "dot" }; }
+  = chord:Chord { return { type: "chord", chord, loc: makeLoc(location()) }; }
+  / "." { return { type: "dot", loc: makeLoc(location()) }; }
 
 TimeSignatureToken
   = "(" numerator:$[0-9]+ "/" denominator:$[0-9]+ ")" {
@@ -207,6 +230,7 @@ Chord
   = root:Root quality:Quality bass:SlashBass? {
       const chord = { type: "chord", root, quality };
       if (bass !== null) chord.bass = bass;
+      chord.loc = makeLoc(location());
       return chord;
     }
 
@@ -237,7 +261,7 @@ Quality
   / "-"    { return "min7"; }
   / ""     { return "major"; }
 
-Comment = "#" text:$[^\n\r]* (Newline / !.) { return { type: "comment", text: "#" + text }; }
+Comment = "#" text:$[^\n\r]* (Newline / !.) { return { type: "comment", text: "#" + text, loc: makeLoc(location()) }; }
 
 Newline = "\r\n" / "\n"
 

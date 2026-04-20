@@ -703,3 +703,21 @@ Created `packages/website/content/renderers/ssr.njk` (permalink `/renderers/buil
 
 ## eleventy-plugin-grigson (2026-04-20)
 Extracted the grigson-dsd Eleventy transform from packages/website/.eleventy.js into a new standalone package packages/eleventy-plugin-grigson. The plugin exports grigsonPlugin (and a default export) — consumers call eleventyConfig.addPlugin(grigsonPlugin). linkedom moved from website devDependencies to plugin dependencies. The website .eleventy.js now uses the plugin via addPlugin. ssr.njk documentation updated to show the plugin API as the primary usage pattern. All 610 tests pass.
+
+## parser-source-locations (2026-04-20)
+
+Added `SourceRange` interface and `loc?: SourceRange` to all AST node types in `src/parser/types.ts` (Song, Section, Row, Bar, ChordSlot, DotSlot, Chord, FrontMatter, CommentLine).
+
+Added a `{{...}}` global initializer block with a `makeLoc(l)` helper to `grammar.pegjs`, and wired it into every rule: Song, FrontMatter, Comment, SectionLabel, Row, BeatSlot (both ChordSlot and DotSlot), Chord, BarTail (both alternatives), and Bar. Replaced the non-enumerable `Object.defineProperty(_sourceRange …)` blocks on BarTail/Bar with `bar.loc = makeLoc(location())`.
+
+Added section loc tracking to the `SongBody` action: `sectionStartLoc` tracks the first item per section; `lastItemLoc` tracks the last; `loc` is assigned when pushing each section.
+
+Rebuilt the Peggy grammar with `pnpm run build:grammar`.
+
+Updated `validator.ts`: `barRange()` now returns `bar.loc ?? zeroRange()`.
+
+Updated test files to use `toMatchObject` (instead of `toEqual`) for assertions against manually-constructed AST shapes, and added `withoutLoc()` helpers in round-trip tests where the rendered output differs from the source (which changes character positions).
+
+Exported `SourceRange` from `src/parser/parser.ts`, `src/index.ts`, and `src/index.browser.ts`.
+
+All 610 tests pass.

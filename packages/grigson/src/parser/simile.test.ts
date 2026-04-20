@@ -9,22 +9,22 @@ function chord(root: string, quality = 'major') {
 describe('simile mark (%)', () => {
   it('resolves % to the previous bar slots', () => {
     const row = parseRow('| Am | % |');
-    expect(row.bars[0].slots).toEqual([chord('A', 'minor')]);
-    expect(row.bars[1].slots).toEqual([chord('A', 'minor')]);
+    expect(row.bars[0].slots).toMatchObject([chord('A', 'minor')]);
+    expect(row.bars[1].slots).toMatchObject([chord('A', 'minor')]);
   });
 
   it('resolves multiple consecutive % bars', () => {
     const row = parseRow('| C | % | % | % |');
     for (const bar of row.bars) {
-      expect(bar.slots).toEqual([chord('C')]);
+      expect(bar.slots).toMatchObject([chord('C')]);
     }
   });
 
   it('resolves % to the most recent non-simile bar', () => {
     const row = parseRow('| G | D | % |');
-    expect(row.bars[0].slots).toEqual([chord('G')]);
-    expect(row.bars[1].slots).toEqual([chord('D')]);
-    expect(row.bars[2].slots).toEqual([chord('D')]);
+    expect(row.bars[0].slots).toMatchObject([chord('G')]);
+    expect(row.bars[1].slots).toMatchObject([chord('D')]);
+    expect(row.bars[2].slots).toMatchObject([chord('D')]);
   });
 
   it('resolves % when last real bar has multiple slots', () => {
@@ -34,8 +34,8 @@ describe('simile mark (%)', () => {
       { type: 'dot' },
       { type: 'chord', chord: { type: 'chord', root: 'G', quality: 'major' } },
     ];
-    expect(row.bars[0].slots).toEqual(expected);
-    expect(row.bars[1].slots).toEqual(expected);
+    expect(row.bars[0].slots).toMatchObject(expected);
+    expect(row.bars[1].slots).toMatchObject(expected);
   });
 
   it('% does not carry the time signature of the preceding bar', () => {
@@ -47,13 +47,13 @@ describe('simile mark (%)', () => {
   it('% with a non-single closing barline preserves that barline', () => {
     const row = parseRow('| C | % ||.');
     expect(row.bars[1].closeBarline).toEqual({ kind: 'final' });
-    expect(row.bars[1].slots).toEqual([chord('C')]);
+    expect(row.bars[1].slots).toMatchObject([chord('C')]);
   });
 
   it('% with a repeat-end closing barline', () => {
     const row = parseRow('||: C | % :||');
     expect(row.bars[1].closeBarline).toEqual({ kind: 'endRepeat' });
-    expect(row.bars[1].slots).toEqual([chord('C')]);
+    expect(row.bars[1].slots).toMatchObject([chord('C')]);
   });
 
   it('resolved % bar has no simile property in the AST', () => {
@@ -65,9 +65,9 @@ describe('simile mark (%)', () => {
     const source = '| G | D | % |\n| C | % | % |\n';
     const song = parseSong(source);
     const rows = song.sections[0].rows;
-    expect(rows[0].bars[2].slots).toEqual([chord('D')]);
-    expect(rows[1].bars[1].slots).toEqual([chord('C')]);
-    expect(rows[1].bars[2].slots).toEqual([chord('C')]);
+    expect(rows[0].bars[2].slots).toMatchObject([chord('D')]);
+    expect(rows[1].bars[1].slots).toMatchObject([chord('C')]);
+    expect(rows[1].bars[2].slots).toMatchObject([chord('C')]);
   });
 
   it('renderer emits resolved chord content (longhand) by default', () => {

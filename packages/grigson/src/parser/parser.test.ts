@@ -4,115 +4,119 @@ import { parseChord, parseBar, parseRow, parseFrontMatter, parseSong } from './p
 describe('chord parsing', () => {
   describe('major chords', () => {
     it('parses C', () => {
-      expect(parseChord('C')).toEqual({ type: 'chord', root: 'C', quality: 'major' });
+      expect(parseChord('C')).toMatchObject({ type: 'chord', root: 'C', quality: 'major' });
     });
 
     it('parses F#', () => {
-      expect(parseChord('F#')).toEqual({ type: 'chord', root: 'F#', quality: 'major' });
+      expect(parseChord('F#')).toMatchObject({ type: 'chord', root: 'F#', quality: 'major' });
     });
 
     it('parses Bb', () => {
-      expect(parseChord('Bb')).toEqual({ type: 'chord', root: 'Bb', quality: 'major' });
+      expect(parseChord('Bb')).toMatchObject({ type: 'chord', root: 'Bb', quality: 'major' });
     });
   });
 
   describe('minor chords', () => {
     it('parses Am', () => {
-      expect(parseChord('Am')).toEqual({ type: 'chord', root: 'A', quality: 'minor' });
+      expect(parseChord('Am')).toMatchObject({ type: 'chord', root: 'A', quality: 'minor' });
     });
 
     it('parses C#m', () => {
-      expect(parseChord('C#m')).toEqual({ type: 'chord', root: 'C#', quality: 'minor' });
+      expect(parseChord('C#m')).toMatchObject({ type: 'chord', root: 'C#', quality: 'minor' });
     });
 
     it('parses Bbm', () => {
-      expect(parseChord('Bbm')).toEqual({ type: 'chord', root: 'Bb', quality: 'minor' });
+      expect(parseChord('Bbm')).toMatchObject({ type: 'chord', root: 'Bb', quality: 'minor' });
     });
   });
 
   describe('dominant seventh chords', () => {
     it('parses G7', () => {
-      expect(parseChord('G7')).toEqual({ type: 'chord', root: 'G', quality: 'dominant7' });
+      expect(parseChord('G7')).toMatchObject({ type: 'chord', root: 'G', quality: 'dominant7' });
     });
 
     it('parses Bb7', () => {
-      expect(parseChord('Bb7')).toEqual({ type: 'chord', root: 'Bb', quality: 'dominant7' });
+      expect(parseChord('Bb7')).toMatchObject({ type: 'chord', root: 'Bb', quality: 'dominant7' });
     });
 
     it('parses F#7', () => {
-      expect(parseChord('F#7')).toEqual({ type: 'chord', root: 'F#', quality: 'dominant7' });
+      expect(parseChord('F#7')).toMatchObject({ type: 'chord', root: 'F#', quality: 'dominant7' });
     });
   });
 
   describe('diminished chords', () => {
     it('parses Cdim', () => {
-      expect(parseChord('Cdim')).toEqual({ type: 'chord', root: 'C', quality: 'diminished' });
+      expect(parseChord('Cdim')).toMatchObject({ type: 'chord', root: 'C', quality: 'diminished' });
     });
 
     it('parses Bdim', () => {
-      expect(parseChord('Bdim')).toEqual({ type: 'chord', root: 'B', quality: 'diminished' });
+      expect(parseChord('Bdim')).toMatchObject({ type: 'chord', root: 'B', quality: 'diminished' });
     });
   });
 
   describe('maj7 chords', () => {
     it('parses Cmaj7', () => {
-      expect(parseChord('Cmaj7')).toEqual({ type: 'chord', root: 'C', quality: 'maj7' });
+      expect(parseChord('Cmaj7')).toMatchObject({ type: 'chord', root: 'C', quality: 'maj7' });
     });
 
     it('parses CM7 as maj7', () => {
-      expect(parseChord('CM7')).toEqual({ type: 'chord', root: 'C', quality: 'maj7' });
+      expect(parseChord('CM7')).toMatchObject({ type: 'chord', root: 'C', quality: 'maj7' });
     });
 
     it('parses Fmaj7', () => {
-      expect(parseChord('Fmaj7')).toEqual({ type: 'chord', root: 'F', quality: 'maj7' });
+      expect(parseChord('Fmaj7')).toMatchObject({ type: 'chord', root: 'F', quality: 'maj7' });
     });
   });
 
   describe('min7 chords', () => {
     it('parses Dm7', () => {
-      expect(parseChord('Dm7')).toEqual({ type: 'chord', root: 'D', quality: 'min7' });
+      expect(parseChord('Dm7')).toMatchObject({ type: 'chord', root: 'D', quality: 'min7' });
     });
 
     it('parses Am7', () => {
-      expect(parseChord('Am7')).toEqual({ type: 'chord', root: 'A', quality: 'min7' });
+      expect(parseChord('Am7')).toMatchObject({ type: 'chord', root: 'A', quality: 'min7' });
     });
 
     it('parses Bm7', () => {
-      expect(parseChord('Bm7')).toEqual({ type: 'chord', root: 'B', quality: 'min7' });
+      expect(parseChord('Bm7')).toMatchObject({ type: 'chord', root: 'B', quality: 'min7' });
     });
   });
 
   describe('dim7 chords', () => {
     it('parses Bdim7', () => {
-      expect(parseChord('Bdim7')).toEqual({ type: 'chord', root: 'B', quality: 'dim7' });
+      expect(parseChord('Bdim7')).toMatchObject({ type: 'chord', root: 'B', quality: 'dim7' });
     });
 
     it('parses G#dim7', () => {
-      expect(parseChord('G#dim7')).toEqual({ type: 'chord', root: 'G#', quality: 'dim7' });
+      expect(parseChord('G#dim7')).toMatchObject({ type: 'chord', root: 'G#', quality: 'dim7' });
     });
   });
 
   describe('dom7flat5 chords', () => {
     it('parses G7b5', () => {
-      expect(parseChord('G7b5')).toEqual({ type: 'chord', root: 'G', quality: 'dom7flat5' });
+      expect(parseChord('G7b5')).toMatchObject({ type: 'chord', root: 'G', quality: 'dom7flat5' });
     });
 
     it('parses F#7b5', () => {
-      expect(parseChord('F#7b5')).toEqual({ type: 'chord', root: 'F#', quality: 'dom7flat5' });
+      expect(parseChord('F#7b5')).toMatchObject({
+        type: 'chord',
+        root: 'F#',
+        quality: 'dom7flat5',
+      });
     });
   });
 
   describe('dash minor chords', () => {
     it('parses C- as min7', () => {
-      expect(parseChord('C-')).toEqual({ type: 'chord', root: 'C', quality: 'min7' });
+      expect(parseChord('C-')).toMatchObject({ type: 'chord', root: 'C', quality: 'min7' });
     });
 
     it('parses F#- as min7', () => {
-      expect(parseChord('F#-')).toEqual({ type: 'chord', root: 'F#', quality: 'min7' });
+      expect(parseChord('F#-')).toMatchObject({ type: 'chord', root: 'F#', quality: 'min7' });
     });
 
     it('parses Bb- as min7', () => {
-      expect(parseChord('Bb-')).toEqual({ type: 'chord', root: 'Bb', quality: 'min7' });
+      expect(parseChord('Bb-')).toMatchObject({ type: 'chord', root: 'Bb', quality: 'min7' });
     });
   });
 
@@ -123,7 +127,7 @@ describe('chord parsing', () => {
     const single = { kind: 'single' };
 
     it('parses | C |', () => {
-      expect(parseBar('| C |')).toEqual({
+      expect(parseBar('| C |')).toMatchObject({
         type: 'bar',
         slots: [{ type: 'chord', chord: cMajor }],
         closeBarline: single,
@@ -131,7 +135,7 @@ describe('chord parsing', () => {
     });
 
     it('parses | Am |', () => {
-      expect(parseBar('| Am |')).toEqual({
+      expect(parseBar('| Am |')).toMatchObject({
         type: 'bar',
         slots: [{ type: 'chord', chord: aMinor }],
         closeBarline: single,
@@ -139,7 +143,7 @@ describe('chord parsing', () => {
     });
 
     it('parses |C| with no spaces', () => {
-      expect(parseBar('|C|')).toEqual({
+      expect(parseBar('|C|')).toMatchObject({
         type: 'bar',
         slots: [{ type: 'chord', chord: cMajor }],
         closeBarline: single,
@@ -147,7 +151,7 @@ describe('chord parsing', () => {
     });
 
     it('parses |  G7  | with extra spaces', () => {
-      expect(parseBar('|  G7  |')).toEqual({
+      expect(parseBar('|  G7  |')).toMatchObject({
         type: 'bar',
         slots: [{ type: 'chord', chord: g7 }],
         closeBarline: single,
@@ -161,8 +165,8 @@ describe('chord parsing', () => {
     it('parses | C G | as two ChordSlots', () => {
       const bar = parseBar('| C G |');
       expect(bar.slots).toHaveLength(2);
-      expect(bar.slots[0]).toEqual({ type: 'chord', chord: cMajor });
-      expect(bar.slots[1]).toEqual({
+      expect(bar.slots[0]).toMatchObject({ type: 'chord', chord: cMajor });
+      expect(bar.slots[1]).toMatchObject({
         type: 'chord',
         chord: { type: 'chord', root: 'G', quality: 'major' },
       });
@@ -190,7 +194,7 @@ describe('chord parsing', () => {
       expect(song.sections).toHaveLength(1);
       expect(song.sections[0].label).toBeNull();
       expect(song.sections[0].rows).toHaveLength(1);
-      expect(song.sections[0].rows[0]).toEqual(
+      expect(song.sections[0].rows[0]).toMatchObject(
         row(bar('C', 'major'), bar('A', 'minor'), bar('F', 'major'), bar('G', 'major')),
       );
     });
@@ -228,7 +232,7 @@ describe('chord parsing', () => {
   describe('front matter parsing', () => {
     it('parses title and key', () => {
       const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G\n---\n');
-      expect(fm).toEqual({
+      expect(fm).toMatchObject({
         type: 'frontMatter',
         title: 'Autumn Leaves',
         key: 'G major',
@@ -238,17 +242,17 @@ describe('chord parsing', () => {
 
     it('parses title without key', () => {
       const fm = parseFrontMatter('---\ntitle: "My Song"\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: 'My Song', key: null, meter: null });
+      expect(fm).toMatchObject({ type: 'frontMatter', title: 'My Song', key: null, meter: null });
     });
 
     it('parses key without title', () => {
       const fm = parseFrontMatter('---\nkey: Bb\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: null, key: 'Bb major', meter: null });
+      expect(fm).toMatchObject({ type: 'frontMatter', title: null, key: 'Bb major', meter: null });
     });
 
     it('parses empty front matter', () => {
       const fm = parseFrontMatter('---\n---\n');
-      expect(fm).toEqual({ type: 'frontMatter', title: null, key: null, meter: null });
+      expect(fm).toMatchObject({ type: 'frontMatter', title: null, key: null, meter: null });
     });
 
     it('accepts all 17 valid key spellings and normalizes to canonical form', () => {
@@ -358,10 +362,10 @@ describe('chord parsing', () => {
       expect(row.type).toBe('row');
       expect(row.openBarline).toEqual({ kind: 'single' });
       expect(row.bars).toHaveLength(4);
-      expect(row.bars[0]).toEqual(bar('C', 'major'));
-      expect(row.bars[1]).toEqual(bar('A', 'minor'));
-      expect(row.bars[2]).toEqual(bar('F', 'major'));
-      expect(row.bars[3]).toEqual(bar('G', 'major'));
+      expect(row.bars[0]).toMatchObject(bar('C', 'major'));
+      expect(row.bars[1]).toMatchObject(bar('A', 'minor'));
+      expect(row.bars[2]).toMatchObject(bar('F', 'major'));
+      expect(row.bars[3]).toMatchObject(bar('G', 'major'));
     });
 
     it('parses a single-bar row', () => {
@@ -369,15 +373,15 @@ describe('chord parsing', () => {
       expect(row.type).toBe('row');
       expect(row.openBarline).toEqual({ kind: 'single' });
       expect(row.bars).toHaveLength(1);
-      expect(row.bars[0]).toEqual(bar('C', 'major'));
+      expect(row.bars[0]).toMatchObject(bar('C', 'major'));
     });
 
     it('parses chord qualities correctly across bars', () => {
       const row = parseRow('| G7 | C | Am | F |');
-      expect(row.bars[0]).toEqual(bar('G', 'dominant7'));
-      expect(row.bars[1]).toEqual(bar('C', 'major'));
-      expect(row.bars[2]).toEqual(bar('A', 'minor'));
-      expect(row.bars[3]).toEqual(bar('F', 'major'));
+      expect(row.bars[0]).toMatchObject(bar('G', 'dominant7'));
+      expect(row.bars[1]).toMatchObject(bar('C', 'major'));
+      expect(row.bars[2]).toMatchObject(bar('A', 'minor'));
+      expect(row.bars[3]).toMatchObject(bar('F', 'major'));
     });
 
     it('rejects a row not starting with |', () => {
@@ -391,15 +395,23 @@ describe('chord parsing', () => {
 
   describe('half-diminished chords', () => {
     it('parses Bm7b5', () => {
-      expect(parseChord('Bm7b5')).toEqual({ type: 'chord', root: 'B', quality: 'halfDiminished' });
+      expect(parseChord('Bm7b5')).toMatchObject({
+        type: 'chord',
+        root: 'B',
+        quality: 'halfDiminished',
+      });
     });
 
     it('parses Am7b5', () => {
-      expect(parseChord('Am7b5')).toEqual({ type: 'chord', root: 'A', quality: 'halfDiminished' });
+      expect(parseChord('Am7b5')).toMatchObject({
+        type: 'chord',
+        root: 'A',
+        quality: 'halfDiminished',
+      });
     });
 
     it('parses C#m7b5', () => {
-      expect(parseChord('C#m7b5')).toEqual({
+      expect(parseChord('C#m7b5')).toMatchObject({
         type: 'chord',
         root: 'C#',
         quality: 'halfDiminished',
@@ -412,7 +424,9 @@ describe('chord parsing', () => {
       const source = '# This is a comment\n| C | Am |\n';
       const song = parseSong(source);
       expect(song.sections[0].rows).toHaveLength(1);
-      expect(song.sections[0].preamble).toEqual([{ type: 'comment', text: '# This is a comment' }]);
+      expect(song.sections[0].preamble).toMatchObject([
+        { type: 'comment', text: '# This is a comment' },
+      ]);
       expect(song.sections[0].content).toHaveLength(1); // only the row
     });
 
@@ -422,7 +436,7 @@ describe('chord parsing', () => {
       expect(song.sections).toHaveLength(1);
       expect(song.sections[0].label).toBe('Verse');
       expect(song.sections[0].rows).toHaveLength(1);
-      expect(song.sections[0].preamble).toEqual([{ type: 'comment', text: '# intro' }]);
+      expect(song.sections[0].preamble).toMatchObject([{ type: 'comment', text: '# intro' }]);
     });
 
     it('stores a comment after a section label in content, not preamble', () => {
@@ -430,7 +444,10 @@ describe('chord parsing', () => {
       const song = parseSong(source);
       expect(song.sections[0].preamble).toEqual([]);
       expect(song.sections[0].content).toHaveLength(2);
-      expect(song.sections[0].content![0]).toEqual({ type: 'comment', text: '# after label' });
+      expect(song.sections[0].content![0]).toMatchObject({
+        type: 'comment',
+        text: '# after label',
+      });
     });
 
     it('preserves comment ordering between rows in content', () => {
@@ -438,17 +455,25 @@ describe('chord parsing', () => {
       const song = parseSong(source);
       expect(song.sections[0].rows).toHaveLength(2);
       expect(song.sections[0].content).toHaveLength(3);
-      expect(song.sections[0].content![1]).toEqual({ type: 'comment', text: '# between rows' });
+      expect(song.sections[0].content![1]).toMatchObject({
+        type: 'comment',
+        text: '# between rows',
+      });
     });
   });
 
   describe('slash chords', () => {
     it('parses F/C', () => {
-      expect(parseChord('F/C')).toEqual({ type: 'chord', root: 'F', quality: 'major', bass: 'C' });
+      expect(parseChord('F/C')).toMatchObject({
+        type: 'chord',
+        root: 'F',
+        quality: 'major',
+        bass: 'C',
+      });
     });
 
     it('parses F#/A#', () => {
-      expect(parseChord('F#/A#')).toEqual({
+      expect(parseChord('F#/A#')).toMatchObject({
         type: 'chord',
         root: 'F#',
         quality: 'major',
@@ -457,7 +482,7 @@ describe('chord parsing', () => {
     });
 
     it('parses C-/Bb (dash minor with slash bass)', () => {
-      expect(parseChord('C-/Bb')).toEqual({
+      expect(parseChord('C-/Bb')).toMatchObject({
         type: 'chord',
         root: 'C',
         quality: 'min7',
@@ -466,7 +491,7 @@ describe('chord parsing', () => {
     });
 
     it('parses G7/B', () => {
-      expect(parseChord('G7/B')).toEqual({
+      expect(parseChord('G7/B')).toMatchObject({
         type: 'chord',
         root: 'G',
         quality: 'dominant7',
@@ -475,7 +500,12 @@ describe('chord parsing', () => {
     });
 
     it('parses Am/C', () => {
-      expect(parseChord('Am/C')).toEqual({ type: 'chord', root: 'A', quality: 'minor', bass: 'C' });
+      expect(parseChord('Am/C')).toMatchObject({
+        type: 'chord',
+        root: 'A',
+        quality: 'minor',
+        bass: 'C',
+      });
     });
 
     it('does not include bass field for plain chords', () => {

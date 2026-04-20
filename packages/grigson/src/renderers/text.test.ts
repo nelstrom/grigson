@@ -5,6 +5,18 @@ import { TextRenderer } from './text.js';
 const renderer = new TextRenderer();
 const render = (source: string) => renderer.render(parseSong(source));
 
+function withoutLoc(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(withoutLoc);
+  if (obj && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as object)) {
+      if (k !== 'loc') result[k] = withoutLoc(v);
+    }
+    return result;
+  }
+  return obj;
+}
+
 describe('text renderer', () => {
   describe('front matter', () => {
     it('renders title and key in a --- block', () => {
@@ -66,7 +78,7 @@ describe('text renderer', () => {
       const source = '| Bm7b5 | E7 | Am |\n';
       const ast1 = parseSong(source);
       const ast2 = parseSong(render(source));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
   });
 
@@ -98,22 +110,22 @@ describe('text renderer', () => {
 
     it('round-trips diminished', () => {
       const source = '| Cdim |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('round-trips maj7', () => {
       const source = '| Cmaj7 |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('round-trips min7', () => {
       const source = '| Dm7 |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('round-trips dim7', () => {
       const source = '| Bdim7 |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('renders dom7flat5 chord with 7b5 suffix', () => {
@@ -123,7 +135,7 @@ describe('text renderer', () => {
 
     it('round-trips dom7flat5', () => {
       const source = '| G7b5 |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('renders C- as m7 (dash min7)', () => {
@@ -135,7 +147,7 @@ describe('text renderer', () => {
       // C- parses to min7, which renders as Cm7, which parses to the same AST
       const ast1 = parseSong('| C- |\n');
       const ast2 = parseSong(render('| C- |\n'));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
   });
 
@@ -157,17 +169,17 @@ describe('text renderer', () => {
 
     it('round-trips F/C', () => {
       const source = '| F/C |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('round-trips F#/A#', () => {
       const source = '| F#/A# |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
 
     it('round-trips G7/B', () => {
       const source = '| G7/B |\n';
-      expect(parseSong(render(source))).toEqual(parseSong(source));
+      expect(withoutLoc(parseSong(render(source)))).toEqual(withoutLoc(parseSong(source)));
     });
   });
 
@@ -177,14 +189,14 @@ describe('text renderer', () => {
         '---\ntitle: "Autumn Leaves"\nkey: G\n---\n| G7 | C | Am | F |\n| Dm | G7 | C | C |\n';
       const ast1 = parseSong(source);
       const ast2 = parseSong(render(source));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
 
     it('round-trip with no front matter', () => {
       const source = '| C | Am | F | G |\n';
       const ast1 = parseSong(source);
       const ast2 = parseSong(render(source));
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
 
     it('preserves comment lines through render', () => {
@@ -196,7 +208,7 @@ describe('text renderer', () => {
       expect(rendered).toContain('# between rows');
       const ast1 = parseSong(source);
       const ast2 = parseSong(rendered);
-      expect(ast2).toEqual(ast1);
+      expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
     });
   });
 });

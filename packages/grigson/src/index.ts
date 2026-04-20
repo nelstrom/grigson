@@ -18,6 +18,7 @@ export type {
   Barline,
   CommentLine,
   SectionItem,
+  SourceRange,
 } from './parser/parser.js';
 
 // Renderer

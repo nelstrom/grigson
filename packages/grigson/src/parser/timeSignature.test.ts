@@ -2,6 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { parseBar, parseRow, parseSong } from './parser.js';
 import { TextRenderer } from '../renderers/text.js';
 
+function withoutLoc(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(withoutLoc);
+  if (obj && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as object)) {
+      if (k !== 'loc') result[k] = withoutLoc(v);
+    }
+    return result;
+  }
+  return obj;
+}
+
 describe('time signature parsing', () => {
   it('parses (4/4) in a bar', () => {
     const bar = parseBar('| (4/4) C |');
@@ -47,7 +59,7 @@ describe('time signature parsing', () => {
       const song1 = parseSong(source);
       const rendered = renderer.render(song1);
       const song2 = parseSong(rendered);
-      expect(song2).toEqual(song1);
+      expect(withoutLoc(song2)).toEqual(withoutLoc(song1));
     });
   });
 });

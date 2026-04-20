@@ -16,6 +16,7 @@ export type {
   Barline,
   CommentLine,
   SectionItem,
+  SourceRange,
 } from './parser/parser.js';
 
 export type { GrigsonRenderer } from './renderers/text.js';

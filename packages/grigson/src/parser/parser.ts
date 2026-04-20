@@ -17,6 +17,7 @@ export type {
   Barline,
   CommentLine,
   SectionItem,
+  SourceRange,
 } from './types.js';
 
 export function parseChord(input: string): Chord {

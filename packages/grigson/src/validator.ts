@@ -36,8 +36,7 @@ function zeroRange(): DiagnosticRange {
 }
 
 function barRange(bar: Bar): DiagnosticRange {
-  const desc = Object.getOwnPropertyDescriptor(bar, '_sourceRange');
-  return (desc?.value as DiagnosticRange | undefined) ?? zeroRange();
+  return bar.loc ?? zeroRange();
 }
 
 function parseMeterString(meter: string | null): TimeSignature | null {
