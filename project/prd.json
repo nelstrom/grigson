@@ -2592,5 +2592,47 @@
       "Run `pnpm build` and manually verify the page in a dev server: tree renders, hover highlights source, URL round-trips, error state clears tree, playground link works"
     ],
     "passes": true
+  },
+  {
+    "id": "tonality-hint-grammar",
+    "category": "functional",
+    "description": "Add TonalityHint grammar rule, Bar.tonalityHints type, and parser tests",
+    "detail": "Add an inline `{Ab major}` / `{D dorian}` / `{}` / `{home}` tonality hint syntax to the Peggy grammar. Extract shared key-validation helpers (`isValidKey`, `normalizeKey`) into the `{{ }}` global initializer block, replacing duplicated inline logic in FrontMatter and SectionLabel. Add a `TonalityHint` grammar rule and a `BeatSlotItem` alternation so hints are parsed inline with beat slots but separated out into a `hints` array in the `BeatSlotList` action. Update `BarTail` to set `bar.tonalityHints` from that array. Add `TonalityHintItem` interface and `tonalityHints?` field to `Bar` in `types.ts`. Rebuild the grammar and add parser tests covering all valid hint forms, reset tokens, and rejection of invalid/shorthand forms. See project/plans/ast-explorer-with-harmony-analysis.md for full context.",
+    "steps": [
+      "In grammar.pegjs global initializer block, extract VALID_NOTES, VALID_SUFFIXES, isValidKey(), and normalizeKey() helpers; replace inline validation in FrontMatter and SectionLabel with calls to these helpers",
+      "Add TonalityHint and TonalityHintKey grammar rules after TimeSignatureToken",
+      "Rename BeatSlot alternation to BeatSlotItem and add TonalityHint as the first alternative",
+      "Rewrite BeatSlotList action to separate hints from slots using beforeSlotIndex; move the 'must contain a chord' check into BeatSlotList; update BarTail to destructure { slots, hints } and set bar.tonalityHints when hints.length > 0",
+      "Run: cd packages/grigson && pnpm run build:grammar",
+      "Add TonalityHintItem interface and tonalityHints? field to Bar in types.ts",
+      "Add parser tests: {D minor} at bar start, {Ab major} mid-bar, all valid modes, {} and {home} reset, rejection of {Hb major} / {Dm} / {D}, bar with both time sig and hint"
+    ]
+  },
+  {
+    "id": "analysed-song-implementation",
+    "category": "functional",
+    "description": "Implement AnalysedSong types, analyseSong(), and export from grigson package",
+    "detail": "Add `loc?` to `AnnotatedChord` (copying from `chord.loc`) in `harmonicAnalysis.ts`, updating both `annotate()` and the borrowed-chord branch. Define the full `AnalysedSong` family of types: `AnnotatedChordSlot`, `AnalysedBeatSlot`, `AnalysedBar`, `AnalysedRow`, `AnalysedSectionItem`, `AnalysedSection`, `AnalysedSong`. Implement `analyseSong(song)` and a private `analyseSection` helper that walks bars interleaving tonality hints with chord slots to build key regions, calls `analyseHarmony` per region, then reconstructs the full tree replacing `ChordSlot` with `AnnotatedChordSlot`. Export all new types and `analyseSong` from both `index.ts` and `index.browser.ts`. Add harmonic analysis tests covering `AnnotatedChord.loc`, tree structure of `analyseSong` output, per-section homeKey, hint override and persistence, `{}` / `{home}` reset, and section-boundary implicit reset. See project/plans/ast-explorer-with-harmony-analysis.md for full context.",
+    "steps": [
+      "Add loc?: SourceRange to AnnotatedChord interface; update annotate() and the borrowed-chord construction (~line 303) to copy chord.loc",
+      "Add AnnotatedChordSlot, AnalysedBeatSlot, AnalysedBar, AnalysedRow, AnalysedSectionItem, AnalysedSection, AnalysedSong interfaces to harmonicAnalysis.ts",
+      "Implement analyseSection(): walk bars collecting key regions split by tonality hints, call analyseHarmony per region, rebuild tree consuming AnnotatedChord entries in order",
+      "Implement analyseSong(song): map sections through analyseSection using song.key ?? 'C major' as fallback",
+      "Export analyseSong and all new types from index.ts and index.browser.ts",
+      "Add harmonic analysis tests for loc propagation, tree structure, per-section keys, hint override/persistence, reset tokens, and section-boundary isolation",
+      "Run: pnpm build && pnpm test"
+    ]
+  },
+  {
+    "id": "ast-explorer-analysed-mode",
+    "category": "functional",
+    "description": "Add Analysed AST mode toggle to the AST Explorer page",
+    "detail": "Add a `<select id=\"ast-mode\">` dropdown to the editor toolbar in `ast-explorer.njk` with options 'Parsed AST' and 'Analysed AST'. Update the `update()` function to call `grigson.analyseSong(ast)` when the analysed mode is selected, passing the result to JSONFormatter and buildLocMap instead of the raw AST. Wire a `change` event listener on the select to re-run `update()`. No changes to buildLocMap or the hover delegation are needed — AnnotatedChordSlot.loc is picked up automatically. See project/plans/ast-explorer-with-harmony-analysis.md for full context.",
+    "steps": [
+      "Add <select id=\"ast-mode\"> with 'Parsed AST' / 'Analysed AST' options to the editor toolbar in ast-explorer.njk",
+      "Update the update() function to branch on the select value: call grigson.analyseSong(ast) for 'analysed', otherwise use the raw AST",
+      "Add addEventListener('change', update) on the ast-mode select",
+      "Run pnpm build, start the dev server, and manually verify: toggle shows AnnotatedChordSlots; adding {Ab major} shows tonalityHints; hover highlights source ranges correctly"
+    ]
   }
 ]
