@@ -2554,5 +2554,41 @@
       "Update packages/grigson/README.md to document both new attributes with a short example showing the responsive layout pattern (bars-per-line for wide, max-bars-per-line for narrow)"
     ],
     "passes": true
+  },
+  {
+    "id": "parser-source-locations",
+    "category": "functional",
+    "description": "Add source locations to all AST nodes in the grigson parser",
+    "detail": "Extend the parser so every AST node carries an enumerable `loc?: SourceRange` property (0-based line/character, LSP-style). Add the `SourceRange` interface to `types.ts` and `loc?` to all node interfaces (Song, Section, Row, Bar, ChordSlot, DotSlot, Chord, FrontMatter, CommentLine). Add a `makeLoc` global-initializer helper to `grammar.pegjs` and call it in every relevant rule action; replace the existing non-enumerable `_sourceRange` on Bar nodes with the new `loc`. Track first/last item locs in the `SongBody` action to compute Section locs. Run `pnpm run build:grammar` to regenerate the parser. Update `validator.ts` to use `bar.loc` instead of `Object.getOwnPropertyDescriptor(bar, '_sourceRange')`. Update parser tests that use `toEqual` on AST nodes to use `toMatchObject` so the extra `loc` property is ignored. Export `SourceRange` from `src/index.ts` and `src/index.browser.ts`. See project/plans/ast-explorer.md for full context.",
+    "steps": [
+      "Add `SourceRange` interface and `loc?: SourceRange` fields to all node interfaces in `src/parser/types.ts`",
+      "Add a global initializer block with `makeLoc(l)` helper to the top of `src/parser/grammar.pegjs`",
+      "Add `loc: makeLoc(location())` to the return values of the Song, FrontMatter, Comment, SectionLabel, Row, BeatSlot, and Chord rules",
+      "Replace the `Object.defineProperty(_sourceRange …)` blocks in BarTail (both alternatives) and Bar with `bar.loc = makeLoc(location())`",
+      "Add section loc tracking to the SongBody action: record sectionStartLoc from the first item, update lastItemLoc on each item, assign loc when pushing each section",
+      "Run `pnpm run build:grammar` to regenerate `src/parser/generated.js` and `generated.d.ts`",
+      "Update `src/validator.ts`: replace the `barRange()` body with `return bar.loc ?? zeroRange()` and remove the now-unused `Object.getOwnPropertyDescriptor` call",
+      "Update parser test files (`parser.test.ts`, `beatSlot.test.ts`, `section.test.ts`, `simile.test.ts`, `examples.test.ts`) — replace `toEqual` with `toMatchObject` on assertions that compare AST node shapes",
+      "Add `SourceRange` to the export lists in `src/index.ts` and `src/index.browser.ts`",
+      "Run `pnpm build && pnpm test` from the repo root and confirm everything passes"
+    ]
+  },
+  {
+    "id": "ast-explorer-page",
+    "category": "functional",
+    "description": "Create the /ast-explorer/ page with Monaco editor, JSON tree view, and hover-to-highlight",
+    "detail": "Add a new `/ast-explorer/` page to the website. Install `json-formatter-js` as a dev dependency in `packages/website` and add passthrough copies for its JS and CSS in `.eleventy.js`. Create `content/ast-explorer.njk` with a two-column layout (Monaco editor left, AST tree right). Load the same Monaco + grigson language/theme setup as the playground; use LZ-String to serialise editor content into the URL hash as `#code/{compressed}` (same format as playground). On each editor change, call `grigson.parseSong()`, pass the result to `JSONFormatter`, and render the tree. After rendering, recursively walk the AST and the rendered DOM in tandem to attach `mouseover`/`mouseout` handlers to every element corresponding to a node with a `loc` property; on hover use `editor.deltaDecorations()` to highlight the source range. On parse error, clear the tree and show the error message. Add an AST Explorer link to the nav in `_includes/base.njk`. Add a dynamic \"View AST\" link to the playground's editor toolbar that opens `/ast-explorer/` with the same `#code/…` hash. See project/plans/ast-explorer.md for full context.",
+    "steps": [
+      "Add `json-formatter-js` to `packages/website/package.json` devDependencies and run `pnpm install`",
+      "Add passthrough copies for `json-formatter.min.js` and `json-formatter.css` to `.eleventy.js`",
+      "Create `content/ast-explorer.njk` with permalink `/ast-explorer/`, two-column layout, and the required `<script>`/`<link>` tags",
+      "Implement `readHash()` and Monaco editor initialisation (language registration, themes, options) — mirror the playground setup",
+      "Implement `update()`: parse with `grigson.parseSong()`, render tree with `JSONFormatter`, show parse errors",
+      "Implement `attachHoverHandlers(obj, containerEl)`: walk AST + DOM in tandem, attach `mouseover`/`mouseout` to nodes with `loc`, use `editor.deltaDecorations()` to highlight ranges",
+      "Implement `updateURL()`: debounced LZ-String compression into `history.replaceState` hash",
+      "Add the AST Explorer nav link to `_includes/base.njk`",
+      "Add a `#view-ast-link` anchor to the playground editor toolbar and update it inside `updateURL()` to carry the current hash",
+      "Run `pnpm build` and manually verify the page in a dev server: tree renders, hover highlights source, URL round-trips, error state clears tree, playground link works"
+    ]
   }
 ]
