@@ -10,20 +10,15 @@ A renderer is any object with a `render(song)` method. The method receives the p
 
 ```javascript
 class MyRenderer {
-  constructor(config = {}) {
-    this.config = config;
-  }
-
   render(song) {
     // Walk the song tree and produce output.
-    // song.meta        — front matter fields (title, artist, key, ...)
     // song.sections    — array of Section objects
-    //   section.name   — e.g. "Verse"
-    //   section.key    — key override for this section, if any
-    //   section.rows   — array of Row objects
+    //   section.label  — e.g. "Verse", or null
+    //   section.key    — key override for this section, or null
+    //   section.rows   — array of Row objects (chords only, no comment lines)
     //     row.bars     — array of Bar objects
-    //       bar.beats  — array of beat slots (chord or hold)
-    //       bar.type   — barline type at start of bar
+    //       bar.slots  — array of BeatSlots (chord or dot)
+    //       bar.closeBarline — closing barline descriptor
   }
 }
 ```
@@ -36,106 +31,144 @@ There are no required base classes or interfaces to extend. Any object that resp
 
 ### `Song`
 
-| Field      | Type        | Description              |
-| ---------- | ----------- | ------------------------ |
-| `meta`     | `SongMeta`  | Front matter fields      |
-| `sections` | `Section[]` | Ordered list of sections |
-
-### `SongMeta`
-
-| Field    | Type     | Description                         |
-| -------- | -------- | ----------------------------------- |
-| `title`  | `string` | Title from front matter             |
-| `artist` | `string` | Artist / composer from front matter |
-| `key`    | `string` | Global key from front matter        |
-| `tempo`  | `number` | Tempo in BPM                        |
-| `feel`   | `string` | e.g. `"swing"`, `"latin"`           |
+| Field      | Type                       | Description                                      |
+| ---------- | -------------------------- | ------------------------------------------------ |
+| `type`     | `'song'`                   | Discriminant                                     |
+| `title`    | `string \| null`           | Title from front matter                          |
+| `key`      | `string \| null`           | Global key from front matter (e.g. `"F# major"`) |
+| `meter`    | `string \| null`           | Meter from front matter (e.g. `"4/4"`, `"6/8"`)  |
+| `sections` | `Section[]`                | Ordered list of sections                         |
+| `loc`      | `SourceRange \| undefined` | Source location                                  |
 
 ### `Section`
 
-| Field  | Type    | Description                                        |
-| ------ | ------- | -------------------------------------------------- |
-| `name` | string  | Section label, e.g. `"A"`, `"Verse"`               |
-| `key`  | string  | Per-section key override (or inherited global key) |
-| `rows` | `Row[]` | Ordered list of rows                               |
+| Field      | Type                         | Description                                                                                                                                                                     |
+| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`     | `'section'`                  | Discriminant                                                                                                                                                                    |
+| `label`    | `string \| null`             | Section label (e.g. `"Verse"`), or `null` if there is no `[Label]` line                                                                                                         |
+| `key`      | `string \| null`             | Per-section key override, or `null`                                                                                                                                             |
+| `rows`     | `Row[]`                      | Rows only — comment lines excluded. Use this for rendering chords.                                                                                                              |
+| `preamble` | `CommentLine[] \| undefined` | Comment lines appearing _before_ the section label                                                                                                                              |
+| `content`  | `SectionItem[] \| undefined` | Rows and comment lines interleaved in document order, appearing _after_ the label. Use this when you need to faithfully reproduce the section (e.g. round-trip text rendering). |
+| `loc`      | `SourceRange \| undefined`   | Source location                                                                                                                                                                 |
+
+`rows` is a filtered view of `content` — the same rows in the same order, with comment lines removed. Most renderers should use `rows`; use `content` only when comment lines matter to your output.
 
 ### `Row`
 
-| Field  | Type    | Description          |
-| ------ | ------- | -------------------- |
-| `bars` | `Bar[]` | Ordered list of bars |
+| Field         | Type                       | Description                    |
+| ------------- | -------------------------- | ------------------------------ |
+| `type`        | `'row'`                    | Discriminant                   |
+| `openBarline` | `Barline`                  | The barline that opens the row |
+| `bars`        | `Bar[]`                    | Ordered list of bars           |
+| `loc`         | `SourceRange \| undefined` | Source location                |
 
 ### `Bar`
 
-| Field           | Type                 | Description                                            |
-| --------------- | -------------------- | ------------------------------------------------------ |
-| `type`          | `BarlineType`        | Barline type at the start of this bar                  |
-| `beats`         | `BeatSlot[]`         | Beat slots (chords and holds)                          |
-| `timeSignature` | `TimeSig\|undefined` | Explicit time signature annotation, if present         |
-| `volta`         | `string\|undefined`  | Volta bracket label, if this bar opens a volta bracket |
+| Field           | Type                         | Description                                                 |
+| --------------- | ---------------------------- | ----------------------------------------------------------- |
+| `type`          | `'bar'`                      | Discriminant                                                |
+| `slots`         | `BeatSlot[]`                 | Beat slots — at least one chord, optionally mixed with dots |
+| `timeSignature` | `TimeSignature \| undefined` | Explicit time signature annotation, if present              |
+| `closeBarline`  | `Barline`                    | The barline that closes this bar                            |
+| `loc`           | `SourceRange \| undefined`   | Source location                                             |
 
-### `BarlineType`
+### `Barline`
+
+| Field         | Type                  | Description                                     |
+| ------------- | --------------------- | ----------------------------------------------- |
+| `kind`        | `BarlineKind`         | Barline type                                    |
+| `repeatCount` | `number \| undefined` | Explicit repeat count (e.g. `x3`), if specified |
 
 ```typescript
-type BarlineType =
-  | 'single'      // |
-  | 'double'      // ||
-  | 'final'       // ||.
-  | 'startRepeat' // ||:
-  | 'endRepeat'   // :||
-  | 'endStartRepeat' // :||:
+type BarlineKind =
+  | 'single'               // |
+  | 'double'               // ||
+  | 'final'                // ||.
+  | 'startRepeat'          // ||:
+  | 'endRepeat'            // :||
+  | 'endRepeatStartRepeat' // :||:
 ```
 
 ### `BeatSlot`
 
 ```typescript
 type BeatSlot =
-  | { type: 'chord'; chord: Chord }
-  | { type: 'hold' }    // dot (.)
-  | { type: 'rest' }    // dash (-)
-  | { type: 'simile' }  // percent (%)
+  | { type: 'chord'; chord: Chord; loc?: SourceRange }
+  | { type: 'dot';               loc?: SourceRange }  // . — hold/sustain
 ```
 
 ### `Chord`
 
-| Field     | Type                | Description                                     |
-| --------- | ------------------- | ----------------------------------------------- |
-| `root`    | string              | Root note, e.g. `"C"`, `"Bb"`, `"F#"`           |
-| `quality` | `ChordQuality`      | Chord quality                                   |
-| `bass`    | `string\|undefined` | Bass note for slash chords, e.g. `"G"` in `C/G` |
+| Field     | Type                       | Description                                     |
+| --------- | -------------------------- | ----------------------------------------------- |
+| `type`    | `'chord'`                  | Discriminant                                    |
+| `root`    | `string`                   | Root note, e.g. `"C"`, `"Bb"`, `"F#"`           |
+| `quality` | `Quality`                  | Chord quality (see below)                       |
+| `bass`    | `string \| undefined`      | Bass note for slash chords, e.g. `"G"` in `C/G` |
+| `loc`     | `SourceRange \| undefined` | Source location                                 |
 
-### `ChordQuality`
+### `Quality`
 
 ```typescript
-type ChordQuality =
-  | 'major' | 'minor' | 'dominant7' | 'maj7' | 'min7'
-  | 'minMaj7' | 'halfDiminished' | 'diminished' | 'diminished7'
-  | 'augmented' | 'sus4' | 'add9'
-  | 'dominant9' | 'dominant11' | 'dominant13'
-  | 'maj9' | 'maj11' | 'maj13'
-  | 'min9' | 'min11' | 'min13'
-  // ... altered tensions
+type Quality =
+  | 'major'           //  (no suffix)
+  | 'minor'           // m
+  | 'dominant7'       // 7
+  | 'maj7'            // maj7 or M7
+  | 'min7'            // m7 or -
+  | 'dim7'            // dim7
+  | 'diminished'      // dim
+  | 'halfDiminished'  // m7b5
+  | 'dom7flat5'       // 7b5
+```
+
+### `TimeSignature`
+
+| Field         | Type     | Description                      |
+| ------------- | -------- | -------------------------------- |
+| `numerator`   | `number` | Top number, e.g. `6` in `6/8`    |
+| `denominator` | `number` | Bottom number, e.g. `8` in `6/8` |
+
+### `CommentLine`
+
+| Field  | Type                       | Description                                   |
+| ------ | -------------------------- | --------------------------------------------- |
+| `type` | `'comment'`                | Discriminant                                  |
+| `text` | `string`                   | Full comment text including the `#` character |
+| `loc`  | `SourceRange \| undefined` | Source location                               |
+
+### `SourceRange`
+
+All AST nodes carry an optional `loc` property with 0-based LSP-style positions.
+
+```typescript
+interface SourceRange {
+  start: { line: number; character: number };
+  end:   { line: number; character: number };
+}
 ```
 
 ---
 
 ## Custom element renderer
 
-To implement a custom renderer as a Web Component that works with `<grigson-chart>`, your element needs to implement the renderer contract:
+To implement a custom renderer as a Web Component that works with `<grigson-chart>`, implement the `GrigsonRendererElement` contract:
 
 ```typescript
 interface GrigsonRendererElement extends HTMLElement {
-  renderChart(song: Song): void;
+  renderChart(song: Song): Element;
 }
 ```
 
-`<grigson-chart>` calls `renderChart()` on **every** child element that has this method, and places all outputs into its shadow root in DOM order. If no child renderer is found, it falls back to `GrigsonHtmlRenderer` automatically.
+`<grigson-chart>` calls `renderChart()` on every child element that implements this method, and places the returned element into its shadow root in DOM order. If no child renderer is present, it falls back to `GrigsonHtmlRenderer` automatically.
 
 ```javascript
 class MyCustomRenderer extends HTMLElement {
   renderChart(song) {
-    const output = /* produce your output */;
-    this.setHTMLUnsafe(output);
+    const div = document.createElement('div');
+    // … populate div from song …
+    return div;
   }
 }
 
@@ -149,10 +182,17 @@ customElements.define('my-custom-renderer', MyCustomRenderer);
 </grigson-chart>
 ```
 
-When your element's configuration changes, dispatch a `grigson:renderer-update` event to trigger a re-render:
+When your element's configuration changes and `<grigson-chart>` should re-render, dispatch a `GrigsonRendererUpdateEvent`:
 
 ```javascript
-this.dispatchEvent(new CustomEvent('grigson:renderer-update', { bubbles: true }));
+import { GrigsonRendererUpdateEvent } from 'grigson';
+
+this.dispatchEvent(new GrigsonRendererUpdateEvent());
 ```
 
-See also the [`grigson generate-renderer`](/cli/#grigson-generate-renderer) CLI command, which scaffolds a complete renderer package with all required boilerplate.
+`<grigson-chart>` also dispatches events you can listen to:
+
+| Event                  | Class                     | When                                                                   |
+| ---------------------- | ------------------------- | ---------------------------------------------------------------------- |
+| `grigson:parse-error`  | `GrigsonParseErrorEvent`  | The chart source failed to parse; `event.error` holds the thrown value |
+| `grigson:render-error` | `GrigsonRenderErrorEvent` | `renderChart()` threw; `event.error` holds the thrown value            |
