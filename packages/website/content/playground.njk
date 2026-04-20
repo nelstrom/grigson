@@ -96,6 +96,7 @@ permalink: /playground/
   <div id="editor-section">
     <div id="editor-toolbar">
       <button id="format-btn" type="button">Format</button>
+      <a id="view-ast-link" href="{{ '/ast-explorer/' | url }}" style="font-size:0.85rem;">View AST</a>
       <span id="format-error" hidden></span>
     </div>
     <div id="input-editor"></div>
@@ -378,6 +379,8 @@ meter: 4/4
       monaco.editor.setTheme(getTheme());
     });
 
+    const viewAstLink = document.getElementById('view-ast-link');
+
     let urlTimer;
     function updateURL() {
       clearTimeout(urlTimer);
@@ -405,6 +408,7 @@ meter: 4/4
         const compressed = compressToEncodedURIComponent(editor.getValue());
         const query = params.toString() ? '?' + params.toString() : '';
         history.replaceState(null, '', query + '#code/' + compressed);
+        viewAstLink.href = '{{ '/ast-explorer/' | url }}' + '#code/' + compressed;
       }, 500);
     }
 

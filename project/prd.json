@@ -2590,6 +2590,7 @@
       "Add the AST Explorer nav link to `_includes/base.njk`",
       "Add a `#view-ast-link` anchor to the playground editor toolbar and update it inside `updateURL()` to carry the current hash",
       "Run `pnpm build` and manually verify the page in a dev server: tree renders, hover highlights source, URL round-trips, error state clears tree, playground link works"
-    ]
+    ],
+    "passes": true
   }
 ]

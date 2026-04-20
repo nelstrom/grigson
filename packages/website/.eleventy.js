@@ -97,6 +97,8 @@ export default async function (eleventyConfig) {
     'node_modules/monaco-editor/min/vs': 'js/monaco/vs',
     'node_modules/vscode-oniguruma/release/onig.wasm': 'js/onig.wasm',
     'node_modules/lz-string/libs/lz-string.min.js': 'js/lz-string.min.js',
+    'node_modules/json-formatter-js/dist/json-formatter.umd.js': 'js/json-formatter.umd.js',
+    'node_modules/json-formatter-js/dist/json-formatter.css': 'js/json-formatter.css',
   });
 
   return {

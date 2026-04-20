@@ -721,3 +721,6 @@ Updated test files to use `toMatchObject` (instead of `toEqual`) for assertions 
 Exported `SourceRange` from `src/parser/parser.ts`, `src/index.ts`, and `src/index.browser.ts`.
 
 All 610 tests pass.
+
+## ast-explorer-page
+Added `/ast-explorer/` page to the website. Installed `json-formatter-js@2.5.23` as a dev dependency in `packages/website` and added passthrough copies for `json-formatter.umd.js` and `json-formatter.css` in `.eleventy.js`. Created `content/ast-explorer.njk` with a two-column layout (Monaco editor left, AST tree right) using the same language/theme/LZ-String setup as the playground. Hover-to-highlight uses event delegation: `buildLocMap()` walks the AST once to build a path→loc map, `JSONFormatter` is configured with `exposePath: true` so every row gets a `data-path` attribute (including lazily-expanded rows), and a single `mouseover` listener on the tree container calls `findLoc()` which walks up path segments to find the nearest ancestor with a loc. Added AST Explorer link to the nav in `_includes/base.njk` and a dynamic "View AST" link to the playground toolbar that carries the current `#code/…` hash.

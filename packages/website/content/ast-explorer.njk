@@ -1,0 +1,259 @@
+---
+layout: base.njk
+title: AST Explorer
+permalink: /ast-explorer/
+---
+
+<h1>AST Explorer</h1>
+
+<p>Type or paste a chord chart below. Hover a node in the tree to highlight its source range in the editor.</p>
+
+<link rel="stylesheet" href="{{ '/js/json-formatter.css' | url }}">
+
+<style>
+  #ast-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  #ast-editor-section {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+  }
+  #ast-input-editor {
+    flex: 1;
+    border: 1px solid var(--color-border);
+    min-height: 0;
+  }
+  #ast-tree-section {
+    overflow: auto;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-bg);
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  #ast-tree-section .error {
+    color: var(--color-error);
+    white-space: pre-wrap;
+  }
+  .ast-source-highlight {
+    background: color-mix(in srgb, var(--color-link) 20%, transparent);
+  }
+  @media (min-width: 800px) {
+    #ast-container {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1.5rem;
+      height: calc(100vh - 10rem);
+    }
+    #ast-editor-section {
+      flex: 1;
+      position: sticky;
+      top: 1rem;
+      height: calc(100vh - 6rem);
+    }
+    #ast-tree-section {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      overflow: auto;
+    }
+  }
+</style>
+
+<div id="ast-container">
+  <div id="ast-editor-section">
+    <div id="ast-input-editor"></div>
+  </div>
+  <div id="ast-tree-section">
+    <div id="ast-tree"></div>
+  </div>
+</div>
+
+<script src="{{ '/js/lz-string.min.js' | url }}"></script>
+<script src="{{ '/js/json-formatter.umd.js' | url }}"></script>
+<script src="{{ '/assets/js/grigson-monarch.js' | url }}"></script>
+<script src="{{ '/js/monaco/vs/loader.js' | url }}"></script>
+<script type="module">
+  const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = LZString;
+
+  require.config({ paths: { 'vs': '{{ '/js/monaco/vs' | url }}' } });
+
+  require(['vs/editor/editor.main'], function () {
+    const DEFAULT_VALUE = `---
+title: "Demo chart"
+key: F# major
+meter: 4/4
+---
+
+# This is a comment line
+| F# | B | C#7 | D#m |
+| G#m | C#7 | F# | Bm7b5 |
+| A Bb | C7 Dm | Em7b5 F | G Am G7 . |
+| Cmaj7  | Bdim7 Am7 | Fmaj7 | Cmaj7 |
+| G7b5 | F#7b5 | Cm7 | Bbm7 |
+||: C | F :||: G | C :||
+| F/C | Am/E | Cm7/Bb | G/B ||.
+`;
+
+    function readHash() {
+      const hash = location.hash;
+      if (hash.startsWith('#code/')) {
+        const encoded = hash.slice('#code/'.length);
+        return decompressFromEncodedURIComponent(encoded) ?? DEFAULT_VALUE;
+      }
+      return DEFAULT_VALUE;
+    }
+
+    monaco.languages.register({ id: 'grigson' });
+    monaco.languages.setMonarchTokensProvider('grigson', window.grigsonMonarchTokens);
+
+    monaco.editor.defineTheme('grigson-light', {
+      base: 'vs',
+      inherit: true,
+      rules: [
+        { token: 'punctuation.definition.header.grigson', foreground: 'A0A1A7' },
+        { token: 'variable.parameter.key.grigson', foreground: 'E45649', fontStyle: 'bold' },
+        { token: 'punctuation.separator.key-value.grigson', foreground: '404040' },
+        { token: 'string.quoted.double.grigson', foreground: '50A14F' },
+        { token: 'string.unquoted.grigson', foreground: '50A14F' },
+        { token: 'punctuation.definition.barline.grigson', foreground: 'A0A1A7', fontStyle: 'bold' },
+        { token: 'constant.other.chord.root.grigson', foreground: '4078F2', fontStyle: 'bold' },
+        { token: 'constant.other.chord.accidental.grigson', foreground: '4078F2' },
+        { token: 'keyword.other.chord.quality.grigson', foreground: '986801' },
+      ],
+      colors: { 'editor.background': '#FAFAFA' },
+    });
+
+    monaco.editor.defineTheme('grigson-dark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'punctuation.definition.header.grigson', foreground: '6A737D' },
+        { token: 'variable.parameter.key.grigson', foreground: 'F97583', fontStyle: 'bold' },
+        { token: 'punctuation.separator.key-value.grigson', foreground: '9ECBFF' },
+        { token: 'string.quoted.double.grigson', foreground: '85E89D' },
+        { token: 'string.unquoted.grigson', foreground: '85E89D' },
+        { token: 'punctuation.definition.barline.grigson', foreground: '6A737D', fontStyle: 'bold' },
+        { token: 'constant.other.chord.root.grigson', foreground: '79B8FF', fontStyle: 'bold' },
+        { token: 'constant.other.chord.accidental.grigson', foreground: '79B8FF' },
+        { token: 'keyword.other.chord.quality.grigson', foreground: 'FFAB70' },
+      ],
+      colors: { 'editor.background': '#1E1E1E' },
+    });
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const getTheme = () => prefersDark.matches ? 'grigson-dark' : 'grigson-light';
+
+    const editor = monaco.editor.create(document.getElementById('ast-input-editor'), {
+      value: readHash(),
+      language: 'grigson',
+      theme: getTheme(),
+      minimap: { enabled: false },
+      automaticLayout: true,
+      fontSize: 14,
+      fontFamily: 'monospace',
+    });
+
+    prefersDark.addEventListener('change', () => {
+      monaco.editor.setTheme(getTheme());
+      update();
+    });
+
+    const treeEl = document.getElementById('ast-tree');
+    let currentDecorations = [];
+    let currentLocMap = {};
+
+    function highlightRange(loc) {
+      currentDecorations = editor.deltaDecorations(currentDecorations, [{
+        range: new monaco.Range(
+          loc.start.line + 1,
+          loc.start.character + 1,
+          loc.end.line + 1,
+          loc.end.character + 1,
+        ),
+        options: {
+          className: 'ast-source-highlight',
+          isWholeLine: false,
+        },
+      }]);
+    }
+
+    function clearHighlight() {
+      currentDecorations = editor.deltaDecorations(currentDecorations, []);
+    }
+
+    // Build a map from JSON path (stringified array) → loc for every AST node that has one.
+    // json-formatter stamps data-path on every row when exposePath:true, so this map
+    // works for both initially-rendered and lazily-expanded rows.
+    function buildLocMap(obj, path, map) {
+      if (typeof obj !== 'object' || obj === null) return;
+      if (obj.loc) map[JSON.stringify(path)] = obj.loc;
+      if (Array.isArray(obj)) {
+        obj.forEach((item, i) => buildLocMap(item, path.concat(String(i)), map));
+      } else {
+        for (const key of Object.keys(obj)) {
+          if (key !== 'loc') buildLocMap(obj[key], path.concat(key), map);
+        }
+      }
+    }
+
+    // Walk up the path segments to find the nearest ancestor with a loc.
+    function findLoc(path, map) {
+      for (let i = path.length; i >= 0; i--) {
+        const loc = map[JSON.stringify(path.slice(0, i))];
+        if (loc) return loc;
+      }
+      return null;
+    }
+
+    // Single delegated listener — works for lazily-added rows too because
+    // json-formatter stamps data-path on every row via exposePath:true.
+    treeEl.addEventListener('mouseover', (e) => {
+      const row = e.target.closest('.json-formatter-row[data-path]');
+      if (!row) { clearHighlight(); return; }
+      const path = JSON.parse(row.dataset.path);
+      const loc = findLoc(path, currentLocMap);
+      if (loc) highlightRange(loc);
+      else clearHighlight();
+    });
+
+    treeEl.addEventListener('mouseout', (e) => {
+      if (!treeEl.contains(e.relatedTarget)) clearHighlight();
+    });
+
+    function update() {
+      updateURL();
+      try {
+        const ast = grigson.parseSong(editor.getValue());
+        currentLocMap = {};
+        buildLocMap(ast, [], currentLocMap);
+        const formatter = new JSONFormatter(ast, 2, {
+          hoverPreviewEnabled: false,
+          animateOpen: false,
+          animateClose: false,
+          exposePath: true,
+          theme: prefersDark.matches ? 'dark' : null,
+        });
+        treeEl.setHTMLUnsafe('');
+        treeEl.appendChild(formatter.render());
+      } catch (err) {
+        currentLocMap = {};
+        treeEl.setHTMLUnsafe(`<span class="error">${err.message}</span>`);
+      }
+    }
+
+    let urlTimer;
+    function updateURL() {
+      clearTimeout(urlTimer);
+      urlTimer = setTimeout(() => {
+        const compressed = compressToEncodedURIComponent(editor.getValue());
+        history.replaceState(null, '', '#code/' + compressed);
+      }, 500);
+    }
+
+    editor.onDidChangeModelContent(update);
+    update();
+  });
+</script>
