@@ -1,6 +1,21 @@
 import { KEYS, diatonicNotes, getKeyMode, getKeyRoot, getRelativeMajor } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
-import type { Chord } from '../parser/types.js';
+import type {
+  Chord,
+  Song,
+  Section,
+  Bar,
+  BeatSlot,
+  ChordSlot,
+  DotSlot,
+  Row,
+  CommentLine,
+  SectionItem,
+  TonalityHintItem,
+  TimeSignature,
+  Barline,
+  SourceRange,
+} from '../parser/types.js';
 
 // Circle-of-fifths positions indexed by major key root pitch class
 const COF_POSITIONS: Readonly<Record<number, number>> = {
@@ -50,6 +65,52 @@ export interface AnnotatedChord {
   homeKey: string;
   currentKey: string;
   currentKeyCandidates: string[];
+  loc?: SourceRange;
+}
+
+export interface AnnotatedChordSlot {
+  type: 'chord';
+  chord: AnnotatedChord;
+  loc?: SourceRange;
+}
+
+export type AnalysedBeatSlot = AnnotatedChordSlot | DotSlot;
+
+export interface AnalysedBar {
+  type: 'bar';
+  slots: AnalysedBeatSlot[];
+  timeSignature?: TimeSignature;
+  tonalityHints?: TonalityHintItem[];
+  closeBarline: Barline;
+  loc?: SourceRange;
+}
+
+export interface AnalysedRow {
+  type: 'row';
+  openBarline: Barline;
+  bars: AnalysedBar[];
+  loc?: SourceRange;
+}
+
+export type AnalysedSectionItem = AnalysedRow | CommentLine;
+
+export interface AnalysedSection {
+  type: 'section';
+  label: string | null;
+  key: string | null;
+  rows: AnalysedRow[];
+  preamble?: CommentLine[];
+  content?: AnalysedSectionItem[];
+  loc?: SourceRange;
+}
+
+export interface AnalysedSong {
+  type: 'song';
+  title: string | null;
+  key: string | null;
+  meter: string | null;
+  sections: AnalysedSection[];
+  loc?: SourceRange;
 }
 
 // Build lookup maps: pitch class → key name (major, minor, dorian, aeolian, mixolydian separately)
@@ -121,7 +182,7 @@ function resolveKey(tonicPC: number, iChordIsMinor: boolean): string | null {
 }
 
 function annotate(chord: Chord, homeKey: string, currentKey: string): AnnotatedChord {
-  return { chord, homeKey, currentKey, currentKeyCandidates: [currentKey] };
+  return { chord, homeKey, currentKey, currentKeyCandidates: [currentKey], loc: chord.loc };
 }
 
 /**
@@ -305,6 +366,7 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
           homeKey,
           currentKey: pickedKey,
           currentKeyCandidates: closestCandidates,
+          loc: chord.loc,
         });
         i += 1;
         continue;
@@ -317,4 +379,139 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
   }
 
   return result;
+}
+
+function analyseSection(section: Section, songKey: string): AnalysedSection {
+  const homeKey = section.key ?? songKey;
+
+  // Collect all chords and tonality hints from the section in order,
+  // split into key regions by tonality hints.
+  interface Region {
+    key: string;
+    chords: Chord[];
+  }
+
+  const regions: Region[] = [];
+  let currentRegionKey = homeKey;
+  let currentRegionChords: Chord[] = [];
+
+  const flushRegion = () => {
+    if (currentRegionChords.length > 0) {
+      regions.push({ key: currentRegionKey, chords: currentRegionChords });
+      currentRegionChords = [];
+    }
+  };
+
+  // Walk all rows/bars/slots, interleaving tonality hints
+  const rows = section.rows;
+  for (const row of rows) {
+    for (const bar of row.bars) {
+      // Build an ordered list of events: hints and chord slots interleaved by beforeSlotIndex
+      const hints = bar.tonalityHints ?? [];
+      let hintIdx = 0;
+      let slotIdx = 0;
+
+      // Process hints that come before all slots (beforeSlotIndex === 0) first
+      for (const slot of bar.slots) {
+        // Emit any hints that fire before this slot index
+        while (hintIdx < hints.length && hints[hintIdx].beforeSlotIndex <= slotIdx) {
+          flushRegion();
+          currentRegionKey = hints[hintIdx].key || homeKey;
+          hintIdx++;
+        }
+
+        if (slot.type === 'chord') {
+          currentRegionChords.push(slot.chord);
+        }
+        slotIdx++;
+      }
+
+      // Emit remaining hints after all slots
+      while (hintIdx < hints.length) {
+        flushRegion();
+        currentRegionKey = hints[hintIdx].key || homeKey;
+        hintIdx++;
+      }
+    }
+  }
+
+  flushRegion();
+
+  // Run analyseHarmony per region and concatenate results
+  const allAnnotated: AnnotatedChord[] = [];
+  for (const region of regions) {
+    const annotated = analyseHarmony(region.chords, region.key);
+    allAnnotated.push(...annotated);
+  }
+
+  // Rebuild tree structure consuming annotated chords in order
+  let annotatedIdx = 0;
+
+  const buildBar = (bar: Bar): AnalysedBar => {
+    const analysedSlots: AnalysedBeatSlot[] = bar.slots.map((slot) => {
+      if (slot.type === 'chord') {
+        const annotatedChord = allAnnotated[annotatedIdx++];
+        const analysedSlot: AnnotatedChordSlot = {
+          type: 'chord',
+          chord: annotatedChord,
+          loc: slot.loc,
+        };
+        return analysedSlot;
+      } else {
+        return slot as DotSlot;
+      }
+    });
+
+    return {
+      type: 'bar',
+      slots: analysedSlots,
+      ...(bar.timeSignature !== undefined ? { timeSignature: bar.timeSignature } : {}),
+      ...(bar.tonalityHints !== undefined ? { tonalityHints: bar.tonalityHints } : {}),
+      closeBarline: bar.closeBarline,
+      ...(bar.loc !== undefined ? { loc: bar.loc } : {}),
+    };
+  };
+
+  const buildRow = (row: Row): AnalysedRow => ({
+    type: 'row',
+    openBarline: row.openBarline,
+    bars: row.bars.map(buildBar),
+    ...(row.loc !== undefined ? { loc: row.loc } : {}),
+  });
+
+  const analysedRows = rows.map(buildRow);
+
+  const analysedContent: AnalysedSectionItem[] | undefined = section.content?.map(
+    (item: SectionItem) => {
+      if (item.type === 'row') {
+        // Find the corresponding analysed row by matching reference
+        const rowIndex = rows.indexOf(item);
+        return analysedRows[rowIndex];
+      }
+      return item as CommentLine;
+    },
+  );
+
+  return {
+    type: 'section',
+    label: section.label,
+    key: section.key,
+    rows: analysedRows,
+    ...(section.preamble !== undefined ? { preamble: section.preamble } : {}),
+    ...(analysedContent !== undefined ? { content: analysedContent } : {}),
+    ...(section.loc !== undefined ? { loc: section.loc } : {}),
+  };
+}
+
+export function analyseSong(song: Song): AnalysedSong {
+  const songKey = song.key ?? 'C major';
+  const sections = song.sections.map((sec) => analyseSection(sec, songKey));
+  return {
+    type: 'song',
+    title: song.title,
+    key: song.key,
+    meter: song.meter,
+    sections,
+    ...(song.loc !== undefined ? { loc: song.loc } : {}),
+  };
 }

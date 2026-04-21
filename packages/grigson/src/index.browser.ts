@@ -34,6 +34,18 @@ export {
   GrigsonRenderErrorEvent,
 } from './events.js';
 
+export { analyseSong } from './theory/harmonicAnalysis.js';
+export type {
+  AnnotatedChord,
+  AnnotatedChordSlot,
+  AnalysedBeatSlot,
+  AnalysedBar,
+  AnalysedRow,
+  AnalysedSectionItem,
+  AnalysedSection,
+  AnalysedSong,
+} from './theory/harmonicAnalysis.js';
+
 export { normaliseSong, normaliseSection } from './theory/normalise.js';
 export type { DetectKeyConfig } from './theory/keyDetector.js';
 

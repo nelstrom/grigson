@@ -47,8 +47,17 @@ export {
 } from './theory/keys.js';
 export type { KeyMode, ScaleFamily } from './theory/keys.js';
 export { rootToPitchClass, ENHARMONIC_PAIRS } from './theory/pitchClass.js';
-export { analyseHarmony, circleOfFifthsDistance } from './theory/harmonicAnalysis.js';
-export type { AnnotatedChord } from './theory/harmonicAnalysis.js';
+export { analyseHarmony, circleOfFifthsDistance, analyseSong } from './theory/harmonicAnalysis.js';
+export type {
+  AnnotatedChord,
+  AnnotatedChordSlot,
+  AnalysedBeatSlot,
+  AnalysedBar,
+  AnalysedRow,
+  AnalysedSectionItem,
+  AnalysedSection,
+  AnalysedSong,
+} from './theory/harmonicAnalysis.js';
 
 // Validator
 export { validate } from './validator.js';

@@ -2622,7 +2622,8 @@
       "Export analyseSong and all new types from index.ts and index.browser.ts",
       "Add harmonic analysis tests for loc propagation, tree structure, per-section keys, hint override/persistence, reset tokens, and section-boundary isolation",
       "Run: pnpm build && pnpm test"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "ast-explorer-analysed-mode",

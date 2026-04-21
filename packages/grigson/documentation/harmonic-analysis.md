@@ -20,6 +20,7 @@ interface AnnotatedChord {
   homeKey: string;           // The key of the enclosing section
   currentKey: string;        // The inferred local key at this chord
   currentKeyCandidates: string[]; // All candidate keys (closest first)
+  loc?: SourceRange;         // Source location — mirrors chord.loc
 }
 ```
 
@@ -151,3 +152,85 @@ circleOfFifthsDistance('C', 'Dm');  // 1  (Dm is relative of F)
 ```
 
 Minor, dorian, aeolian, and mixolydian keys are all mapped to their relative (parent) major before computing the distance, so keys in the same scale family have distance 0 from each other.
+
+---
+
+## `analyseSong`
+
+`analyseSong` produces a structured `AnalysedSong` that mirrors the parsed `Song` tree but with `AnnotatedChord` at the chord leaves. It respects per-section keys and inline tonality hints.
+
+```typescript
+import { parseSong, analyseSong, type AnalysedSong } from 'grigson';
+
+const song = parseSong(source);
+const analysed: AnalysedSong = analyseSong(song);
+```
+
+### `AnalysedSong` family
+
+```typescript
+interface AnnotatedChordSlot {
+  type: 'chord';
+  chord: AnnotatedChord;   // fully annotated — includes homeKey, currentKey, loc
+  loc?: SourceRange;
+}
+
+type AnalysedBeatSlot = AnnotatedChordSlot | DotSlot;
+
+interface AnalysedBar {
+  type: 'bar';
+  slots: AnalysedBeatSlot[];
+  timeSignature?: TimeSignature;
+  tonalityHints?: TonalityHintItem[];
+  closeBarline: Barline;
+  loc?: SourceRange;
+}
+
+interface AnalysedRow {
+  type: 'row';
+  openBarline: Barline;
+  bars: AnalysedBar[];
+  loc?: SourceRange;
+}
+
+type AnalysedSectionItem = AnalysedRow | CommentLine;
+
+interface AnalysedSection {
+  type: 'section';
+  label: string | null;
+  key: string | null;
+  rows: AnalysedRow[];
+  preamble?: CommentLine[];
+  content?: AnalysedSectionItem[];
+  loc?: SourceRange;
+}
+
+interface AnalysedSong {
+  type: 'song';
+  title: string | null;
+  key: string | null;
+  meter: string | null;
+  sections: AnalysedSection[];
+  loc?: SourceRange;
+}
+```
+
+### Key resolution in `analyseSong`
+
+- Each section uses `section.key ?? song.key ?? 'C major'` as its `homeKey`.
+- Inline tonality hints (`bar.tonalityHints`) split the chord stream into key regions. Each region is analysed independently with `analyseHarmony`.
+- A hint with `key: ''` (produced by `{}` or `{home}` in the source) resets the region key to the section home key.
+- Section boundaries are always an implicit reset — a tonality hint from one section never affects the next.
+
+### Tonality hints
+
+Tonality hints appear as `TonalityHintItem` entries on `Bar.tonalityHints`. The `beforeSlotIndex` field records which chord slot in the bar the hint precedes, enabling correct key-region splitting.
+
+```
+{Ab major} C Am | F G
+ ↑
+ hint before slot 0 → C and Am analysed in Ab major
+ F and G (next bar, no hint) → same Ab major region continues
+```
+
+A hint persists until the next hint or the end of the section.
