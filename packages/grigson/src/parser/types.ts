@@ -61,10 +61,17 @@ export interface Barline {
   repeatCount?: number;
 }
 
+export interface TonalityHintItem {
+  beforeSlotIndex: number;
+  key: string;
+  loc?: SourceRange;
+}
+
 export interface Bar {
   type: 'bar';
   slots: BeatSlot[];
   timeSignature?: TimeSignature;
+  tonalityHints?: TonalityHintItem[];
   closeBarline: Barline;
   loc?: SourceRange;
 }

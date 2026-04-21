@@ -9,6 +9,20 @@
       end:   { line: l.end.line - 1,   character: l.end.column - 1   },
     };
   }
+
+  const VALID_NOTES = ["C#","Db","D#","Eb","F#","Gb","G#","Ab","A#","Bb","C","D","E","F","G","A","B"];
+  const VALID_SUFFIXES = ["m"," dorian"," aeolian"," mixolydian"," major"," minor"," ionian",""];
+
+  function isValidKey(k) {
+    return VALID_NOTES.some(n => VALID_SUFFIXES.some(s => k === n + s));
+  }
+
+  function normalizeKey(k) {
+    if (k.endsWith(' ionian')) return k.slice(0, -7) + ' major';
+    if (k.includes(' ')) return k;
+    if (k.endsWith('m')) return k.slice(0, -1) + ' minor';
+    return k + ' major';
+  }
 }}
 
 Song
@@ -93,13 +107,8 @@ SongBody
 
 SectionLabel
   = "[" label:$[^\]\r\n]+ "]" _ key:("key" _ ":" _ value:FrontMatterValue { return value; })? _ Newline? {
-      if (key !== null) {
-        const validNotes = ["C#","Db","D#","Eb","F#","Gb","G#","Ab","A#","Bb","C","D","E","F","G","A","B"];
-        const validKeySuffixes = ["m"," dorian"," aeolian"," mixolydian"," major"," minor"," ionian",""];
-        const isValidKey = (k) => validNotes.some((n) => validKeySuffixes.some((s) => k === n + s));
-        if (!isValidKey(key)) {
-          error(`Invalid key: "${key}".`);
-        }
+      if (key !== null && !isValidKey(key)) {
+        error(`Invalid key: "${key}".`);
       }
       return { type: "sectionLabel", label: label.trim(), key: key ?? null, loc: makeLoc(location()) };
     }
@@ -108,22 +117,9 @@ FrontMatter
   = "---" Newline fields:FrontMatterField* "---" Newline? {
       const meta = Object.fromEntries(fields.map(f => [f.key, f.value]));
 
-      const validNotes = [
-        "C#", "Db", "D#", "Eb", "F#", "Gb", "G#", "Ab", "A#", "Bb",
-        "C", "D", "E", "F", "G", "A", "B",
-      ];
-      const validKeySuffixes = ["m", " dorian", " aeolian", " mixolydian", " major", " minor", " ionian", ""];
-      const isValidKey = (k) =>
-        validNotes.some((n) => validKeySuffixes.some((s) => k === n + s));
       if (meta.key !== undefined && !isValidKey(meta.key)) {
         error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian, C major, A minor).`);
       }
-      const normalizeKey = (k) => {
-        if (k.endsWith(' ionian')) return k.slice(0, -7) + ' major';
-        if (k.includes(' ')) return k; // dorian/aeolian/mixolydian/major/minor — already canonical
-        if (k.endsWith('m')) return k.slice(0, -1) + ' minor';
-        return k + ' major';
-      };
 
       const isValidMeter = (m) => m === 'mixed' || /^[0-9]+\/[0-9]+$/.test(m);
       if (meta.meter !== undefined && !isValidMeter(meta.meter)) {
@@ -166,12 +162,11 @@ Row
 // A bar's content plus its closing barline.
 // The opening barline is consumed by Row (or the previous BarTail).
 BarTail
-  = ts:TimeSignatureToken? slots:BeatSlotList close:CloseBarline _ {
-      if (!slots.some(s => s.type === "chord")) {
-        error("A bar must contain at least one chord");
-      }
+  = ts:TimeSignatureToken? result:BeatSlotList close:CloseBarline _ {
+      const { slots, hints } = result;
       const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
+      if (hints.length > 0) bar.tonalityHints = hints;
       bar.loc = makeLoc(location());
       return bar;
     }
@@ -183,12 +178,11 @@ BarTail
     }
 
 Bar
-  = open:OpenBarline _ ts:TimeSignatureToken? slots:BeatSlotList close:CloseBarline {
-      if (!slots.some(s => s.type === "chord")) {
-        error("A bar must contain at least one chord");
-      }
+  = open:OpenBarline _ ts:TimeSignatureToken? result:BeatSlotList close:CloseBarline {
+      const { slots, hints } = result;
       const bar = { type: "bar", slots, closeBarline: close };
       if (ts) bar.timeSignature = ts;
+      if (hints.length > 0) bar.tonalityHints = hints;
       bar.loc = makeLoc(location());
       return bar;
     }
@@ -213,9 +207,27 @@ CloseBarline
   / "|"                   { return { kind: "single" }; }
 
 BeatSlotList
-  = first:(_ BeatSlot) rest:(_ BeatSlot)* _ {
-      return [first[1], ...rest.map(([, s]) => s)];
+  = items:(_ BeatSlotItem)+ _ {
+      const slots = [];
+      const hints = [];
+      let slotIdx = 0;
+      for (const [, item] of items) {
+        if (item.type === "tonalityHint") {
+          hints.push({ beforeSlotIndex: slotIdx, key: item.key, loc: item.loc });
+        } else {
+          slots.push(item);
+          slotIdx++;
+        }
+      }
+      if (!slots.some(s => s.type === "chord")) {
+        error("A bar must contain at least one chord");
+      }
+      return { slots, hints };
     }
+
+BeatSlotItem
+  = TonalityHint
+  / BeatSlot
 
 BeatSlot
   = chord:Chord { return { type: "chord", chord, loc: makeLoc(location()) }; }
@@ -225,6 +237,20 @@ TimeSignatureToken
   = "(" numerator:$[0-9]+ "/" denominator:$[0-9]+ ")" {
       return { numerator: parseInt(numerator, 10), denominator: parseInt(denominator, 10) };
     }
+
+TonalityHint
+  = "{" _ key:TonalityHintKey _ "}" {
+      return { type: "tonalityHint", key, loc: makeLoc(location()) };
+    }
+
+TonalityHintKey
+  = "home" { return ""; }
+  / note:$([A-G][#b]?) " " mode:$("major" / "minor" / "dorian" / "aeolian" / "mixolydian") {
+      const k = note + " " + mode;
+      if (!isValidKey(k)) error(`Invalid tonality hint: "${k}".`);
+      return k;
+    }
+  / "" { return ""; }
 
 Chord
   = root:Root quality:Quality bass:SlashBass? {

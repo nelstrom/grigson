@@ -211,6 +211,49 @@ Different bars within the same row may independently use mode 1 or mode 2:
 
 ---
 
+## Tonality Hints
+
+A **tonality hint** is an inline annotation that tells the harmonic analyser which key to use from that point forward in the section. It is written in curly braces immediately before the chord it applies to:
+
+```
+| {Ab major} C Am F |
+| C {D dorian} Am . F |
+```
+
+### Syntax
+
+```
+{<note> <mode>}   — set a new key, e.g. {Ab major}, {D dorian}, {G mixolydian}
+{home}            — reset to the section's home key
+{}                — also resets to the section's home key
+```
+
+The mode must always be written in full. Shorthand forms like `{Dm}` or `{D}` are rejected.
+
+Supported modes: `major`, `minor`, `dorian`, `aeolian`, `mixolydian`.
+
+### How tonality hints work
+
+- A hint takes effect at its position and persists across bar boundaries until the next hint or the end of the section.
+- Section boundaries are always an implicit reset: a hint from one section never affects the next.
+- `{home}` or `{}` explicitly resets to the section's home key mid-section, which is useful for controlling how a pivot chord is interpreted.
+
+### In the AST
+
+Hints are separated from the beat grid. The `Bar` type has an optional `tonalityHints` field:
+
+```typescript
+interface TonalityHintItem {
+  beforeSlotIndex: number; // hint applies from this beat-slot index onward within the bar
+  key: string;             // e.g. "Ab major", "D dorian"; "" = reset to home
+  loc?: SourceRange;
+}
+```
+
+Tonality hints do not occupy a beat slot — they are a side channel on `Bar`. The `slots` array contains only `ChordSlot` and `DotSlot` entries, as before.
+
+---
+
 ## Simile Marks
 
 The `%` symbol means "repeat the previous bar". It is shorthand for writing the same chord content again:

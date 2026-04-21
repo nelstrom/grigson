@@ -2606,7 +2606,8 @@
       "Run: cd packages/grigson && pnpm run build:grammar",
       "Add TonalityHintItem interface and tonalityHints? field to Bar in types.ts",
       "Add parser tests: {D minor} at bar start, {Ab major} mid-bar, all valid modes, {} and {home} reset, rejection of {Hb major} / {Dm} / {D}, bar with both time sig and hint"
-    ]
+    ],
+    "passes": true
   },
   {
     "id": "analysed-song-implementation",

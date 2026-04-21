@@ -7,6 +7,7 @@ export type {
   Section,
   Row,
   Bar,
+  TonalityHintItem,
   Chord,
   Quality,
   FrontMatter,

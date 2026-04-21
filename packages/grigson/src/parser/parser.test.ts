@@ -524,3 +524,79 @@ describe('chord parsing', () => {
     });
   });
 });
+
+describe('tonality hints', () => {
+  describe('valid hint forms', () => {
+    it('parses {D minor} at bar start', () => {
+      const bar = parseBar('| {D minor} C Am |');
+      expect(bar.tonalityHints).toEqual([
+        { beforeSlotIndex: 0, key: 'D minor', loc: expect.any(Object) },
+      ]);
+      expect(bar.slots).toHaveLength(2);
+    });
+
+    it('parses {Ab major} between chords', () => {
+      const bar = parseBar('| C {Ab major} Am |');
+      expect(bar.tonalityHints).toEqual([
+        { beforeSlotIndex: 1, key: 'Ab major', loc: expect.any(Object) },
+      ]);
+    });
+
+    it('parses {D dorian}', () => {
+      const bar = parseBar('| {D dorian} C |');
+      expect(bar.tonalityHints![0].key).toBe('D dorian');
+    });
+
+    it('parses {E aeolian}', () => {
+      const bar = parseBar('| {E aeolian} C |');
+      expect(bar.tonalityHints![0].key).toBe('E aeolian');
+    });
+
+    it('parses {G mixolydian}', () => {
+      const bar = parseBar('| {G mixolydian} C |');
+      expect(bar.tonalityHints![0].key).toBe('G mixolydian');
+    });
+
+    it('parses {} as reset to home', () => {
+      const bar = parseBar('| {} C |');
+      expect(bar.tonalityHints).toEqual([{ beforeSlotIndex: 0, key: '', loc: expect.any(Object) }]);
+    });
+
+    it('parses {home} as reset to home', () => {
+      const bar = parseBar('| {home} C |');
+      expect(bar.tonalityHints).toEqual([{ beforeSlotIndex: 0, key: '', loc: expect.any(Object) }]);
+    });
+  });
+
+  describe('bar with time sig and hint', () => {
+    it('parses (4/4){D minor} C Am with both fields', () => {
+      const bar = parseBar('| (4/4){D minor} C Am |');
+      expect(bar.timeSignature).toEqual({ numerator: 4, denominator: 4 });
+      expect(bar.tonalityHints).toEqual([
+        { beforeSlotIndex: 0, key: 'D minor', loc: expect.any(Object) },
+      ]);
+      expect(bar.slots).toHaveLength(2);
+    });
+  });
+
+  describe('bars without hints', () => {
+    it('has no tonalityHints property on a plain bar', () => {
+      const bar = parseBar('| C Am |');
+      expect(bar).not.toHaveProperty('tonalityHints');
+    });
+  });
+
+  describe('invalid hints are rejected', () => {
+    it('rejects {Hb major} (invalid note)', () => {
+      expect(() => parseBar('| {Hb major} C |')).toThrow();
+    });
+
+    it('rejects {Dm} (m-suffix shorthand)', () => {
+      expect(() => parseBar('| {Dm} C |')).toThrow();
+    });
+
+    it('rejects {D} (bare note without mode)', () => {
+      expect(() => parseBar('| {D} C |')).toThrow();
+    });
+  });
+});

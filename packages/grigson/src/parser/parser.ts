@@ -5,6 +5,7 @@ export type {
   FrontMatter,
   Chord,
   Bar,
+  TonalityHintItem,
   Row,
   Section,
   Song,
