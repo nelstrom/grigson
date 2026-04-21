@@ -2635,6 +2635,7 @@
       "Update the update() function to branch on the select value: call grigson.analyseSong(ast) for 'analysed', otherwise use the raw AST",
       "Add addEventListener('change', update) on the ast-mode select",
       "Run pnpm build, start the dev server, and manually verify: toggle shows AnnotatedChordSlots; adding {Ab major} shows tonalityHints; hover highlights source ranges correctly"
-    ]
+    ],
+    "passes": true
   }
 ]
