@@ -480,3 +480,54 @@ describe('analyseSong — tonality hint override', () => {
     }
   });
 });
+
+describe('currentKeyCandidates — passage-level ambiguity', () => {
+  it('ambiguous diatonic passage: F C F C in F includes both F and C as candidates, F first', () => {
+    // F and C major both score 8/8 for this passage (every chord diatonic + quality in both keys).
+    // Several other keys (A aeolian, D dorian, G mixolydian) also tie — we only assert the key
+    // facts: F and C are present, and F (homeKey, CoF distance 0) sorts before C (distance 1).
+    const result = analyseHarmony([maj('F'), maj('C'), maj('F'), maj('C')], 'F');
+    for (const annotated of result) {
+      expect(annotated.currentKeyCandidates).toContain('F');
+      expect(annotated.currentKeyCandidates).toContain('C');
+      // F is the homeKey — CoF distance 0 — must sort before C (distance 1)
+      expect(annotated.currentKeyCandidates[0]).toBe('F');
+      const fIdx = annotated.currentKeyCandidates.indexOf('F');
+      const cIdx = annotated.currentKeyCandidates.indexOf('C');
+      expect(fIdx).toBeLessThan(cIdx);
+    }
+  });
+
+  it('unambiguous passage: G7 makes C the sole highest-scoring key', () => {
+    // G7 as dominant7 only earns full 2pts in C major (V7 quality match).
+    // In all other keys containing G, the dominant7 quality mismatches → those keys score < 8.
+    // Result: passageCandidates = ['C'] for every chord.
+    const result = analyseHarmony([maj('C'), min('A'), min('D'), dom7('G')], 'C');
+    for (const annotated of result) {
+      expect(annotated.currentKeyCandidates).toEqual(['C']);
+    }
+  });
+
+  it('homeKey sorts before equally-distant candidates: F C with homeKey C has C before F', () => {
+    // C and F major both score 4/4 here. C has CoF distance 0 from homeKey C; F has distance 1.
+    // (Other keys like A aeolian / D dorian / G mixolydian also tie but all have distance 0.)
+    // Assert: both 'C' and 'F' are present, and 'C' precedes 'F'.
+    const result = analyseHarmony([maj('F'), maj('C')], 'C');
+    for (const annotated of result) {
+      expect(annotated.currentKeyCandidates).toContain('C');
+      expect(annotated.currentKeyCandidates).toContain('F');
+      const cIdx = annotated.currentKeyCandidates.indexOf('C');
+      const fIdx = annotated.currentKeyCandidates.indexOf('F');
+      expect(cIdx).toBeLessThan(fIdx);
+    }
+  });
+
+  it('pattern chords (2-5-1) are unaffected: each gets [resolvedKey]', () => {
+    // The 2-5-1 pattern consumes all three chords via annotate(), which hardcodes
+    // currentKeyCandidates: [currentKey]. passageCandidates is never consulted.
+    const result = analyseHarmony([min('D'), dom7('G'), maj('C')], 'C');
+    for (const annotated of result) {
+      expect(annotated.currentKeyCandidates).toEqual(['C']);
+    }
+  });
+});

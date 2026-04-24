@@ -115,6 +115,15 @@ function computeScore(key: string, chords: Chord[]): number {
   return score;
 }
 
+/** Returns a score for every known key against the given chord sequence. */
+export function scoreAllKeys(chords: Chord[]): Map<string, number> {
+  const scores = new Map<string, number>();
+  for (const key of Object.keys(KEYS)) {
+    scores.set(key, computeScore(key, chords));
+  }
+  return scores;
+}
+
 // When a key and its relative major/minor are within 1 point, apply ordered tiebreakers.
 function breakRelativeTie(major: string, minor: string, chords: Chord[]): string {
   const minorRootPC = rootToPitchClass(getKeyRoot(minor));

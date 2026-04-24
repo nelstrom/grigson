@@ -1,4 +1,5 @@
 import { KEYS, diatonicNotes, getKeyMode, getKeyRoot, getRelativeMajor } from './keys.js';
+import { scoreAllKeys } from './keyDetector.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type {
   Chord,
@@ -209,6 +210,17 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
     homeNotes = new Set<string>();
   }
 
+  // Passage-level key candidates: all keys tied at the highest score.
+  const keyScores = scoreAllKeys(chords);
+  const maxKeyScore = chords.length > 0 ? Math.max(0, ...keyScores.values()) : 0;
+  const passageCandidates: string[] =
+    maxKeyScore > 0
+      ? Array.from(keyScores.entries())
+          .filter(([, s]) => s === maxKeyScore)
+          .map(([k]) => k)
+          .sort((a, b) => circleOfFifthsDistance(homeKey, a) - circleOfFifthsDistance(homeKey, b))
+      : [homeKey];
+
   while (i < chords.length) {
     const chord = chords[i];
     const pc = getPC(chord);
@@ -373,8 +385,14 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
       }
     }
 
-    // Diatonic chord or unrecognised root — assign home key
-    result.push(annotate(chord, homeKey, homeKey));
+    // Diatonic chord or unrecognised root — assign home key with passage-level candidates
+    result.push({
+      chord,
+      homeKey,
+      currentKey: homeKey,
+      currentKeyCandidates: passageCandidates,
+      loc: chord.loc,
+    });
     i += 1;
   }
 
