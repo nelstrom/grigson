@@ -149,13 +149,32 @@
     }
   },
   {
-    "type": "section_label",
+    "type": "section_key_annotation",
     "named": true,
     "fields": {},
     "children": {
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "frontmatter_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "section_label",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "section_key_annotation",
+          "named": true
+        },
         {
           "type": "section_name",
           "named": true
@@ -276,6 +295,10 @@
   {
     "type": "integer",
     "named": true
+  },
+  {
+    "type": "key",
+    "named": false
   },
   {
     "type": "note_letter",

@@ -61,12 +61,41 @@
         {
           "type": "STRING",
           "value": "]"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "section_key_annotation"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
     "section_name": {
       "type": "PATTERN",
       "value": "[^\\]\\r\\n]+"
+    },
+    "section_key_annotation": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "key"
+        },
+        {
+          "type": "STRING",
+          "value": ":"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "frontmatter_value"
+        }
+      ]
     },
     "frontmatter": {
       "type": "SEQ",

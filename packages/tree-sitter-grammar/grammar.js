@@ -9,9 +9,11 @@ module.exports = grammar({
 
     comment: (_$) => /#[^\r\n]*/,
 
-    section_label: ($) => seq('[', $.section_name, ']'),
+    section_label: ($) => seq('[', $.section_name, ']', optional($.section_key_annotation)),
 
     section_name: (_$) => /[^\]\r\n]+/,
+
+    section_key_annotation: ($) => seq('key', ':', $.frontmatter_value),
 
     frontmatter: ($) =>
       seq($.frontmatter_delimiter, repeat($.frontmatter_field), $.frontmatter_delimiter),

@@ -38,6 +38,36 @@ Song with two section labels produces two section_label nodes
     (section_name)))
 
 ================================================================================
+Section label with key annotation
+================================================================================
+
+[Chorus] key: C major
+
+--------------------------------------------------------------------------------
+
+(song
+  (section_label
+    (section_name)
+    (section_key_annotation
+      (frontmatter_value
+        (unquoted_value)))))
+
+================================================================================
+Section label with quoted key annotation
+================================================================================
+
+[Verse] key: "F# minor"
+
+--------------------------------------------------------------------------------
+
+(song
+  (section_label
+    (section_name)
+    (section_key_annotation
+      (frontmatter_value
+        (quoted_string)))))
+
+================================================================================
 Section label immediately followed by a row
 ================================================================================
 

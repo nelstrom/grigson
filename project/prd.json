@@ -2707,7 +2707,7 @@
       "Regenerate the tree-sitter parser",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-tonality-hint",

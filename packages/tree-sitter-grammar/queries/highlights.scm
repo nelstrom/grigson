@@ -19,6 +19,11 @@
   (section_name) @markup.heading
   "]" @punctuation.bracket)
 
+(section_key_annotation
+  "key" @variable.member
+  ":" @punctuation.delimiter
+  (frontmatter_value) @string)
+
 ; Barlines
 (open_barline) @punctuation.delimiter
 (close_barline) @punctuation.delimiter
