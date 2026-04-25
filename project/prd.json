@@ -2664,7 +2664,7 @@
       "Verify a line like '[Chorus] key: F major' highlights correctly",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-textmate-tonality-hint",

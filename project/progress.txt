@@ -739,3 +739,6 @@ Added 10 new `Quality` members: `dom9`, `dom11`, `dom13`, `dom7flat9`, `dom7shar
 
 ## sync-textmate-extended-qualities
 Extended the TextMate grammar chord quality regex in `packages/textmate-grammar/grigson.tmLanguage.json` to include the 10 new qualities added to the Peggy grammar. Updated the chord `match` pattern quality group from `(m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)` to `(m7b5|maj7|M7|dim7|m7|dim|m|7b13|7b9|7#9|7#5|7b5|sus4|sus2|13|11|9|7|6|-)`, inserting new alternatives in longest-first order to avoid prefix ambiguity (7b13, 7b9, 7#9, 7#5 before 7b5; sus4, sus2; 13, 11, 9, 6 before 7). All tests pass.
+
+## sync-textmate-section-label-key
+Updated the TextMate grammar `section-label` pattern in `packages/textmate-grammar/grigson.tmLanguage.json` to support the optional `key:` annotation (e.g. `[Chorus] key: F major`). Changed the match regex from `^(\[)([^\]\r\n]+)(\])\s*$` to `^(\[)([^\]\r\n]+)(\])(?:\s+(key)\s*(:)\s*(.*?))?\s*$`, adding capture groups 4–6 for the `key` keyword (`keyword.other.key-annotation.grigson`), colon (`punctuation.separator.key-value.grigson`), and value (`string.unquoted.grigson`). All tests pass.

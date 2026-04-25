@@ -85,7 +85,7 @@
       ]
     },
     "section-label": {
-      "match": "^(\\[)([^\\]\\r\\n]+)(\\])\\s*$",
+      "match": "^(\\[)([^\\]\\r\\n]+)(\\])(?:\\s+(key)\\s*(:)\\s*(.*?))?\\s*$",
       "captures": {
         "1": {
           "name": "punctuation.definition.section.begin.grigson"
@@ -95,6 +95,15 @@
         },
         "3": {
           "name": "punctuation.definition.section.end.grigson"
+        },
+        "4": {
+          "name": "keyword.other.key-annotation.grigson"
+        },
+        "5": {
+          "name": "punctuation.separator.key-value.grigson"
+        },
+        "6": {
+          "name": "string.unquoted.grigson"
         }
       }
     },
