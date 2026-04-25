@@ -2650,7 +2650,7 @@
       "Verify the updated regex matches all Peggy Quality alternatives",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-textmate-section-label-key",

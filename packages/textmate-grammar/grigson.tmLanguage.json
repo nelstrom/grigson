@@ -131,7 +131,7 @@
       "name": "keyword.operator.simile.grigson"
     },
     "chord": {
-      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?(?:(/)([A-G])([#b])?)?(?=\\s|\\||$)",
+      "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7b13|7b9|7#9|7#5|7b5|sus4|sus2|13|11|9|7|6|-)?(?:(/)([A-G])([#b])?)?(?=\\s|\\||$)",
       "captures": {
         "1": {
           "name": "constant.other.chord.root.grigson"
