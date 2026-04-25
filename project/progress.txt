@@ -760,3 +760,6 @@ Updated the section-label regex in packages/website/assets/js/grigson-monarch.js
 
 ## sync-monarch-tonality-hint
 Added a tonality-hint rule to the root tokenizer array in `packages/website/assets/js/grigson-monarch.js`, placed before the chord rule. Pattern: `/\{\s*(?:home|[A-G][#b]?\s+(?:major|minor|dorian|aeolian|mixolydian))\s*\}/` assigned token `constant.language.tonality-hint.grigson`. This covers all TonalityHint forms (`{home}`, `{C major}`, `{D mixolydian}`, etc.) without needing lookbehind. All 674 tests pass.
+
+## sync-monarch-dot
+Added a dot beat-slot rule to `packages/website/assets/js/grigson-monarch.js`. Placed `/\./` with token `punctuation.separator.beat.grigson` immediately after the barline rules and before the time-signature rule. This ensures '.' characters inside bars (e.g., `| C . G |`) are highlighted rather than left uncoloured. No lookbehind needed — dots only appear between barlines and whitespace in valid input. All 674 tests pass.

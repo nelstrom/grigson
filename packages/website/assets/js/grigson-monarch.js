@@ -37,6 +37,8 @@ window.grigsonMonarchTokens = {
       [/\|\|\./, 'punctuation.definition.barline.grigson'],
       [/\|\|/, 'punctuation.definition.barline.grigson'],
       [/\|/, 'punctuation.definition.barline.grigson'],
+      // Dot beat-slot — holds the beat (continuation/rest)
+      [/\./, 'punctuation.separator.beat.grigson'],
       // Time signatures (4/4)
       [/\(\d+\/\d+\)/, 'constant.numeric.grigson'],
       // Simile mark %
