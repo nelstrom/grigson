@@ -2637,5 +2637,147 @@
       "Run pnpm build, start the dev server, and manually verify: toggle shows AnnotatedChordSlots; adding {Ab major} shows tonalityHints; hover highlights source ranges correctly"
     ],
     "passes": true
+  },
+  {
+    "id": "sync-textmate-extended-qualities",
+    "category": "grammar-sync",
+    "description": "Add extended chord qualities to TextMate grammar chord pattern",
+    "detail": "The Peggy grammar was extended with new chord qualities that are absent from the TextMate chord regex. The current pattern only covers: m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-. Missing: 7b13, 7b9, 7#9, 7#5, sus4, sus2, 13, 11, 9, 6. These qualities will not be highlighted in VS Code/editors using the TextMate grammar.",
+    "steps": [
+      "Open packages/textmate-grammar/grigson.tmLanguage.json",
+      "Locate the chord rule's match pattern (currently ending in |7b5|7|-)",
+      "Insert the missing qualities in longest-first order to avoid prefix ambiguity: 7b13, 7b9, 7#9, 7#5, sus4, sus2 before 7b5; 13, 11, 9, 6 before 7",
+      "Verify the updated regex matches all Peggy Quality alternatives",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-textmate-section-label-key",
+    "category": "grammar-sync",
+    "description": "Handle section-label key annotation in TextMate grammar",
+    "detail": "The Peggy SectionLabel rule supports an optional key annotation: [Label] key: C major. The TextMate section-label pattern is '^(\\[)([^\\]\\r\\n]+)(\\])\\s*$' which requires end-of-line immediately after ']'. When a key annotation is present the entire section label fails to match and is left unhighlighted.",
+    "steps": [
+      "Open packages/textmate-grammar/grigson.tmLanguage.json",
+      "Update the section-label match to allow an optional 'key: <value>' suffix after ']' (e.g. ^(\\[)([^\\]\\r\\n]+)(\\])(?:\\s+key\\s*:\\s*(.*))?\\s*$)",
+      "Add capture groups for the key keyword, colon, and value, assigning them appropriate scopes (e.g. keyword.other.key-annotation.grigson, punctuation.separator.key-value.grigson, string.unquoted.grigson)",
+      "Verify a line like '[Chorus] key: F major' highlights correctly",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-textmate-tonality-hint",
+    "category": "grammar-sync",
+    "description": "Add tonality-hint pattern to TextMate grammar",
+    "detail": "The Peggy grammar supports TonalityHint tokens inside bars: {home}, {C major}, {A minor}, {D mixolydian}, etc. The TextMate grammar has no corresponding rule. These constructs appear in the token stream between barlines and will be left entirely unhighlighted.",
+    "steps": [
+      "Open packages/textmate-grammar/grigson.tmLanguage.json",
+      "Add a 'tonality-hint' entry to the repository with a match pattern for {home} and {<Note> <mode>} (e.g. \\{\\s*(?:home|[A-G][#b]?\\s+(?:major|minor|dorian|aeolian|mixolydian))\\s*\\})",
+      "Assign scopes to the braces (punctuation.definition.tonality-hint.begin/end.grigson) and the key content (constant.language.tonality-hint.grigson)",
+      "Add '#tonality-hint' to the main patterns array (before the chord rule to avoid the root letter being consumed first)",
+      "Verify {C major} and {home} highlight correctly",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-extended-qualities",
+    "category": "grammar-sync",
+    "description": "Add extended chord qualities to tree-sitter grammar quality rule",
+    "detail": "The tree-sitter quality rule lists: m7b5, maj7, M7, dim7, m7, dim, m, 7b5, 7, -. Missing qualities from the Peggy grammar: 7b13, 7b9, 7#9, 7#5, sus4, sus2, 13, 11, 9, 6. Chords using these qualities will fail to parse or be incorrectly structured.",
+    "steps": [
+      "Open packages/tree-sitter-grammar/grammar.js",
+      "Locate the quality rule (token.immediate(choice(...)))",
+      "Add missing quality strings in longest-first order to avoid prefix ambiguity: 7b13, 7b9, 7#9, 7#5 before 7b5; sus4, sus2; 13, 11, 9, 6 before 7",
+      "Regenerate the tree-sitter parser (npx tree-sitter generate)",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-section-label-key",
+    "category": "grammar-sync",
+    "description": "Support section-label key annotation in tree-sitter grammar",
+    "detail": "The Peggy SectionLabel rule parses [Label] key: C major, but the tree-sitter section_label rule is just seq('[', $.section_name, ']'). The key annotation is silently dropped; if the parser is used for navigation/structure the key information is unavailable.",
+    "steps": [
+      "Open packages/tree-sitter-grammar/grammar.js",
+      "Add a section_key_annotation rule matching the optional suffix: seq('key', ':', $.frontmatter_value) or similar, reusing existing frontmatter_value",
+      "Update section_label to seq('[', $.section_name, ']', optional($.section_key_annotation))",
+      "Regenerate the tree-sitter parser",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-tree-sitter-tonality-hint",
+    "category": "grammar-sync",
+    "description": "Add tonality_hint node to tree-sitter grammar",
+    "detail": "The Peggy grammar recognises TonalityHint tokens ({home}, {C major}, etc.) as BeatSlotItems. The tree-sitter grammar has no tonality_hint rule; beat_slot is only choice($.chord, $.dot). Tonality hints will cause parse errors or be silently mis-parsed.",
+    "steps": [
+      "Open packages/tree-sitter-grammar/grammar.js",
+      "Add a tonality_hint rule that matches '{', optional whitespace, a key string (home or note+mode), optional whitespace, '}'",
+      "Add a tonality_hint_key rule to represent the key content inside the braces",
+      "Update beat_slot (or introduce a beat_slot_item) to choice($.tonality_hint, $.chord, $.dot) to match the Peggy BeatSlotItem rule",
+      "Regenerate the tree-sitter parser",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-monarch-extended-qualities",
+    "category": "grammar-sync",
+    "description": "Add extended chord qualities to Monarch tokenizer chord regex",
+    "detail": "The Monarch chord regex quality group only covers: m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-. Missing qualities from Peggy: 7b13, 7b9, 7#9, 7#5, sus4, sus2, 13, 11, 9, 6. Chords with these qualities will be partially tokenised (root highlighted, quality treated as plain text).",
+    "steps": [
+      "Open packages/website/assets/js/grigson-monarch.js",
+      "Locate the chord regex quality group ((?:m7b5|...|-)?) in the root tokenizer",
+      "Insert missing qualities in longest-first order before their prefixes: 7b13, 7b9, 7#9, 7#5 before 7b5; sus4, sus2; 13, 11, 9, 6 before 7",
+      "Verify the updated regex correctly tokenises e.g. Csus4, G13, A7#9",
+      "Run pnpm test and reload the Monaco playground to visually verify"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-monarch-section-label-key",
+    "category": "grammar-sync",
+    "description": "Handle section-label key annotation in Monarch tokenizer",
+    "detail": "The Monarch section-label pattern is /^(\\[)([^\\]]+)(\\])\\s*$/ which ends at ']' + optional whitespace + EOL. When a key annotation like 'key: F major' follows the ']', the pattern fails to match and the entire section label is unhighlighted.",
+    "steps": [
+      "Open packages/website/assets/js/grigson-monarch.js",
+      "Update the section-label regex to allow an optional 'key: <value>' suffix: /^(\\[)([^\\]]+)(\\])(?:\\s+key\\s*:\\s*(.*))?\\s*$/",
+      "Note: Monarch does not support named capture groups; use positional groups and map them to appropriate token names in the token array (punctuation, entity.name, punctuation, string.unquoted or similar)",
+      "Test with '[Chorus] key: F major' in the Monaco playground",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-monarch-tonality-hint",
+    "category": "grammar-sync",
+    "description": "Add tonality-hint tokenizer rule to Monarch",
+    "detail": "The Peggy grammar supports TonalityHint tokens inside bars: {home}, {C major}, {D mixolydian}, etc. The Monarch tokenizer has no rule for these. The '{' and '}' characters and the key name inside will be uncoloured, visibly inconsistent with other structured tokens.",
+    "steps": [
+      "Open packages/website/assets/js/grigson-monarch.js",
+      "Add a tonality-hint rule to the root tokenizer array before the chord rule",
+      "Pattern: /\\{\\s*(?:home|[A-G][#b]?\\s+(?:major|minor|dorian|aeolian|mixolydian))\\s*\\}/ (Monarch has no lookbehind so the full form is matched at once)",
+      "Assign token name 'constant.language.tonality-hint.grigson' (or split into multiple tokens if finer granularity is wanted)",
+      "Test with '| {C major} Dm7 | {home} Cmaj7 |' in the Monaco playground",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
+  },
+  {
+    "id": "sync-monarch-dot",
+    "category": "grammar-sync",
+    "description": "Add dot beat-slot rule to Monarch tokenizer",
+    "detail": "The Peggy grammar allows '.' as a BeatSlot (holds the beat, equivalent to a rest/continuation). The TextMate grammar has a dot rule with lookbehind/lookahead. The Monarch tokenizer has no dot rule, so '.' characters inside bars are left uncoloured. A simple /\\./ rule placed after the barline rules will cover this (Monarch's lack of lookbehind is acceptable here because '.' only appears between barlines and whitespace in valid input).",
+    "steps": [
+      "Open packages/website/assets/js/grigson-monarch.js",
+      "Add a dot rule after the barline rules and before the chord rule: [/\\./, 'punctuation.separator.beat.grigson']",
+      "Verify that a bar like '| C . G |' shows the dot highlighted",
+      "Run pnpm test to confirm no regressions"
+    ],
+    "passes": false
   }
 ]
