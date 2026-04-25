@@ -3,6 +3,7 @@ import { scoreAllKeys } from './keyDetector.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type {
   Chord,
+  Quality,
   Song,
   Section,
   Bar,
@@ -66,6 +67,7 @@ export interface AnnotatedChord {
   homeKey: string;
   currentKey: string;
   currentKeyCandidates: string[];
+  realtimeKeyCandidates: string[];
   loc?: SourceRange;
 }
 
@@ -167,6 +169,65 @@ const {
 
 export { MAJOR_BY_PC, MINOR_BY_PC, DORIAN_BY_PC, AEOLIAN_BY_PC, MIXOLYDIAN_BY_PC };
 
+// Qualities with both major and minor tonal lean
+const DOM_AMBIGUOUS = new Set<Quality>(['dominant7', 'dom7flat5', 'dom7sharp9', 'dom11']);
+// Major-leaning dominant qualities
+const DOM_MAJOR = new Set<Quality>(['dom9', 'dom13']);
+// Minor-leaning dominant qualities
+const DOM_MINOR = new Set<Quality>(['dom7flat9', 'dom7sharp5', 'dom7flat13']);
+
+const ALL_DOM = new Set<Quality>([...DOM_AMBIGUOUS, ...DOM_MAJOR, ...DOM_MINOR]);
+
+function computeRealtimeCandidates(
+  chord: Chord,
+  prevChord: Chord | null,
+  homeKey: string,
+  passageCandidates: string[],
+): string[] {
+  if (!ALL_DOM.has(chord.quality)) return passageCandidates;
+
+  const pc = getPC(chord);
+  if (pc === null) return passageCandidates;
+
+  const tonicPC = (pc + 5) % 12; // a perfect 5th above V is I
+
+  // Determine tonal lean from quality
+  let wantMajor = DOM_MAJOR.has(chord.quality) || DOM_AMBIGUOUS.has(chord.quality);
+  let wantMinor = DOM_MINOR.has(chord.quality) || DOM_AMBIGUOUS.has(chord.quality);
+
+  // Refine using the preceding ii chord if present
+  if (prevChord !== null) {
+    const prevPC = getPC(prevChord);
+    if (prevPC !== null && (prevPC + 5) % 12 === pc) {
+      // prevChord is a ii chord (its root is a perfect 4th below V)
+      if (prevChord.quality === 'min7' || prevChord.quality === 'minor') {
+        // Major ii → minor resolution less likely
+        wantMinor = false;
+      } else if (prevChord.quality === 'halfDiminished' || prevChord.quality === 'diminished') {
+        // Half-dim ii → major resolution less likely
+        wantMajor = false;
+      }
+    }
+  }
+
+  const candidates: string[] = [];
+  if (wantMajor) {
+    const majorKey = MAJOR_BY_PC.get(tonicPC);
+    if (majorKey) candidates.push(majorKey);
+  }
+  if (wantMinor) {
+    const minorKey = MINOR_BY_PC.get(tonicPC);
+    if (minorKey) candidates.push(minorKey);
+  }
+
+  // Sort by CoF distance to homeKey so hinted key appears first
+  candidates.sort(
+    (a, b) => circleOfFifthsDistance(homeKey, a) - circleOfFifthsDistance(homeKey, b),
+  );
+
+  return candidates.length > 0 ? candidates : passageCandidates;
+}
+
 function getPC(chord: Chord): number | null {
   try {
     return rootToPitchClass(chord.root);
@@ -182,8 +243,20 @@ function resolveKey(tonicPC: number, iChordIsMinor: boolean): string | null {
   return MAJOR_BY_PC.get(tonicPC) ?? null;
 }
 
-function annotate(chord: Chord, homeKey: string, currentKey: string): AnnotatedChord {
-  return { chord, homeKey, currentKey, currentKeyCandidates: [currentKey], loc: chord.loc };
+function annotate(
+  chord: Chord,
+  homeKey: string,
+  currentKey: string,
+  rtCandidates: string[],
+): AnnotatedChord {
+  return {
+    chord,
+    homeKey,
+    currentKey,
+    currentKeyCandidates: [currentKey],
+    realtimeKeyCandidates: rtCandidates,
+    loc: chord.loc,
+  };
 }
 
 /**
@@ -221,6 +294,8 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
           .sort((a, b) => circleOfFifthsDistance(homeKey, a) - circleOfFifthsDistance(homeKey, b))
       : [homeKey];
 
+  let prevChord: Chord | null = null;
+
   while (i < chords.length) {
     const chord = chords[i];
     const pc = getPC(chord);
@@ -251,9 +326,31 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
           iChord.quality === 'halfDiminished' ||
           iChord.quality === 'min7';
         const resolvedKey = resolveKey(iPC, iIsMinor) ?? homeKey;
-        result.push(annotate(chord, homeKey, resolvedKey));
-        result.push(annotate(v7Chord, homeKey, resolvedKey));
-        result.push(annotate(iChord, homeKey, resolvedKey));
+        result.push(
+          annotate(
+            chord,
+            homeKey,
+            resolvedKey,
+            computeRealtimeCandidates(chord, prevChord, homeKey, passageCandidates),
+          ),
+        );
+        result.push(
+          annotate(
+            v7Chord,
+            homeKey,
+            resolvedKey,
+            computeRealtimeCandidates(v7Chord, chord, homeKey, passageCandidates),
+          ),
+        );
+        result.push(
+          annotate(
+            iChord,
+            homeKey,
+            resolvedKey,
+            computeRealtimeCandidates(iChord, v7Chord, homeKey, passageCandidates),
+          ),
+        );
+        prevChord = iChord;
         i += 3;
         continue;
       }
@@ -270,8 +367,23 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
           iChord.quality === 'halfDiminished' ||
           iChord.quality === 'min7';
         const resolvedKey = resolveKey(iPC, iIsMinor) ?? homeKey;
-        result.push(annotate(chord, homeKey, resolvedKey));
-        result.push(annotate(iChord, homeKey, resolvedKey));
+        result.push(
+          annotate(
+            chord,
+            homeKey,
+            resolvedKey,
+            computeRealtimeCandidates(chord, prevChord, homeKey, passageCandidates),
+          ),
+        );
+        result.push(
+          annotate(
+            iChord,
+            homeKey,
+            resolvedKey,
+            computeRealtimeCandidates(iChord, chord, homeKey, passageCandidates),
+          ),
+        );
+        prevChord = iChord;
         i += 2;
         continue;
       }
@@ -291,8 +403,23 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
         const iChord = chords[i + 1];
         const iPC = getPC(iChord);
         if (iPC !== null && iPC === tonicPC && iChord.quality === 'minor') {
-          result.push(annotate(chord, homeKey, homeKey));
-          result.push(annotate(iChord, homeKey, homeKey));
+          result.push(
+            annotate(
+              chord,
+              homeKey,
+              homeKey,
+              computeRealtimeCandidates(chord, prevChord, homeKey, passageCandidates),
+            ),
+          );
+          result.push(
+            annotate(
+              iChord,
+              homeKey,
+              homeKey,
+              computeRealtimeCandidates(iChord, chord, homeKey, passageCandidates),
+            ),
+          );
+          prevChord = iChord;
           i += 2;
           continue;
         }
@@ -313,8 +440,23 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
         const iChord = chords[i + 1];
         const iPC = getPC(iChord);
         if (iPC !== null && iPC === tonicPC && iChord.quality === 'minor') {
-          result.push(annotate(chord, homeKey, homeKey));
-          result.push(annotate(iChord, homeKey, homeKey));
+          result.push(
+            annotate(
+              chord,
+              homeKey,
+              homeKey,
+              computeRealtimeCandidates(chord, prevChord, homeKey, passageCandidates),
+            ),
+          );
+          result.push(
+            annotate(
+              iChord,
+              homeKey,
+              homeKey,
+              computeRealtimeCandidates(iChord, chord, homeKey, passageCandidates),
+            ),
+          );
+          prevChord = iChord;
           i += 2;
           continue;
         }
@@ -335,8 +477,23 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
         const iChord = chords[i + 1];
         const iPC = getPC(iChord);
         if (iPC !== null && iPC === tonicPC && iChord.quality === 'major') {
-          result.push(annotate(chord, homeKey, homeKey));
-          result.push(annotate(iChord, homeKey, homeKey));
+          result.push(
+            annotate(
+              chord,
+              homeKey,
+              homeKey,
+              computeRealtimeCandidates(chord, prevChord, homeKey, passageCandidates),
+            ),
+          );
+          result.push(
+            annotate(
+              iChord,
+              homeKey,
+              homeKey,
+              computeRealtimeCandidates(iChord, chord, homeKey, passageCandidates),
+            ),
+          );
+          prevChord = iChord;
           i += 2;
           continue;
         }
@@ -378,8 +535,15 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
           homeKey,
           currentKey: pickedKey,
           currentKeyCandidates: closestCandidates,
+          realtimeKeyCandidates: computeRealtimeCandidates(
+            chord,
+            prevChord,
+            homeKey,
+            closestCandidates,
+          ),
           loc: chord.loc,
         });
+        prevChord = chord;
         i += 1;
         continue;
       }
@@ -391,8 +555,15 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
       homeKey,
       currentKey: homeKey,
       currentKeyCandidates: passageCandidates,
+      realtimeKeyCandidates: computeRealtimeCandidates(
+        chord,
+        prevChord,
+        homeKey,
+        passageCandidates,
+      ),
       loc: chord.loc,
     });
+    prevChord = chord;
     i += 1;
   }
 

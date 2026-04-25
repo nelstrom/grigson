@@ -531,3 +531,67 @@ describe('currentKeyCandidates — passage-level ambiguity', () => {
     }
   });
 });
+
+describe('realtimeKeyCandidates', () => {
+  function chord(root: string, quality: import('../parser/types.js').Quality): Chord {
+    return { type: 'chord', root, quality };
+  }
+
+  it('plain dom7 alone: G7 in C → [C, Cm] (ambiguous)', () => {
+    const result = analyseHarmony([chord('G', 'dominant7')], 'C');
+    expect(result[0].realtimeKeyCandidates).toEqual(expect.arrayContaining(['C', 'Cm']));
+    expect(result[0].realtimeKeyCandidates).toHaveLength(2);
+  });
+
+  it('major-leaning dom9: G9 in C → [C] only', () => {
+    const result = analyseHarmony([chord('G', 'dom9')], 'C');
+    expect(result[0].realtimeKeyCandidates).toEqual(['C']);
+  });
+
+  it('minor-leaning dom7b9: G7b9 in C → [Cm] only', () => {
+    const result = analyseHarmony([chord('G', 'dom7flat9')], 'C');
+    expect(result[0].realtimeKeyCandidates).toEqual(['Cm']);
+  });
+
+  it('major ii context: Dm7 G7 in C → G7 gets [C]', () => {
+    const result = analyseHarmony([chord('D', 'min7'), chord('G', 'dominant7')], 'C');
+    // Dm7 is ii of C — preceding minor ii narrows G7 to major resolution
+    expect(result[1].realtimeKeyCandidates).toEqual(['C']);
+  });
+
+  it('minor ii context: Dø7 G7 in Cm → G7 gets [Cm]', () => {
+    const result = analyseHarmony([chord('D', 'halfDiminished'), chord('G', 'dominant7')], 'Cm');
+    // Half-dim ii narrows G7 to minor resolution
+    expect(result[1].realtimeKeyCandidates).toEqual(['Cm']);
+  });
+
+  it('non-dominant chord: F C in C → same as currentKeyCandidates', () => {
+    const result = analyseHarmony([maj('F'), maj('C')], 'C');
+    expect(result[0].realtimeKeyCandidates).toEqual(result[0].currentKeyCandidates);
+    expect(result[1].realtimeKeyCandidates).toEqual(result[1].currentKeyCandidates);
+  });
+
+  it('pattern-matched 2-5-1: Dm7 G7 C → G7 realtimeKeyCandidates includes C and Cm, currentKey=C', () => {
+    // G7 is pattern-matched with currentKey=C, but realtimeKeyCandidates reflects the in-the-moment
+    // view: Dm7 (minor ii) narrows it to major only → [C]
+    const result = analyseHarmony([chord('D', 'min7'), chord('G', 'dominant7'), maj('C')], 'C');
+    expect(result[1].currentKey).toBe('C');
+    expect(result[1].realtimeKeyCandidates).toEqual(['C']);
+  });
+
+  it('dom7sharp9 (Hendrix chord) is ambiguous: appears in both major and minor candidates', () => {
+    const result = analyseHarmony([chord('G', 'dom7sharp9')], 'C');
+    expect(result[0].realtimeKeyCandidates).toContain('C');
+    expect(result[0].realtimeKeyCandidates).toContain('Cm');
+  });
+
+  it('minor-leaning dom7sharp5: G7#5 in C → [Cm]', () => {
+    const result = analyseHarmony([chord('G', 'dom7sharp5')], 'C');
+    expect(result[0].realtimeKeyCandidates).toEqual(['Cm']);
+  });
+
+  it('minor-leaning dom7flat13: G7b13 in C → [Cm]', () => {
+    const result = analyseHarmony([chord('G', 'dom7flat13')], 'C');
+    expect(result[0].realtimeKeyCandidates).toEqual(['Cm']);
+  });
+});

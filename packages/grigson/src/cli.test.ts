@@ -240,7 +240,7 @@ describe('CLI validate subcommand', () => {
 
   it('exits with code 1 and prints filename and line number for a file with a parse error', () => {
     const tmpFile = path.join(os.tmpdir(), 'test-validate-invalid.chart');
-    fs.writeFileSync(tmpFile, '| Csus4 |\n', 'utf8');
+    fs.writeFileSync(tmpFile, '| Caug |\n', 'utf8');
 
     const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -283,7 +283,7 @@ describe('CLI validate subcommand', () => {
 
   it('exits with code 1 and prints JSON array with error entry for an invalid file with --format json', () => {
     const tmpFile = path.join(os.tmpdir(), 'test-validate-json-invalid.chart');
-    fs.writeFileSync(tmpFile, '| Csus4 |\n', 'utf8');
+    fs.writeFileSync(tmpFile, '| Caug |\n', 'utf8');
 
     const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});

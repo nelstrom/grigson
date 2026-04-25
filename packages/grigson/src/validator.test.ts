@@ -81,9 +81,9 @@ describe('validate', () => {
     expect(validate('| C |')).toEqual([]);
   });
 
-  it('returns one error for an unsupported quality (Cm7 is now valid — use a truly unsupported suffix)', () => {
-    // 'sus4' is not a supported quality
-    const result = validate('| Csus4 |');
+  it('returns one error for an unsupported quality', () => {
+    // 'aug' is not a supported quality
+    const result = validate('| Caug |');
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('error');
     expect(result[0].message.length).toBeGreaterThan(0);
@@ -97,7 +97,7 @@ describe('validate', () => {
   });
 
   it('range.start.line and character are non-negative integers (0-indexed)', () => {
-    const result = validate('| Csus4 |');
+    const result = validate('| Caug |');
     expect(result).toHaveLength(1);
     const { line, character } = result[0].range.start;
     expect(Number.isInteger(line)).toBe(true);
@@ -113,7 +113,7 @@ describe('validate', () => {
 
   it('error range reflects parse error location (not always line 0)', () => {
     // A valid first line then an invalid second line
-    const source = '| C |\n| Csus4 |';
+    const source = '| C |\n| Caug |';
     const result = validate(source);
     expect(result).toHaveLength(1);
     // The error should be on line 1 (0-indexed), not line 0

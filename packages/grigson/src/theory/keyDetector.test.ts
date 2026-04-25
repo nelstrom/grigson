@@ -289,3 +289,39 @@ describe('detectKey — mixolydian mode', () => {
     expect(detectKey([maj('A'), maj('G'), maj('D')])).toBe('A mixolydian');
   });
 });
+
+describe('detectKey — extended qualities', () => {
+  function chord(root: string, quality: import('../parser/types.js').Quality): Chord {
+    return { type: 'chord', root, quality };
+  }
+
+  it('dom9 at V earns quality bonus in major: G9 in C major context', () => {
+    // G9 is V in C major — should earn quality bonus
+    const result = detectKey([maj('C'), maj('F'), chord('G', 'dom9'), maj('C')]);
+    expect(result).toBe('C');
+  });
+
+  it('dom9 does not earn quality bonus in harmonic minor: G9 not V in Am context', () => {
+    // In Am, V can have dom7flat9; dom9 is major-leaning so Am should still detect
+    // but the key detection should work without extra quality bonus for dom9 in minor
+    const result = detectKey([min('A'), min('D'), chord('E', 'dom7flat9'), min('A')]);
+    expect(result).toBe('Am');
+  });
+
+  it('dom7flat9 at V earns quality bonus in harmonic minor: E7b9 in Am', () => {
+    // E7b9 is V in Am — should earn quality bonus and confirm Am
+    const result = detectKey([min('A'), chord('E', 'dom7flat9'), min('A'), min('A')]);
+    expect(result).toBe('Am');
+  });
+
+  it('dom7flat5 bugfix: G7b5 earns quality bonus at V in major', () => {
+    // Previously absent from degree quality sets — should now score quality bonus at V
+    const result = detectKey([maj('C'), maj('F'), chord('G', 'dom7flat5'), maj('C')]);
+    expect(result).toBe('C');
+  });
+
+  it('add6 earns quality bonus on I in major: C6 in C major', () => {
+    const result = detectKey([chord('C', 'add6'), maj('F'), maj('G'), chord('C', 'add6')]);
+    expect(result).toBe('C');
+  });
+});

@@ -20,7 +20,17 @@ export type Quality =
   | 'maj7'
   | 'min7'
   | 'dim7'
-  | 'dom7flat5';
+  | 'dom7flat5'
+  | 'dom9'
+  | 'dom11'
+  | 'dom13'
+  | 'dom7flat9'
+  | 'dom7sharp9'
+  | 'dom7sharp5'
+  | 'dom7flat13'
+  | 'sus4'
+  | 'sus2'
+  | 'add6';
 
 export interface Chord {
   type: 'chord';

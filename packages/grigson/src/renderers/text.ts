@@ -52,6 +52,16 @@ const TEXT_DEFAULT: NotationPreset = {
   min7: 'm7',
   dim7: 'dim7',
   dom7flat5: '7b5',
+  dom9: '9',
+  dom11: '11',
+  dom13: '13',
+  dom7flat9: '7b9',
+  dom7sharp9: '7#9',
+  dom7sharp5: '7#5',
+  dom7flat13: '7b13',
+  sus4: 'sus4',
+  sus2: 'sus2',
+  add6: '6',
 };
 
 const TEXT_FLAT = 'b';

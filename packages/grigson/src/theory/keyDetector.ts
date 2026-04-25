@@ -4,11 +4,11 @@ import type { Chord, Quality } from '../parser/types.js';
 
 // Expected chord qualities (triad + tetrad) for each scale degree
 const MAJOR_DEGREE_QUALITY_SETS: Set<Quality>[] = [
-  new Set<Quality>(['major', 'maj7']), // I
+  new Set<Quality>(['major', 'maj7', 'add6']), // I
   new Set<Quality>(['minor', 'min7']), // II
   new Set<Quality>(['minor', 'min7']), // III
-  new Set<Quality>(['major', 'maj7']), // IV
-  new Set<Quality>(['major', 'dominant7']), // V
+  new Set<Quality>(['major', 'maj7', 'add6']), // IV
+  new Set<Quality>(['major', 'dominant7', 'dom7flat5', 'dom9', 'dom11', 'dom13', 'dom7sharp9']), // V
   new Set<Quality>(['minor', 'min7']), // VI
   new Set<Quality>(['diminished', 'halfDiminished']), // VII
 ];
@@ -18,7 +18,15 @@ const HARMONIC_MINOR_DEGREE_QUALITY_SETS: Set<Quality>[] = [
   new Set<Quality>(['diminished', 'halfDiminished']), // II
   new Set<Quality>(), // III (augmented — placeholder)
   new Set<Quality>(['minor', 'min7']), // IV
-  new Set<Quality>(['major', 'dominant7']), // V
+  new Set<Quality>([
+    'major',
+    'dominant7',
+    'dom7flat5',
+    'dom7flat9',
+    'dom7sharp9',
+    'dom7sharp5',
+    'dom7flat13',
+  ]), // V
   new Set<Quality>(['major', 'maj7']), // VI
   new Set<Quality>(['diminished', 'dim7']), // VII
 ];

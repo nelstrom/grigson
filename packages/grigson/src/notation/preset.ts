@@ -8,6 +8,16 @@ export interface NotationPreset {
   min7: string;
   dim7: string;
   dom7flat5: string;
+  dom9: string;
+  dom11: string;
+  dom13: string;
+  dom7flat9: string;
+  dom7sharp9: string;
+  dom7sharp5: string;
+  dom7flat13: string;
+  sus4: string;
+  sus2: string;
+  add6: string;
 }
 
 export const DEFAULT_PRESET: NotationPreset = {
@@ -20,6 +30,16 @@ export const DEFAULT_PRESET: NotationPreset = {
   min7: '<small>m</small><sup>7</sup>',
   dim7: '<sup><small>o</small>7</sup>',
   dom7flat5: '<sup>7♭5</sup>',
+  dom9: '<sup>9</sup>',
+  dom11: '<sup>11</sup>',
+  dom13: '<sup>13</sup>',
+  dom7flat9: '<sup>7♭9</sup>',
+  dom7sharp9: '<sup>7♯9</sup>',
+  dom7sharp5: '<sup>7♯5</sup>',
+  dom7flat13: '<sup>7♭13</sup>',
+  sus4: '<sup><small>sus4</small></sup>',
+  sus2: '<sup><small>sus2</small></sup>',
+  add6: '<sup>6</sup>',
 };
 
 /** Real Book chord symbol dialect (e.g. CMA7, CMI, CMI7(♭5)). */
@@ -33,4 +53,14 @@ export const REALBOOK_PRESET: NotationPreset = {
   min7: '<small><small>MI</small></small><sup>7</sup>',
   dim7: '<sup><small>o</small>7</sup>',
   dom7flat5: '<sup>7(♭5)</sup>',
+  dom9: '<sup>9</sup>',
+  dom11: '<sup>11</sup>',
+  dom13: '<sup>13</sup>',
+  dom7flat9: '<sup>7(♭9)</sup>',
+  dom7sharp9: '<sup>7(♯9)</sup>',
+  dom7sharp5: '<sup>7(♯5)</sup>',
+  dom7flat13: '<sup>7(♭13)</sup>',
+  sus4: '<sup>sus4</sup>',
+  sus2: '<sup>sus2</sup>',
+  add6: '<sup>6</sup>',
 };

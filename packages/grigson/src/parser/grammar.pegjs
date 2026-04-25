@@ -275,17 +275,27 @@ Accidental
   = "#" / "b"
 
 Quality
-  = "m7b5" { return "halfDiminished"; }
-  / "maj7" { return "maj7"; }
-  / "M7"   { return "maj7"; }
-  / "dim7" { return "dim7"; }
-  / "m7"   { return "min7"; }
-  / "dim"  { return "diminished"; }
-  / "m"    { return "minor"; }
-  / "7b5"  { return "dom7flat5"; }
-  / "7"    { return "dominant7"; }
-  / "-"    { return "min7"; }
-  / ""     { return "major"; }
+  = "m7b5"  { return "halfDiminished"; }
+  / "maj7"  { return "maj7"; }
+  / "M7"    { return "maj7"; }
+  / "dim7"  { return "dim7"; }
+  / "m7"    { return "min7"; }
+  / "dim"   { return "diminished"; }
+  / "m"     { return "minor"; }
+  / "7b13"  { return "dom7flat13"; }
+  / "7b9"   { return "dom7flat9"; }
+  / "7b5"   { return "dom7flat5"; }
+  / "7#9"   { return "dom7sharp9"; }
+  / "7#5"   { return "dom7sharp5"; }
+  / "sus4"  { return "sus4"; }
+  / "sus2"  { return "sus2"; }
+  / "13"    { return "dom13"; }
+  / "11"    { return "dom11"; }
+  / "9"     { return "dom9"; }
+  / "7"     { return "dominant7"; }
+  / "6"     { return "add6"; }
+  / "-"     { return "min7"; }
+  / ""      { return "major"; }
 
 Comment = "#" text:$[^\n\r]* (Newline / !.) { return { type: "comment", text: "#" + text, loc: makeLoc(location()) }; }
 

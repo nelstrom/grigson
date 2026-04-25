@@ -515,10 +515,6 @@ describe('chord parsing', () => {
   });
 
   describe('unsupported qualities are rejected', () => {
-    it('rejects Csus4', () => {
-      expect(() => parseChord('Csus4')).toThrow();
-    });
-
     it('rejects Caug', () => {
       expect(() => parseChord('Caug')).toThrow();
     });
@@ -597,6 +593,91 @@ describe('tonality hints', () => {
 
     it('rejects {D} (bare note without mode)', () => {
       expect(() => parseBar('| {D} C |')).toThrow();
+    });
+  });
+});
+
+describe('extended chord qualities', () => {
+  describe('dom9', () => {
+    it('parses G9', () => {
+      expect(parseChord('G9')).toMatchObject({ root: 'G', quality: 'dom9' });
+    });
+    it('round-trips G9', () => {
+      expect(parseChord('G9')?.quality).toBe('dom9');
+    });
+  });
+
+  describe('dom11', () => {
+    it('parses G11', () => {
+      expect(parseChord('G11')).toMatchObject({ root: 'G', quality: 'dom11' });
+    });
+  });
+
+  describe('dom13', () => {
+    it('parses G13', () => {
+      expect(parseChord('G13')).toMatchObject({ root: 'G', quality: 'dom13' });
+    });
+  });
+
+  describe('dom7flat9', () => {
+    it('parses G7b9', () => {
+      expect(parseChord('G7b9')).toMatchObject({ root: 'G', quality: 'dom7flat9' });
+    });
+  });
+
+  describe('dom7sharp9', () => {
+    it('parses G7#9', () => {
+      expect(parseChord('G7#9')).toMatchObject({ root: 'G', quality: 'dom7sharp9' });
+    });
+  });
+
+  describe('dom7sharp5', () => {
+    it('parses G7#5', () => {
+      expect(parseChord('G7#5')).toMatchObject({ root: 'G', quality: 'dom7sharp5' });
+    });
+  });
+
+  describe('dom7flat13', () => {
+    it('parses G7b13', () => {
+      expect(parseChord('G7b13')).toMatchObject({ root: 'G', quality: 'dom7flat13' });
+    });
+    it('7b13 is parsed before 7b9 and 7b5', () => {
+      expect(parseChord('G7b13')?.quality).toBe('dom7flat13');
+    });
+  });
+
+  describe('sus4', () => {
+    it('parses Gsus4', () => {
+      expect(parseChord('Gsus4')).toMatchObject({ root: 'G', quality: 'sus4' });
+    });
+  });
+
+  describe('sus2', () => {
+    it('parses Gsus2', () => {
+      expect(parseChord('Gsus2')).toMatchObject({ root: 'G', quality: 'sus2' });
+    });
+  });
+
+  describe('add6', () => {
+    it('parses C6', () => {
+      expect(parseChord('C6')).toMatchObject({ root: 'C', quality: 'add6' });
+    });
+  });
+
+  describe('prefix ordering', () => {
+    it('13 before 11 before 9: C13 is dom13, not something else', () => {
+      expect(parseChord('C13')?.quality).toBe('dom13');
+    });
+    it('11 parsed correctly', () => {
+      expect(parseChord('C11')?.quality).toBe('dom11');
+    });
+    it('7b13 not confused with 7b9', () => {
+      expect(parseChord('G7b9')?.quality).toBe('dom7flat9');
+      expect(parseChord('G7b13')?.quality).toBe('dom7flat13');
+    });
+    it('sus4 before sus2', () => {
+      expect(parseChord('Csus4')?.quality).toBe('sus4');
+      expect(parseChord('Csus2')?.quality).toBe('sus2');
     });
   });
 });
