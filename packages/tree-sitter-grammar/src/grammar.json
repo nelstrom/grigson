@@ -238,6 +238,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "tonality_hint"
+        },
+        {
+          "type": "SYMBOL",
           "name": "chord"
         },
         {
@@ -245,6 +249,27 @@
           "name": "dot"
         }
       ]
+    },
+    "tonality_hint": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "{"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tonality_hint_key"
+        },
+        {
+          "type": "STRING",
+          "value": "}"
+        }
+      ]
+    },
+    "tonality_hint_key": {
+      "type": "PATTERN",
+      "value": "home|[A-G][#b]?\\s+(?:major|minor|dorian|aeolian|mixolydian)"
     },
     "dot": {
       "type": "STRING",

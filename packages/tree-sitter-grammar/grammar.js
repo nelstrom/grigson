@@ -40,7 +40,11 @@ module.exports = grammar({
 
     simile_mark: (_$) => '%',
 
-    beat_slot: ($) => choice($.chord, $.dot),
+    beat_slot: ($) => choice($.tonality_hint, $.chord, $.dot),
+
+    tonality_hint: ($) => seq('{', $.tonality_hint_key, '}'),
+
+    tonality_hint_key: (_$) => /home|[A-G][#b]?\s+(?:major|minor|dorian|aeolian|mixolydian)/,
 
     dot: (_$) => '.',
 

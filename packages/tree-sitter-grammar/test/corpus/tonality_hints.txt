@@ -1,0 +1,105 @@
+================================================================================
+Tonality hint: home
+================================================================================
+
+| {home} C |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (tonality_hint
+          (tonality_hint_key)))
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Tonality hint: note and mode
+================================================================================
+
+| {C major} Dm7 |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (tonality_hint
+          (tonality_hint_key)))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
+      (close_barline))))
+
+================================================================================
+Tonality hint with accidental
+================================================================================
+
+| {Ab major} C |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (tonality_hint
+          (tonality_hint_key)))
+      (beat_slot
+        (chord
+          (note_letter)))
+      (close_barline))))
+
+================================================================================
+Tonality hint mid-bar
+================================================================================
+
+| C {home} Cmaj7 |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (chord
+          (note_letter)))
+      (beat_slot
+        (tonality_hint
+          (tonality_hint_key)))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
+      (close_barline))))
+
+================================================================================
+Tonality hint: minor mode
+================================================================================
+
+| {D minor} Am |
+
+--------------------------------------------------------------------------------
+
+(song
+  (row
+    (open_barline)
+    (bar_tail
+      (beat_slot
+        (tonality_hint
+          (tonality_hint_key)))
+      (beat_slot
+        (chord
+          (note_letter)
+          (quality)))
+      (close_barline))))

@@ -40,6 +40,12 @@
 ; Simile mark
 (simile_mark) @keyword.operator
 
+; Tonality hints
+(tonality_hint
+  "{" @punctuation.bracket
+  (tonality_hint_key) @constant.builtin
+  "}" @punctuation.bracket)
+
 ; Beat slots
 (beat_slot
   (dot) @punctuation.separator)
