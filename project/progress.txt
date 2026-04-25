@@ -754,3 +754,6 @@ Added `section_key_annotation` rule to `packages/tree-sitter-grammar/grammar.js`
 
 ## sync-monarch-extended-qualities
 Updated the chord regex quality group in `packages/website/assets/js/grigson-monarch.js` to include the 10 new qualities added to the Peggy grammar. Changed from `(?:m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?` to `(?:m7b5|maj7|M7|dim7|m7|dim|m|7b13|7b9|7#9|7#5|7b5|sus4|sus2|13|11|9|7|6|-)?`, inserting new alternatives in longest-first order (7b13, 7b9, 7#9, 7#5 before 7b5; sus4, sus2; 13, 11, 9, 6 before 7). All 674 tests pass.
+
+## sync-monarch-section-label-key
+Updated the section-label regex in packages/website/assets/js/grigson-monarch.js from `/^(\[)([^\]]+)(\])\s*$/` to `/^(\[)([^\]]+)(\])(?:\s+key\s*:\s*(.*))?\s*$/`. Added a fourth token `string.unquoted.key-annotation.grigson` to match the optional key annotation capture group. This allows lines like `[Chorus] key: F major` to be fully highlighted instead of falling through unmatched. All 67 tree-sitter tests and 674 vitest tests pass.

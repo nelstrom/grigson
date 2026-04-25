@@ -18,13 +18,14 @@ window.grigsonMonarchTokens = {
       [/^#.*$/, 'comment.line.number-sign.grigson'],
       // Frontmatter delimiter — opens frontmatter state
       [/^---$/, { token: 'punctuation.definition.header.grigson', next: '@frontmatter' }],
-      // Section labels [Name]
+      // Section labels [Name] with optional key annotation: [Name] key: F major
       [
-        /^(\[)([^\]]+)(\])\s*$/,
+        /^(\[)([^\]]+)(\])(?:\s+key\s*:\s*(.*))?\s*$/,
         [
           'punctuation.definition.section.begin.grigson',
           'entity.name.section.grigson',
           'punctuation.definition.section.end.grigson',
+          'string.unquoted.key-annotation.grigson',
         ],
       ],
       // Barlines (complex forms before simple |)
