@@ -742,3 +742,6 @@ Extended the TextMate grammar chord quality regex in `packages/textmate-grammar/
 
 ## sync-textmate-section-label-key
 Updated the TextMate grammar `section-label` pattern in `packages/textmate-grammar/grigson.tmLanguage.json` to support the optional `key:` annotation (e.g. `[Chorus] key: F major`). Changed the match regex from `^(\[)([^\]\r\n]+)(\])\s*$` to `^(\[)([^\]\r\n]+)(\])(?:\s+(key)\s*(:)\s*(.*?))?\s*$`, adding capture groups 4–6 for the `key` keyword (`keyword.other.key-annotation.grigson`), colon (`punctuation.separator.key-value.grigson`), and value (`string.unquoted.grigson`). All tests pass.
+
+## sync-textmate-tonality-hint
+Added a `tonality-hint` rule to the TextMate grammar in `packages/textmate-grammar/grigson.tmLanguage.json`. The rule matches `{home}` and `{<Note> <mode>}` constructs (e.g. `{C major}`, `{A minor}`, `{D mixolydian}`) using the pattern `(\{)\s*(home|[A-G][#b]?\s+(?:major|minor|dorian|aeolian|mixolydian))\s*(\})`. Capture groups assign `punctuation.definition.tonality-hint.begin/end.grigson` to the braces and `constant.language.tonality-hint.grigson` to the key content. Added `#tonality-hint` to the main patterns array before `#chord` to prevent the root note letter being consumed by the chord rule. All tests pass.

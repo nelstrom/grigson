@@ -32,6 +32,9 @@
           "include": "#simile"
         },
         {
+          "include": "#tonality-hint"
+        },
+        {
           "include": "#chord"
         }
       ]
@@ -138,6 +141,20 @@
     "simile": {
       "match": "(?<=\\||\\s)%(?=\\s|\\||$)",
       "name": "keyword.operator.simile.grigson"
+    },
+    "tonality-hint": {
+      "match": "(\\{)\\s*(home|[A-G][#b]?\\s+(?:major|minor|dorian|aeolian|mixolydian))\\s*(\\})",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.tonality-hint.begin.grigson"
+        },
+        "2": {
+          "name": "constant.language.tonality-hint.grigson"
+        },
+        "3": {
+          "name": "punctuation.definition.tonality-hint.end.grigson"
+        }
+      }
     },
     "chord": {
       "match": "(?<=^|\\s|\\|)([A-G])([#b])?(m7b5|maj7|M7|dim7|m7|dim|m|7b13|7b9|7#9|7#5|7b5|sus4|sus2|13|11|9|7|6|-)?(?:(/)([A-G])([#b])?)?(?=\\s|\\||$)",

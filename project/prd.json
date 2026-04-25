@@ -2679,7 +2679,7 @@
       "Verify {C major} and {home} highlight correctly",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-tree-sitter-extended-qualities",
