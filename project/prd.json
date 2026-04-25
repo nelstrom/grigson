@@ -2722,7 +2722,7 @@
       "Regenerate the tree-sitter parser",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-monarch-extended-qualities",
@@ -2736,7 +2736,7 @@
       "Verify the updated regex correctly tokenises e.g. Csus4, G13, A7#9",
       "Run pnpm test and reload the Monaco playground to visually verify"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-monarch-section-label-key",

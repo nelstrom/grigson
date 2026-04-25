@@ -751,3 +751,6 @@ Added 10 missing chord qualities to the tree-sitter grammar `quality` rule in `p
 
 ## sync-tree-sitter-section-label-key
 Added `section_key_annotation` rule to `packages/tree-sitter-grammar/grammar.js` matching `seq('key', ':', $.frontmatter_value)`, reusing the existing `frontmatter_value` rule. Updated `section_label` to `seq('[', $.section_name, ']', optional($.section_key_annotation))`. Added highlights for `section_key_annotation` in `queries/highlights.scm`. Regenerated the parser. Added two corpus tests in `test/corpus/sections.txt`: one for unquoted key annotation (`[Chorus] key: C major`) and one for quoted (`[Verse] key: "F# minor"`). All 62 tree-sitter corpus tests pass; full suite (674 tests) passes.
+
+## sync-monarch-extended-qualities
+Updated the chord regex quality group in `packages/website/assets/js/grigson-monarch.js` to include the 10 new qualities added to the Peggy grammar. Changed from `(?:m7b5|maj7|M7|dim7|m7|dim|m|7b5|7|-)?` to `(?:m7b5|maj7|M7|dim7|m7|dim|m|7b13|7b9|7#9|7#5|7b5|sus4|sus2|13|11|9|7|6|-)?`, inserting new alternatives in longest-first order (7b13, 7b9, 7#9, 7#5 before 7b5; sus4, sus2; 13, 11, 9, 6 before 7). All 674 tests pass.
