@@ -434,11 +434,51 @@
           },
           {
             "type": "STRING",
+            "value": "7b13"
+          },
+          {
+            "type": "STRING",
+            "value": "7b9"
+          },
+          {
+            "type": "STRING",
+            "value": "7#9"
+          },
+          {
+            "type": "STRING",
+            "value": "7#5"
+          },
+          {
+            "type": "STRING",
             "value": "7b5"
           },
           {
             "type": "STRING",
             "value": "7"
+          },
+          {
+            "type": "STRING",
+            "value": "sus4"
+          },
+          {
+            "type": "STRING",
+            "value": "sus2"
+          },
+          {
+            "type": "STRING",
+            "value": "13"
+          },
+          {
+            "type": "STRING",
+            "value": "11"
+          },
+          {
+            "type": "STRING",
+            "value": "9"
+          },
+          {
+            "type": "STRING",
+            "value": "6"
           },
           {
             "type": "STRING",

@@ -745,3 +745,6 @@ Updated the TextMate grammar `section-label` pattern in `packages/textmate-gramm
 
 ## sync-textmate-tonality-hint
 Added a `tonality-hint` rule to the TextMate grammar in `packages/textmate-grammar/grigson.tmLanguage.json`. The rule matches `{home}` and `{<Note> <mode>}` constructs (e.g. `{C major}`, `{A minor}`, `{D mixolydian}`) using the pattern `(\{)\s*(home|[A-G][#b]?\s+(?:major|minor|dorian|aeolian|mixolydian))\s*(\})`. Capture groups assign `punctuation.definition.tonality-hint.begin/end.grigson` to the braces and `constant.language.tonality-hint.grigson` to the key content. Added `#tonality-hint` to the main patterns array before `#chord` to prevent the root note letter being consumed by the chord rule. All tests pass.
+
+## sync-tree-sitter-extended-qualities
+Added 10 missing chord qualities to the tree-sitter grammar `quality` rule in `packages/tree-sitter-grammar/grammar.js`: `7b13`, `7b9`, `7#9`, `7#5` (before `7b5` to avoid prefix ambiguity), `sus4`, `sus2`, `13`, `11`, `9`, `6` (before `7`). Regenerated the parser with `npx tree-sitter generate`. Added 10 new corpus tests to `test/corpus/chords.txt` covering each new quality. All 50 tree-sitter tests and 674 other tests pass.

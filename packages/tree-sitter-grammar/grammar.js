@@ -61,6 +61,29 @@ module.exports = grammar({
     accidental: (_$) => token.immediate(/[#b]/),
 
     quality: (_$) =>
-      token.immediate(choice('m7b5', 'maj7', 'M7', 'dim7', 'm7', 'dim', 'm', '7b5', '7', '-')),
+      token.immediate(
+        choice(
+          'm7b5',
+          'maj7',
+          'M7',
+          'dim7',
+          'm7',
+          'dim',
+          'm',
+          '7b13',
+          '7b9',
+          '7#9',
+          '7#5',
+          '7b5',
+          '7',
+          'sus4',
+          'sus2',
+          '13',
+          '11',
+          '9',
+          '6',
+          '-',
+        ),
+      ),
   },
 });
