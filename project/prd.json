@@ -2765,7 +2765,7 @@
       "Test with '| {C major} Dm7 | {home} Cmaj7 |' in the Monaco playground",
       "Run pnpm test to confirm no regressions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "sync-monarch-dot",

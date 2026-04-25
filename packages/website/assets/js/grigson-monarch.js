@@ -41,6 +41,11 @@ window.grigsonMonarchTokens = {
       [/\(\d+\/\d+\)/, 'constant.numeric.grigson'],
       // Simile mark %
       [/%/, 'keyword.operator.simile.grigson'],
+      // Tonality hints: {home}, {C major}, {D mixolydian}, etc.
+      [
+        /\{\s*(?:home|[A-G][#b]?\s+(?:major|minor|dorian|aeolian|mixolydian))\s*\}/,
+        'constant.language.tonality-hint.grigson',
+      ],
       // Chord: root + optional accidental + optional quality + optional slash bass
       [
         /([A-G])([#b]?)((?:m7b5|maj7|M7|dim7|m7|dim|m|7b13|7b9|7#9|7#5|7b5|sus4|sus2|13|11|9|7|6|-)?)((?:\/[A-G][#b]?)?)/,

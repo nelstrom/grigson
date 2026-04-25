@@ -757,3 +757,6 @@ Updated the chord regex quality group in `packages/website/assets/js/grigson-mon
 
 ## sync-monarch-section-label-key
 Updated the section-label regex in packages/website/assets/js/grigson-monarch.js from `/^(\[)([^\]]+)(\])\s*$/` to `/^(\[)([^\]]+)(\])(?:\s+key\s*:\s*(.*))?\s*$/`. Added a fourth token `string.unquoted.key-annotation.grigson` to match the optional key annotation capture group. This allows lines like `[Chorus] key: F major` to be fully highlighted instead of falling through unmatched. All 67 tree-sitter tests and 674 vitest tests pass.
+
+## sync-monarch-tonality-hint
+Added a tonality-hint rule to the root tokenizer array in `packages/website/assets/js/grigson-monarch.js`, placed before the chord rule. Pattern: `/\{\s*(?:home|[A-G][#b]?\s+(?:major|minor|dorian|aeolian|mixolydian))\s*\}/` assigned token `constant.language.tonality-hint.grigson`. This covers all TonalityHint forms (`{home}`, `{C major}`, `{D mixolydian}`, etc.) without needing lookbehind. All 674 tests pass.
