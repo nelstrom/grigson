@@ -388,6 +388,7 @@ function spokenNote(note: string, spoken: SpokenPreset): string {
   return spoken.note(m[1], expandAccidental(m[2] ?? ''));
 }
 
+/** Generate an accessible spoken label for a chord using the given spoken preset. */
 export function chordAriaLabel(
   chord: Chord,
   tsBeats: number,
@@ -402,6 +403,7 @@ export function chordAriaLabel(
   return `${named}, ${spoken.duration(tsBeats, isWholeBar, denominator)}`;
 }
 
+/** The built-in English spoken preset used by `HtmlRenderer` when none is provided. */
 export const DEFAULT_SPOKEN_PRESET: SpokenPreset = {
   qualities: {
     major: '',
@@ -694,6 +696,10 @@ function renderFrontMatter(song: Song): string {
 // Main renderer
 // ---------------------------------------------------------------------------
 
+/**
+ * Renders a `Song` to a semantic HTML string. Output uses CSS grid layout with `part` attributes
+ * for styling and `aria-label` attributes for accessibility.
+ */
 export class HtmlRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 

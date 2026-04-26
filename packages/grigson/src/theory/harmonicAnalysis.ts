@@ -62,23 +62,30 @@ export function circleOfFifthsDistance(keyA: string, keyB: string): number {
   return Math.min(diff, 12 - diff);
 }
 
+/** A chord augmented with harmonic context inferred by `analyseHarmony`. */
 export interface AnnotatedChord {
   chord: Chord;
+  /** Key of the enclosing section. */
   homeKey: string;
+  /** Inferred local key at this chord, based on ii–V–I and V–I pattern detection. */
   currentKey: string;
+  /** All candidate keys ordered by circle-of-fifths proximity. */
   currentKeyCandidates: string[];
   realtimeKeyCandidates: string[];
   loc?: SourceRange;
 }
 
+/** A `ChordSlot`-equivalent carrying an `AnnotatedChord`. */
 export interface AnnotatedChordSlot {
   type: 'chord';
   chord: AnnotatedChord;
   loc?: SourceRange;
 }
 
+/** Beat slot type used in an analysed bar — either an annotated chord or a plain dot. */
 export type AnalysedBeatSlot = AnnotatedChordSlot | DotSlot;
 
+/** Analysed counterpart of `Bar`, with chord slots replaced by `AnnotatedChordSlot`s. */
 export interface AnalysedBar {
   type: 'bar';
   slots: AnalysedBeatSlot[];
@@ -88,6 +95,7 @@ export interface AnalysedBar {
   loc?: SourceRange;
 }
 
+/** Analysed counterpart of `Row`, containing `AnalysedBar`s. */
 export interface AnalysedRow {
   type: 'row';
   openBarline: Barline;
@@ -97,6 +105,7 @@ export interface AnalysedRow {
 
 export type AnalysedSectionItem = AnalysedRow | CommentLine;
 
+/** Analysed counterpart of `Section`, with rows containing annotated chords. */
 export interface AnalysedSection {
   type: 'section';
   label: string | null;
@@ -107,6 +116,7 @@ export interface AnalysedSection {
   loc?: SourceRange;
 }
 
+/** Analysed counterpart of `Song`, with every section fully annotated. */
 export interface AnalysedSong {
   type: 'song';
   title: string | null;
@@ -692,6 +702,10 @@ function analyseSection(section: Section, songKey: string): AnalysedSection {
   };
 }
 
+/**
+ * Apply `analyseHarmony` to every section of a song, using each section's own key as the home
+ * key. Returns a new `AnalysedSong`; does not mutate.
+ */
 export function analyseSong(song: Song): AnalysedSong {
   const songKey = song.key ?? 'C major';
   const sections = song.sections.map((sec) => analyseSection(sec, songKey));

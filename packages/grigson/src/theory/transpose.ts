@@ -49,10 +49,18 @@ function transposeSectionInternal(
   return normaliseSection(shifted);
 }
 
+/**
+ * Shift each chord root by `semitones` (positive = up, negative = down) and re-normalise
+ * enharmonic spelling. Returns a new array; does not mutate input.
+ */
 export function transposeSection(chords: Chord[], semitones: number): Chord[] {
   return transposeSectionInternal(chords, semitones).chords;
 }
 
+/**
+ * Transpose all sections of a song and update the front-matter key to the home key of the first
+ * transposed section. Returns a new `Song`; does not mutate.
+ */
 export function transposeSong(song: Song, semitones: number): Song {
   let firstSectionKey: string | null = null;
 
@@ -94,6 +102,11 @@ export function transposeSong(song: Song, semitones: number): Song {
   return { ...song, key: firstSectionKey, sections: newSections };
 }
 
+/**
+ * Compute the semitone interval from the detected home key to `targetKey`, then call
+ * `transposeSong`. Equivalent to computing the interval yourself and calling
+ * `transposeSong(song, semitones)`.
+ */
 export function transposeSongToKey(song: Song, targetKey: string): Song {
   const firstSectionChords =
     song.sections[0]?.rows.flatMap((row) =>

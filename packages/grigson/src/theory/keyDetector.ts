@@ -167,8 +167,11 @@ function breakRelativeTie(major: string, minor: string, chords: Chord[]): string
   return major;
 }
 
+/** Options for `detectKey`. */
 export interface DetectKeyConfig {
+  /** Resolve the ambiguous F♯/G♭ enharmonic key to one spelling. Defaults to `'f-sharp'`. */
   fSharpOrGFlat?: 'f-sharp' | 'g-flat';
+  /** Skip scoring entirely and return this key string. */
   forceKey?: string;
 }
 
@@ -353,6 +356,12 @@ function breakDSharpEbTie(chords: Chord[]): string {
   return 'Ebm';
 }
 
+/**
+ * Infer the tonic key from a chord sequence. Returns a key string (e.g. `'Am'`,
+ * `'G mixolydian'`) or `null` if no key scores above the minimum confidence
+ * threshold. If `declaredKey` is provided and scores above zero, it is returned
+ * unchanged unless it has zero diatonic overlap with the chords.
+ */
 export function detectKey(
   chords: Chord[],
   declaredKey?: string | null,

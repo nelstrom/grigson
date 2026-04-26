@@ -5,6 +5,10 @@ import { notoSymbols2Woff2 } from './noto-symbols2-subset.js';
 import { petalumaScriptWoff2 } from './petaluma-script-subset.js';
 import { grigsonPetalumaNotationWoff2 } from './grigson-petaluma-notation-subset.js';
 
+/**
+ * Return `@font-face` declarations for the grigson bundled fonts. Inject these into the main
+ * document (not a shadow root) so that browsers reliably load unicode-range sub-faces.
+ */
 export function getRendererFontFaceCSS(): string {
   return [
     `@font-face{font-family:"GrigsonTimeSig";src:url("${bravuraWoff2}") format("woff2");unicode-range:U+1D7CE-1D7D7,U+E500-E501;font-weight:normal;font-style:normal}`,
@@ -20,6 +24,10 @@ export function getRendererFontFaceCSS(): string {
   ].join('\n');
 }
 
+/**
+ * Return the CSS stylesheet required to render HTML output from `HtmlRenderer`. Pass a typeface
+ * name to select a bundled font; defaults to `'sans'`.
+ */
 export function getRendererStyles(typeface: string = 'sans'): string {
   const defaultFamily =
     typeface === 'serif'

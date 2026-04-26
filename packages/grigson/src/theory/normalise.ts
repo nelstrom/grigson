@@ -75,6 +75,10 @@ function normaliseChord(
   return result;
 }
 
+/**
+ * Re-spell a flat chord array for a single section. Returns the corrected chords and the
+ * inferred home key.
+ */
 export function normaliseSection(
   chords: Chord[],
   config?: DetectKeyConfig,
@@ -95,6 +99,11 @@ export function normaliseSection(
   return { homeKey: detectedKey, chords: normalisedChords };
 }
 
+/**
+ * Re-spell chord roots across every section to match inferred key signatures and canonical
+ * enharmonic conventions. Runs harmonic analysis internally to determine the home key of each
+ * section. Returns a new `Song`; does not mutate.
+ */
 export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
   const sectionResults: { homeKey: string | null; section: Section }[] = song.sections.map(
     (sec) => {

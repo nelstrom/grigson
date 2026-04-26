@@ -1,13 +1,22 @@
 import { parseSong } from './parser/parser.js';
 import { Song, Bar, TimeSignature, DotSlot } from './parser/types.js';
 
+/**
+ * LSP-compatible source range (0-based line/character). Mirrors the `Range` type from the
+ * Language Server Protocol.
+ */
 export interface DiagnosticRange {
   start: { line: number; character: number };
   end: { line: number; character: number };
 }
 
+/** A single parse or semantic issue. `source` is always `'grigson'`. */
 export interface Diagnostic {
   range: DiagnosticRange;
+  /**
+   * `'error'` for parse failures; `'warning'` for semantic issues such as beat-count
+   * mismatches.
+   */
   severity: 'error' | 'warning';
   message: string;
   source: 'grigson';
@@ -88,6 +97,10 @@ function semanticChecks(song: Song): Diagnostic[] {
   return diagnostics;
 }
 
+/**
+ * Map a `.chart` source string to a list of structured diagnostics. Returns `[]` for valid
+ * input. Does not depend on the LSP — usable in CLI tools, pre-commit hooks, and CI pipelines.
+ */
 export function validate(source: string): Diagnostic[] {
   try {
     const song = parseSong(source);

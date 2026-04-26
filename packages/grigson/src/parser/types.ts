@@ -1,16 +1,26 @@
+/**
+ * LSP-style source location (0-based line/character). Present on most tree nodes when the input
+ * was parsed with location tracking.
+ */
 export interface SourceRange {
   start: { line: number; character: number };
   end: { line: number; character: number };
 }
 
+/** Parsed front-matter block from the top of a `.chart` file. */
 export interface FrontMatter {
   type: 'frontMatter';
   title: string | null;
   key: string | null;
+  /** Raw meter string from front matter (e.g. `'4/4'`, `'mixed'`, or `null`). */
   meter: string | null;
   loc?: SourceRange;
 }
 
+/**
+ * Chord quality. The source syntax that maps to each variant is shown in the
+ * renderer-interface guide.
+ */
 export type Quality =
   | 'major'
   | 'minor'
@@ -32,32 +42,51 @@ export type Quality =
   | 'sus2'
   | 'add6';
 
+/**
+ * A single chord as parsed. `root` is the letter name including any accidentals (e.g. `'Bb'`,
+ * `'F#'`). `bass` is the optional slash-chord bass note.
+ */
 export interface Chord {
   type: 'chord';
+  /** Letter name including any accidentals (e.g. `'Bb'`, `'F#'`). */
   root: string;
   quality: Quality;
+  /** Optional slash-chord bass note. */
   bass?: string;
   loc?: SourceRange;
 }
 
+/** Numerator/denominator pair (e.g. 6/8 → `{ numerator: 6, denominator: 8 }`). */
 export interface TimeSignature {
   numerator: number;
   denominator: number;
 }
 
+/** A chord occupying one beat slot within a bar. */
 export interface ChordSlot {
   type: 'chord';
   chord: Chord;
   loc?: SourceRange;
 }
 
+/** `type: 'dot'` — a sustain mark (`.`) that holds the previous chord for one beat. */
 export interface DotSlot {
   type: 'dot';
   loc?: SourceRange;
 }
 
+/** Discriminated union of the two slot kinds inside a bar. */
 export type BeatSlot = ChordSlot | DotSlot;
 
+/**
+ * Barline variant.
+ * - `'single'` — plain `|`
+ * - `'double'` — `||`
+ * - `'final'` — `||.`
+ * - `'startRepeat'` — `||:`
+ * - `'endRepeat'` — `:||`
+ * - `'endRepeatStartRepeat'` — `:||:`
+ */
 export type BarlineKind =
   | 'single'
   | 'double'
@@ -66,26 +95,42 @@ export type BarlineKind =
   | 'endRepeat'
   | 'endRepeatStartRepeat';
 
+/**
+ * A barline with an optional explicit repeat count. `repeatCount` is only set when the source
+ * carries an explicit `x3`-style count.
+ */
 export interface Barline {
   kind: BarlineKind;
+  /** Explicit repeat count (e.g. `3` from `x3`). Only present when the source includes a count. */
   repeatCount?: number;
 }
 
+/**
+ * Inline key annotation in the source (e.g. `[Am]`), placed between beat slots.
+ * `beforeSlotIndex` is the slot index the hint precedes.
+ */
 export interface TonalityHintItem {
+  /** Index of the slot this hint precedes. */
   beforeSlotIndex: number;
   key: string;
   loc?: SourceRange;
 }
 
+/**
+ * A bar containing beat slots. `slots` always contains at least one chord slot.
+ * `timeSignature` is set only when the bar carries an explicit `(n/d)` annotation.
+ */
 export interface Bar {
   type: 'bar';
   slots: BeatSlot[];
+  /** Explicit time-signature annotation on this bar, e.g. `(6/8)`. */
   timeSignature?: TimeSignature;
   tonalityHints?: TonalityHintItem[];
   closeBarline: Barline;
   loc?: SourceRange;
 }
 
+/** A horizontal line of bars sharing an opening barline. */
 export interface Row {
   type: 'row';
   openBarline: Barline;
@@ -93,28 +138,42 @@ export interface Row {
   loc?: SourceRange;
 }
 
+/** A comment line in the source. `text` includes the leading `#` character. */
 export interface CommentLine {
   type: 'comment';
+  /** Raw comment text including the leading `#` character. */
   text: string;
   loc?: SourceRange;
 }
 
 export type SectionItem = Row | CommentLine;
 
+/**
+ * A labelled section of the chart. `rows` contains only `Row` nodes; `content`
+ * interleaves rows and comment lines in document order and is more useful for display.
+ */
 export interface Section {
   type: 'section';
   label: string | null;
   key: string | null;
   rows: Row[];
-  preamble?: CommentLine[]; // comment lines appearing before the section label
-  content?: SectionItem[]; // rows and inline comments appearing after the label
+  /** Comment lines appearing before the section label. */
+  preamble?: CommentLine[];
+  /** Rows and inline comments in document order (more useful for display than `rows` alone). */
+  content?: SectionItem[];
   loc?: SourceRange;
 }
 
+/**
+ * Top-level parse result for a `.chart` file. `key` comes from front matter;
+ * `meter` is the raw string from front matter (e.g. `'4/4'`, `'mixed'`, or `null`).
+ */
 export interface Song {
   type: 'song';
   title: string | null;
+  /** Key string from front matter (e.g. `'Am'`, `'G mixolydian'`). */
   key: string | null;
+  /** Raw meter string from front matter (e.g. `'4/4'`, `'mixed'`, or `null`). */
   meter: string | null;
   sections: Section[];
   loc?: SourceRange;

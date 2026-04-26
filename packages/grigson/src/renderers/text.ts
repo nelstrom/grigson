@@ -11,7 +11,10 @@ export interface SpokenPreset {
   /** Spoken name for a note. `letter` is one of A–G; `accidental` is an already-expanded
    *  English word ('flat', 'sharp', 'double flat', 'double sharp') or '' for a natural note. */
   note(letter: string, accidental: string): string;
-  /** Format the duration part of a chord label. `denominator` is the active time-signature denominator (e.g. 4 for 4/4, 8 for 6/8). */
+  /**
+   * Format the duration part of a chord label. `denominator` is the active time-signature
+   * denominator (e.g. 4 for 4/4, 8 for 6/8).
+   */
   duration(beats: number, isWholeBar: boolean, denominator: number): string;
   /** Label for a barline (null = hide with aria-hidden). */
   barline(kind: BarlineKind, repeatCount?: number): string | null;
@@ -32,7 +35,10 @@ export interface TextRendererConfig {
   slashStyle?: 'horizontal' | 'diagonal' | 'ascii';
   /** Reflow bars into rows of exactly this many bars (HTML only). Ignores source row breaks. */
   barsPerLine?: number;
-  /** Split source rows that exceed this many bars (HTML only). Source row breaks are preserved as hard boundaries. */
+  /**
+   * Split source rows that exceed this many bars (HTML only). Source row breaks are preserved
+   * as hard boundaries.
+   */
   maxBarsPerLine?: number;
   /** Set false to suppress all aria-* attributes. Default: true. */
   aria?: boolean;
@@ -160,6 +166,7 @@ function renderFrontMatter(title: string | null, key: string | null, meter: stri
   return lines.join('\n');
 }
 
+/** Renders a `Song` to a plain-text or ASCII chord chart. */
 export class TextRenderer implements GrigsonRenderer {
   constructor(private config: TextRendererConfig = {}) {}
 
