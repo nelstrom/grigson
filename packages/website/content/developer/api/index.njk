@@ -1,0 +1,21 @@
+---
+layout: base.njk
+title: API Reference
+permalink: /developer/api/
+---
+
+<h1>API Reference</h1>
+
+<p>Auto-generated reference for every public module exported from the <code>grigson</code> package. Pages are built from TypeDoc output at Eleventy build time.</p>
+
+<ul>
+{% for mod in typedocModules %}
+<li>
+  <a href="{{ ('/developer/api/' + mod.slug + '/') | url }}"><strong>{{ mod.title }}</strong></a>
+  — {{ mod.description }}
+  {% if mod.functions.length %}
+  <br><small>{% for fn in mod.functions %}{% if not loop.first %}, {% endif %}{{ fn.name }}{% endfor %}</small>
+  {% endif %}
+</li>
+{% endfor %}
+</ul>

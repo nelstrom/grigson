@@ -4,8 +4,9 @@
   "description": "Eleventy documentation website for grigson",
   "type": "module",
   "scripts": {
-    "build": "eleventy",
-    "serve": "eleventy --serve"
+    "typedoc": "typedoc",
+    "build": "typedoc && eleventy",
+    "serve": "typedoc && eleventy --serve"
   },
   "dependencies": {
     "eleventy-plugin-grigson": "workspace:*",
@@ -19,6 +20,7 @@
     "monaco-editor": "^0.55.1",
     "monaco-textmate": "^3.0.1",
     "shiki": "^4.0.2",
+    "typedoc": "^0.28.0",
     "vscode-oniguruma": "^2.0.1"
   }
 }

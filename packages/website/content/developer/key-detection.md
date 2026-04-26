@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Key Detection
-permalink: /api/key-detection/
+permalink: /developer/key-detection/
 ---
 
 # Key Detection

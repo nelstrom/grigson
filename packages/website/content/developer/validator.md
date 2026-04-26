@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Validator
-permalink: /api/validator/
+permalink: /developer/validator/
 ---
 
 # Validator

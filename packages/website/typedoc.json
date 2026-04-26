@@ -1,0 +1,12 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["../grigson/src/index.ts"],
+  "entryPointStrategy": "resolve",
+  "tsconfig": "../grigson/tsconfig.build.json",
+  "json": "content/_data/typedoc-output.json",
+  "pretty": false,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "readme": "none",
+  "name": "grigson"
+}

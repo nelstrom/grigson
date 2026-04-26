@@ -763,3 +763,18 @@ Added a tonality-hint rule to the root tokenizer array in `packages/website/asse
 
 ## sync-monarch-dot
 Added a dot beat-slot rule to `packages/website/assets/js/grigson-monarch.js`. Placed `/\./` with token `punctuation.separator.beat.grigson` immediately after the barline rules and before the time-signature rule. This ensures '.' characters inside bars (e.g., `| C . G |`) are highlighted rather than left uncoloured. No lookbehind needed — dots only appear between barlines and whitespace in valid input. All 674 tests pass.
+
+## TypeDoc API Reference under /developer
+
+- Renamed `content/api/` → `content/developer/`; updated all 7 permalinks from `/api/…` to `/developer/…`
+- Updated nav link in `_includes/base.njk` from "API Reference" → "Developer" at `/developer/`
+- Updated `content/developer/index.njk` with corrected internal links and new "API Reference" section linking to `/developer/api/`
+- Added `typedoc ^0.28.0` to `packages/website/package.json`; updated `build`/`serve` scripts to run `typedoc &&` first; added `typedoc` script
+- Created `packages/website/typedoc.json`: entry point `src/index.ts`, strategy `resolve`, JSON output to `content/_data/typedoc-output.json`
+- Added `content/_data/typedoc-output.json` to `.gitignore`
+- Added `eleventyConfig.addWatchTarget('content/_data/typedoc-output.json')` to `.eleventy.js`
+- Created `content/_data/typedocModules.js`: groups TypeDoc flat symbol list by source file into 12 module objects (slug, title, description, functions, types, classes, variables)
+- Created `_includes/api-module.njk`: layout rendering functions, classes, types, and constants sections
+- Created `content/developer/api/module.njk`: Eleventy pagination template generating one page per module at `/developer/api/<slug>/`
+- Created `content/developer/api/index.njk`: module listing page at `/developer/api/`
+- Build generates 49 pages including 12 module reference pages; no stale `/api/` URLs

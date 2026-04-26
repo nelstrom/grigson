@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Time Signatures
-permalink: /api/time-signatures/
+permalink: /developer/time-signatures/
 ---
 
 # Time Signatures

@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Harmonic Analysis
-permalink: /api/harmonic-analysis/
+permalink: /developer/harmonic-analysis/
 ---
 
 # Harmonic Analysis

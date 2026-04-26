@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Renderer Interface
-permalink: /api/renderer-interface/
+permalink: /developer/renderer-interface/
 ---
 
 # Renderer Interface

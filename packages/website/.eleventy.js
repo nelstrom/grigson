@@ -79,6 +79,7 @@ export default async function (eleventyConfig) {
 
   eleventyConfig.addWatchTarget('charts/');
   eleventyConfig.addWatchTarget('../grigson/dist/');
+  eleventyConfig.addWatchTarget('content/_data/typedoc-output.json');
 
   eleventyConfig.setServerOptions({
     headers: {

@@ -26,6 +26,9 @@ packages/tree-sitter-grammar/*.so
 .turbo/
 **/.turbo/
 
+# Generated TypeDoc output
+packages/website/content/_data/typedoc-output.json
+
 # Misc
 .vscode/grigson.code-workspace
 .DS_Store

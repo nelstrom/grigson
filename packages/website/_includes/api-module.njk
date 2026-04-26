@@ -1,0 +1,88 @@
+---
+layout: base.njk
+---
+
+<h1>{{ module.title }}</h1>
+<p>{{ module.description }}</p>
+
+{% if module.functions.length %}
+<hr>
+<h2>Functions</h2>
+{% for fn in module.functions %}
+<h3 id="fn-{{ fn.name }}"><code>{{ fn.name }}</code></h3>
+<pre><code>{{ fn.signature }}</code></pre>
+{% if fn.description %}<p>{{ fn.description }}</p>{% endif %}
+{% if fn.overloads.length %}
+<details>
+  <summary>Overloads</summary>
+  {% for ov in fn.overloads %}
+  <pre><code>{{ ov }}</code></pre>
+  {% endfor %}
+</details>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if module.classes.length %}
+<hr>
+<h2>Classes</h2>
+{% for cls in module.classes %}
+<h3 id="cls-{{ cls.name }}"><code>{{ cls.name }}</code></h3>
+{% if cls.description %}<p>{{ cls.description }}</p>{% endif %}
+{% if cls.constructorSignature %}
+<h4>Constructor</h4>
+<pre><code>new {{ cls.constructorSignature }}</code></pre>
+{% endif %}
+{% if cls.methods.length %}
+<h4>Methods</h4>
+<dl>
+{% for method in cls.methods %}
+<dt><code>{{ method.signature }}</code></dt>
+{% if method.description %}<dd>{{ method.description }}</dd>{% endif %}
+{% endfor %}
+</dl>
+{% endif %}
+{% if cls.properties.length %}
+<h4>Properties</h4>
+<dl>
+{% for prop in cls.properties %}
+<dt><code>{{ prop.name }}: {{ prop.type }}</code></dt>
+{% if prop.description %}<dd>{{ prop.description }}</dd>{% endif %}
+{% endfor %}
+</dl>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if module.types.length %}
+<hr>
+<h2>Types</h2>
+{% for t in module.types %}
+<h3 id="type-{{ t.name }}">
+  <code>{{ t.name }}</code>
+  <small>{{ t.kind }}</small>
+</h3>
+{% if t.description %}<p>{{ t.description }}</p>{% endif %}
+{% if t.aliasedType %}
+<pre><code>type {{ t.name }} = {{ t.aliasedType }}</code></pre>
+{% endif %}
+{% if t.members.length %}
+<dl>
+{% for member in t.members %}
+<dt><code>{{ member.name }}{% if member.optional %}?{% endif %}: {{ member.type }}</code></dt>
+{% if member.description %}<dd>{{ member.description }}</dd>{% endif %}
+{% endfor %}
+</dl>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if module.variables.length %}
+<hr>
+<h2>Constants</h2>
+{% for v in module.variables %}
+<h3 id="const-{{ v.name }}"><code>{{ v.name }}</code></h3>
+<pre><code>const {{ v.name }}: {{ v.type }}</code></pre>
+{% if v.description %}<p>{{ v.description }}</p>{% endif %}
+{% endfor %}
+{% endif %}

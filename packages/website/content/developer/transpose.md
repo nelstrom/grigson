@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Transpose
-permalink: /api/transpose/
+permalink: /developer/transpose/
 ---
 
 # Transpose
