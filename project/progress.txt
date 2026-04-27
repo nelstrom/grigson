@@ -778,3 +778,21 @@ Added a dot beat-slot rule to `packages/website/assets/js/grigson-monarch.js`. P
 - Created `content/developer/api/module.njk`: Eleventy pagination template generating one page per module at `/developer/api/<slug>/`
 - Created `content/developer/api/index.njk`: module listing page at `/developer/api/`
 - Build generates 49 pages including 12 module reference pages; no stale `/api/` URLs
+
+## Website sitemap restructure (2026-04-27)
+
+Replaced flat navigation with six audience-focused sections:
+- /language/ — .chart syntax split into 5 sequential sub-pages with prev/next nav
+- /usage/ — getting-started, custom-elements, html-renderer, build-time, accessibility
+- /customize/ — CSS custom properties (split from html.md), notation presets, typefaces
+- /extend/ — renderer interface, SVG renderer, text renderer
+- /tooling/ — CLI, playground, AST explorer
+- /dev/api/ — TypeDoc API reference (renamed from /developer/api/)
+
+Songbook moved to /language/examples/ (tag: language-examples). Tutorial section
+removed; superseded lessons deleted, lesson 6 → /customize/typefaces/, lesson 7 merged
+into /usage/getting-started/.
+
+Added @example JSDoc blocks to transposeSection, transposeSong, transposeSongToKey,
+analyseHarmony, detectKey, validate — covering content from deleted prose docs.
+Build: 45 pages, 674 tests pass.

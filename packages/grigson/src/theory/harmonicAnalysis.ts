@@ -280,6 +280,29 @@ function annotate(
  *      key.
  *
  * Unmatched chords receive currentKey = homeKey.
+ *
+ * @example
+ * ```typescript
+ * import { parseSong, analyseHarmony } from 'grigson';
+ *
+ * const song = parseSong(`
+ * ---
+ * key: C
+ * ---
+ * | C | A7 | Dm | G7 | C |
+ * `);
+ *
+ * const chords = song.sections[0].rows
+ *   .flatMap((r) => r.bars.flatMap((b) => b.slots))
+ *   .filter((s) => s.type === 'chord')
+ *   .map((s) => s.chord);
+ *
+ * const annotated = analyseHarmony(chords, 'C');
+ * // A7 → currentKey: 'Dm'  (A7 is V7 of D minor; paired with following Dm)
+ * // Dm → currentKey: 'Dm'  (tonic of the ii–V–i resolution)
+ * // G7 → currentKey: 'C'   (G7 is V7 of C major; paired with following C)
+ * // C  → currentKey: 'C'   (tonic of the V–I resolution)
+ * ```
  */
 export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord[] {
   const result: AnnotatedChord[] = [];

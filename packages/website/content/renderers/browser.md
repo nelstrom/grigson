@@ -1,21 +1,56 @@
 ---
 layout: base.njk
-title: Browser Bundles
-permalink: /renderers/browser/
+title: Getting Started
+permalink: /usage/getting-started/
 ---
 
-# Browser Bundles
+# Getting Started
 
 The grigson library ships browser-ready bundles alongside the Node.js build:
 
-| File                            | Format                | Global    |
-| ------------------------------- | --------------------- | --------- |
-| `dist/grigson.iife.js`          | IIFE (self-executing) | `grigson` |
-| `dist/grigson.esm.js`           | ES module             | —         |
-| `dist/grigson-register.iife.js` | IIFE (side-effect)    | —         |
-| `dist/grigson-register.esm.js`  | ES module             | —         |
+| File                                | Format                | Global    |
+| ----------------------------------- | --------------------- | --------- |
+| `dist/grigson.iife.js`              | IIFE (self-executing) | `grigson` |
+| `dist/grigson.esm.js`               | ES module             | —         |
+| `dist/grigson-register.iife.js`     | IIFE (side-effect)    | —         |
+| `dist/grigson-register.esm.js`      | ES module             | —         |
+| `dist/grigson-cdn-register.iife.js` | IIFE (side-effect)    | —         |
 
 The `grigson-register` bundle registers both `<grigson-chart>` and `<grigson-html-renderer>` as custom elements. It is separate from the core `grigson` bundle so you can import the library without the custom element side effects.
+
+---
+
+## Standard build vs CDN build
+
+The standard bundle embeds all font subsets as base64 data URIs, so charts render with no network requests. This makes it easy to drop into any page with a single `<script>` tag, but the file is around 270 KB.
+
+A CDN build is also available, where the font files are fetched on demand from [jsDelivr](https://www.jsdelivr.com/?docs=gh) rather than bundled inline. This brings the script down to around 75 KB, at the cost of a network dependency for fonts.
+
+```html
+<!-- Standard build (~270 KB, fonts embedded) -->
+<script defer src="grigson-register.iife.js"></script>
+
+<!-- CDN build (~75 KB, fonts from jsDelivr) -->
+<script defer src="grigson-cdn-register.iife.js"></script>
+
+<!-- Usage is the same either way -->
+<grigson-chart normalise>
+  <template>
+    | Cm7 | F7 | BbMaj7 | EbMaj7 |
+    | Am7b5 | D7 | Gm | % |
+  </template>
+</grigson-chart>
+```
+
+### Content Security Policy (CDN build)
+
+Because the CDN build fetches font files from `cdn.jsdelivr.net`, your page's Content Security Policy must allow it:
+
+```
+Content-Security-Policy: font-src 'self' cdn.jsdelivr.net;
+```
+
+No other CSP changes are needed — the JavaScript itself is still served from your own host.
 
 ---
 
@@ -91,4 +126,4 @@ To use `<grigson-chart>` and `<grigson-html-renderer>`, load the auto-registerin
 
 If you use `type="module"` instead of IIFE, `defer` is implicit — no attribute needed.
 
-See [Custom Elements](/renderers/custom-elements/) for the full element documentation.
+See [Custom Elements](/usage/custom-elements/) for the full element documentation.

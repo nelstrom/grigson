@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: CLI Reference
-permalink: /cli/
+permalink: /tooling/cli/
 ---
 
 # grigson CLI

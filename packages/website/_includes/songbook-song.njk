@@ -7,10 +7,10 @@ layout: base.njk
   <template>{{ chartName | readChart }}</template>
 </grigson-chart>
 
-{% set songs = collections.songbook | sort(false, false, 'data.order') %}
+{% set songs = collections['language-examples'] | sort(false, false, 'data.order') %}
 {% set currentIndex = songs | indexOf(page) %}
 <nav class="songbook-nav">
-  <a href="{{ '/songbook/' | url }}">Songbook</a>
+  <a href="{{ '/language/examples/' | url }}">Songbook</a>
   <span class="songbook-nav-arrows">
     {% if currentIndex > 0 %}
       <a href="{{ songs[currentIndex - 1].url | url }}">← {{ songs[currentIndex - 1].data.title }}</a>

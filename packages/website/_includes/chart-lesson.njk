@@ -3,6 +3,7 @@ layout: base.njk
 ---
 {{ content | safe }}
 
+{% if chartName %}
 <h2>Source</h2>
 {{ chartName | highlightChart | safe }}
 
@@ -10,8 +11,13 @@ layout: base.njk
 <grigson-chart normalise>
   <template>{{ chartName | readChart }}</template>
 </grigson-chart>
+{% endif %}
 
-{% set lessons = collections.tutorial | sort(false, false, 'data.order') %}
+{% if tags and 'language-syntax' in tags %}
+  {% set lessons = collections['language-syntax'] | sort(false, false, 'data.order') %}
+{% else %}
+  {% set lessons = collections.tutorial | sort(false, false, 'data.order') %}
+{% endif %}
 {% set currentIndex = lessons | indexOf(page) %}
 <nav class="lesson-nav">
   {% if currentIndex > 0 %}

@@ -87,6 +87,21 @@ export default async function (eleventyConfig) {
     },
   });
 
+  // When deploying under a path prefix (e.g. /grigson/ on GitHub Pages), Eleventy's
+  // `url` filter handles template expressions but leaves raw markdown links and inline
+  // HTML untouched.  This transform rewrites every href/src that starts with "/" but
+  // does not already carry the prefix so all links resolve correctly.
+  const pathPrefix = process.env.ELEVENTY_PATH_PREFIX ?? '/';
+  if (pathPrefix !== '/') {
+    const prefix = pathPrefix.replace(/\/$/, ''); // strip trailing slash → "/grigson"
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(href|src)="(?!${escaped})/`, 'g');
+    eleventyConfig.addTransform('pathPrefix', (content, outputPath) => {
+      if (!outputPath?.endsWith('.html')) return content;
+      return content.replace(re, `$1="${prefix}/`);
+    });
+  }
+
   eleventyConfig.addPassthroughCopy('assets');
   eleventyConfig.addPassthroughCopy({
     'node_modules/grigson/dist/grigson.iife.js': 'js/grigson.iife.js',

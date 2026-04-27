@@ -100,6 +100,34 @@ function semanticChecks(song: Song): Diagnostic[] {
 /**
  * Map a `.chart` source string to a list of structured diagnostics. Returns `[]` for valid
  * input. Does not depend on the LSP — usable in CLI tools, pre-commit hooks, and CI pipelines.
+ *
+ * @example
+ * ```typescript
+ * import { validate } from 'grigson';
+ *
+ * // Valid chart — returns empty array
+ * validate('| C | Am | F | G |');  // → []
+ *
+ * // Parse error — unrecognised chord root
+ * const errors = validate('| C | Pm | F | G |');
+ * // → [{ severity: 'error', message: 'Expected ...', range: { start: { line: 0, character: 6 }, ... } }]
+ *
+ * // Semantic warning — beat balance mismatch in mode-2 bar
+ * const warnings = validate('| (4/4) C . . G . |');
+ * // → [{ severity: 'warning', message: 'Bar has 5 slots but time signature is 4/4 (expected 4)', ... }]
+ *
+ * // Programmatic use in a CI pipeline
+ * import { readFileSync } from 'fs';
+ * const source = readFileSync('song.chart', 'utf8');
+ * const diagnostics = validate(source);
+ * if (diagnostics.length > 0) {
+ *   for (const d of diagnostics) {
+ *     const { line, character } = d.range.start;
+ *     console.error(`${line + 1}:${character + 1}: ${d.severity}: ${d.message}`);
+ *   }
+ *   process.exit(1);
+ * }
+ * ```
  */
 export function validate(source: string): Diagnostic[] {
   try {

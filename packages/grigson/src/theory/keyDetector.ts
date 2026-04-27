@@ -361,6 +361,24 @@ function breakDSharpEbTie(chords: Chord[]): string {
  * `'G mixolydian'`) or `null` if no key scores above the minimum confidence
  * threshold. If `declaredKey` is provided and scores above zero, it is returned
  * unchanged unless it has zero diatonic overlap with the chords.
+ *
+ * @example
+ * ```typescript
+ * import { parseSong, detectKey } from 'grigson';
+ *
+ * const song = parseSong('| Am | Dm | E7 | Am |');
+ * const chords = song.sections[0].rows
+ *   .flatMap((r) => r.bars.flatMap((b) => b.slots))
+ *   .filter((s) => s.type === 'chord')
+ *   .map((s) => s.chord);
+ *
+ * detectKey(chords);           // → 'Am'
+ * detectKey(chords, 'A');      // → 'Am'  (declared key preserved when it scores above zero)
+ * detectKey(chords, null, { fSharpOrGFlat: 'g-flat' }); // → 'Am'
+ *
+ * // When the progression is too sparse to identify a key:
+ * detectKey([]);               // → null
+ * ```
  */
 export function detectKey(
   chords: Chord[],

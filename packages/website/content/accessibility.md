@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: Accessibility
-permalink: /accessibility/
+permalink: /usage/accessibility/
 ---
 
 # Accessibility
@@ -152,7 +152,7 @@ const chart = document.querySelector('grigson-chart');
 chart.renderChart({ spokenPreset: frenchPreset });
 ```
 
-See the [custom elements page]({{ '/renderers/custom-elements/' | url }}) for the full element API.
+See the [custom elements page]({{ '/usage/custom-elements/' | url }}) for the full element API.
 
 ---
 

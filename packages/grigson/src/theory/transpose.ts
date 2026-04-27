@@ -52,6 +52,21 @@ function transposeSectionInternal(
 /**
  * Shift each chord root by `semitones` (positive = up, negative = down) and re-normalise
  * enharmonic spelling. Returns a new array; does not mutate input.
+ *
+ * @example
+ * ```typescript
+ * import { transposeSection } from 'grigson';
+ *
+ * const chords = [
+ *   { type: 'chord', root: 'C', quality: 'major' },
+ *   { type: 'chord', root: 'F', quality: 'major' },
+ *   { type: 'chord', root: 'G', quality: 'dominant7' },
+ *   { type: 'chord', root: 'A', quality: 'minor' },
+ * ] as Chord[];
+ *
+ * const up7 = transposeSection(chords, 7);
+ * // → roots: ['G', 'C', 'D', 'E']  (C major → G major, up a perfect fifth)
+ * ```
  */
 export function transposeSection(chords: Chord[], semitones: number): Chord[] {
   return transposeSectionInternal(chords, semitones).chords;
@@ -60,6 +75,25 @@ export function transposeSection(chords: Chord[], semitones: number): Chord[] {
 /**
  * Transpose all sections of a song and update the front-matter key to the home key of the first
  * transposed section. Returns a new `Song`; does not mutate.
+ *
+ * @example
+ * ```typescript
+ * import { parseSong, transposeSong, TextRenderer } from 'grigson';
+ *
+ * const song = parseSong(`
+ * ---
+ * key: C
+ * ---
+ * | C | F | G | Am |
+ * `);
+ *
+ * const inG = transposeSong(song, 7); // up a perfect fifth → G major
+ * console.log(new TextRenderer().render(inG));
+ * // ---
+ * // key: G
+ * // ---
+ * // | G | C | D | Em |
+ * ```
  */
 export function transposeSong(song: Song, semitones: number): Song {
   let firstSectionKey: string | null = null;
@@ -106,6 +140,22 @@ export function transposeSong(song: Song, semitones: number): Song {
  * Compute the semitone interval from the detected home key to `targetKey`, then call
  * `transposeSong`. Equivalent to computing the interval yourself and calling
  * `transposeSong(song, semitones)`.
+ *
+ * @example
+ * ```typescript
+ * import { parseSong, transposeSongToKey, TextRenderer } from 'grigson';
+ *
+ * const song = parseSong('| C | F | G | Am |');
+ *
+ * // Transpose from C major to G major
+ * const inG = transposeSongToKey(song, 'G');
+ * console.log(new TextRenderer().render(inG));
+ * // | G | C | D | Em |
+ *
+ * // Common use case: Bb instrument part (sounds a major 2nd lower, so write up 2 semitones)
+ * const bbPart = transposeSongToKey(song, 'D');
+ * // | D | G | A | Bm |
+ * ```
  */
 export function transposeSongToKey(song: Song, targetKey: string): Song {
   const firstSectionChords =
