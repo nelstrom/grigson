@@ -15,8 +15,8 @@ Grigson source files use the `.chart` extension.
 ## Philosophy
 
 - **Plain text that resembles output.** The pipe character `|` represents a bar line. Time signatures look like time signatures. Chord names are written as you would write them on a lead sheet.
-- **Left-aligned, ragged right.** Unlike some chord chart tools that stretch rows to fill the page width, grigson renders rows at their natural width. A bar with four beats takes up twice as much space as a bar with two beats. The space a passage occupies on the page reflects how long it lasts in time.
-- **Explicit row layout.** Each line in the source becomes a row in the output. You control the layout by how you arrange your source text.
+- **Left-aligned, ragged right.** Rows render at their natural width. A bar with four beats takes up twice as much space as a bar with two beats — the space a passage occupies on the page reflects how long it lasts in time.
+- **Source-driven row layout.** Each line in the source becomes a row in the output by default. The HTML renderer's `barsPerLine` and `maxBarsPerLine` options can override this.
 - **Simple rhythm.** Grigson does not use a rhythm staff or per-chord duration notation. Rhythmic information is conveyed through beat-slot notation (see below).
 - **Key per section.** Songs that modulate between sections (e.g. verse in Eb, chorus in Ab) can specify a key for each section independently.
 
