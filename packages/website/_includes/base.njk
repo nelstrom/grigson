@@ -173,7 +173,7 @@
     <div class="layout">
       <nav class="sidebar">
         <a class="sidebar-home" href="{{ '/' | url }}"
-          {% if page.url == ('/' | url) %}aria-current="page"{% endif %}>
+          {% if (page.url | url) == ('/' | url) %}aria-current="page"{% endif %}>
           grigson
         </a>
 
@@ -215,13 +215,13 @@
 
         {% for section in sections %}
         <div class="sidebar-section-group">
-          <a class="sidebar-section{% if page.url | startsWith(section.url | url) %} is-active{% endif %}"
+          <a class="sidebar-section{% if (page.url | url) | startsWith(section.url | url) %} is-active{% endif %}"
              href="{{ section.url | url }}">{{ section.label }}</a>
           <ul>
             {% for p in section.pages %}
             <li>
               <a href="{{ p.url | url }}"
-                 {% if page.url == (p.url | url) %}aria-current="page"{% endif %}>
+                 {% if (page.url | url) == (p.url | url) %}aria-current="page"{% endif %}>
                 {{ p.label }}
               </a>
             </li>
@@ -231,14 +231,14 @@
         {% endfor %}
 
         <div class="sidebar-section-group">
-          <a class="sidebar-section{% if page.url | startsWith('/dev/api/' | url) %} is-active{% endif %}"
+          <a class="sidebar-section{% if (page.url | url) | startsWith('/dev/api/' | url) %} is-active{% endif %}"
              href="{{ '/dev/api/' | url }}">API Reference</a>
-          {% if page.url | startsWith('/dev/api/' | url) %}
+          {% if (page.url | url) | startsWith('/dev/api/' | url) %}
           <ul>
             {% for mod in typedocModules %}
             <li>
               <a href="{{ ('/dev/api/' + mod.slug + '/') | url }}"
-                 {% if page.url == (('/dev/api/' + mod.slug + '/') | url) %}aria-current="page"{% endif %}>
+                 {% if (page.url | url) == (('/dev/api/' + mod.slug + '/') | url) %}aria-current="page"{% endif %}>
                 {{ mod.title }}
               </a>
             </li>
