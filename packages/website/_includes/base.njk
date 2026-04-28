@@ -130,15 +130,21 @@
       .sidebar-section-group li { margin: 0.15rem 0; }
 
       .sidebar-section-group a {
+        display: block;
         color: var(--color-fg);
         text-decoration: none;
         opacity: 0.8;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        margin-left: -0.4rem;
       }
       .sidebar-section-group a:hover { opacity: 1; color: var(--color-link); }
       .sidebar-section-group a[aria-current="page"] {
         color: var(--color-link);
         opacity: 1;
-        font-weight: 500;
+        font-weight: 600;
+        background: color-mix(in srgb, var(--color-link) 15%, transparent);
+        box-shadow: inset 2px 0 0 var(--color-link);
       }
     </style>
     {% block scripts %}
