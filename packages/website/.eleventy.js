@@ -77,6 +77,8 @@ export default async function (eleventyConfig) {
     arr.findIndex((item) => item.url === page.url),
   );
 
+  eleventyConfig.addFilter('startsWith', (str, prefix) => str?.startsWith(prefix) ?? false);
+
   eleventyConfig.addWatchTarget('charts/');
   eleventyConfig.addWatchTarget('../grigson/dist/');
   eleventyConfig.addWatchTarget('content/_data/typedoc-output.json');

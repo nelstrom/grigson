@@ -33,39 +33,13 @@
         background-color: var(--color-bg);
         color: var(--color-fg);
         margin: 0;
-        padding: 1rem 2rem;
+        padding: 0;
         font-family: system-ui, sans-serif;
         line-height: 1.6;
       }
 
       a {
         color: var(--color-link);
-      }
-
-      nav {
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: baseline;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-      }
-
-      nav .nav-primary {
-        display: flex;
-        align-items: baseline;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-        flex: 1;
-      }
-
-      nav .nav-api {
-        font-size: 0.8rem;
-        opacity: 0.7;
-      }
-
-      nav .nav-api:hover {
-        opacity: 1;
       }
 
       pre, code {
@@ -93,6 +67,79 @@
           background-color: var(--shiki-dark-bg) !important;
         }
       }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 1rem;
+        border-right: 1px solid var(--color-border);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        box-sizing: border-box;
+      }
+
+      .page-content {
+        padding: 1rem 2rem;
+        min-width: 0;
+      }
+
+      @media (max-width: 720px) {
+        .layout { grid-template-columns: 1fr; }
+        .sidebar {
+          position: static;
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid var(--color-border);
+        }
+      }
+
+      .sidebar-home {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 1.25rem;
+        color: var(--color-fg);
+        text-decoration: none;
+      }
+      .sidebar-home:hover { color: var(--color-link); }
+
+      .sidebar-section-group { margin-bottom: 1rem; }
+
+      .sidebar-section {
+        display: block;
+        font-weight: 600;
+        color: var(--color-fg);
+        text-decoration: none;
+        padding: 0.1rem 0;
+      }
+      .sidebar-section:hover,
+      .sidebar-section.is-active { color: var(--color-link); }
+
+      .sidebar-section-group ul {
+        list-style: none;
+        margin: 0.2rem 0 0 0.75rem;
+        padding: 0;
+      }
+      .sidebar-section-group li { margin: 0.15rem 0; }
+
+      .sidebar-section-group a {
+        color: var(--color-fg);
+        text-decoration: none;
+        opacity: 0.8;
+      }
+      .sidebar-section-group a:hover { opacity: 1; color: var(--color-link); }
+      .sidebar-section-group a[aria-current="page"] {
+        color: var(--color-link);
+        opacity: 1;
+        font-weight: 500;
+      }
     </style>
     {% block scripts %}
     <script defer src="{{ '/js/grigson.iife.js' | url }}"></script>
@@ -100,27 +147,88 @@
     {% endblock %}
   </head>
   <body>
-    <nav>
-      <div class="nav-primary">
-        <a href="{{ '/' | url }}">grigson</a>
-        |
-        <a href="{{ '/language/' | url }}">Language</a>
-        |
-        <a href="{{ '/usage/' | url }}">Usage</a>
-        |
-        <a href="{{ '/customize/' | url }}">Customize</a>
-        |
-        <a href="{{ '/extend/' | url }}">Extend</a>
-        |
-        <a href="{{ '/tooling/' | url }}">Tooling</a>
+    <div class="layout">
+      <nav class="sidebar">
+        <a class="sidebar-home" href="{{ '/' | url }}"
+          {% if page.url == ('/' | url) %}aria-current="page"{% endif %}>
+          grigson
+        </a>
+
+        {% set sections = [
+          { label: 'Language', url: '/language/', pages: [
+            { label: 'Front matter',       url: '/language/syntax/front-matter/' },
+            { label: 'Sections',           url: '/language/syntax/sections/' },
+            { label: 'Bars',               url: '/language/syntax/bars/' },
+            { label: 'Chords',             url: '/language/syntax/chords/' },
+            { label: 'Repeats',            url: '/language/syntax/repeats/' },
+            { label: 'Songbook',           url: '/language/examples/' }
+          ]},
+          { label: 'Usage', url: '/usage/', pages: [
+            { label: 'Getting started',    url: '/usage/getting-started/' },
+            { label: 'Custom elements',    url: '/usage/custom-elements/' },
+            { label: 'HTML renderer',      url: '/usage/html-renderer/' },
+            { label: 'Build-time rendering', url: '/usage/build-time/' },
+            { label: 'Accessibility',      url: '/usage/accessibility/' }
+          ]},
+          { label: 'Customize', url: '/customize/', pages: [
+            { label: 'CSS custom properties', url: '/customize/css/' },
+            { label: 'Notation presets',   url: '/customize/notation/' },
+            { label: 'Typefaces',          url: '/customize/typefaces/' }
+          ]},
+          { label: 'Extend', url: '/extend/', pages: [
+            { label: 'Renderer interface', url: '/extend/renderer-interface/' },
+            { label: 'SVG renderer',       url: '/extend/svg-renderer/' },
+            { label: 'Text renderer',      url: '/extend/text-renderer/' }
+          ]},
+          { label: 'Tooling', url: '/tooling/', pages: [
+            { label: 'CLI',                url: '/tooling/cli/' },
+            { label: 'Playground',         url: '/tooling/playground/' },
+            { label: 'AST Explorer',       url: '/tooling/ast-explorer/' }
+          ]}
+        ] %}
+
+        {% for section in sections %}
+        <div class="sidebar-section-group">
+          <a class="sidebar-section{% if page.url | startsWith(section.url | url) %} is-active{% endif %}"
+             href="{{ section.url | url }}">{{ section.label }}</a>
+          <ul>
+            {% for p in section.pages %}
+            <li>
+              <a href="{{ p.url | url }}"
+                 {% if page.url == (p.url | url) %}aria-current="page"{% endif %}>
+                {{ p.label }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+
+        <div class="sidebar-section-group">
+          <a class="sidebar-section{% if page.url | startsWith('/dev/api/' | url) %} is-active{% endif %}"
+             href="{{ '/dev/api/' | url }}">API Reference</a>
+          {% if page.url | startsWith('/dev/api/' | url) %}
+          <ul>
+            {% for mod in typedocModules %}
+            <li>
+              <a href="{{ ('/dev/api/' + mod.slug + '/') | url }}"
+                 {% if page.url == (('/dev/api/' + mod.slug + '/') | url) %}aria-current="page"{% endif %}>
+                {{ mod.title }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </nav>
+      <div class="page-content">
+        <main>
+          {{ content | safe }}
+        </main>
+        <footer>
+          <p>grigson — a .chart file parser and normaliser</p>
+        </footer>
       </div>
-      <a class="nav-api" href="{{ '/dev/api/' | url }}">API Reference</a>
-    </nav>
-    <main>
-      {{ content | safe }}
-    </main>
-    <footer>
-      <p>grigson — a .chart file parser and normaliser</p>
-    </footer>
+    </div>
   </body>
 </html>
