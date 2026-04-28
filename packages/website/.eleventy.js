@@ -18,7 +18,7 @@ export default async function (eleventyConfig) {
   // Initialise Shiki once and reuse across all pages
   const highlighter = await createHighlighter({
     themes: ['nord', 'github-light'],
-    langs: ['html', 'css'],
+    langs: ['html', 'css', 'javascript', 'typescript', 'shellscript'],
   });
   await highlighter.loadLanguage({
     ...JSON.parse(
@@ -69,6 +69,13 @@ export default async function (eleventyConfig) {
       `  <template>${source.trim()}</template>`,
       `</grigson-chart>`,
     ].join('\n');
+  });
+
+  eleventyConfig.amendLibrary('md', (md) => {
+    md.options.highlight = (code, lang) => {
+      const language = highlighter.getLoadedLanguages().includes(lang) ? lang : 'plain';
+      return highlighter.codeToHtml(code, { lang: language, ...shikiOptions });
+    };
   });
 
   eleventyConfig.addPlugin(grigsonPlugin);

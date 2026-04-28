@@ -10,7 +10,7 @@ tags: language-syntax
 
 A section is declared by a name in square brackets, optionally followed by a `key:` annotation:
 
-```
+```grigson
 [Verse]
 [Chorus] key: Ab
 [Bridge] key: F# dorian

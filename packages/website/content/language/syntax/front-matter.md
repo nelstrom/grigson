@@ -15,7 +15,7 @@ A `.chart` file consists of two parts:
 1. **Front matter** — a YAML block enclosed in `---` delimiters, containing global metadata.
 2. **Body** — one or more sections, each containing rows of measures.
 
-```
+```grigson
 ---
 title: "All the Things You Are"
 artist: "Jerome Kern"

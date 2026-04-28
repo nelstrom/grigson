@@ -796,3 +796,6 @@ into /usage/getting-started/.
 Added @example JSDoc blocks to transposeSection, transposeSong, transposeSongToKey,
 analyseHarmony, detectKey, validate — covering content from deleted prose docs.
 Build: 45 pages, 674 tests pass.
+
+## shiki-markdown-highlighting
+Loaded javascript, typescript, shellscript into the Shiki highlighter in .eleventy.js alongside existing html and css. Wired Shiki into markdown-it via amendLibrary so all fenced code blocks in .md files are highlighted. Labelled bare fences as grigson in bars.md, chords.md, front-matter.md, repeats.md, sections.md, accessibility.md. Unknown or unlabelled languages fall back to plain for consistent Shiki structure. Build passes; no class="language-*" blocks remain in built output.

@@ -42,7 +42,7 @@ The content of each measure is a sequence of chord names and dots. The beat unit
 
 When a bar contains only chord names and no dots, the chords divide the bar into equal portions:
 
-```
+```grigson
 | C |          (4/4) → C for 4 beats
 | C G |        (4/4) → C for 2 beats, G for 2 beats
 | C G Am F |   (4/4) → C G Am F, 1 beat each
@@ -53,7 +53,7 @@ When a bar contains only chord names and no dots, the chords divide the bar into
 
 When a bar contains one or more dots (`.`), every item — chord name or dot — occupies exactly one beat unit. A dot continues (holds) the preceding chord for one more beat:
 
-```
+```grigson
 | C . . G |    (4/4) → C for 3 beats, G for 1 beat
 | C G . . |    (4/4) → C for 1 beat, G for 3 beats
 | G . A |       (3/4) → G for 2 beats, A for 1 beat
@@ -66,7 +66,7 @@ The total number of items (chords + dots) in a mode-2 bar must equal the number 
 
 Different bars within the same row may independently use mode 1 or mode 2:
 
-```
+```grigson
 | (4/4) C G | Am . . F | C | G . . . |
 ```
 
@@ -76,7 +76,7 @@ Different bars within the same row may independently use mode 1 or mode 2:
 
 The `%` symbol means "repeat the previous bar". It is shorthand for writing the same chord content again:
 
-```
+```grigson
 | Am | G | G | G |     ← longhand
 | Am | G | % | % |     ← shorthand, same meaning
 ```
@@ -91,7 +91,7 @@ There is no double-bar simile symbol in grigson. To repeat two bars, write `%` t
 
 A rest within a bar is written as `-`:
 
-```
+```grigson
 | - | - | - | - |
 ```
 

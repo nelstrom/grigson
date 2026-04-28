@@ -23,7 +23,7 @@ Repeat signs are expressed as part of the barline:
 
 Volta brackets (first-time / second-time endings) are written by placing a bracket label in square brackets immediately after a barline, before the contents of that bar:
 
-```
+```grigson
 ||: Am | G |[1.] F | G :||
 [2.] F | C ||.
 ```
@@ -32,7 +32,7 @@ The label can be any short text: `[1.]`, `[2.]`, `[1.-3.]`, `[2.-4.]`, etc.
 
 A typical use with a two-bar ending:
 
-```
+```grigson
 ||: (4/4) C | Am | F | G |
 | C | Am |[1.] F | G :||
 [2.] F | C ||.
@@ -44,7 +44,7 @@ A typical use with a two-bar ending:
 
 Here is a short jazz-style chart demonstrating several features:
 
-```
+```grigson
 ---
 title: "Blues in F"
 key: F

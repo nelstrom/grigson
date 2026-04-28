@@ -16,7 +16,7 @@ The strategy is simple: put a human-readable `aria-label` on each meaningful bou
 
 Here is a concrete example. Given this source:
 
-```
+```grigson
 ||: (4/4) Cm7 | F7 | Bbmaj7 | % :||x3
 ```
 
