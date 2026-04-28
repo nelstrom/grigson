@@ -56,30 +56,30 @@ permalink: /customize/notation/
   Register a preset once using <code>window.grigsonRegister.definePreset()</code>
   (from <code>grigson-register.iife.js</code> — the same bundle the custom elements use):
 </p>
-<pre><code>window.grigsonRegister.definePreset('ascii', {
+{% highlight "javascript" %}window.grigsonRegister.definePreset('ascii', {
   flat: 'b',
   sharp: '#',
   halfDiminished: 'm7b5',
   diminished: 'dim',
   maj7: 'maj7',
-});</code></pre>
+});{% endhighlight %}
 <p>
   Then reference it by name on <code>&lt;grigson-html-renderer&gt;</code>:
 </p>
-<pre><code>&lt;grigson-chart normalise&gt;
-  &lt;grigson-html-renderer notation-preset="ascii"&gt;&lt;/grigson-html-renderer&gt;
-  &lt;template&gt;...&lt;/template&gt;
-&lt;/grigson-chart&gt;</code></pre>
+{% highlight "html" %}<grigson-chart normalise>
+  <grigson-html-renderer notation-preset="ascii"></grigson-html-renderer>
+  <template>...</template>
+</grigson-chart>{% endhighlight %}
 <p>
   The <code>notation-preset</code> attribute belongs to <code>&lt;grigson-html-renderer&gt;</code>,
   not <code>&lt;grigson-chart&gt;</code>. Multiple renderer children inside one
   <code>&lt;grigson-chart&gt;</code> each render the same parsed song independently:
 </p>
-<pre><code>&lt;grigson-chart normalise&gt;
-  &lt;grigson-html-renderer&gt;&lt;/grigson-html-renderer&gt;
-  &lt;grigson-html-renderer notation-preset="ascii"&gt;&lt;/grigson-html-renderer&gt;
-  &lt;template&gt;...&lt;/template&gt;
-&lt;/grigson-chart&gt;</code></pre>
+{% highlight "html" %}<grigson-chart normalise>
+  <grigson-html-renderer></grigson-html-renderer>
+  <grigson-html-renderer notation-preset="ascii"></grigson-html-renderer>
+  <template>...</template>
+</grigson-chart>{% endhighlight %}
 
 <h2>Preset fields</h2>
 <table>
