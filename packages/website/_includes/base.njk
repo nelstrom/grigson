@@ -99,6 +99,19 @@
           border-right: none;
           border-bottom: 1px solid var(--color-border);
         }
+        .sidebar-summary {
+          cursor: pointer;
+          font-weight: 600;
+          padding: 0.3rem 0;
+          color: var(--color-fg);
+          user-select: none;
+        }
+        .sidebar-details[open] .sidebar-summary { margin-bottom: 0.75rem; }
+      }
+
+      @media (min-width: 721px) {
+        /* Nav is always open on desktop; just hide the toggle affordance. */
+        .sidebar-summary { display: none; }
       }
 
       .sidebar-home {
@@ -159,6 +172,9 @@
           {% if page.url == ('/' | url) %}aria-current="page"{% endif %}>
           grigson
         </a>
+
+        <details class="sidebar-details" open>
+          <summary class="sidebar-summary">Navigation</summary>
 
         {% set sections = [
           { label: 'Language', url: '/language/', pages: [
@@ -226,6 +242,17 @@
           </ul>
           {% endif %}
         </div>
+        </details>
+        <script>
+          (function () {
+            var nav = document.querySelector('.sidebar-details');
+            var mq = matchMedia('(max-width: 720px)');
+            if (mq.matches) nav.open = false;
+            mq.addEventListener('change', function (e) {
+              if (!e.matches) nav.open = true;
+            });
+          })();
+        </script>
       </nav>
       <div class="page-content">
         <main>
