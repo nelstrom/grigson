@@ -43,13 +43,14 @@
       }
 
       pre, code {
-        background: color-mix(in srgb, var(--color-fg) 8%, var(--color-bg));
+        background: #f5f5f5;
         border-radius: 3px;
       }
 
       pre {
         padding: 0.75rem 1rem;
         overflow-x: auto;
+        border: 1px solid var(--color-border-subtle);
       }
 
       code {
@@ -62,6 +63,9 @@
       }
 
       @media (prefers-color-scheme: dark) {
+        pre, code {
+          background: color-mix(in srgb, var(--color-fg) 8%, var(--color-bg));
+        }
         .shiki, .shiki span {
           color: var(--shiki-dark) !important;
           background-color: var(--shiki-dark-bg) !important;
