@@ -71,6 +71,11 @@ export {
   GrigsonRenderErrorEvent,
 } from './events.js';
 
+// Notation presets
+export { definePreset, resolvePreset } from './notation/index.js';
+export type { NotationPreset } from './notation/index.js';
+export { DEFAULT_PRESET, REALBOOK_PRESET } from './notation/index.js';
+
 // CLI helpers
 export { runRenderer } from './run-renderer.js';
 export type { RunRendererOptions } from './run-renderer.js';

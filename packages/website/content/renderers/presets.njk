@@ -5,8 +5,6 @@ permalink: /customize/notation/
 ---
 <script>
   window.grigsonRegister.definePreset('ascii', {
-    flat: 'b',
-    sharp: '#',
     halfDiminished: 'm7b5',
     diminished: 'dim',
     maj7: 'maj7',
@@ -57,8 +55,6 @@ permalink: /customize/notation/
   (from <code>grigson-register.iife.js</code> — the same bundle the custom elements use):
 </p>
 {% highlight "javascript" %}window.grigsonRegister.definePreset('ascii', {
-  flat: 'b',
-  sharp: '#',
   halfDiminished: 'm7b5',
   diminished: 'dim',
   maj7: 'maj7',
@@ -82,23 +78,10 @@ permalink: /customize/notation/
 </grigson-chart>{% endhighlight %}
 
 <h2>Preset fields</h2>
-<table>
-  <thead><tr><th>Field</th><th>Default</th><th>Example custom</th></tr></thead>
-  <tbody>
-    <tr><td><code>flat</code></td><td>♭</td><td>b</td></tr>
-    <tr><td><code>sharp</code></td><td>♯</td><td>#</td></tr>
-    <tr><td><code>halfDiminished</code></td><td>ø</td><td>m7b5</td></tr>
-    <tr><td><code>diminished</code></td><td>°</td><td>dim</td></tr>
-    <tr><td><code>maj7</code></td><td>△</td><td>maj7</td></tr>
-    <tr><td><code>min7</code></td><td>m7</td><td>m7</td></tr>
-    <tr><td><code>dim7</code></td><td>°7</td><td>dim7</td></tr>
-    <tr><td><code>dom7flat5</code></td><td>7♭5</td><td>7b5</td></tr>
-    <tr><td><code>major</code></td><td>(empty)</td><td>(empty)</td></tr>
-    <tr><td><code>minor</code></td><td>m</td><td>m</td></tr>
-    <tr><td><code>dominant7</code></td><td>7</td><td>7</td></tr>
-  </tbody>
-</table>
 <p>
-  Unspecified fields fall back to <code>DEFAULT_PRESET</code>. See the
-  <a href="{{ '/dev/api/' | url }}">API Reference</a> for the full <code>NotationPreset</code> interface.
+  Unspecified fields fall back to <code>DEFAULT_PRESET</code>. For the complete list of fields
+  with their default values and descriptions, see the
+  <a href="{{ '/dev/api/notation/' | url }}">Notation Presets API reference</a>
+  (<code>NotationPreset</code>, <code>DEFAULT_PRESET</code>, <code>REALBOOK_PRESET</code>,
+  <code>definePreset</code>, <code>resolvePreset</code>).
 </p>

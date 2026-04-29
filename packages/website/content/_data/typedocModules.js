@@ -32,6 +32,8 @@ const FILE_TO_MODULE = {
   'renderers/renderer-css': 'renderer-css',
   validator: 'validator',
   events: 'events',
+  'notation/preset': 'notation',
+  'notation/registry': 'notation',
 };
 
 const MODULE_ORDER = [
@@ -45,6 +47,7 @@ const MODULE_ORDER = [
   'text',
   'html',
   'renderer-css',
+  'notation',
   'validator',
   'events',
 ];
@@ -100,6 +103,12 @@ const MODULE_META = {
     title: 'Renderer CSS',
     slug: 'renderer-css',
     description: 'Generate stylesheet and font-face declarations for the HTML renderer.',
+  },
+  notation: {
+    title: 'Notation Presets',
+    slug: 'notation',
+    description:
+      'Register and resolve notation presets that control how chord qualities are rendered.',
   },
   validator: {
     title: 'Validator',
