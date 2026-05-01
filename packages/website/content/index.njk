@@ -48,6 +48,76 @@ permalink: /
   .quick-links a:hover {
     border-color: var(--color-link);
   }
+
+  .theme-demo {
+    margin: 2.5rem 0;
+  }
+
+  .theme-demo-label {
+    font-size: 0.85rem;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    margin: 0 0 0.75rem;
+  }
+
+  .theme-demo-stage {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+
+  .theme-demo-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split, 50%);
+    transform: translateX(-50%);
+    width: 2px;
+    background: rgba(128, 128, 128, 0.5);
+    pointer-events: none;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .theme-demo-handle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(128, 128, 128, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: #fff;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  }
+
+  .theme-demo-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .theme-demo-footer span {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    white-space: nowrap;
+  }
+
+  .theme-demo-slider {
+    flex: 1;
+    cursor: ew-resize;
+  }
 </style>
 
 <h1>grigson</h1>
@@ -90,6 +160,73 @@ key: F
   <a href="{{ '/language/examples/' | url }}">Browse examples</a>
   <a href="{{ '/tooling/playground/' | url }}">Try the playground</a>
 </div>
+
+<div class="theme-demo">
+  <p class="theme-demo-label">Light / Dark theme</p>
+  <div class="theme-demo-stage" id="theme-demo-stage">
+    <grigson-chart normalise id="theme-demo-chart">
+      <style>
+        :host {
+          position: relative;
+          overflow: hidden;
+        }
+        .chart-light {
+          box-sizing: border-box;
+          background: #ffffff;
+          color: #1a1a1a;
+          padding: 1.25rem 1.5rem;
+        }
+        .chart-dark {
+          box-sizing: border-box;
+          position: absolute;
+          inset: 0;
+          background: #1e1e1e;
+          color: #d4d4d4;
+          padding: 1.25rem 1.5rem;
+          clip-path: inset(0 calc(100% - var(--split, 50%)) 0 0);
+        }
+      </style>
+      <grigson-html-renderer class="chart-light"></grigson-html-renderer>
+      <grigson-html-renderer class="chart-dark"></grigson-html-renderer>
+      <template>---
+title: Blues in F
+key: F
+---
+
+[Head]
+||: (4/4) F7 | % | % | % |
+| Bb7 | % | F7 | % |
+| C7 | Bb7 | F7 | C7 :||</template>
+    </grigson-chart>
+    <div class="theme-demo-divider" id="theme-demo-divider" aria-hidden="true">
+      <div class="theme-demo-handle">◀▶</div>
+    </div>
+  </div>
+  <div class="theme-demo-footer">
+    <span>Dark</span>
+    <input type="range" class="theme-demo-slider" id="theme-demo-slider" min="0" max="100" step="1">
+    <span>Light</span>
+  </div>
+</div>
+<script>
+  (function () {
+    var stage = document.getElementById('theme-demo-stage');
+    var slider = document.getElementById('theme-demo-slider');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var initial = prefersDark ? 70 : 30;
+
+    function setSplit(value) {
+      stage.style.setProperty('--split', value + '%');
+      slider.value = value;
+    }
+
+    setSplit(initial);
+
+    slider.addEventListener('input', function () {
+      setSplit(Number(this.value));
+    });
+  }());
+</script>
 
 <h2>What's in the toolkit</h2>
 <ul>
