@@ -4,53 +4,64 @@ title: grigson
 permalink: /
 ---
 <style>
-  .hero-example {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin: 2rem 0;
+  .feature {
+    margin: 3rem 0;
   }
 
-  @media (max-width: 600px) {
-    .hero-example {
-      grid-template-columns: 1fr;
+  .feature pre {
+    font-size: 1rem;
+  }
+
+  @media (min-width: 600px) {
+    .feature pre {
+      font-size: 1.4em;
+    }
+
+    .feature grigson-chart {
+      --grigson-font-size: 1.5rem;
     }
   }
 
-  .hero-example h3 {
-    margin: 0 0 0.5rem;
-    font-size: 0.85rem;
-    font-weight: normal;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.6;
+  .feature grigson-chart {
+    --grigson-font-size: 1.2rem;
   }
 
-  .hero-example pre {
-    margin: 0;
-  }
-
-  .quick-links {
+  .demo-controls {
     display: flex;
-    gap: 1rem;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
     flex-wrap: wrap;
-    margin: 2rem 0;
   }
 
-  .quick-links a {
-    padding: 0.4rem 0.9rem;
+  .demo-controls label {
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+
+  .demo-controls select {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.6rem;
     border: 1px solid var(--color-border);
     border-radius: 4px;
-    text-decoration: none;
-    font-size: 0.9rem;
+    background: var(--color-bg, #fff);
+    color: inherit;
   }
 
-  .quick-links a:hover {
+  .demo-controls button {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .demo-controls button.active {
+    background: color-mix(in srgb, var(--color-link) 20%, transparent);
+    color: inherit;
     border-color: var(--color-link);
-  }
-
-  .theme-demo {
-    margin: 2.5rem 0;
   }
 
   .theme-demo-label {
@@ -67,6 +78,10 @@ permalink: /
     border-radius: 6px;
     overflow: hidden;
     border: 1px solid var(--color-border);
+    cursor: ew-resize;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
   }
 
   .theme-demo-divider {
@@ -101,13 +116,6 @@ permalink: /
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   }
 
-  .theme-demo-stage {
-    cursor: ew-resize;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
-  }
-
   .theme-demo-tag {
     position: absolute;
     bottom: 0.6rem;
@@ -128,51 +136,102 @@ permalink: /
     right: 0.75rem;
     color: rgba(0, 0, 0, 0.35);
   }
+
+  .intro {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
 </style>
 
 <h1>grigson</h1>
-<p>A plain-text format and toolkit for writing chord charts.
-Source files use the <code>.chart</code> extension and look like the charts they describe —
-pipe characters for bar lines, standard chord names, YAML front matter for metadata.</p>
+<p class="intro">A markup language for chord charts, with a parser and system of renderers that output
+to HTML, plain text, and other formats. Transpose to any key, switch between light and
+dark themes, choose a typeface, and customise notation to taste.</p>
 
-<div class="hero-example">
-  <div>
-    <h3>Source</h3>
-    {% highlight "grigson" %}---
-title: Blues in F
-key: F
+<section class="feature">
+  <h2>The .chart format</h2>
+  <p>Charts are plain-text files with YAML front matter and pipe-delimited bars. They're readable
+  without any tooling — open one in any text editor and the structure is immediately clear.</p>
+  <p><a href="{{ '/language/' | url }}">Learn the language →</a></p>
+  {% highlight "grigson" %}---
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
 ---
 
-[Head]
-||: (4/4) F7 | % | % | % |
-| Bb7 | % | F7 | % |
-| C7 | Bb7 | F7 | C7 :||{% endhighlight %}
-  </div>
-  <div>
-    <h3>Rendered</h3>
-    <grigson-chart normalise>
-      <template>---
-title: Blues in F
-key: F
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 | G7 | Cm | % |
+| Ebm7 | Ab7 | Dbmaj7 | % |
+| Dm7b5 | G7 | Cm | % ||.{% endhighlight %}
+</section>
+
+<section class="feature">
+  <h2>Rendered output</h2>
+  <p>Drop <code>&lt;grigson-chart&gt;</code> into any page and the chart renders to HTML —
+  no build step required for the browser.</p>
+  <p><a href="{{ '/usage/html-renderer/' | url }}">HTML renderer docs →</a></p>
+  <grigson-chart normalise>
+    <template>---
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
 ---
 
-[Head]
-||: (4/4) F7 | % | % | % |
-| Bb7 | % | F7 | % |
-| C7 | Bb7 | F7 | C7 :||</template>
-    </grigson-chart>
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 | G7 | Cm | % |
+| Ebm7 | Ab7 | Dbmaj7 | % |
+| Dm7b5 | G7 | Cm | % ||.</template>
+  </grigson-chart>
+</section>
+
+<section class="feature">
+  <h2>Transposition</h2>
+  <p>Charts transpose to any key on the fly. Useful for instruments in B♭ or E♭,
+  or for practicing in all twelve keys.</p>
+  <p><a href="{{ '/usage/custom-elements/' | url }}">Custom elements docs →</a></p>
+  <div class="demo-controls">
+    <label for="transpose-key-select">Key:</label>
+    <select id="transpose-key-select">
+      <option value="">C minor (original)</option>
+      <option value="C#">C♯ minor</option>
+      <option value="D">D minor</option>
+      <option value="Eb">E♭ minor</option>
+      <option value="E">E minor</option>
+      <option value="F">F minor</option>
+      <option value="F#">F♯ minor</option>
+      <option value="G">G minor</option>
+      <option value="G#">G♯ minor</option>
+      <option value="A">A minor</option>
+      <option value="Bb">B♭ minor</option>
+      <option value="B">B minor</option>
+    </select>
   </div>
-</div>
+  <grigson-chart id="transpose-demo" normalise>
+    <template>---
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
+---
 
-<div class="quick-links">
-  <a href="{{ '/language/' | url }}">Learn the language</a>
-  <a href="{{ '/usage/' | url }}">Embedding charts</a>
-  <a href="{{ '/language/examples/' | url }}">Browse examples</a>
-  <a href="{{ '/tooling/playground/' | url }}">Try the playground</a>
-</div>
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 | G7 | Cm | % |
+| Ebm7 | Ab7 | Dbmaj7 | % |
+| Dm7b5 | G7 | Cm | % ||.</template>
+  </grigson-chart>
+  <script>
+    document.getElementById('transpose-key-select').addEventListener('change', function(e) {
+      var chart = document.getElementById('transpose-demo');
+      if (e.target.value) chart.setAttribute('transpose-key', e.target.value);
+      else chart.removeAttribute('transpose-key');
+    });
+  </script>
+</section>
 
-<div class="theme-demo">
-  <p class="theme-demo-label">Light / Dark theme</p>
+<section class="feature">
+  <h2>Light and dark themes</h2>
+  <p>Built-in CSS custom properties make it easy to match any colour scheme.
+  The slider below compares the two built-in themes side by side.</p>
+  <p><a href="{{ '/customize/css/' | url }}">CSS custom properties →</a></p>
   <div class="theme-demo-stage" id="theme-demo-stage"
        role="slider" tabindex="0"
        aria-label="Theme comparison: drag to reveal light or dark mode"
@@ -202,14 +261,15 @@ key: F
       <grigson-html-renderer class="chart-light"></grigson-html-renderer>
       <grigson-html-renderer class="chart-dark"></grigson-html-renderer>
       <template>---
-title: Blues in F
-key: F
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
 ---
 
-[Head]
-||: (4/4) F7 | % | % | % |
-| Bb7 | % | F7 | % |
-| C7 | Bb7 | F7 | C7 :||</template>
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 | G7 | Cm | % |
+| Ebm7 | Ab7 | Dbmaj7 | % |
+| Dm7b5 | G7 | Cm | % ||.</template>
     </grigson-chart>
     <div class="theme-demo-divider" aria-hidden="true">
       <div class="theme-demo-handle">◀▶</div>
@@ -217,47 +277,103 @@ key: F
     <span class="theme-demo-tag theme-demo-tag--dark" aria-hidden="true">Dark</span>
     <span class="theme-demo-tag theme-demo-tag--light" aria-hidden="true">Light</span>
   </div>
-</div>
-<script>
-  (function () {
-    var stage = document.getElementById('theme-demo-stage');
-    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var split = prefersDark ? 70 : 30;
+  <script>
+    (function () {
+      var stage = document.getElementById('theme-demo-stage');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var split = prefersDark ? 70 : 30;
 
-    function setSplit(value) {
-      split = Math.max(0, Math.min(100, value));
-      stage.style.setProperty('--split', split + '%');
-      stage.setAttribute('aria-valuenow', Math.round(split));
+      function setSplit(value) {
+        split = Math.max(0, Math.min(100, value));
+        stage.style.setProperty('--split', split + '%');
+        stage.setAttribute('aria-valuenow', Math.round(split));
+      }
+
+      setSplit(split);
+
+      stage.addEventListener('pointerdown', function (e) {
+        stage.setPointerCapture(e.pointerId);
+        var rect = stage.getBoundingClientRect();
+        setSplit(((e.clientX - rect.left) / rect.width) * 100);
+      });
+
+      stage.addEventListener('pointermove', function (e) {
+        if (!stage.hasPointerCapture(e.pointerId)) return;
+        var rect = stage.getBoundingClientRect();
+        setSplit(((e.clientX - rect.left) / rect.width) * 100);
+      });
+
+      stage.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setSplit(split - 5);
+        else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setSplit(split + 5);
+      });
+    }());
+  </script>
+</section>
+
+<section class="feature">
+  <h2>Chord symbols</h2>
+  <p>Two notation presets ship out of the box — the default symbolic style (♭ ♯ △ ø) and
+  the Real Book style (MI, MA, MI7(♭5)). You can also define your own preset with any HTML fragments.</p>
+  <p><a href="{{ '/customize/notation/' | url }}">Notation presets →</a></p>
+  <div class="demo-controls">
+    <button id="notation-btn-symbolic" class="active" onclick="setNotation('')">Symbolic</button>
+    <button id="notation-btn-realbook" onclick="setNotation('realbook')">Real Book</button>
+  </div>
+  <grigson-chart id="notation-demo" normalise>
+    <grigson-html-renderer id="notation-renderer"></grigson-html-renderer>
+    <template>---
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
+---
+
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 | G7 | Cm | % |
+| Ebm7 | Ab7 | Dbmaj7 | % |
+| Dm7b5 | G7 | Cm | % ||.</template>
+  </grigson-chart>
+  <script>
+    function setNotation(preset) {
+      var renderer = document.getElementById('notation-renderer');
+      if (preset) renderer.setAttribute('notation-preset', preset);
+      else renderer.removeAttribute('notation-preset');
+      document.getElementById('notation-btn-symbolic').classList.toggle('active', preset === '');
+      document.getElementById('notation-btn-realbook').classList.toggle('active', preset === 'realbook');
     }
+  </script>
+</section>
 
-    setSplit(split);
+<section class="feature">
+  <h2>Typefaces</h2>
+  <p>Choose from three built-in typeface styles — or supply your own font via a CSS custom property.</p>
+  <p><a href="{{ '/customize/typefaces/' | url }}">Typefaces docs →</a></p>
+  <div class="demo-controls">
+    <button id="typeface-btn-sans" class="active" onclick="setTypeface('')">Sans</button>
+    <button id="typeface-btn-serif" onclick="setTypeface('serif')">Serif</button>
+    <button id="typeface-btn-cursive" onclick="setTypeface('cursive')">Cursive</button>
+  </div>
+  <grigson-chart id="typeface-demo" normalise>
+    <grigson-html-renderer id="typeface-renderer"></grigson-html-renderer>
+    <template>---
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
+---
 
-    stage.addEventListener('pointerdown', function (e) {
-      stage.setPointerCapture(e.pointerId);
-      var rect = stage.getBoundingClientRect();
-      setSplit(((e.clientX - rect.left) / rect.width) * 100);
-    });
-
-    stage.addEventListener('pointermove', function (e) {
-      if (!stage.hasPointerCapture(e.pointerId)) return;
-      var rect = stage.getBoundingClientRect();
-      setSplit(((e.clientX - rect.left) / rect.width) * 100);
-    });
-
-    stage.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setSplit(split - 5);
-      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setSplit(split + 5);
-    });
-  }());
-</script>
-
-<h2>What's in the toolkit</h2>
-<ul>
-  <li><a href="{{ '/language/' | url }}">The grigson format</a> — a readable plain-text chord chart language with sections, keys, time signatures, repeats, and volta brackets</li>
-  <li><a href="{{ '/usage/custom-elements/' | url }}">Custom elements</a> — drop <code>&lt;grigson-chart&gt;</code> into any HTML page for live rendering with optional transposition</li>
-  <li><a href="{{ '/usage/accessibility/' | url }}">Accessibility</a> — screen-reader support built in; every chord is announced with its name, quality, and duration; fully customisable spoken labels for any language</li>
-  <li><a href="{{ '/extend/svg-renderer/' | url }}">SVG renderer</a> — produce publication-quality SVG for embedding in web pages or exporting</li>
-  <li><a href="{{ '/extend/text-renderer/' | url }}">Text renderer</a> — round-trip <code>.chart</code> output; use with the CLI for transposition pipelines</li>
-  <li><a href="{{ '/tooling/cli/' | url }}">CLI</a> — normalise, transpose, and validate <code>.chart</code> files from the command line</li>
-  <li><a href="{{ '/tooling/playground/' | url }}">Playground</a> — live editor with syntax highlighting, normalisation, and URL sharing</li>
-</ul>
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 | G7 | Cm | % |
+| Ebm7 | Ab7 | Dbmaj7 | % |
+| Dm7b5 | G7 | Cm | % ||.</template>
+  </grigson-chart>
+  <script>
+    function setTypeface(value) {
+      var renderer = document.getElementById('typeface-renderer');
+      if (value) renderer.setAttribute('typeface', value);
+      else renderer.removeAttribute('typeface');
+      document.getElementById('typeface-btn-sans').classList.toggle('active', value === '');
+      document.getElementById('typeface-btn-serif').classList.toggle('active', value === 'serif');
+      document.getElementById('typeface-btn-cursive').classList.toggle('active', value === 'cursive');
+    }
+  </script>
+</section>
