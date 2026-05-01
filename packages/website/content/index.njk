@@ -101,22 +101,32 @@ permalink: /
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   }
 
-  .theme-demo-footer {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .theme-demo-footer span {
-    font-size: 0.75rem;
-    opacity: 0.6;
-    white-space: nowrap;
-  }
-
-  .theme-demo-slider {
-    flex: 1;
+  .theme-demo-stage {
     cursor: ew-resize;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+
+  .theme-demo-tag {
+    position: absolute;
+    bottom: 0.6rem;
+    font-size: 0.7rem;
+    pointer-events: none;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    user-select: none;
+  }
+
+  .theme-demo-tag--dark {
+    left: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .theme-demo-tag--light {
+    right: 0.75rem;
+    color: rgba(0, 0, 0, 0.35);
   }
 </style>
 
@@ -163,7 +173,10 @@ key: F
 
 <div class="theme-demo">
   <p class="theme-demo-label">Light / Dark theme</p>
-  <div class="theme-demo-stage" id="theme-demo-stage">
+  <div class="theme-demo-stage" id="theme-demo-stage"
+       role="slider" tabindex="0"
+       aria-label="Theme comparison: drag to reveal light or dark mode"
+       aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
     <grigson-chart normalise id="theme-demo-chart">
       <style>
         :host {
@@ -198,32 +211,42 @@ key: F
 | Bb7 | % | F7 | % |
 | C7 | Bb7 | F7 | C7 :||</template>
     </grigson-chart>
-    <div class="theme-demo-divider" id="theme-demo-divider" aria-hidden="true">
+    <div class="theme-demo-divider" aria-hidden="true">
       <div class="theme-demo-handle">◀▶</div>
     </div>
-  </div>
-  <div class="theme-demo-footer">
-    <span>Dark</span>
-    <input type="range" class="theme-demo-slider" id="theme-demo-slider" min="0" max="100" step="1">
-    <span>Light</span>
+    <span class="theme-demo-tag theme-demo-tag--dark" aria-hidden="true">Dark</span>
+    <span class="theme-demo-tag theme-demo-tag--light" aria-hidden="true">Light</span>
   </div>
 </div>
 <script>
   (function () {
     var stage = document.getElementById('theme-demo-stage');
-    var slider = document.getElementById('theme-demo-slider');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var initial = prefersDark ? 70 : 30;
+    var split = prefersDark ? 70 : 30;
 
     function setSplit(value) {
-      stage.style.setProperty('--split', value + '%');
-      slider.value = value;
+      split = Math.max(0, Math.min(100, value));
+      stage.style.setProperty('--split', split + '%');
+      stage.setAttribute('aria-valuenow', Math.round(split));
     }
 
-    setSplit(initial);
+    setSplit(split);
 
-    slider.addEventListener('input', function () {
-      setSplit(Number(this.value));
+    stage.addEventListener('pointerdown', function (e) {
+      stage.setPointerCapture(e.pointerId);
+      var rect = stage.getBoundingClientRect();
+      setSplit(((e.clientX - rect.left) / rect.width) * 100);
+    });
+
+    stage.addEventListener('pointermove', function (e) {
+      if (!stage.hasPointerCapture(e.pointerId)) return;
+      var rect = stage.getBoundingClientRect();
+      setSplit(((e.clientX - rect.left) / rect.width) * 100);
+    });
+
+    stage.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setSplit(split - 5);
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setSplit(split + 5);
     });
   }());
 </script>
