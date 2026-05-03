@@ -16,13 +16,16 @@ Each element of the returned array is an `AnnotatedChord`:
 
 ```typescript
 interface AnnotatedChord {
-  chord: Chord;              // The original chord
-  homeKey: string;           // The key of the enclosing section
-  currentKey: string;        // The inferred local key at this chord
-  currentKeyCandidates: string[]; // All candidate keys (closest first)
-  loc?: SourceRange;         // Source location — mirrors chord.loc
+  chord: Chord;                        // The original chord
+  homeKey: string;                     // The key of the enclosing section
+  currentKey: string;                  // The inferred local key at this chord
+  currentKeyCandidates: string[];      // All candidate keys (closest first)
+  realtimeKeyCandidates: string[];     // Forward-looking resolution candidates for dominant chords
+  loc?: SourceRange;                   // Source location — mirrors chord.loc
 }
 ```
+
+`realtimeKeyCandidates` is populated only for dominant chords (chords with a dominant quality such as `dominant7`, `dom9`, `dom7flat9`, etc.). It contains the keys the chord is most likely resolving to, computed from the chord's pitch class and the quality's major/minor lean, refined by any preceding ii chord. For non-dominant chords the array equals `currentKeyCandidates`.
 
 ## Pattern Detection
 
