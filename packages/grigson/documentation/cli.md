@@ -52,15 +52,24 @@ grigson-html-renderer [options] [file]
 
 **Options**
 
-| Option                       | Description                                                  |
-| ---------------------------- | ------------------------------------------------------------ |
-| `--notation-preset <preset>` | Chord notation style: `jazz` (default), `pop`, or `symbolic` |
+| Option                          | Description                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------- |
+| `--format <format>`             | Output format: `html` (default), `css` (stylesheet only), or `standalone` (full page)  |
+| `--typeface <typeface>`         | Embedded typeface for `css`/`standalone` formats: `sans` (default), `serif`, `cursive` |
+| `--notation-preset <name>`      | Named notation preset (e.g. `default`, `realbook`, or a custom registered name)        |
+| `--notation-preset-file <path>` | Path to a JSON file containing a partial `NotationPreset` object                       |
+| `--simile-output <mode>`        | Simile rendering: `shorthand` (use `%` glyph) or `longhand` (default)                  |
+| `--accidentals <mode>`          | Accidental symbols: `unicode` (♭♯, default) or `ascii` (b#)                            |
+| `--help`, `-h`                  | Show help and exit                                                                     |
 
 **Examples**
 
 ```sh
 grigson-html-renderer song.chart > out.html
-cat song.chart | grigson normalise | grigson-html-renderer --notation-preset symbolic > out.html
+grigson-html-renderer --format standalone song.chart > out.html
+cat song.chart | grigson normalise | grigson-html-renderer --notation-preset realbook > out.html
+grigson-html-renderer --notation-preset-file ./my-preset.json song.chart > out.html
+grigson-html-renderer --simile-output shorthand song.chart > out.html
 ```
 
 ### `grigson-svg-renderer`

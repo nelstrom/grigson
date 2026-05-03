@@ -530,7 +530,7 @@ Two presets are built-in and always available without registration:
 
 #### CLI flags
 
-The `grigson-html-renderer` CLI accepts the following flags for controlling notation and simile rendering:
+The `grigson-html-renderer` CLI accepts the following flags:
 
 ```bash
 # Use a named preset (must be pre-registered — useful when extending the CLI)
@@ -541,6 +541,18 @@ grigson-html-renderer --notation-preset-file ./my-preset.json chart.chart
 
 # Render repeated bars as simile marks instead of writing them out in full
 grigson-html-renderer --simile-output shorthand chart.chart
+
+# Render accidentals as ASCII characters instead of Unicode glyphs
+grigson-html-renderer --accidentals ascii chart.chart
+
+# Choose the embedded typeface (relevant for --format css/standalone)
+grigson-html-renderer --typeface cursive --format standalone chart.chart > out.html
+
+# Emit a full standalone HTML page instead of a bare <div> fragment
+grigson-html-renderer --format standalone chart.chart > out.html
+
+# Emit only the CSS stylesheet (no chart content)
+grigson-html-renderer --format css > chart.css
 ```
 
 The `--notation-preset-file` flag reads a JSON file whose contents are treated as a `Partial<NotationPreset>`. Only the fields you specify are overridden; all others fall back to `DEFAULT_PRESET`.
