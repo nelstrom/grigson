@@ -419,31 +419,51 @@ The keys of `NotationPreset` correspond to the parser's `Quality` enum names. Ea
 
 **Accidentals within quality strings** (e.g. the ♭ in `7(♭5)`) must be written as unicode symbols — ♭ (U+266D) and ♯ (U+266F). The renderer transforms them at render time according to the `accidentals` setting.
 
-| Field            | Type     | Description                                         |
-| ---------------- | -------- | --------------------------------------------------- |
-| `major`          | `string` | Suffix for plain major triads (e.g. `C`)            |
-| `minor`          | `string` | Suffix for minor chords (e.g. `Cm`)                 |
-| `dominant7`      | `string` | Suffix for dominant seventh chords (e.g. `C7`)      |
-| `halfDiminished` | `string` | Suffix for half-diminished / min7♭5 (e.g. `Cø`)     |
-| `diminished`     | `string` | Suffix for diminished triads (e.g. `C°`)            |
-| `maj7`           | `string` | Suffix for major seventh chords (e.g. `C△`)         |
-| `min7`           | `string` | Suffix for minor seventh chords (e.g. `Cm7`)        |
-| `dim7`           | `string` | Suffix for diminished seventh chords (e.g. `C°7`)   |
-| `dom7flat5`      | `string` | Suffix for dominant seventh flat-five (e.g. `C7♭5`) |
+| Field            | Type     | Description                                              |
+| ---------------- | -------- | -------------------------------------------------------- |
+| `major`          | `string` | Suffix for plain major triads (e.g. `C`)                 |
+| `minor`          | `string` | Suffix for minor chords (e.g. `Cm`)                      |
+| `dominant7`      | `string` | Suffix for dominant seventh chords (e.g. `C7`)           |
+| `halfDiminished` | `string` | Suffix for half-diminished / min7♭5 (e.g. `Cø`)          |
+| `diminished`     | `string` | Suffix for diminished triads (e.g. `C°`)                 |
+| `maj7`           | `string` | Suffix for major seventh chords (e.g. `C△`)              |
+| `min7`           | `string` | Suffix for minor seventh chords (e.g. `Cm7`)             |
+| `dim7`           | `string` | Suffix for diminished seventh chords (e.g. `C°7`)        |
+| `dom7flat5`      | `string` | Suffix for dominant seventh flat-five (e.g. `C7♭5`)      |
+| `dom9`           | `string` | Suffix for dominant ninth chords (e.g. `C9`)             |
+| `dom11`          | `string` | Suffix for dominant eleventh chords (e.g. `C11`)         |
+| `dom13`          | `string` | Suffix for dominant thirteenth chords (e.g. `C13`)       |
+| `dom7flat9`      | `string` | Suffix for dominant 7♭9 (e.g. `C7♭9`)                    |
+| `dom7sharp9`     | `string` | Suffix for dominant 7♯9 (e.g. `C7♯9`)                    |
+| `dom7sharp5`     | `string` | Suffix for dominant 7♯5 / augmented seventh (e.g. `C+7`) |
+| `dom7flat13`     | `string` | Suffix for dominant 7♭13 (e.g. `C7♭13`)                  |
+| `sus4`           | `string` | Suffix for suspended fourth chords (e.g. `Csus4`)        |
+| `sus2`           | `string` | Suffix for suspended second chords (e.g. `Csus2`)        |
+| `add6`           | `string` | Suffix for added sixth chords (e.g. `C6`)                |
 
 #### `DEFAULT_PRESET` values
 
-| Field            | Default value                    |
-| ---------------- | -------------------------------- |
-| `major`          | `''`                             |
-| `minor`          | `'<small>m</small>'`             |
-| `dominant7`      | `'<sup>7</sup>'`                 |
-| `halfDiminished` | `'<sup><small>ø</small></sup>'`  |
-| `diminished`     | `'<sup><small>o</small></sup>'`  |
-| `maj7`           | `'<sup><small>△</small></sup>'`  |
-| `min7`           | `'<small>m</small><sup>7</sup>'` |
-| `dim7`           | `'<sup><small>o</small>7</sup>'` |
-| `dom7flat5`      | `'<sup>7♭5</sup>'`               |
+| Field            | Default value                      |
+| ---------------- | ---------------------------------- |
+| `major`          | `''`                               |
+| `minor`          | `'<small>m</small>'`               |
+| `dominant7`      | `'<sup>7</sup>'`                   |
+| `halfDiminished` | `'<sup><small>ø</small></sup>'`    |
+| `diminished`     | `'<sup><small>o</small></sup>'`    |
+| `maj7`           | `'<sup><small>△</small></sup>'`    |
+| `min7`           | `'<small>m</small><sup>7</sup>'`   |
+| `dim7`           | `'<sup><small>o</small>7</sup>'`   |
+| `dom7flat5`      | `'<sup>7♭5</sup>'`                 |
+| `dom9`           | `'<sup>9</sup>'`                   |
+| `dom11`          | `'<sup>11</sup>'`                  |
+| `dom13`          | `'<sup>13</sup>'`                  |
+| `dom7flat9`      | `'<sup>7♭9</sup>'`                 |
+| `dom7sharp9`     | `'<sup>7♯9</sup>'`                 |
+| `dom7sharp5`     | `'<sup>7♯5</sup>'`                 |
+| `dom7flat13`     | `'<sup>7♭13</sup>'`                |
+| `sus4`           | `'<sup><small>sus4</small></sup>'` |
+| `sus2`           | `'<sup><small>sus2</small></sup>'` |
+| `add6`           | `'<sup>6</sup>'`                   |
 
 #### HTML renderer and `<sup>`/`<sub>` tags
 
