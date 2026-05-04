@@ -9,6 +9,11 @@ permalink: /grille-harmonique/
   .cg {
     --g: 3px;            /* gap — controls line thickness */
     --g2: calc(var(--g) * 2);
+    /* For the X pattern, each triangle's apex must be pulled back from
+       (50%,50%) by g/√2 so the perpendicular gap width stays constant
+       all the way to the centre. Base corners shift by g*(1+1/√2). */
+    --gd:  calc(var(--g) * 0.7071); /* g / √2  */
+    --g17: calc(var(--g) * 1.7071); /* g * (1 + 1/√2) */
     --bar: 5.5rem;       /* width of one bar square */
     --line: var(--color-fg);
     --fill: var(--color-bg);
@@ -66,33 +71,36 @@ permalink: /grille-harmonique/
     );
   }
 
-  /* 4 chords: X pattern, four triangles meeting at centre */
+  /* 4 chords: X pattern.
+     Each triangle's apex sits at 50% ± gd rather than exactly 50%,
+     so the gap between adjacent zones is a constant g pixels wide
+     (perpendicular to the diagonal) all the way to the centre. */
   .bar-4 .zone-top {
     clip-path: polygon(
-      var(--g2) var(--g),
-      calc(100% - var(--g2)) var(--g),
-      50% 50%
+      var(--g17) var(--g),
+      calc(100% - var(--g17)) var(--g),
+      50% calc(50% - var(--gd))
     );
   }
   .bar-4 .zone-right {
     clip-path: polygon(
-      calc(100% - var(--g)) var(--g2),
-      calc(100% - var(--g)) calc(100% - var(--g2)),
-      50% 50%
+      calc(100% - var(--g)) var(--g17),
+      calc(100% - var(--g)) calc(100% - var(--g17)),
+      calc(50% + var(--gd)) 50%
     );
   }
   .bar-4 .zone-bottom {
     clip-path: polygon(
-      calc(100% - var(--g2)) calc(100% - var(--g)),
-      var(--g2) calc(100% - var(--g)),
-      50% 50%
+      calc(100% - var(--g17)) calc(100% - var(--g)),
+      var(--g17) calc(100% - var(--g)),
+      50% calc(50% + var(--gd))
     );
   }
   .bar-4 .zone-left {
     clip-path: polygon(
-      var(--g) calc(100% - var(--g2)),
-      var(--g) var(--g2),
-      50% 50%
+      var(--g) calc(100% - var(--g17)),
+      var(--g) var(--g17),
+      calc(50% - var(--gd)) 50%
     );
   }
 
