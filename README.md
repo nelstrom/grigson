@@ -25,16 +25,17 @@ The format is designed so that the source closely resembles the rendered output,
 
 This is a pnpm monorepo. Each package lives under `packages/`.
 
-| Package                                                                 | Description                                                                   |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| [`grigson`](packages/grigson/README.md)                                 | Core library: parser, normaliser, transposer, renderer, and CLI               |
-| [`eleventy-plugin-grigson`](packages/eleventy-plugin-grigson/README.md) | Eleventy plugin: build-time chart rendering via Declarative Shadow DOM        |
-| [`grigson-fonts`](packages/grigson-fonts/README.md)                     | Versioned WOFF2 font subsets served via jsDelivr for the CDN browser builds   |
-| [`language-server`](packages/language-server/README.md)                 | Standalone LSP server for `.chart` files                                      |
-| [`textmate-grammar`](packages/textmate-grammar/README.md)               | TextMate grammar (`source.grigson`) shared by the VS Code extension and Shiki |
-| [`tree-sitter-grammar`](packages/tree-sitter-grammar/README.md)         | Tree-sitter grammar for structural highlighting and text objects              |
-| [`vscode-extension`](packages/vscode-extension/README.md)               | VS Code extension: syntax highlighting and LSP client                         |
-| [`website`](packages/website/README.md)                                 | Eleventy documentation site with interactive playground                       |
+| Package                                                                                       | Description                                                                   |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`grigson`](packages/grigson/README.md)                                                       | Core library: parser, normaliser, transposer, renderer, and CLI               |
+| [`grigson-grille-harmonique-renderer`](packages/grigson-grille-harmonique-renderer/README.md) | Grille harmonique (French jazz chord grid) renderer                           |
+| [`eleventy-plugin-grigson`](packages/eleventy-plugin-grigson/README.md)                       | Eleventy plugin: build-time chart rendering via Declarative Shadow DOM        |
+| [`grigson-fonts`](packages/grigson-fonts/README.md)                                           | Versioned WOFF2 font subsets served via jsDelivr for the CDN browser builds   |
+| [`language-server`](packages/language-server/README.md)                                       | Standalone LSP server for `.chart` files                                      |
+| [`textmate-grammar`](packages/textmate-grammar/README.md)                                     | TextMate grammar (`source.grigson`) shared by the VS Code extension and Shiki |
+| [`tree-sitter-grammar`](packages/tree-sitter-grammar/README.md)                               | Tree-sitter grammar for structural highlighting and text objects              |
+| [`vscode-extension`](packages/vscode-extension/README.md)                                     | VS Code extension: syntax highlighting and LSP client                         |
+| [`website`](packages/website/README.md)                                                       | Eleventy documentation site with interactive playground                       |
 
 ---
 

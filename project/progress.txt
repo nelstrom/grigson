@@ -799,3 +799,17 @@ Build: 45 pages, 674 tests pass.
 
 ## shiki-markdown-highlighting
 Loaded javascript, typescript, shellscript into the Shiki highlighter in .eleventy.js alongside existing html and css. Wired Shiki into markdown-it via amendLibrary so all fenced code blocks in .md files are highlighted. Labelled bare fences as grigson in bars.md, chords.md, front-matter.md, repeats.md, sections.md, accessibility.md. Unknown or unlabelled languages fall back to plain for consistent Shiki structure. Build passes; no class="language-*" blocks remain in built output.
+
+## 2026-05-05 — grigson-grille-harmonique-renderer
+
+Implemented the `grigson-grille-harmonique-renderer` package end-to-end:
+
+- Exported `reflowSong` from `packages/grigson/src/index.ts`
+- Scaffolded package via `generate-renderer grille-harmonique`, fixed devDependencies, added `minimist`
+- `src/patterns.ts` — `detectPattern()` for all 8 supported 4/4 quarter-note bar patterns
+- `src/styles.ts` — complete CSS with all 8 zone shapes using `clip-path` and `part` attributes for styling
+- `src/render.ts` — `render(song, config)` with reflow, simile detection, chord HTML generation, aria labels
+- `src/element.ts` — `GrigsonGrilleHarmoniqueRenderer` custom element observing 3 attributes
+- `src/cli.ts` — CLI with `--format html/standalone`, `--notation-preset`, `--bars-per-line`, `--accidentals`
+- `src/render.test.ts` — 19 tests covering all patterns, simile, error cases, accidentals, title rendering
+- Updated `README.md` packages table; added `packages/website/content/renderers/grille-harmonique.md`
