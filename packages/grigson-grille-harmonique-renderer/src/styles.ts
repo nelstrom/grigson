@@ -229,6 +229,14 @@ export function getGrilleStyles(typeface: string = 'serif'): string {
   justify-content: center;
 }
 
+[part~="bar-1"] [part~="chord-slash"] {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+}
+
 [part~="bar-simile"] [part~="zone"] {
   clip-path: inset(var(--cg-gap));
 }
