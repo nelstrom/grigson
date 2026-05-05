@@ -31,6 +31,7 @@ export function getGrilleStyles(): string {
   background: currentColor;
   position: relative;
   flex-shrink: 0;
+  overflow: hidden;
   margin-left: calc(-1 * var(--cg-gap));
 }
 [part~="bar"]:first-child {
@@ -50,15 +51,15 @@ export function getGrilleStyles(): string {
   clip-path: inset(var(--cg-gap));
 }
 
-/* bar-2: diagonal top-left / bottom-right */
-[part~="bar-2"] [part~="zone-tl"] {
+/* bar-2-2: diagonal top-left / bottom-right */
+[part~="bar-2-2"] [part~="zone-tl"] {
   clip-path: polygon(
     var(--cg-gap)  var(--cg-gap),
     calc(100% - var(--cg-gap2)) var(--cg-gap),
     var(--cg-gap)  calc(100% - var(--cg-gap2))
   );
 }
-[part~="bar-2"] [part~="zone-br"] {
+[part~="bar-2-2"] [part~="zone-br"] {
   clip-path: polygon(
     calc(100% - var(--cg-gap)) var(--cg-gap2),
     calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap)),
@@ -174,29 +175,29 @@ export function getGrilleStyles(): string {
   );
 }
 
-/* bar-4: X pattern */
-[part~="bar-4"] [part~="zone-top"] {
+/* bar-1-1-1-1: X pattern */
+[part~="bar-1-1-1-1"] [part~="zone-top"] {
   clip-path: polygon(
     var(--cg-g17) var(--cg-gap),
     calc(100% - var(--cg-g17)) var(--cg-gap),
     50% calc(50% - var(--cg-gd))
   );
 }
-[part~="bar-4"] [part~="zone-right"] {
+[part~="bar-1-1-1-1"] [part~="zone-right"] {
   clip-path: polygon(
     calc(100% - var(--cg-gap)) var(--cg-g17),
     calc(100% - var(--cg-gap)) calc(100% - var(--cg-g17)),
     calc(50% + var(--cg-gd)) 50%
   );
 }
-[part~="bar-4"] [part~="zone-bottom"] {
+[part~="bar-1-1-1-1"] [part~="zone-bottom"] {
   clip-path: polygon(
     calc(100% - var(--cg-g17)) calc(100% - var(--cg-gap)),
     var(--cg-g17) calc(100% - var(--cg-gap)),
     50% calc(50% + var(--cg-gd))
   );
 }
-[part~="bar-4"] [part~="zone-left"] {
+[part~="bar-1-1-1-1"] [part~="zone-left"] {
   clip-path: polygon(
     var(--cg-gap) calc(100% - var(--cg-g17)),
     var(--cg-gap) var(--cg-g17),
@@ -219,6 +220,10 @@ export function getGrilleStyles(): string {
   justify-content: center;
 }
 
+[part~="bar-simile"] [part~="zone"] {
+  clip-path: inset(var(--cg-gap));
+}
+
 [part~="bar-simile"] [part~="chord"] {
   inset: 0;
   display: flex;
@@ -229,8 +234,8 @@ export function getGrilleStyles(): string {
   opacity: 0.4;
 }
 
-[part~="bar-2"] [part~="chord-tl"] { top: 33%; left: 33%; transform: translate(-50%, -50%); }
-[part~="bar-2"] [part~="chord-br"] { bottom: 33%; right: 33%; transform: translate(50%, 50%); }
+[part~="bar-2-2"] [part~="chord-tl"] { top: 33%; left: 33%; transform: translate(-50%, -50%); }
+[part~="bar-2-2"] [part~="chord-br"] { bottom: 33%; right: 33%; transform: translate(50%, 50%); }
 
 [part~="bar-3-1"] [part~="chord-main"]   { top: 40%; left: 35%; transform: translate(-50%, -50%); }
 [part~="bar-3-1"] [part~="chord-corner"] { bottom: 12%; right: 12%; transform: translate(50%, 50%); }
@@ -250,10 +255,10 @@ export function getGrilleStyles(): string {
 [part~="bar-1-1-2"] [part~="chord-bl"]    { bottom: 22%; left: 20%; transform: translate(-50%, 50%); }
 [part~="bar-1-1-2"] [part~="chord-right"] { top: 50%; right: 25%; transform: translate(50%, -50%); }
 
-[part~="bar-4"] [part~="chord-top"]    { top: 20%;    left: 50%;  transform: translate(-50%, -50%); }
-[part~="bar-4"] [part~="chord-right"]  { top: 50%;    right: 18%; transform: translate(50%, -50%); }
-[part~="bar-4"] [part~="chord-bottom"] { bottom: 20%; left: 50%;  transform: translate(-50%, 50%); }
-[part~="bar-4"] [part~="chord-left"]   { top: 50%;    left: 18%;  transform: translate(-50%, -50%); }
+[part~="bar-1-1-1-1"] [part~="chord-top"]    { top: 20%;    left: 50%;  transform: translate(-50%, -50%); }
+[part~="bar-1-1-1-1"] [part~="chord-right"]  { top: 50%;    right: 18%; transform: translate(50%, -50%); }
+[part~="bar-1-1-1-1"] [part~="chord-bottom"] { bottom: 20%; left: 50%;  transform: translate(-50%, 50%); }
+[part~="bar-1-1-1-1"] [part~="chord-left"]   { top: 50%;    left: 18%;  transform: translate(-50%, -50%); }
 
 /* ── Section ── */
 [part~="section"] {
