@@ -3,6 +3,7 @@ layout: base.njk
 title: Grille harmonique renderer
 permalink: /extend/grille-harmonique/
 ---
+<script defer src="{{ '/js/grigson-grille-harmonique-renderer-register.iife.js' | url }}"></script>
 
 <h1>Grille harmonique renderer</h1>
 
@@ -14,9 +15,11 @@ permalink: /extend/grille-harmonique/
 
 <h2>Example</h2>
 
-<p>Whisper Not rendered with 4 bars per row:</p>
+<p>Whisper Not rendered with 8 bars per row:</p>
 
-{% grilleHarmonique 8 %}
+<grigson-chart>
+  <grigson-grille-harmonique-renderer bars-per-line="8"></grigson-grille-harmonique-renderer>
+  <template>
 ---
 title: "Whisper Not"
 key: Dm
@@ -37,7 +40,8 @@ key: Dm
 [A]
 | C- C-/Bb | Am7b5 D7 | G- G-/F | Em7b5 A7 |
 | D- Bm7b5 | Em7b5 A7 | D- E- | F- G7 |
-{% endgrilleHarmonique %}
+  </template>
+</grigson-chart>
 
 <hr>
 
@@ -90,10 +94,13 @@ cat my-chart.chart | grigson-grille-harmonique-renderer
 </p>
 
 {% highlight "html" %}
-<script type="module" src="grigson-grille-harmonique-renderer.esm.js"></script>
+<script type="module" src="grigson-grille-harmonique-renderer-register.esm.js"></script>
 
-<grigson-chart src="my-chart.chart">
-  <grigson-grille-harmonique-renderer bars-per-line="4"></grigson-grille-harmonique-renderer>
+<grigson-chart>
+  <grigson-grille-harmonique-renderer bars-per-line="8"></grigson-grille-harmonique-renderer>
+  <template>
+    ...chart source...
+  </template>
 </grigson-chart>
 {% endhighlight %}
 
@@ -105,6 +112,7 @@ cat my-chart.chart | grigson-grille-harmonique-renderer
     <tr><td><code>notation-preset</code></td><td>—</td><td>Named notation preset</td></tr>
     <tr><td><code>bars-per-line</code></td><td><code>4</code></td><td>Bars per row</td></tr>
     <tr><td><code>accidentals</code></td><td><code>unicode</code></td><td><code>unicode</code> or <code>ascii</code></td></tr>
+    <tr><td><code>typeface</code></td><td><code>serif</code></td><td><code>serif</code>, <code>sans</code>, or <code>cursive</code></td></tr>
   </tbody>
 </table>
 
