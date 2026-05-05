@@ -1,4 +1,4 @@
-export function getGrilleStyles(typeface: string = 'serif'): string {
+export function getGrilleStyles(typeface: string = 'sans'): string {
   const fontFamily =
     typeface === 'cursive'
       ? '"GrigsonCursive", cursive'

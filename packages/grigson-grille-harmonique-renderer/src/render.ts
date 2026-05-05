@@ -204,7 +204,7 @@ function renderBar(
 export default function render(song: Song, config: GrilleConfig = {}): string {
   const barsPerLine = config.barsPerLine ?? 4;
   const mode = config.accidentals ?? 'unicode';
-  const typeface = config.typeface ?? 'serif';
+  const typeface = config.typeface ?? 'sans';
   const preset = resolvePreset(config.notation?.preset);
 
   // Validate: all bars must be 4/4
