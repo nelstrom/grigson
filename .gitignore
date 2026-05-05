@@ -6,6 +6,7 @@ node_modules/
 # Package outputs
 packages/eleventy-plugin-grigson/dist/
 packages/grigson/dist/
+packages/grigson-grille-harmonique-renderer/dist/
 packages/grigson-text-renderer/dist/
 packages/grigson-svg-renderer/dist/
 packages/language-server/dist/
