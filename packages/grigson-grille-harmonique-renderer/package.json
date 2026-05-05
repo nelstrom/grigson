@@ -8,6 +8,10 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./render": "./dist/render.js"
+  },
   "scripts": {
     "build": "pnpm run build:ts && pnpm run build:browser && pnpm run build:browser:register",
     "build:browser": "vite build",

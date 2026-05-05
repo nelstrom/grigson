@@ -8,6 +8,7 @@ import {
   getRendererStyles,
   getRendererFontFaceCSS,
 } from 'grigson';
+import renderGrilleHarmonique from 'grigson-grille-harmonique-renderer/render';
 import grigsonPlugin from 'eleventy-plugin-grigson';
 
 // Precompute once — font data URIs are large
@@ -69,6 +70,11 @@ export default async function (eleventyConfig) {
       `  <template>${source.trim()}</template>`,
       `</grigson-chart>`,
     ].join('\n');
+  });
+
+  eleventyConfig.addPairedShortcode('grilleHarmonique', (source, barsPerLine = 4) => {
+    const song = parseSong(source.trim());
+    return renderGrilleHarmonique(song, { barsPerLine });
   });
 
   eleventyConfig.amendLibrary('md', (md) => {

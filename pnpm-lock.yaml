@@ -208,6 +208,9 @@ importers:
       grigson:
         specifier: workspace:*
         version: link:../grigson
+      grigson-grille-harmonique-renderer:
+        specifier: workspace:*
+        version: link:../grigson-grille-harmonique-renderer
       grigson-text-renderer:
         specifier: workspace:*
         version: link:../grigson-text-renderer

@@ -1,0 +1,147 @@
+---
+layout: base.njk
+title: Grille harmonique renderer
+permalink: /extend/grille-harmonique/
+---
+
+<h1>Grille harmonique renderer</h1>
+
+<p>
+  The <code>grigson-grille-harmonique-renderer</code> package renders <code>.chart</code> files
+  as French jazz-style <em>grilles harmoniques</em> — each bar is a square, subdivided diagonally
+  to show how many chords fall within it.
+</p>
+<p>
+  A visual proof-of-concept with labelled subdivision examples is available at
+  <a href="/grille-harmonique/">/grille-harmonique/</a>.
+</p>
+
+<h2>Example</h2>
+
+<p>Blue Bossa rendered with 4 bars per row:</p>
+
+{% grilleHarmonique %}
+---
+title: "Blue Bossa"
+key: C minor
+meter: 4/4
+---
+
+| Cm7 | Cm7 | Fm7 | Fm7 |
+| Dm7b5 G7 | Cm7 | Cm7 | Cm7 |
+| Ebm7 Ab7 | Dbmaj7 | Dbmaj7 | Dm7b5 G7 |
+| Cm7 | Cm7 | Cm7 | Cm7 ||.
+{% endgrilleHarmonique %}
+
+<hr>
+
+<h2>Constraints</h2>
+
+<ul>
+  <li><strong>4/4 only.</strong> Non-4/4 time signatures cause a render error.</li>
+  <li><strong>Quarter-note granularity.</strong> Chord durations must be whole quarter notes (1, 2, 3, or 4 beats).</li>
+  <li><strong>8 bar patterns</strong> are supported: <code>1</code>, <code>2+2</code>, <code>3+1</code>, <code>1+3</code>, <code>2+1+1</code>, <code>1+2+1</code>, <code>1+1+2</code>, and <code>1+1+1+1</code>.</li>
+  <li>Simile bars (same chord slots as the previous bar) render as a <code>%</code> glyph in a plain square.</li>
+</ul>
+
+<hr>
+
+<h2>CLI</h2>
+
+{% highlight "sh" %}
+# HTML fragment (default)
+grigson-grille-harmonique-renderer my-chart.chart
+
+# Standalone HTML page, open in browser
+grigson-grille-harmonique-renderer --format standalone my-chart.chart > chart.html
+open chart.html
+
+# From stdin
+cat my-chart.chart | grigson-grille-harmonique-renderer
+{% endhighlight %}
+
+<h3>CLI options</h3>
+
+<table>
+  <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>--format &lt;fmt&gt;</code></td><td><code>html</code></td><td><code>html</code> (fragment) or <code>standalone</code> (full page)</td></tr>
+    <tr><td><code>--notation-preset &lt;name&gt;</code></td><td>—</td><td>Named preset, e.g. <code>realbook</code></td></tr>
+    <tr><td><code>--notation-preset-file &lt;path&gt;</code></td><td>—</td><td>JSON file with partial <code>NotationPreset</code></td></tr>
+    <tr><td><code>--bars-per-line &lt;n&gt;</code></td><td><code>4</code></td><td>Bars per row</td></tr>
+    <tr><td><code>--accidentals &lt;mode&gt;</code></td><td><code>unicode</code></td><td><code>unicode</code> (♭♯) or <code>ascii</code> (b#)</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Custom element</h2>
+
+<p>
+  The package registers the <code>grigson-grille-harmonique-renderer</code> custom element,
+  which implements the <code>GrigsonRendererElement</code> interface and can be used with
+  <code>&lt;grigson-chart&gt;</code>.
+</p>
+
+{% highlight "html" %}
+<script type="module" src="grigson-grille-harmonique-renderer.esm.js"></script>
+
+<grigson-chart src="my-chart.chart">
+  <grigson-grille-harmonique-renderer bars-per-line="4"></grigson-grille-harmonique-renderer>
+</grigson-chart>
+{% endhighlight %}
+
+<h3>Observed attributes</h3>
+
+<table>
+  <thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>notation-preset</code></td><td>—</td><td>Named notation preset</td></tr>
+    <tr><td><code>bars-per-line</code></td><td><code>4</code></td><td>Bars per row</td></tr>
+    <tr><td><code>accidentals</code></td><td><code>unicode</code></td><td><code>unicode</code> or <code>ascii</code></td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>CSS custom properties</h2>
+
+<p>These properties can be set on any ancestor of the chart element:</p>
+
+<table>
+  <thead><tr><th>Property</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>--cg-gap</code></td><td><code>3px</code></td><td>Line thickness between zones</td></tr>
+    <tr><td><code>--cg-bar</code></td><td><code>5.5rem</code></td><td>Width (and height) of each bar square</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2><code>part</code> attributes</h2>
+
+<p>Every rendered element carries a <code>part</code> attribute for styling:</p>
+
+<table>
+  <thead><tr><th>Part</th><th>Element</th></tr></thead>
+  <tbody>
+    <tr><td><code>chart</code></td><td>Outer chart container</td></tr>
+    <tr><td><code>row</code></td><td>Row of bars</td></tr>
+    <tr><td><code>section</code>, <code>section-label</code></td><td>Section wrapper and label</td></tr>
+    <tr><td><code>bar</code></td><td>Individual bar square</td></tr>
+    <tr><td><code>bar-1</code>, <code>bar-2-2</code>, <code>bar-3-1</code>, <code>bar-1-3</code>, <code>bar-2-1-1</code>, <code>bar-1-2-1</code>, <code>bar-1-1-2</code>, <code>bar-1-1-1-1</code></td><td>Pattern modifier on <code>bar</code></td></tr>
+    <tr><td><code>bar-simile</code></td><td>Simile bar (shows <code>%</code>)</td></tr>
+    <tr><td><code>zone</code> + position modifiers</td><td>White zone fill (<code>zone-tl</code>, <code>zone-br</code>, <code>zone-top</code>, <code>zone-right</code>, <code>zone-bottom</code>, <code>zone-left</code>, <code>zone-main</code>, <code>zone-corner</code>, <code>zone-mid</code>, <code>zone-tr</code>, <code>zone-bl</code>)</td></tr>
+    <tr><td><code>chord</code>, <code>chord-root</code>, <code>chord-accidental</code>, <code>chord-quality</code>, <code>chord-bass</code></td><td>Chord label parts</td></tr>
+    <tr><td><code>song-header</code>, <code>song-title</code>, <code>song-key</code></td><td>Header block parts</td></tr>
+  </tbody>
+</table>
+
+<h3>Example: larger bars with thicker lines</h3>
+
+{% highlight "css" %}
+[part~="chart"] {
+  --cg-bar: 7rem;
+  --cg-gap: 4px;
+}
+{% endhighlight %}
