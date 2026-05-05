@@ -2,11 +2,11 @@ export function getGrilleStyles(): string {
   return `
 /* ── Variables ── */
 [part~="chart"] {
-  --cg-gap: 3px;
+  --cg-gap: 2px;
   --cg-gap2: calc(var(--cg-gap) * 2);
   --cg-gd:  calc(var(--cg-gap) * 0.7071);
   --cg-g17: calc(var(--cg-gap) * 1.7071);
-  --cg-bar: 5.5rem;
+  --cg-bar: 6.5rem;
   font-family: serif;
   font-size: 0.9rem;
   display: flex;
@@ -55,15 +55,15 @@ export function getGrilleStyles(): string {
 [part~="bar-2-2"] [part~="zone-tl"] {
   clip-path: polygon(
     var(--cg-gap)  var(--cg-gap),
-    calc(100% - var(--cg-gap2)) var(--cg-gap),
-    var(--cg-gap)  calc(100% - var(--cg-gap2))
+    calc(100% - var(--cg-g17)) var(--cg-gap),
+    var(--cg-gap)  calc(100% - var(--cg-g17))
   );
 }
 [part~="bar-2-2"] [part~="zone-br"] {
   clip-path: polygon(
-    calc(100% - var(--cg-gap)) var(--cg-gap2),
+    calc(100% - var(--cg-gap)) var(--cg-g17),
     calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap)),
-    var(--cg-gap2) calc(100% - var(--cg-gap))
+    var(--cg-g17) calc(100% - var(--cg-gap))
   );
 }
 
@@ -265,6 +265,10 @@ export function getGrilleStyles(): string {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-top: calc(-1 * var(--cg-gap));
+}
+[part~="chart"] > [part~="section"]:first-child {
+  margin-top: 0;
 }
 [part~="section-label"] {
   font-family: system-ui, sans-serif;
