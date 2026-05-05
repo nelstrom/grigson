@@ -1,4 +1,10 @@
-export function getGrilleStyles(): string {
+export function getGrilleStyles(typeface: string = 'serif'): string {
+  const fontFamily =
+    typeface === 'cursive'
+      ? '"GrigsonCursive", cursive'
+      : typeface === 'sans'
+        ? '"GrigsonSans", sans-serif'
+        : '"GrigsonSerif", serif';
   return `
 /* ── Variables ── */
 [part~="chart"] {
@@ -7,7 +13,10 @@ export function getGrilleStyles(): string {
   --cg-gd:  calc(var(--cg-gap) * 0.7071);
   --cg-g17: calc(var(--cg-gap) * 1.7071);
   --cg-bar: 6.5rem;
-  font-family: serif;
+  --cg-slash-angle: 45deg;
+  --cg-slash-chord-offset: -0.35em;
+  --cg-slash-bass-offset: 0.35em;
+  font-family: ${fontFamily};
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;
@@ -294,6 +303,59 @@ export function getGrilleStyles(): string {
   font-size: 0.8rem;
   opacity: 0.6;
   margin: 0;
+}
+
+/* ── Glyph spacing ── */
+[part="chord-accidental"][data-glyph="unicode"] {
+  vertical-align: super;
+  line-height: 0;
+  margin-left: 0.05em;
+  margin-right: 0.05em;
+}
+
+[part="quality-accidental"][data-glyph="unicode"] {
+  font-size: 1em;
+  vertical-align: 0.15em;
+  line-height: 0;
+  margin-left: 0.05em;
+  margin-right: 0.05em;
+}
+
+/* ── Diagonal slash chord ── */
+[part~="chord-slash"] {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
+[part~="chord-slash"] [part="chord-top"] {
+  align-self: flex-start;
+  transform: translateY(var(--cg-slash-chord-offset));
+}
+
+[part~="chord-slash"] [part="chord-fraction-line"] {
+  position: relative;
+  display: inline-block;
+  width: 0.5em;
+  height: 1.2em;
+  background: none;
+  overflow: visible;
+}
+
+[part~="chord-slash"] [part="chord-fraction-line"]::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  background: currentColor;
+  transform: rotate(var(--cg-slash-angle));
+  transform-origin: center;
+}
+
+[part~="chord-slash"] [part="chord-bass"] {
+  align-self: flex-end;
+  transform: translateY(var(--cg-slash-bass-offset));
 }
 `;
 }

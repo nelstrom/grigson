@@ -5,7 +5,7 @@ import render, { type GrilleConfig } from './render.js';
 
 export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset', 'bars-per-line', 'accidentals'];
+    return ['notation-preset', 'bars-per-line', 'accidentals', 'typeface'];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
@@ -24,6 +24,10 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
 
     const accidentals = this.getAttribute('accidentals');
     if (accidentals === 'unicode' || accidentals === 'ascii') config.accidentals = accidentals;
+
+    const typeface = this.getAttribute('typeface');
+    if (typeface === 'sans' || typeface === 'serif' || typeface === 'cursive')
+      config.typeface = typeface;
 
     const html = render(song, config);
 

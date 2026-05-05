@@ -1,5 +1,11 @@
 import type { Song, Bar, Chord, TimeSignature, Section, Row, ChordSlot } from 'grigson';
-import { reflowSong, resolvePreset, DEFAULT_SPOKEN_PRESET, chordAriaLabel } from 'grigson';
+import {
+  reflowSong,
+  resolvePreset,
+  DEFAULT_SPOKEN_PRESET,
+  chordAriaLabel,
+  getRendererFontFaceCSS,
+} from 'grigson';
 import type { NotationPreset } from 'grigson';
 import { detectPattern, type BarPattern } from './patterns.js';
 import { getGrilleStyles } from './styles.js';
@@ -8,6 +14,7 @@ export interface GrilleConfig {
   notation?: { preset?: string | Partial<NotationPreset> };
   barsPerLine?: number;
   accidentals?: 'unicode' | 'ascii';
+  typeface?: 'sans' | 'serif' | 'cursive';
 }
 
 // ---------------------------------------------------------------------------
@@ -16,6 +23,13 @@ export interface GrilleConfig {
 
 function renderAccidental(acc: string, flat: string, sharp: string): string {
   return acc.replace(/b/g, flat).replace(/#/g, sharp);
+}
+
+function wrapQualityAccidentals(html: string, mode: 'unicode' | 'ascii'): string {
+  return html.replace(/[♭♯]/g, (ch) => {
+    const glyph = mode === 'ascii' ? (ch === '♭' ? 'b' : '#') : ch;
+    return `<span part="quality-accidental" data-glyph="${mode}">${glyph}</span>`;
+  });
 }
 
 function renderChordHtml(chord: Chord, preset: NotationPreset, mode: 'unicode' | 'ascii'): string {
@@ -28,7 +42,7 @@ function renderChordHtml(chord: Chord, preset: NotationPreset, mode: 'unicode' |
     const letter = rootMatch[1];
     const acc = rootMatch[2] ?? '';
     rootHtml = acc
-      ? `${letter}<span part="chord-accidental">${renderAccidental(acc, flat, sharp)}</span>`
+      ? `${letter}<span part="chord-accidental" data-glyph="${mode}">${renderAccidental(acc, flat, sharp)}</span>`
       : letter;
   } else {
     rootHtml = renderAccidental(chord.root, flat, sharp);
@@ -36,7 +50,7 @@ function renderChordHtml(chord: Chord, preset: NotationPreset, mode: 'unicode' |
 
   const qualityRaw = preset[chord.quality as keyof NotationPreset] ?? '';
   const qualityHtml = qualityRaw
-    ? `<span part="chord-quality">${qualityRaw.replace(/[♭♯]/g, (ch) => (mode === 'ascii' ? (ch === '♭' ? 'b' : '#') : ch))}</span>`
+    ? `<span part="chord-quality">${wrapQualityAccidentals(qualityRaw, mode)}</span>`
     : '';
 
   const inner = `<span part="chord-root">${rootHtml}</span>${qualityHtml}`;
@@ -45,10 +59,14 @@ function renderChordHtml(chord: Chord, preset: NotationPreset, mode: 'unicode' |
     const bassMatch = chord.bass.match(/^([A-G])(b+|#+)?$/);
     const bassHtml = bassMatch
       ? bassMatch[2]
-        ? `${bassMatch[1]}<span part="chord-accidental">${renderAccidental(bassMatch[2], flat, sharp)}</span>`
+        ? `${bassMatch[1]}<span part="chord-accidental" data-glyph="${mode}">${renderAccidental(bassMatch[2], flat, sharp)}</span>`
         : bassMatch[1]
       : renderAccidental(chord.bass, flat, sharp);
-    return `<span part="chord-inner">${inner}</span>/<span part="chord-bass">${bassHtml}</span>`;
+    return (
+      `<span part="chord-top">${inner}</span>` +
+      `<span part="chord-fraction-line"></span>` +
+      `<span part="chord-bass">${bassHtml}</span>`
+    );
   }
   return inner;
 }
@@ -170,7 +188,9 @@ function renderBar(
       const isWhole = slotBeats === 4;
       const label = ariaLabel(slot.chord, slotBeats, isWhole);
       const html = renderChordHtml(slot.chord, preset, mode);
-      return `<span part="${chordPart}" aria-label="${label}">${html}</span>`;
+      const hasBass = slot.chord.bass != null;
+      const partStr = hasBass ? `${chordPart} chord-slash` : chordPart;
+      return `<span part="${partStr}" aria-label="${label}">${html}</span>`;
     })
     .join('');
 
@@ -184,6 +204,7 @@ function renderBar(
 export default function render(song: Song, config: GrilleConfig = {}): string {
   const barsPerLine = config.barsPerLine ?? 4;
   const mode = config.accidentals ?? 'unicode';
+  const typeface = config.typeface ?? 'serif';
   const preset = resolvePreset(config.notation?.preset);
 
   // Validate: all bars must be 4/4
@@ -200,7 +221,7 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
   const reflowed = reflowSong(song, barsPerLine);
 
   const parts: string[] = [];
-  parts.push(`<style>${getGrilleStyles()}</style>`);
+  parts.push(`<style>${getRendererFontFaceCSS()}\n${getGrilleStyles(typeface)}</style>`);
 
   // Header
   if (song.title || song.key) {
