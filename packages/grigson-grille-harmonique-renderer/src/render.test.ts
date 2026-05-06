@@ -100,29 +100,26 @@ describe('render', () => {
   it('includes a style block', () => {
     const html = render(simpleSong([bar(chord('C'))]), {});
     expect(html).toContain('<style>');
-    expect(html).toContain('--cg-gap');
+    expect(html).toContain('--cg-grid-width');
   });
 
-  it('renders a bar-1 zone for a single-chord bar', () => {
+  it('renders a bar-1 for a single-chord bar with no line dividers', () => {
     const html = render(simpleSong([bar(chord('C'))]), {});
     expect(html).toContain('part="bar bar-1"');
-    expect(html).toContain('part="zone"');
+    expect(html).not.toContain('part="zone"');
   });
 
-  it('renders a bar-2 zone for a two-chord bar', () => {
+  it('renders a bar-2-2 with a diagonal line divider', () => {
     const html = render(simpleSong([bar(chord('C'), chord('G'))]), {});
     expect(html).toContain('part="bar bar-2-2"');
-    expect(html).toContain('zone-tl');
-    expect(html).toContain('zone-br');
+    expect(html).toContain('line-diag');
   });
 
-  it('renders a bar-4 zone for a four-chord bar', () => {
+  it('renders a bar-1-1-1-1 with two crossing line dividers', () => {
     const html = render(simpleSong([bar(chord('C'), chord('D'), chord('E'), chord('F'))]), {});
     expect(html).toContain('part="bar bar-1-1-1-1"');
-    expect(html).toContain('zone-top');
-    expect(html).toContain('zone-right');
-    expect(html).toContain('zone-bottom');
-    expect(html).toContain('zone-left');
+    expect(html).toContain('line-diag');
+    expect(html).toContain('line-anti');
   });
 
   it('renders a title when present', () => {

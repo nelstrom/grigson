@@ -110,38 +110,38 @@ function rowsOfSection(section: Section): Row[] {
 // ---------------------------------------------------------------------------
 
 interface ZoneSpec {
-  zoneParts: string[];
+  lineParts: string[];
   chordParts: string[];
 }
 
 const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
-  '1': { zoneParts: ['zone'], chordParts: ['chord'] },
+  '1': { lineParts: [], chordParts: ['chord'] },
   '2+2': {
-    zoneParts: ['zone zone-tl', 'zone zone-br'],
+    lineParts: ['line line-diag'],
     chordParts: ['chord chord-tl', 'chord chord-br'],
   },
   '3+1': {
-    zoneParts: ['zone zone-main', 'zone zone-corner'],
+    lineParts: ['line line-diag-br'],
     chordParts: ['chord chord-main', 'chord chord-corner'],
   },
   '1+3': {
-    zoneParts: ['zone zone-corner', 'zone zone-main'],
+    lineParts: ['line line-diag-tl'],
     chordParts: ['chord chord-corner', 'chord chord-main'],
   },
   '2+1+1': {
-    zoneParts: ['zone zone-left', 'zone zone-tr', 'zone zone-br'],
+    lineParts: ['line line-vert', 'line line-anti-tr', 'line line-diag-br'],
     chordParts: ['chord chord-left', 'chord chord-tr', 'chord chord-br'],
   },
   '1+2+1': {
-    zoneParts: ['zone zone-top', 'zone zone-mid', 'zone zone-bottom'],
+    lineParts: ['line line-diag', 'line line-anti'],
     chordParts: ['chord chord-top', 'chord chord-mid', 'chord chord-bottom'],
   },
   '1+1+2': {
-    zoneParts: ['zone zone-tl', 'zone zone-bl', 'zone zone-right'],
+    lineParts: ['line line-vert', 'line line-diag-tl', 'line line-anti-bl'],
     chordParts: ['chord chord-tl', 'chord chord-bl', 'chord chord-right'],
   },
   '1+1+1+1': {
-    zoneParts: ['zone zone-top', 'zone zone-right', 'zone zone-bottom', 'zone zone-left'],
+    lineParts: ['line line-diag', 'line line-anti'],
     chordParts: ['chord chord-top', 'chord chord-right', 'chord chord-bottom', 'chord chord-left'],
   },
 };
@@ -171,7 +171,7 @@ function renderBar(
   const isSimile = prevBar !== null && slotsEqual(bar, prevBar);
 
   if (isSimile) {
-    return `<div part="bar bar-simile"><div part="zone zone-simile"></div><span part="chord chord-simile" aria-label="repeat bar">%</span></div>`;
+    return `<div part="bar bar-simile"><span part="chord chord-simile" aria-label="repeat bar">%</span></div>`;
   }
 
   const pattern = detectPattern(bar, activeTSig);
@@ -179,7 +179,7 @@ function renderBar(
   const beats = PATTERN_BEATS[pattern];
   const chordSlots = bar.slots.filter((s): s is ChordSlot => s.type === 'chord');
 
-  const zones = spec.zoneParts.map((p) => `<div part="${p}"></div>`).join('');
+  const zones = spec.lineParts.map((p) => `<div part="${p}"></div>`).join('');
 
   const chords = chordSlots
     .map((slot, i) => {
@@ -239,11 +239,11 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
     const rows = rowsOfSection(section);
     if (rows.length === 0) continue;
 
+    parts.push(`<div part="section">`);
     if (section.label) {
-      parts.push(`<div part="section">`);
       parts.push(`<span part="section-label">${escapeHtml(section.label)}</span>`);
-      parts.push(`<div part="section-rows">`);
     }
+    parts.push(`<div part="section-rows">`);
 
     for (const row of rows) {
       parts.push(`<div part="row">`);
@@ -257,9 +257,7 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
       parts.push(`</div>`);
     }
 
-    if (section.label) {
-      parts.push(`</div></div>`);
-    }
+    parts.push(`</div></div>`);
   }
 
   parts.push(`</div>`);

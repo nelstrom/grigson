@@ -8,11 +8,14 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   return `
 /* ── Variables ── */
 [part~="chart"] {
-  --cg-gap: 2px;
-  --cg-gap2: calc(var(--cg-gap) * 2);
-  --cg-gd:  calc(var(--cg-gap) * 0.7071);
-  --cg-g17: calc(var(--cg-gap) * 1.7071);
-  --cg-bar: 6.5rem;
+  --cg-grid-width: 2px;
+  --cg-diag-width: 0.5px;
+  --cg-diag-style: solid;
+  --cg-bar-w: 6.5rem;
+  --cg-bar-h: 6.5rem;
+  /* Negative angle → "/" direction (bottom-left to top-right) */
+  --cg-diag-angle: calc(-1 * atan2(var(--cg-bar-h), var(--cg-bar-w)));
+  --cg-diag-len:   hypot(var(--cg-bar-w), var(--cg-bar-h));
   --cg-slash-angle: 45deg;
   --cg-slash-chord-offset: -0.35em;
   --cg-slash-bass-offset: 0.35em;
@@ -23,195 +26,90 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   width: fit-content;
 }
 
+/* ── Section rows ── */
+[part~="section-rows"] {
+  display: flex;
+  flex-direction: column;
+  background: currentColor;
+  padding: var(--cg-grid-width);
+  gap: var(--cg-grid-width);
+}
+
 /* ── Row ── */
 [part~="row"] {
   display: flex;
-  width: fit-content;
-  margin-top: calc(-1 * var(--cg-gap));
-}
-[part~="row"]:first-child {
-  margin-top: 0;
+  gap: var(--cg-grid-width);
 }
 
 /* ── Bar ── */
 [part~="bar"] {
-  width: var(--cg-bar);
-  aspect-ratio: 1;
-  background: currentColor;
+  background: Canvas;
+  color: CanvasText;
+  width: var(--cg-bar-w);
+  height: var(--cg-bar-h);
   position: relative;
   flex-shrink: 0;
   overflow: hidden;
-  margin-left: calc(-1 * var(--cg-gap));
-}
-[part~="bar"]:first-child {
-  margin-left: 0;
 }
 
-/* ── Zones ── */
-[part~="zone"] {
+/* ── Lines ── */
+[part~="line"] {
   position: absolute;
-  inset: 0;
-  background: Canvas;
-  color: CanvasText;
+  top: 50%;
+  left: 50%;
+  height: var(--cg-diag-width);
+  background: currentColor;
+  transform-origin: center;
 }
 
-/* bar-1: single inset rectangle */
-[part~="bar-1"] [part~="zone"] {
-  clip-path: inset(var(--cg-gap));
+/* Full "/" diagonal: bottom-left to top-right */
+[part~="line-diag"] {
+  width: var(--cg-diag-len);
+  transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
 }
 
-/* bar-2-2: diagonal top-left / bottom-right */
-[part~="bar-2-2"] [part~="zone-tl"] {
-  clip-path: polygon(
-    var(--cg-gap)  var(--cg-gap),
-    calc(100% - var(--cg-g17)) var(--cg-gap),
-    var(--cg-gap)  calc(100% - var(--cg-g17))
-  );
-}
-[part~="bar-2-2"] [part~="zone-br"] {
-  clip-path: polygon(
-    calc(100% - var(--cg-gap)) var(--cg-g17),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap)),
-    var(--cg-g17) calc(100% - var(--cg-gap))
-  );
+/* Full "\" anti-diagonal: top-left to bottom-right */
+[part~="line-anti"] {
+  width: var(--cg-diag-len);
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
 }
 
-/* bar-3-1: large trapezoid (3 beats) top-left + small triangle (1 beat) bottom-right */
-[part~="bar-3-1"] [part~="zone-main"] {
-  clip-path: polygon(
-    var(--cg-gap)       var(--cg-gap),
-    calc(100% - var(--cg-gap)) var(--cg-gap),
-    calc(100% - var(--cg-gap)) calc(50% - var(--cg-gap)),
-    calc(50% + var(--cg-gap))  calc(100% - var(--cg-gap)),
-    var(--cg-gap)       calc(100% - var(--cg-gap))
-  );
-}
-[part~="bar-3-1"] [part~="zone-corner"] {
-  clip-path: polygon(
-    calc(100% - var(--cg-gap)) calc(50% + var(--cg-gap)),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap)),
-    calc(50% + var(--cg-gap2)) calc(100% - var(--cg-gap))
-  );
+/* Half-length "/" lines — centered in their quadrant */
+[part~="line-diag-tl"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 25%;
+  left: 25%;
+  transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
 }
 
-/* bar-1-3: mirror of bar-3-1 — small triangle top-left + large trapezoid bottom-right */
-[part~="bar-1-3"] [part~="zone-corner"] {
-  clip-path: polygon(
-    var(--cg-gap)      var(--cg-gap),
-    calc(50% - var(--cg-gap2)) var(--cg-gap),
-    var(--cg-gap)      calc(50% - var(--cg-gap))
-  );
-}
-[part~="bar-1-3"] [part~="zone-main"] {
-  clip-path: polygon(
-    calc(50% - var(--cg-gap))  var(--cg-gap),
-    calc(100% - var(--cg-gap)) var(--cg-gap),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap)),
-    var(--cg-gap)       calc(100% - var(--cg-gap)),
-    var(--cg-gap)       calc(50% + var(--cg-gap))
-  );
+[part~="line-diag-br"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 75%;
+  left: 75%;
+  transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
 }
 
-/* bar-2-1-1: left trapezoid (2 beats) + top-right triangle + bottom-right triangle */
-[part~="bar-2-1-1"] [part~="zone-left"] {
-  clip-path: polygon(
-    var(--cg-gap)      var(--cg-gap),
-    calc(50% - var(--cg-gap))  var(--cg-gap),
-    calc(50% - var(--cg-gap))  calc(100% - var(--cg-gap)),
-    var(--cg-gap)      calc(100% - var(--cg-gap))
-  );
-}
-[part~="bar-2-1-1"] [part~="zone-tr"] {
-  clip-path: polygon(
-    calc(50% + var(--cg-gap))  var(--cg-gap),
-    calc(100% - var(--cg-gap)) var(--cg-gap),
-    calc(100% - var(--cg-gap)) calc(50% - var(--cg-gap))
-  );
-}
-[part~="bar-2-1-1"] [part~="zone-br"] {
-  clip-path: polygon(
-    calc(50% + var(--cg-gap))  calc(100% - var(--cg-gap)),
-    calc(100% - var(--cg-gap)) calc(50% + var(--cg-gap)),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap))
-  );
+/* Half-length "\" lines — centered in their quadrant */
+[part~="line-anti-tr"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 25%;
+  left: 75%;
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
 }
 
-/* bar-1-2-1: top-left triangle + center diamond + bottom-right triangle */
-[part~="bar-1-2-1"] [part~="zone-top"] {
-  clip-path: polygon(
-    var(--cg-gap)      var(--cg-gap),
-    calc(50% - var(--cg-gap))  var(--cg-gap),
-    var(--cg-gap)      calc(50% - var(--cg-gap))
-  );
-}
-[part~="bar-1-2-1"] [part~="zone-mid"] {
-  clip-path: polygon(
-    calc(50%)           var(--cg-gap2),
-    calc(100% - var(--cg-gap2)) 50%,
-    50%                calc(100% - var(--cg-gap2)),
-    var(--cg-gap2)     50%
-  );
-}
-[part~="bar-1-2-1"] [part~="zone-bottom"] {
-  clip-path: polygon(
-    calc(50% + var(--cg-gap))  calc(100% - var(--cg-gap)),
-    calc(100% - var(--cg-gap)) calc(50% + var(--cg-gap)),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap))
-  );
+[part~="line-anti-bl"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 75%;
+  left: 25%;
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
 }
 
-/* bar-1-1-2: mirror of bar-2-1-1 — top-left triangle + bottom-left triangle + right trapezoid */
-[part~="bar-1-1-2"] [part~="zone-tl"] {
-  clip-path: polygon(
-    var(--cg-gap)      var(--cg-gap),
-    calc(50% - var(--cg-gap))  var(--cg-gap),
-    var(--cg-gap)      calc(50% - var(--cg-gap))
-  );
-}
-[part~="bar-1-1-2"] [part~="zone-bl"] {
-  clip-path: polygon(
-    var(--cg-gap)      calc(50% + var(--cg-gap)),
-    calc(50% - var(--cg-gap))  calc(100% - var(--cg-gap)),
-    var(--cg-gap)      calc(100% - var(--cg-gap))
-  );
-}
-[part~="bar-1-1-2"] [part~="zone-right"] {
-  clip-path: polygon(
-    calc(50% + var(--cg-gap))  var(--cg-gap),
-    calc(100% - var(--cg-gap)) var(--cg-gap),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-gap)),
-    calc(50% + var(--cg-gap))  calc(100% - var(--cg-gap))
-  );
-}
-
-/* bar-1-1-1-1: X pattern */
-[part~="bar-1-1-1-1"] [part~="zone-top"] {
-  clip-path: polygon(
-    var(--cg-g17) var(--cg-gap),
-    calc(100% - var(--cg-g17)) var(--cg-gap),
-    50% calc(50% - var(--cg-gd))
-  );
-}
-[part~="bar-1-1-1-1"] [part~="zone-right"] {
-  clip-path: polygon(
-    calc(100% - var(--cg-gap)) var(--cg-g17),
-    calc(100% - var(--cg-gap)) calc(100% - var(--cg-g17)),
-    calc(50% + var(--cg-gd)) 50%
-  );
-}
-[part~="bar-1-1-1-1"] [part~="zone-bottom"] {
-  clip-path: polygon(
-    calc(100% - var(--cg-g17)) calc(100% - var(--cg-gap)),
-    var(--cg-g17) calc(100% - var(--cg-gap)),
-    50% calc(50% + var(--cg-gd))
-  );
-}
-[part~="bar-1-1-1-1"] [part~="zone-left"] {
-  clip-path: polygon(
-    var(--cg-gap) calc(100% - var(--cg-g17)),
-    var(--cg-gap) var(--cg-g17),
-    calc(50% - var(--cg-gd)) 50%
-  );
+/* Vertical internal divider */
+[part~="line-vert"] {
+  width: var(--cg-grid-width);
+  height: 100%;
+  top: 0;
+  transform: translateX(-50%);
 }
 
 /* ── Chord labels ── */
@@ -230,10 +128,6 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 
 [part~="bar-1"] [part~="chord-slash"] {
   display: inline-flex;
-}
-
-[part~="bar-simile"] [part~="zone"] {
-  clip-path: inset(var(--cg-gap));
 }
 
 [part~="bar-simile"] [part~="chord"] {
@@ -277,10 +171,9 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: calc(-1 * var(--cg-gap));
 }
-[part~="chart"] > [part~="section"]:first-child {
-  margin-top: 0;
+[part~="section"] + [part~="section"] {
+  margin-top: calc(-1 * var(--cg-grid-width));
 }
 [part~="section-label"] {
   font-family: system-ui, sans-serif;

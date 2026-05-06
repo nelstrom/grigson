@@ -42,10 +42,15 @@ const html = render(song, {
 
 ## CSS custom properties
 
-| Property   | Default  | Description                  |
-| ---------- | -------- | ---------------------------- |
-| `--cg-gap` | `3px`    | Line thickness between zones |
-| `--cg-bar` | `5.5rem` | Bar square size              |
+| Property          | Default  | Description                                   |
+| ----------------- | -------- | --------------------------------------------- |
+| `--cg-grid-width` | `2px`    | Outer border and gap between bars             |
+| `--cg-diag-width` | `2px`    | Thickness of diagonal dividing lines          |
+| `--cg-diag-style` | `solid`  | Border style for diagonals (`dashed`, etc.)   |
+| `--cg-bar-w`      | `6.5rem` | Bar width                                     |
+| `--cg-bar-h`      | `6.5rem` | Bar height (set independently for rectangles) |
+
+`--cg-diag-style` requires border-based rendering to take effect; with the default `background`-based lines only `solid` renders correctly.
 
 See the [full documentation](/renderers/grille-harmonique/) on the website.
 
