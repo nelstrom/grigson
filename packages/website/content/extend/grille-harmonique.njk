@@ -15,10 +15,19 @@ permalink: /extend/grille-harmonique/
 
 <h2>Example</h2>
 
-<p>Whisper Not rendered with 8 bars per row:</p>
+<p>Whisper Not (4 bars per row on narrow screens, 8 bars per row on wider screens):</p>
 
 <grigson-chart>
-  <grigson-grille-harmonique-renderer bars-per-line="8"></grigson-grille-harmonique-renderer>
+  <style>
+    .wn-4bar { display: block; }
+    .wn-8bar { display: none;  }
+    @container (min-width: 44rem) {
+      .wn-4bar { display: none;  }
+      .wn-8bar { display: block; }
+    }
+  </style>
+  <grigson-grille-harmonique-renderer class="wn-4bar" bars-per-line="4"></grigson-grille-harmonique-renderer>
+  <grigson-grille-harmonique-renderer class="wn-8bar" bars-per-line="8"></grigson-grille-harmonique-renderer>
   <template>
 ---
 title: "Whisper Not"
