@@ -223,17 +223,12 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 }
 
 [part~="bar-1"] [part~="chord"] {
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-[part~="bar-1"] [part~="chord-slash"] {
-  inset: auto;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+[part~="bar-1"] [part~="chord-slash"] {
   display: inline-flex;
 }
 
