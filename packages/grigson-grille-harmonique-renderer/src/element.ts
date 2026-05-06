@@ -1,5 +1,5 @@
 import type { Song } from 'grigson';
-import { GrigsonRendererUpdateEvent } from 'grigson';
+import { GrigsonRendererUpdateEvent, getRendererFontFaceCSS } from 'grigson';
 import type { GrigsonRendererElement } from 'grigson';
 import render, { type GrilleConfig } from './render.js';
 
@@ -13,7 +13,18 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
     this.dispatchEvent(new GrigsonRendererUpdateEvent());
   }
 
+  private _ensureFontFaces(): void {
+    const id = 'grigson-font-faces';
+    if (!document.getElementById(id)) {
+      const style = document.createElement('style');
+      style.id = id;
+      style.textContent = getRendererFontFaceCSS();
+      document.head.appendChild(style);
+    }
+  }
+
   renderChart(song: Song): Element {
+    this._ensureFontFaces();
     const config: GrilleConfig = {};
 
     const notationPreset = this.getAttribute('notation-preset');
