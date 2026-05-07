@@ -57,8 +57,8 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   position: absolute;
   top: 50%;
   left: 50%;
-  height: var(--cg-diag-width);
-  background: currentColor;
+  height: 0;
+  border-top: var(--cg-diag-width) var(--cg-diag-style) currentColor;
   transform-origin: center;
 }
 
@@ -108,6 +108,8 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 [part~="line-vert"] {
   width: var(--cg-grid-width);
   height: 100%;
+  border-top: none;
+  background: currentColor;
   top: 0;
   transform: translateX(-50%);
 }
