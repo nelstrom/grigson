@@ -53,10 +53,10 @@ permalink: /tooling/playground/
     row-gap: 0.35rem;
     font-size: 0.85rem;
   }
-  #html-options {
+  #html-options, #gh-options {
     display: contents;
   }
-  #html-options[hidden] {
+  #html-options[hidden], #gh-options[hidden] {
     display: none !important;
   }
   #output-container {
@@ -134,6 +134,7 @@ permalink: /tooling/playground/
     <select id="renderer-select">
       <option value="html">HTML</option>
       <option value="text">Text</option>
+      <option value="grille-harmonique">Grille Harmonique</option>
     </select>
     <span id="html-options">
       <label for="line-length-select">Line length:</label>
@@ -194,6 +195,31 @@ permalink: /tooling/playground/
         <option value="ascii">ASCII /</option>
       </select>
     </span>
+    <span id="gh-options" hidden>
+      <label for="gh-line-length-select">Line length:</label>
+      <select id="gh-line-length-select">
+        <option value="">Default (4 bars)</option>
+        <option value="2">Fixed 2</option>
+        <option value="4">Fixed 4</option>
+        <option value="8">Fixed 8</option>
+      </select>
+      <label for="gh-typeface-select">Typeface:</label>
+      <select id="gh-typeface-select">
+        <option value="sans">Sans-serif (default)</option>
+        <option value="serif">Serif</option>
+        <option value="cursive">Cursive (Petaluma)</option>
+      </select>
+      <label for="gh-notation-preset-select">Notation preset:</label>
+      <select id="gh-notation-preset-select">
+        <option value="">Default</option>
+        <option value="realbook">Real Book</option>
+      </select>
+      <label for="gh-accidentals-select">Accidentals:</label>
+      <select id="gh-accidentals-select">
+        <option value="">Unicode ♭♯ (default)</option>
+        <option value="ascii">ASCII b#</option>
+      </select>
+    </span>
     </div>
 
     <div id="output-container">
@@ -203,6 +229,7 @@ permalink: /tooling/playground/
 </div>
 
 <script src="{{ '/js/grigson-text-renderer-register.iife.js' | url }}"></script>
+<script src="{{ '/js/grigson-grille-harmonique-renderer-register.iife.js' | url }}"></script>
 <script src="{{ '/js/lz-string.min.js' | url }}"></script>
 <script src="{{ '/assets/js/grigson-monarch.js' | url }}"></script>
 <script src="{{ '/js/monaco/vs/loader.js' | url }}"></script>
@@ -223,6 +250,14 @@ permalink: /tooling/playground/
     }),
     z.object({
       name: z.literal('text'),
+      transposeSemitones: z.number().int().min(-11).max(11).optional(),
+    }),
+    z.object({
+      name: z.literal('grille-harmonique'),
+      typeface: z.enum(['sans', 'serif', 'cursive']).optional(),
+      preset: z.string().optional(),
+      accidentals: z.enum(['ascii', 'unicode']).optional(),
+      barsPerLine: z.number().int().min(1).optional(),
       transposeSemitones: z.number().int().min(-11).max(11).optional(),
     }),
   ]);
@@ -280,6 +315,11 @@ meter: 4/4
     const slashStyleSelect = document.getElementById('slash-style-select');
     const lineLengthSelect = document.getElementById('line-length-select');
     const htmlOptions = document.getElementById('html-options');
+    const ghOptions = document.getElementById('gh-options');
+    const ghLineLengthSelect = document.getElementById('gh-line-length-select');
+    const ghTypefaceSelect = document.getElementById('gh-typeface-select');
+    const ghNotationPresetSelect = document.getElementById('gh-notation-preset-select');
+    const ghAccidentalsSelect = document.getElementById('gh-accidentals-select');
 
     function applyLineLength(renderer) {
       const val = lineLengthSelect.value;
@@ -302,6 +342,18 @@ meter: 4/4
       if (name === 'text') {
         currentRenderer = document.createElement('grigson-text-renderer');
         htmlOptions.hidden = true;
+        ghOptions.hidden = true;
+      } else if (name === 'grille-harmonique') {
+        currentRenderer = document.createElement('grigson-grille-harmonique-renderer');
+        currentRenderer.setAttribute('typeface', ghTypefaceSelect.value);
+        const preset = ghNotationPresetSelect.value;
+        if (preset) currentRenderer.setAttribute('notation-preset', preset);
+        const accidentals = ghAccidentalsSelect.value;
+        if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
+        const barsPerLine = ghLineLengthSelect.value;
+        if (barsPerLine) currentRenderer.setAttribute('bars-per-line', barsPerLine);
+        htmlOptions.hidden = true;
+        ghOptions.hidden = false;
       } else {
         currentRenderer = document.createElement('grigson-html-renderer');
         currentRenderer.setAttribute('typeface', typefaceSelect.value);
@@ -315,6 +367,7 @@ meter: 4/4
         if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
         applyLineLength(currentRenderer);
         htmlOptions.hidden = false;
+        ghOptions.hidden = true;
       }
 
       const template = outputElement.querySelector('template');
@@ -398,11 +451,17 @@ meter: 4/4
             if (mode === 'fixed') config.barsPerLine = parseInt(n, 10);
             else if (mode === 'max') config.maxBarsPerLine = parseInt(n, 10);
           }
+        } else if (rendererSelect.value === 'grille-harmonique') {
+          if (ghTypefaceSelect.value !== 'sans') config.typeface = ghTypefaceSelect.value;
+          if (ghNotationPresetSelect.value) config.preset = ghNotationPresetSelect.value;
+          if (ghAccidentalsSelect.value) config.accidentals = ghAccidentalsSelect.value;
+          if (ghLineLengthSelect.value) config.barsPerLine = parseInt(ghLineLengthSelect.value, 10);
         }
         const semitones = parseInt(transposeSelect.value, 10);
         if (semitones !== 0) config.transposeSemitones = semitones;
         const params = new URLSearchParams();
-        if (config.name !== 'html' || config.typeface || config.preset || config.simileOutput || config.accidentals || config.slashStyle || config.barsPerLine || config.maxBarsPerLine || config.transposeSemitones) {
+        const isDefault = config.name === 'html' && !config.typeface && !config.preset && !config.simileOutput && !config.accidentals && !config.slashStyle && !config.barsPerLine && !config.maxBarsPerLine && !config.transposeSemitones;
+        if (!isDefault) {
           params.set('renderer-config', JSON.stringify(config));
         }
         const compressed = compressToEncodedURIComponent(editor.getValue());
@@ -440,14 +499,21 @@ meter: 4/4
     const initialConfig = readRendererConfig();
     rendererSelect.value = initialConfig.name;
     transposeSelect.value = String(initialConfig.transposeSemitones ?? 0);
-    typefaceSelect.value = initialConfig.typeface ?? 'sans';
-    notationPresetSelect.value = initialConfig.preset ?? '';
-    simileOutputSelect.value = initialConfig.simileOutput ?? '';
-    accidentalsSelect.value = initialConfig.accidentals ?? '';
-    slashStyleSelect.value = initialConfig.slashStyle ?? '';
-    if (initialConfig.barsPerLine) lineLengthSelect.value = `fixed:${initialConfig.barsPerLine}`;
-    else if (initialConfig.maxBarsPerLine) lineLengthSelect.value = `max:${initialConfig.maxBarsPerLine}`;
-    else lineLengthSelect.value = '';
+    if (initialConfig.name === 'grille-harmonique') {
+      ghTypefaceSelect.value = initialConfig.typeface ?? 'sans';
+      ghNotationPresetSelect.value = initialConfig.preset ?? '';
+      ghAccidentalsSelect.value = initialConfig.accidentals ?? '';
+      ghLineLengthSelect.value = initialConfig.barsPerLine ? String(initialConfig.barsPerLine) : '';
+    } else {
+      typefaceSelect.value = initialConfig.typeface ?? 'sans';
+      notationPresetSelect.value = initialConfig.preset ?? '';
+      simileOutputSelect.value = initialConfig.simileOutput ?? '';
+      accidentalsSelect.value = initialConfig.accidentals ?? '';
+      slashStyleSelect.value = initialConfig.slashStyle ?? '';
+      if (initialConfig.barsPerLine) lineLengthSelect.value = `fixed:${initialConfig.barsPerLine}`;
+      else if (initialConfig.maxBarsPerLine) lineLengthSelect.value = `max:${initialConfig.maxBarsPerLine}`;
+      else lineLengthSelect.value = '';
+    }
     const initialSemitones = initialConfig.transposeSemitones ?? 0;
     if (initialSemitones !== 0) outputElement.setAttribute('transpose-semitones', String(initialSemitones));
     applyRenderer();
@@ -520,6 +586,44 @@ meter: 4/4
     lineLengthSelect.addEventListener('change', () => {
       if (currentRenderer && rendererSelect.value === 'html') {
         applyLineLength(currentRenderer);
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    ghLineLengthSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'grille-harmonique') {
+        const barsPerLine = ghLineLengthSelect.value;
+        if (barsPerLine) currentRenderer.setAttribute('bars-per-line', barsPerLine);
+        else currentRenderer.removeAttribute('bars-per-line');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    ghTypefaceSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'grille-harmonique') {
+        currentRenderer.setAttribute('typeface', ghTypefaceSelect.value);
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    ghNotationPresetSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'grille-harmonique') {
+        const preset = ghNotationPresetSelect.value;
+        if (preset) currentRenderer.setAttribute('notation-preset', preset);
+        else currentRenderer.removeAttribute('notation-preset');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    ghAccidentalsSelect.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'grille-harmonique') {
+        const accidentals = ghAccidentalsSelect.value;
+        if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
+        else currentRenderer.removeAttribute('accidentals');
         outputElement.update();
       }
       updateURL();
