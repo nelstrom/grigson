@@ -82,6 +82,20 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
 }
 
+[part~="line-diag-tr"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 25%;
+  left: 75%;
+  transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
+}
+
+[part~="line-diag-bl"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 75%;
+  left: 25%;
+  transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
+}
+
 [part~="line-diag-br"] {
   width: calc(var(--cg-diag-len) / 2);
   top: 75%;
@@ -90,6 +104,13 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 }
 
 /* Half-length "\" lines — centered in their quadrant */
+[part~="line-anti-tl"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 25%;
+  left: 25%;
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
+}
+
 [part~="line-anti-tr"] {
   width: calc(var(--cg-diag-len) / 2);
   top: 25%;
@@ -101,6 +122,13 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   width: calc(var(--cg-diag-len) / 2);
   top: 75%;
   left: 25%;
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
+}
+
+[part~="line-anti-br"] {
+  width: calc(var(--cg-diag-len) / 2);
+  top: 75%;
+  left: 75%;
   transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
 }
 
@@ -142,31 +170,22 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   opacity: 0.4;
 }
 
-[part~="bar-2-2"] [part~="chord-tl"] { top: 33%; left: 33%; transform: translate(-50%, -50%); }
-[part~="bar-2-2"] [part~="chord-br"] { bottom: 33%; right: 33%; transform: translate(50%, 50%); }
+/* Global chord label positions (W/N/S/E zones and span zones) */
+[part~="chord-left"]   { top: 50%;    left: 18%;  transform: translate(-50%, -50%); }
+[part~="chord-top"]    { top: 20%;    left: 50%;  transform: translate(-50%, -50%); }
+[part~="chord-bottom"] { bottom: 20%; left: 50%;  transform: translate(-50%, 50%); }
+[part~="chord-right"]  { top: 50%;    right: 18%; transform: translate(50%, -50%); }
+[part~="chord-tl"]     { top: 33%;    left: 33%;  transform: translate(-50%, -50%); }
+[part~="chord-br"]     { bottom: 33%; right: 33%; transform: translate(50%, 50%); }
+[part~="chord-mid"]    { top: 50%;    left: 50%;  transform: translate(-50%, -50%); }
 
+/* 3+1: main = W+N+S area; corner = E (right-center) */
 [part~="bar-3-1"] [part~="chord-main"]   { top: 40%; left: 35%; transform: translate(-50%, -50%); }
-[part~="bar-3-1"] [part~="chord-corner"] { bottom: 12%; right: 12%; transform: translate(50%, 50%); }
+[part~="bar-3-1"] [part~="chord-corner"] { top: 50%; right: 20%; transform: translate(50%, -50%); }
 
-[part~="bar-1-3"] [part~="chord-corner"] { top: 12%; left: 12%; transform: translate(-50%, -50%); }
+/* 1+3: corner = W (left-center); main = N+S+E area */
+[part~="bar-1-3"] [part~="chord-corner"] { top: 50%; left: 15%; transform: translate(-50%, -50%); }
 [part~="bar-1-3"] [part~="chord-main"]   { bottom: 40%; right: 35%; transform: translate(50%, 50%); }
-
-[part~="bar-2-1-1"] [part~="chord-left"] { top: 50%; left: 25%; transform: translate(-50%, -50%); }
-[part~="bar-2-1-1"] [part~="chord-tr"]   { top: 22%; right: 20%; transform: translate(50%, -50%); }
-[part~="bar-2-1-1"] [part~="chord-br"]   { bottom: 22%; right: 20%; transform: translate(50%, 50%); }
-
-[part~="bar-1-2-1"] [part~="chord-top"]    { top: 18%; left: 18%; transform: translate(-50%, -50%); }
-[part~="bar-1-2-1"] [part~="chord-mid"]    { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-[part~="bar-1-2-1"] [part~="chord-bottom"] { bottom: 18%; right: 18%; transform: translate(50%, 50%); }
-
-[part~="bar-1-1-2"] [part~="chord-tl"]    { top: 22%; left: 20%; transform: translate(-50%, -50%); }
-[part~="bar-1-1-2"] [part~="chord-bl"]    { bottom: 22%; left: 20%; transform: translate(-50%, 50%); }
-[part~="bar-1-1-2"] [part~="chord-right"] { top: 50%; right: 25%; transform: translate(50%, -50%); }
-
-[part~="bar-1-1-1-1"] [part~="chord-top"]    { top: 20%;    left: 50%;  transform: translate(-50%, -50%); }
-[part~="bar-1-1-1-1"] [part~="chord-right"]  { top: 50%;    right: 18%; transform: translate(50%, -50%); }
-[part~="bar-1-1-1-1"] [part~="chord-bottom"] { bottom: 20%; left: 50%;  transform: translate(-50%, 50%); }
-[part~="bar-1-1-1-1"] [part~="chord-left"]   { top: 50%;    left: 18%;  transform: translate(-50%, -50%); }
 
 /* ── Section ── */
 [part~="section"] {

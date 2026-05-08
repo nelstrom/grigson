@@ -112,6 +112,9 @@ function rowsOfSection(section: Section): Row[] {
 interface ZoneSpec {
   lineParts: string[];
   chordParts: string[];
+  // Maps each chordParts entry to a chord slot index. Defaults to [0,1,2,...].
+  // Allows a slot to be rendered in multiple positions (e.g. 1+2+1 duplicates the middle chord into N and S).
+  slotIndices?: number[];
 }
 
 const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
@@ -121,28 +124,37 @@ const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
     chordParts: ['chord chord-tl', 'chord chord-br'],
   },
   '3+1': {
-    lineParts: ['line line-diag-br'],
+    // Beat order: W+N+S (main) | E (corner).
+    // E-triangle boundaries: "/" from center→top-right + "\" from center→bottom-right.
+    lineParts: ['line line-diag-tr', 'line line-anti-br'],
     chordParts: ['chord chord-main', 'chord chord-corner'],
   },
   '1+3': {
-    lineParts: ['line line-diag-tl'],
+    // Beat order: W (corner) | N+S+E (main).
+    // W-triangle boundaries: "\" from top-left→center + "/" from bottom-left→center.
+    lineParts: ['line line-anti-tl', 'line line-diag-bl'],
     chordParts: ['chord chord-corner', 'chord chord-main'],
   },
   '2+1+1': {
-    lineParts: ['line line-vert', 'line line-anti-tr', 'line line-diag-br'],
-    chordParts: ['chord chord-left', 'chord chord-tr', 'chord chord-br'],
+    // Beat order: W+N (tl) | S (bottom) | E (right). "/" splits left from right; "\" half splits S from E.
+    lineParts: ['line line-diag', 'line line-anti-br'],
+    chordParts: ['chord chord-tl', 'chord chord-bottom', 'chord chord-right'],
   },
   '1+2+1': {
+    // Beat order: W | N+S | E. Rendered as four quadrants with the spanning chord duplicated into N and S.
     lineParts: ['line line-diag', 'line line-anti'],
-    chordParts: ['chord chord-top', 'chord chord-mid', 'chord chord-bottom'],
+    chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-bottom', 'chord chord-right'],
+    slotIndices: [0, 1, 1, 2],
   },
   '1+1+2': {
-    lineParts: ['line line-vert', 'line line-diag-tl', 'line line-anti-bl'],
-    chordParts: ['chord chord-tl', 'chord chord-bl', 'chord chord-right'],
+    // Beat order: W (left) | N (top) | S+E (br). "/" splits W+N from S+E; "\" half splits W from N.
+    lineParts: ['line line-diag', 'line line-anti-tl'],
+    chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-br'],
   },
   '1+1+1+1': {
+    // Beat order: W (left) | N (top) | S (bottom) | E (right).
     lineParts: ['line line-diag', 'line line-anti'],
-    chordParts: ['chord chord-top', 'chord chord-right', 'chord chord-bottom', 'chord chord-left'],
+    chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-bottom', 'chord chord-right'],
   },
 };
 
@@ -152,7 +164,7 @@ const PATTERN_BEATS: Record<BarPattern, number[]> = {
   '3+1': [3, 1],
   '1+3': [1, 3],
   '2+1+1': [2, 1, 1],
-  '1+2+1': [1, 2, 1],
+  '1+2+1': [1, 1, 1, 1],
   '1+1+2': [1, 1, 2],
   '1+1+1+1': [1, 1, 1, 1],
 };
@@ -181,9 +193,11 @@ function renderBar(
 
   const zones = spec.lineParts.map((p) => `<div part="${p}"></div>`).join('');
 
-  const chords = chordSlots
-    .map((slot, i) => {
-      const chordPart = spec.chordParts[i] ?? 'chord';
+  const chords = spec.chordParts
+    .map((chordPart, i) => {
+      const slotIdx = spec.slotIndices ? spec.slotIndices[i] : i;
+      const slot = chordSlots[slotIdx ?? i];
+      if (!slot) return '';
       const slotBeats = beats[i] ?? 1;
       const isWhole = slotBeats === 4;
       const label = ariaLabel(slot.chord, slotBeats, isWhole);
