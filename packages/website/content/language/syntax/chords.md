@@ -38,33 +38,33 @@ Chord names follow standard notation. The root note is a capital letter (A–G) 
 
 The content of each measure is a sequence of chord names and dots. The beat unit is determined by the time signature denominator (e.g. a quarter note in 4/4 or 3/4; an eighth note in 6/8 or 3/8).
 
-### Mode 1 — no dots: chords split the bar evenly
+### Without dots: chords share the bar equally
 
-When a bar contains only chord names and no dots, the chords divide the bar into equal portions:
+When a bar contains only chord names, the chords divide the bar into equal portions:
 
 ```grigson
 | C |          (4/4) → C for 4 beats
 | C G |        (4/4) → C for 2 beats, G for 2 beats
 | C G Am F |   (4/4) → C G Am F, 1 beat each
-| Em D |        (6/8) → Em for 3 eighths, D for 3 eighths
+| Em D |       (6/8) → Em for 3 eighths, D for 3 eighths
 ```
 
-### Mode 2 — dots present: each slot is one beat unit
+### With dots: each item is one beat unit
 
 When a bar contains one or more dots (`.`), every item — chord name or dot — occupies exactly one beat unit. A dot continues (holds) the preceding chord for one more beat:
 
 ```grigson
 | C . . G |    (4/4) → C for 3 beats, G for 1 beat
 | C G . . |    (4/4) → C for 1 beat, G for 3 beats
-| G . A |       (3/4) → G for 2 beats, A for 1 beat
+| G . A |      (3/4) → G for 2 beats, A for 1 beat
 | Bb . C F . . | (6/8) → Bb for 2 eighths, C for 1 eighth, F for 3 eighths
 ```
 
-The total number of items (chords + dots) in a mode-2 bar must equal the number of beat units in the bar.
+The total number of items (chords + dots) in such a bar must equal the number of beat units in the bar.
 
-### Mixing modes within a row
+### Mixing within a row
 
-Different bars within the same row may independently use mode 1 or mode 2:
+Different bars within the same row may independently use either notation:
 
 ```grigson
 | (4/4) C G | Am . . F | C | G . . . |

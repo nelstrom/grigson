@@ -112,7 +112,7 @@ function semanticChecks(song: Song): Diagnostic[] {
  * const errors = validate('| C | Pm | F | G |');
  * // → [{ severity: 'error', message: 'Expected ...', range: { start: { line: 0, character: 6 }, ... } }]
  *
- * // Semantic warning — beat balance mismatch in mode-2 bar
+ * // Semantic warning — beat balance mismatch (dots present, wrong slot count)
  * const warnings = validate('| (4/4) C . . G . |');
  * // → [{ severity: 'warning', message: 'Bar has 5 slots but time signature is 4/4 (expected 4)', ... }]
  *
