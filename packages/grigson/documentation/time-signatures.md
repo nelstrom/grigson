@@ -37,26 +37,26 @@ Without the normalizer, a chart with `meter: 4/4` in the front matter but no inl
 The `computeGlobalLayout` function in `html.ts` tracks the currently active time signature as it walks bars in order. When it encounters a bar with `bar.timeSignature` set, it:
 
 1. Updates `activeTSig` to the new value.
-2. Sets `showTimeSig` on the layout object for that bar's **first slot only**.
+2. Sets `showTimeSig` on the layout object for that bar's **first cell only**.
 
-`showTimeSig` is `undefined` on every other slot in the bar, and on all slots of bars that carry no annotation. The renderer uses `showTimeSig` to decide whether to emit a `[part="time-sig"]` element inside a slot.
+`showTimeSig` is `undefined` on every other cell in the bar, and on all cells of bars that carry no annotation. The renderer uses `showTimeSig` to decide whether to emit a `[part="time-sig"]` element inside a cell.
 
 ```
 bar.timeSignature set?
-  yes → showTimeSig = bar.timeSignature  (first slot of that bar only)
-  no  → showTimeSig = undefined          (all slots)
+  yes → showTimeSig = bar.timeSignature  (first cell of that bar only)
+  no  → showTimeSig = undefined          (all cells)
 ```
 
 ---
 
 ## CSS layout
 
-The time signature is rendered as an absolutely-positioned element inside its chord slot, so it occupies no space in the flex layout and does not displace the chord.
+The time signature is rendered as an absolutely-positioned element inside its chord cell, so it occupies no space in the flex layout and does not displace the chord.
 
-The first slot after each barline receives extra left padding (`padding-left: 1em`) via the adjacent-sibling selector:
+The first cell after each barline receives extra left padding (`padding-left: 1em`) via the adjacent-sibling selector:
 
 ```css
-[part~="barline"] + [part="slot"] {
+[part~="barline"] + [part="cell"] {
   padding-left: 1em;
 }
 ```
@@ -74,7 +74,7 @@ This creates a reserved zone to the left of every first chord. The time signatur
 
 The result is that the time signature sits visually between the barline and the chord, and the chord's horizontal position is identical whether or not a time signature is present.
 
-Second and later slots in a bar receive no left padding — they are not matched by the adjacent-sibling selector — so chords in multi-chord bars sit in their natural grid positions.
+Second and later cells in a bar receive no left padding — they are not matched by the adjacent-sibling selector — so chords in multi-chord bars sit in their natural grid positions.
 
 ---
 
@@ -84,6 +84,6 @@ Second and later slots in a bar receive no left padding — they are not matched
 | ------------------------------ | -------------------------------------------------------------------------------------------------------- |
 | Parser                         | Sets `bar.timeSignature` on bars with an inline `(n/d)` annotation                                       |
 | Normalizer                     | Sets `bar.timeSignature` on the first bar when a `meter:` front-matter field is declared                 |
-| Layout (`computeGlobalLayout`) | Sets `showTimeSig` on the first slot of each annotated bar                                               |
-| HTML renderer                  | Emits `[part="time-sig"]` inside the slot when `showTimeSig` is set                                      |
-| CSS                            | Reserves space with `padding-left` on post-barline slots; positions time-sig absolutely within that zone |
+| Layout (`computeGlobalLayout`) | Sets `showTimeSig` on the first cell of each annotated bar                                               |
+| HTML renderer                  | Emits `[part="time-sig"]` inside the cell when `showTimeSig` is set                                      |
+| CSS                            | Reserves space with `padding-left` on post-barline cells; positions time-sig absolutely within that zone |

@@ -38,17 +38,17 @@ Comment between rows
   (row
     (open_barline)
     (bar_tail
-      (beat_slot (chord (note_letter)))
+      (beat_cell (chord (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot (chord (note_letter)))
+      (beat_cell (chord (note_letter)))
       (close_barline)))
   (comment)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot (chord (note_letter)))
+      (beat_cell (chord (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot (chord (note_letter)))
+      (beat_cell (chord (note_letter)))
       (close_barline))))

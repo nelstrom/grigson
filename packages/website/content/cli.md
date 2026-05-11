@@ -371,11 +371,11 @@ The error points to the exact position in the input (`line:character`).
 
 #### Semantic warning — beat balance
 
-Parse errors catch syntax problems; semantic warnings catch musical logic errors that the parser accepts. A bar with dot slots must have exactly as many slots as the time signature's numerator:
+Parse errors catch syntax problems; semantic warnings catch musical logic errors that the parser accepts. A bar with dot cells must have exactly as many cells as the time signature's numerator:
 
 ```sh
 $ echo '| (4/4) C . . G . |' | grigson validate
-<stdin>:1:3: warning: Bar has 5 slots but time signature is 4/4 (expected 4)
+<stdin>:1:3: warning: Bar has 5 cells but time signature is 4/4 (expected 4)
 $ echo $?
 1
 ```

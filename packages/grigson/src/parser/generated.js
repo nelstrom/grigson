@@ -501,35 +501,35 @@ function peg$parse(input, options) {
     return value.trim();
   }
   function peg$f8(open, bars) {
-    // Resolve simile bars left-to-right: each % copies the preceding bar's slots
-    let lastSlots = [];
+    // Resolve simile bars left-to-right: each % copies the preceding bar's cells
+    let lastCells = [];
     for (const bar of bars) {
       if (bar.simile) {
-        bar.slots = lastSlots.map((s) => ({ ...s }));
+        bar.cells = lastCells.map((s) => ({ ...s }));
         delete bar.simile;
       } else {
-        lastSlots = bar.slots;
+        lastCells = bar.cells;
       }
     }
     return { type: 'row', openBarline: open, bars, loc: makeLoc(location()) };
   }
   function peg$f9(ts, result, close) {
-    const { slots, hints } = result;
-    const bar = { type: 'bar', slots, closeBarline: close };
+    const { cells, hints } = result;
+    const bar = { type: 'bar', cells, closeBarline: close };
     if (ts) bar.timeSignature = ts;
     if (hints.length > 0) bar.tonalityHints = hints;
     bar.loc = makeLoc(location());
     return bar;
   }
   function peg$f10(close) {
-    // Simile mark — slots resolved by the Row action above
-    const bar = { type: 'bar', simile: true, slots: [], closeBarline: close };
+    // Simile mark — cells resolved by the Row action above
+    const bar = { type: 'bar', simile: true, cells: [], closeBarline: close };
     bar.loc = makeLoc(location());
     return bar;
   }
   function peg$f11(open, ts, result, close) {
-    const { slots, hints } = result;
-    const bar = { type: 'bar', slots, closeBarline: close };
+    const { cells, hints } = result;
+    const bar = { type: 'bar', cells, closeBarline: close };
     if (ts) bar.timeSignature = ts;
     if (hints.length > 0) bar.tonalityHints = hints;
     bar.loc = makeLoc(location());
@@ -575,21 +575,21 @@ function peg$parse(input, options) {
     return { kind: 'single' };
   }
   function peg$f25(items) {
-    const slots = [];
+    const cells = [];
     const hints = [];
-    let slotIdx = 0;
+    let cellIdx = 0;
     for (const [, item] of items) {
       if (item.type === 'tonalityHint') {
-        hints.push({ beforeSlotIndex: slotIdx, key: item.key, loc: item.loc });
+        hints.push({ beforeCellIndex: cellIdx, key: item.key, loc: item.loc });
       } else {
-        slots.push(item);
-        slotIdx++;
+        cells.push(item);
+        cellIdx++;
       }
     }
-    if (!slots.some((s) => s.type === 'chord')) {
+    if (!cells.some((s) => s.type === 'chord')) {
       error('A bar must contain at least one chord');
     }
-    return { slots, hints };
+    return { cells, hints };
   }
   function peg$f26(chord) {
     return { type: 'chord', chord, loc: makeLoc(location()) };
@@ -1366,7 +1366,7 @@ function peg$parse(input, options) {
     if (s1 === peg$FAILED) {
       s1 = null;
     }
-    s2 = peg$parseBeatSlotList();
+    s2 = peg$parseBeatCellList();
     if (s2 !== peg$FAILED) {
       s3 = peg$parseCloseBarline();
       if (s3 !== peg$FAILED) {
@@ -1423,7 +1423,7 @@ function peg$parse(input, options) {
       if (s3 === peg$FAILED) {
         s3 = null;
       }
-      s4 = peg$parseBeatSlotList();
+      s4 = peg$parseBeatCellList();
       if (s4 !== peg$FAILED) {
         s5 = peg$parseCloseBarline();
         if (s5 !== peg$FAILED) {
@@ -1768,14 +1768,14 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseBeatSlotList() {
+  function peg$parseBeatCellList() {
     let s0, s1, s2, s3, s4;
 
     s0 = peg$currPos;
     s1 = [];
     s2 = peg$currPos;
     s3 = peg$parse_();
-    s4 = peg$parseBeatSlotItem();
+    s4 = peg$parseBeatCellItem();
     if (s4 !== peg$FAILED) {
       s3 = [s3, s4];
       s2 = s3;
@@ -1788,7 +1788,7 @@ function peg$parse(input, options) {
         s1.push(s2);
         s2 = peg$currPos;
         s3 = peg$parse_();
-        s4 = peg$parseBeatSlotItem();
+        s4 = peg$parseBeatCellItem();
         if (s4 !== peg$FAILED) {
           s3 = [s3, s4];
           s2 = s3;
@@ -1812,18 +1812,18 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseBeatSlotItem() {
+  function peg$parseBeatCellItem() {
     let s0;
 
     s0 = peg$parseTonalityHint();
     if (s0 === peg$FAILED) {
-      s0 = peg$parseBeatSlot();
+      s0 = peg$parseBeatCell();
     }
 
     return s0;
   }
 
-  function peg$parseBeatSlot() {
+  function peg$parseBeatCell() {
     let s0, s1;
 
     s0 = peg$currPos;

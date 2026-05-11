@@ -10,9 +10,9 @@ export type {
   Quality,
   FrontMatter,
   TimeSignature,
-  ChordSlot,
-  DotSlot,
-  BeatSlot,
+  ChordCell,
+  DotCell,
+  BeatCell,
   BarlineKind,
   Barline,
   CommentLine,
@@ -37,8 +37,8 @@ export {
 export { analyseSong } from './theory/harmonicAnalysis.js';
 export type {
   AnnotatedChord,
-  AnnotatedChordSlot,
-  AnalysedBeatSlot,
+  AnnotatedChordCell,
+  AnalysedBeatCell,
   AnalysedBar,
   AnalysedRow,
   AnalysedSectionItem,

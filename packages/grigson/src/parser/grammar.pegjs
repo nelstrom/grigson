@@ -146,14 +146,14 @@ FrontMatterValue
 
 Row
   = open:OpenBarline _ bars:BarTail+ {
-      // Resolve simile bars left-to-right: each % copies the preceding bar's slots
-      let lastSlots = [];
+      // Resolve simile bars left-to-right: each % copies the preceding bar's cells
+      let lastCells = [];
       for (const bar of bars) {
         if (bar.simile) {
-          bar.slots = lastSlots.map(s => ({ ...s }));
+          bar.cells = lastCells.map(s => ({ ...s }));
           delete bar.simile;
         } else {
-          lastSlots = bar.slots;
+          lastCells = bar.cells;
         }
       }
       return { type: "row", openBarline: open, bars, loc: makeLoc(location()) };
@@ -162,25 +162,25 @@ Row
 // A bar's content plus its closing barline.
 // The opening barline is consumed by Row (or the previous BarTail).
 BarTail
-  = ts:TimeSignatureToken? result:BeatSlotList close:CloseBarline _ {
-      const { slots, hints } = result;
-      const bar = { type: "bar", slots, closeBarline: close };
+  = ts:TimeSignatureToken? result:BeatCellList close:CloseBarline _ {
+      const { cells, hints } = result;
+      const bar = { type: "bar", cells, closeBarline: close };
       if (ts) bar.timeSignature = ts;
       if (hints.length > 0) bar.tonalityHints = hints;
       bar.loc = makeLoc(location());
       return bar;
     }
   / "%" _ close:CloseBarline _ {
-      // Simile mark — slots resolved by the Row action above
-      const bar = { type: "bar", simile: true, slots: [], closeBarline: close };
+      // Simile mark — cells resolved by the Row action above
+      const bar = { type: "bar", simile: true, cells: [], closeBarline: close };
       bar.loc = makeLoc(location());
       return bar;
     }
 
 Bar
-  = open:OpenBarline _ ts:TimeSignatureToken? result:BeatSlotList close:CloseBarline {
-      const { slots, hints } = result;
-      const bar = { type: "bar", slots, closeBarline: close };
+  = open:OpenBarline _ ts:TimeSignatureToken? result:BeatCellList close:CloseBarline {
+      const { cells, hints } = result;
+      const bar = { type: "bar", cells, closeBarline: close };
       if (ts) bar.timeSignature = ts;
       if (hints.length > 0) bar.tonalityHints = hints;
       bar.loc = makeLoc(location());
@@ -206,30 +206,30 @@ CloseBarline
   / "||"                  { return { kind: "double" }; }
   / "|"                   { return { kind: "single" }; }
 
-BeatSlotList
-  = items:(_ BeatSlotItem)+ _ {
-      const slots = [];
+BeatCellList
+  = items:(_ BeatCellItem)+ _ {
+      const cells = [];
       const hints = [];
-      let slotIdx = 0;
+      let cellIdx = 0;
       for (const [, item] of items) {
         if (item.type === "tonalityHint") {
-          hints.push({ beforeSlotIndex: slotIdx, key: item.key, loc: item.loc });
+          hints.push({ beforeCellIndex: cellIdx, key: item.key, loc: item.loc });
         } else {
-          slots.push(item);
-          slotIdx++;
+          cells.push(item);
+          cellIdx++;
         }
       }
-      if (!slots.some(s => s.type === "chord")) {
+      if (!cells.some(s => s.type === "chord")) {
         error("A bar must contain at least one chord");
       }
-      return { slots, hints };
+      return { cells, hints };
     }
 
-BeatSlotItem
+BeatCellItem
   = TonalityHint
-  / BeatSlot
+  / BeatCell
 
-BeatSlot
+BeatCell
   = chord:Chord { return { type: "chord", chord, loc: makeLoc(location()) }; }
   / "." { return { type: "dot", loc: makeLoc(location()) }; }
 

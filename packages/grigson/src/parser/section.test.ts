@@ -31,12 +31,12 @@ describe('section parsing', () => {
     expect(song.sections).toHaveLength(2);
     expect(song.sections[0].label).toBe('Verse');
     expect(song.sections[0].rows).toHaveLength(1);
-    const bar0slot0 = song.sections[0].rows[0].bars[0].slots[0];
-    expect(bar0slot0.type === 'chord' && bar0slot0.chord.root).toBe('C');
+    const bar0cell0 = song.sections[0].rows[0].bars[0].cells[0];
+    expect(bar0cell0.type === 'chord' && bar0cell0.chord.root).toBe('C');
     expect(song.sections[1].label).toBe('Chorus');
     expect(song.sections[1].rows).toHaveLength(1);
-    const bar1slot0 = song.sections[1].rows[0].bars[0].slots[0];
-    expect(bar1slot0.type === 'chord' && bar1slot0.chord.root).toBe('F');
+    const bar1cell0 = song.sections[1].rows[0].bars[0].cells[0];
+    expect(bar1cell0.type === 'chord' && bar1cell0.chord.root).toBe('F');
   });
 
   it('blank lines between section label and rows do not produce extra section nodes', () => {
@@ -131,7 +131,7 @@ describe('section key annotation', () => {
     const source = '[Chorus] key: Db\n| C#m7 | Ab7 | Db |\n';
     const song = parseSong(source);
     const normalised = normaliseSong(song);
-    const slot = normalised.sections[0].rows[0].bars[0].slots[0];
-    expect(slot.type === 'chord' && slot.chord.root).toBe('Db');
+    const cell = normalised.sections[0].rows[0].bars[0].cells[0];
+    expect(cell.type === 'chord' && cell.chord.root).toBe('Db');
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { transposeSong, transposeSongToKey } from './transpose.js';
-import type { Song, Chord, Bar, Row, Section, ChordSlot } from '../parser/types.js';
+import type { Song, Chord, Bar, Row, Section, ChordCell } from '../parser/types.js';
 
 function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
   return { type: 'chord', root, quality };
@@ -11,7 +11,7 @@ function chSlash(root: string, bass: string, quality: Chord['quality'] = 'major'
 }
 
 function bar(c: Chord): Bar {
-  return { type: 'bar', slots: [{ type: 'chord', chord: c }], closeBarline: { kind: 'single' } };
+  return { type: 'bar', cells: [{ type: 'chord', chord: c }], closeBarline: { kind: 'single' } };
 }
 
 function row(...chords: Chord[]): Row {
@@ -30,7 +30,7 @@ function getRoots(result: Song): string[] {
   return result.sections.flatMap((sec) =>
     sec.rows.flatMap((r) =>
       r.bars.flatMap((b) =>
-        b.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord.root),
+        b.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord.root),
       ),
     ),
   );
@@ -40,7 +40,7 @@ function getQualities(result: Song): Chord['quality'][] {
   return result.sections.flatMap((sec) =>
     sec.rows.flatMap((r) =>
       r.bars.flatMap((b) =>
-        b.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord.quality),
+        b.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord.quality),
       ),
     ),
   );
@@ -50,7 +50,7 @@ function getBassNotes(result: Song): (string | undefined)[] {
   return result.sections.flatMap((sec) =>
     sec.rows.flatMap((r) =>
       r.bars.flatMap((b) =>
-        b.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord.bass),
+        b.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord.bass),
       ),
     ),
   );

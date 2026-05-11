@@ -1,4 +1,4 @@
-import type { Song, Bar, Chord, TimeSignature, Section, Row, ChordSlot } from 'grigson';
+import type { Song, Bar, Chord, TimeSignature, Section, Row, ChordCell } from 'grigson';
 import {
   reflowSong,
   resolvePreset,
@@ -79,11 +79,11 @@ function ariaLabel(chord: Chord, beats: number, isWhole: boolean): string {
 // Simile detection
 // ---------------------------------------------------------------------------
 
-function slotsEqual(a: Bar, b: Bar): boolean {
-  if (a.slots.length !== b.slots.length) return false;
-  for (let i = 0; i < a.slots.length; i++) {
-    const sa = a.slots[i];
-    const sb = b.slots[i];
+function cellsEqual(a: Bar, b: Bar): boolean {
+  if (a.cells.length !== b.cells.length) return false;
+  for (let i = 0; i < a.cells.length; i++) {
+    const sa = a.cells[i];
+    const sb = b.cells[i];
     if (sa.type !== sb.type) return false;
     if (sa.type === 'chord' && sb.type === 'chord') {
       if (sa.chord.root !== sb.chord.root) return false;
@@ -112,9 +112,9 @@ function rowsOfSection(section: Section): Row[] {
 interface ZoneSpec {
   lineParts: string[];
   chordParts: string[];
-  // Maps each chordParts entry to a chord slot index. Defaults to [0,1,2,...].
-  // Allows a slot to be rendered in multiple positions (e.g. 1+2+1 duplicates the middle chord into N and S).
-  slotIndices?: number[];
+  // Maps each chordParts entry to a chord cell index. Defaults to [0,1,2,...].
+  // Allows a cell to be rendered in multiple positions (e.g. 1+2+1 duplicates the middle chord into N and S).
+  cellIndices?: number[];
 }
 
 const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
@@ -144,7 +144,7 @@ const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
     // Beat order: W | N+S | E. Rendered as four quadrants with the spanning chord duplicated into N and S.
     lineParts: ['line line-diag', 'line line-anti'],
     chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-bottom', 'chord chord-right'],
-    slotIndices: [0, 1, 1, 2],
+    cellIndices: [0, 1, 1, 2],
   },
   '1+1+2': {
     // Beat order: W (left) | N (top) | S+E (br). "/" splits W+N from S+E; "\" half splits W from N.
@@ -180,7 +180,7 @@ function renderBar(
   mode: 'unicode' | 'ascii',
   prevBar: Bar | null,
 ): string {
-  const isSimile = prevBar !== null && slotsEqual(bar, prevBar);
+  const isSimile = prevBar !== null && cellsEqual(bar, prevBar);
 
   if (isSimile) {
     return `<div part="bar bar-simile"><span part="chord chord-simile" aria-label="repeat bar">%</span></div>`;
@@ -189,20 +189,20 @@ function renderBar(
   const pattern = detectPattern(bar, activeTSig);
   const spec = PATTERN_ZONES[pattern];
   const beats = PATTERN_BEATS[pattern];
-  const chordSlots = bar.slots.filter((s): s is ChordSlot => s.type === 'chord');
+  const chordCells = bar.cells.filter((s): s is ChordCell => s.type === 'chord');
 
   const zones = spec.lineParts.map((p) => `<div part="${p}"></div>`).join('');
 
   const chords = spec.chordParts
     .map((chordPart, i) => {
-      const slotIdx = spec.slotIndices ? spec.slotIndices[i] : i;
-      const slot = chordSlots[slotIdx ?? i];
-      if (!slot) return '';
-      const slotBeats = beats[i] ?? 1;
-      const isWhole = slotBeats === 4;
-      const label = ariaLabel(slot.chord, slotBeats, isWhole);
-      const html = renderChordHtml(slot.chord, preset, mode);
-      const hasBass = slot.chord.bass != null;
+      const cellIdx = spec.cellIndices ? spec.cellIndices[i] : i;
+      const cell = chordCells[cellIdx ?? i];
+      if (!cell) return '';
+      const cellBeats = beats[i] ?? 1;
+      const isWhole = cellBeats === 4;
+      const label = ariaLabel(cell.chord, cellBeats, isWhole);
+      const html = renderChordHtml(cell.chord, preset, mode);
+      const hasBass = cell.chord.bass != null;
       const partStr = hasBass ? `${chordPart} chord-slash` : chordPart;
       return `<span part="${partStr}" aria-label="${label}">${html}</span>`;
     })

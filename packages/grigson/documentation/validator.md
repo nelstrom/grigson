@@ -76,19 +76,19 @@ After a successful parse, `validate()` runs a semantic pass that inspects the AS
 
 ### Beat balance
 
-For bars written in **mode 2** (containing at least one dot slot), the total slot count must match the effective time signature's numerator.
+For bars written in **mode 2** (containing at least one dot cell), the total cell count must match the effective time signature's numerator.
 
 - The effective time signature is carried forward from the last bar that declared one; the default is `(4/4)`.
-- A warning is emitted for both **underfilled** bars (slot count < numerator) and **overfilled** bars (slot count > numerator).
-- **Mode-1 bars** (no dot slots) are never warned about — the even-split rule is always unambiguous.
+- A warning is emitted for both **underfilled** bars (cell count < numerator) and **overfilled** bars (cell count > numerator).
+- **Mode-1 bars** (no dot cells) are never warned about — the even-split rule is always unambiguous.
 
 Example:
 
 ```
-| (3/4) C . G |      → OK — 3 slots in 3/4
-| (4/4) C . . G |    → OK — 4 slots in 4/4
-| (5/4) C . . G |    → warning: 4 slots, expected 5
-| (4/4) C . . . . . G | → warning: 7 slots, expected 4
+| (3/4) C . G |      → OK — 3 cells in 3/4
+| (4/4) C . . G |    → OK — 4 cells in 4/4
+| (5/4) C . . G |    → warning: 4 cells, expected 5
+| (4/4) C . . . . . G | → warning: 7 cells, expected 4
 | (3/4) C | Am . G | → OK — second bar inherits 3/4
 ```
 

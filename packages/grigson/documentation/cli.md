@@ -351,11 +351,11 @@ The error points to the exact position in the input (`line:character`).
 
 #### Semantic warning — beat balance
 
-Parse errors catch syntax problems; semantic warnings catch musical logic errors that the parser accepts. A bar with dot slots must have exactly as many slots as the time signature's numerator:
+Parse errors catch syntax problems; semantic warnings catch musical logic errors that the parser accepts. A bar with dot cells must have exactly as many cells as the time signature's numerator:
 
 ```sh
 $ echo '| (4/4) C . . G . |' | grigson validate
-<stdin>:1:3: warning: Bar has 5 slots but time signature is 4/4 (expected 4)
+<stdin>:1:3: warning: Bar has 5 cells but time signature is 4/4 (expected 4)
 $ echo $?
 1
 ```
@@ -368,7 +368,7 @@ $ echo $?
 
 ```sh
 $ echo '| C | Am | F | G |' | grigson-html-renderer
-<div part="song" style="--beat-cols: 16; --min-beat-width: 1.00em"><div part="song-grid"><section part="section" style="display: contents"><div part="row" style="grid-column: 1 / 34"><span part="barline barline-single barline-position-start" aria-hidden="true" style="grid-column: 1">…</span><span part="slot bar-start" style="grid-column: 2 / span 7"><span part="chord" aria-label="C, whole bar"><span part="chord-root" aria-hidden="true">C</span></span></span>…</div></section></div></div>
+<div part="song" style="--beat-cols: 16; --min-beat-width: 1.00em"><div part="song-grid"><section part="section" style="display: contents"><div part="row" style="grid-column: 1 / 34"><span part="barline barline-single barline-position-start" aria-hidden="true" style="grid-column: 1">…</span><span part="cell bar-start" style="grid-column: 2 / span 7"><span part="chord" aria-label="C, whole bar"><span part="chord-root" aria-hidden="true">C</span></span></span>…</div></section></div></div>
 ```
 
 The output is unstyled markup. It can be piped into a file and served alongside the grigson stylesheet, or it can be passed through a normalise/transpose step first:

@@ -62,21 +62,21 @@ export interface TimeSignature {
   denominator: number;
 }
 
-/** A chord occupying one beat slot within a bar. */
-export interface ChordSlot {
+/** A chord occupying one beat cell within a bar. */
+export interface ChordCell {
   type: 'chord';
   chord: Chord;
   loc?: SourceRange;
 }
 
 /** `type: 'dot'` — a sustain mark (`.`) that holds the previous chord for one beat. */
-export interface DotSlot {
+export interface DotCell {
   type: 'dot';
   loc?: SourceRange;
 }
 
-/** Discriminated union of the two slot kinds inside a bar. */
-export type BeatSlot = ChordSlot | DotSlot;
+/** Discriminated union of the two cell kinds inside a bar. */
+export type BeatCell = ChordCell | DotCell;
 
 /**
  * Barline variant.
@@ -106,23 +106,23 @@ export interface Barline {
 }
 
 /**
- * Inline key annotation in the source (e.g. `[Am]`), placed between beat slots.
- * `beforeSlotIndex` is the slot index the hint precedes.
+ * Inline key annotation in the source (e.g. `[Am]`), placed between beat cells.
+ * `beforeCellIndex` is the cell index the hint precedes.
  */
 export interface TonalityHintItem {
-  /** Index of the slot this hint precedes. */
-  beforeSlotIndex: number;
+  /** Index of the cell this hint precedes. */
+  beforeCellIndex: number;
   key: string;
   loc?: SourceRange;
 }
 
 /**
- * A bar containing beat slots. `slots` always contains at least one chord slot.
+ * A bar containing beat cells. `cells` always contains at least one chord cell.
  * `timeSignature` is set only when the bar carries an explicit `(n/d)` annotation.
  */
 export interface Bar {
   type: 'bar';
-  slots: BeatSlot[];
+  cells: BeatCell[];
   /** Explicit time-signature annotation on this bar, e.g. `(6/8)`. */
   timeSignature?: TimeSignature;
   tonalityHints?: TonalityHintItem[];

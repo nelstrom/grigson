@@ -1,4 +1,4 @@
-import type { Song, Section, Row, Bar, Chord, ChordSlot } from '../parser/types.js';
+import type { Song, Section, Row, Bar, Chord, ChordCell } from '../parser/types.js';
 import { rootToPitchClass } from './pitchClass.js';
 import { normaliseSection } from './normalise.js';
 import { detectKey } from './keyDetector.js';
@@ -101,7 +101,7 @@ export function transposeSong(song: Song, semitones: number): Song {
   const newSections: Section[] = song.sections.map((sec, secIndex) => {
     const chords = sec.rows.flatMap((row) =>
       row.bars.flatMap((bar) =>
-        bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
+        bar.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord),
       ),
     );
     const { chords: transposedChords, homeKey } = transposeSectionInternal(chords, semitones);
@@ -116,10 +116,10 @@ export function transposeSong(song: Song, semitones: number): Song {
       bars: row.bars.map(
         (bar): Bar => ({
           ...bar,
-          slots: bar.slots.map((slot) =>
-            slot.type === 'chord'
+          cells: bar.cells.map((cell) =>
+            cell.type === 'chord'
               ? { type: 'chord' as const, chord: transposedChords[chordIndex++] }
-              : slot,
+              : cell,
           ),
         }),
       ),
@@ -161,7 +161,7 @@ export function transposeSongToKey(song: Song, targetKey: string): Song {
   const firstSectionChords =
     song.sections[0]?.rows.flatMap((row) =>
       row.bars.flatMap((bar) =>
-        bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
+        bar.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord),
       ),
     ) ?? [];
   const homeKey = detectKey(firstSectionChords, song.key) ?? 'C';

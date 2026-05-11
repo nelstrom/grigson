@@ -10,7 +10,7 @@ Single-bar row
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -27,23 +27,23 @@ Four-bar row
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -63,7 +63,7 @@ Bar with 4/4 time signature
       (time_signature
         (integer)
         (integer))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -83,12 +83,12 @@ First bar has time signature, second does not
       (time_signature
         (integer)
         (integer))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -109,7 +109,7 @@ Bar with 6/8 time signature
       (time_signature
         (integer)
         (integer))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -127,32 +127,32 @@ Mixed accidentals and qualities across bars
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (accidental)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (accidental)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
       (close_barline))))
 
 ================================================================================
-Bar with multiple chords (beat slots)
+Bar with multiple chords (beat cells)
 ================================================================================
 
 | C Am |
@@ -163,10 +163,10 @@ Bar with multiple chords (beat slots)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -184,19 +184,19 @@ Bar with chord dot chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
-      (beat_slot
+      (beat_cell
         (dot))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
       (close_barline))))
 
 ================================================================================
-Bar with leading time signature and multiple beat slots
+Bar with leading time signature and multiple beat cells
 ================================================================================
 
 | (3/4) C . . |
@@ -210,12 +210,12 @@ Bar with leading time signature and multiple beat slots
       (time_signature
         (integer)
         (integer))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
-      (beat_slot
+      (beat_cell
         (dot))
-      (beat_slot
+      (beat_cell
         (dot))
       (close_barline))))
 
@@ -231,7 +231,7 @@ Double barline open
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -248,7 +248,7 @@ Double final barline close
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -265,7 +265,7 @@ Double dotted barline close
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -282,7 +282,7 @@ Start repeat open barline
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -299,7 +299,7 @@ End repeat close barline
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -316,7 +316,7 @@ End repeat with count close barline
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -333,7 +333,7 @@ End and start repeat barline
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -350,7 +350,7 @@ End repeat with count and start repeat barline
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -367,12 +367,12 @@ Start repeat open with end repeat close
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))

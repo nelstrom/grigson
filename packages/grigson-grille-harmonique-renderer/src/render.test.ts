@@ -10,13 +10,13 @@ import render from './render.js';
 const SIG_44: TimeSignature = { numerator: 4, denominator: 4 };
 const SIG_34: TimeSignature = { numerator: 3, denominator: 4 };
 
-function chord(root: string): Bar['slots'][number] {
+function chord(root: string): Bar['cells'][number] {
   return { type: 'chord', chord: { type: 'chord', root, quality: 'major' } };
 }
-const dot = (): Bar['slots'][number] => ({ type: 'dot' });
+const dot = (): Bar['cells'][number] => ({ type: 'dot' });
 
-function bar(...slots: Bar['slots']): Bar {
-  return { type: 'bar', slots, closeBarline: { kind: 'single' } };
+function bar(...cells: Bar['cells']): Bar {
+  return { type: 'bar', cells, closeBarline: { kind: 'single' } };
 }
 
 function simpleSong(bars: Bar[]): Song {
@@ -86,8 +86,8 @@ describe('detectPattern', () => {
     expect(() => detectPattern(bar(chord('C')), SIG_34)).toThrow('4/4');
   });
 
-  it('throws for unsupported slot pattern', () => {
-    // .C.. — dot-first slot pattern has no valid mapping
+  it('throws for unsupported cell pattern', () => {
+    // .C.. — dot-first cell pattern has no valid mapping
     expect(() => detectPattern(bar(dot(), chord('G'), dot(), dot()), SIG_44)).toThrow();
   });
 });

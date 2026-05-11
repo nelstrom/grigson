@@ -46,8 +46,8 @@
   (tonality_hint_key) @constant.builtin
   "}" @punctuation.bracket)
 
-; Beat slots
-(beat_slot
+; beat cells
+(beat_cell
   (dot) @punctuation.separator)
 
 ; Chords

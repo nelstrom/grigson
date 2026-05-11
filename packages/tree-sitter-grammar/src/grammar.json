@@ -205,7 +205,7 @@
               "type": "REPEAT1",
               "content": {
                 "type": "SYMBOL",
-                "name": "beat_slot"
+                "name": "beat_cell"
               }
             },
             {
@@ -233,7 +233,7 @@
       "type": "STRING",
       "value": "%"
     },
-    "beat_slot": {
+    "beat_cell": {
       "type": "CHOICE",
       "members": [
         {

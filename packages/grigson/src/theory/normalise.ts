@@ -1,4 +1,4 @@
-import type { Song, Section, Row, Bar, Chord, ChordSlot, Quality } from '../parser/types.js';
+import type { Song, Section, Row, Bar, Chord, ChordCell, Quality } from '../parser/types.js';
 import { detectKey, type DetectKeyConfig } from './keyDetector.js';
 import { KEYS, resolveKey } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
@@ -109,7 +109,7 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     (sec) => {
       const chords = sec.rows.flatMap((row) =>
         row.bars.flatMap((bar) =>
-          bar.slots.filter((s): s is ChordSlot => s.type === 'chord').map((s) => s.chord),
+          bar.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord),
         ),
       );
       const { homeKey, chords: normalisedChords } = normaliseSection(chords, config, sec.key);
@@ -120,10 +120,10 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
         bars: row.bars.map(
           (bar): Bar => ({
             ...bar,
-            slots: bar.slots.map((slot) =>
-              slot.type === 'chord'
+            cells: bar.cells.map((cell) =>
+              cell.type === 'chord'
                 ? { type: 'chord' as const, chord: normalisedChords[chordIndex++] }
-                : slot,
+                : cell,
             ),
           }),
         ),

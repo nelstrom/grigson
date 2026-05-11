@@ -34,13 +34,13 @@ module.exports = grammar({
 
     bar_tail: ($) =>
       choice(
-        seq(optional($.time_signature), repeat1($.beat_slot), $.close_barline),
+        seq(optional($.time_signature), repeat1($.beat_cell), $.close_barline),
         seq($.simile_mark, $.close_barline),
       ),
 
     simile_mark: (_$) => '%',
 
-    beat_slot: ($) => choice($.tonality_hint, $.chord, $.dot),
+    beat_cell: ($) => choice($.tonality_hint, $.chord, $.dot),
 
     tonality_hint: ($) => seq('{', $.tonality_hint_key, '}'),
 

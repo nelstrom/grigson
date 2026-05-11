@@ -178,11 +178,11 @@ interface AnnotatedChordSlot {
   loc?: SourceRange;
 }
 
-type AnalysedBeatSlot = AnnotatedChordSlot | DotSlot;
+type AnalysedBeatCell = AnnotatedChordCell | DotCell;
 
 interface AnalysedBar {
   type: 'bar';
-  slots: AnalysedBeatSlot[];
+  cells: AnalysedBeatCell[];
   timeSignature?: TimeSignature;
   tonalityHints?: TonalityHintItem[];
   closeBarline: Barline;
@@ -227,12 +227,12 @@ interface AnalysedSong {
 
 ### Tonality hints
 
-Tonality hints appear as `TonalityHintItem` entries on `Bar.tonalityHints`. The `beforeSlotIndex` field records which chord slot in the bar the hint precedes, enabling correct key-region splitting.
+Tonality hints appear as `TonalityHintItem` entries on `Bar.tonalityHints`. The `beforeCellIndex` field records which chord cell in the bar the hint precedes, enabling correct key-region splitting.
 
 ```
 {Ab major} C Am | F G
  ↑
- hint before slot 0 → C and Am analysed in Ab major
+ hint before cell 0 → C and Am analysed in Ab major
  F and G (next bar, no hint) → same Ab major region continues
 ```
 

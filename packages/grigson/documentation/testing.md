@@ -49,7 +49,7 @@ The parser is the highest-value layer to test. Tests cover each grammar rule in 
 expect(parseChord('Cm7')).toEqual({ root: 'C', quality: 'minor', extensions: ['7'] });
 expect(parseChord('F#/A#')).toEqual({ root: 'F#', quality: 'major', bass: 'A#' });
 
-// Beat slot notation
+// Beat cell notation
 expect(parseBar('C . . G')).toEqual([
   { type: 'chord', value: 'C', beats: 3 },
   { type: 'chord', value: 'G', beats: 1 },

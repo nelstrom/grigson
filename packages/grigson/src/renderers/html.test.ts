@@ -14,7 +14,7 @@ import type { Song } from '../parser/types.js';
 
 describe('computeGlobalLayout', () => {
   describe('globalMaxBeats', () => {
-    it('single 4/4 bar with 1 chord slot = 4 beats', () => {
+    it('single 4/4 bar with 1 chord cell = 4 beats', () => {
       const song = parseSong('---\nmeter: 4/4\n---\n| C |\n');
       const { beatCols } = computeGlobalLayout(song);
       expect(beatCols).toBe(4);
@@ -26,7 +26,7 @@ describe('computeGlobalLayout', () => {
       expect(beatCols).toBe(8);
     });
 
-    it('4/4 bar with 2 slots → beatsPerSlot=2, row total=4', () => {
+    it('4/4 bar with 2 cells → beatsPerCell=2, row total=4', () => {
       const song = parseSong('---\nmeter: 4/4\n---\n| C Am |\n');
       const { beatCols } = computeGlobalLayout(song);
       expect(beatCols).toBe(4);
@@ -55,7 +55,7 @@ describe('computeGlobalLayout', () => {
       expect(beatCols).toBe(6);
     });
 
-    it('4/4 bar with 3 slots → last slot absorbs remainder, row total=4', () => {
+    it('4/4 bar with 3 cells → last cell absorbs remainder, row total=4', () => {
       const song = parseSong('---\nmeter: 4/4\n---\n| C Am F |\n');
       const { beatCols } = computeGlobalLayout(song);
       expect(beatCols).toBe(4);
@@ -69,7 +69,7 @@ describe('computeGlobalLayout', () => {
       expect(b.beatCols).toBe(4);
     });
 
-    it('non-proportional: | C . . Am | forced to 1-beat-per-slot', () => {
+    it('non-proportional: | C . . Am | forced to 1-beat-per-cell', () => {
       // 2 chords but dots NOT at uniform positions → non-proportional, 4 beats
       const song = parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n');
       expect(computeGlobalLayout(song).beatCols).toBe(4);
@@ -91,8 +91,8 @@ describe('computeGlobalLayout', () => {
     });
 
     it("mixed time signatures across sections — A Man's A Man-style rows", () => {
-      // Verse: 4 bars of 4/4 with 1 slot each = 16 beats
-      // Chorus row 1: 4 bars of 4/4 with 1 slot each = 16 beats
+      // Verse: 4 bars of 4/4 with 1 cell each = 16 beats
+      // Chorus row 1: 4 bars of 4/4 with 1 cell each = 16 beats
       // Chorus row 2: 2 bars of 4/4 + 1 bar of 2/4 = 4+4+2 = 10 beats
       const song = parseSong(
         '---\nmeter: 4/4\n---\n[Verse]\n| C | Am | F | G |\n[Chorus]\n| C | Am | F | G |\n| C | Am | (2/4) F |\n',
@@ -103,8 +103,8 @@ describe('computeGlobalLayout', () => {
   });
 
   describe('col and span layout', () => {
-    it('single bar: open barline at col 1 (gap col), slot at col 2, close barline at col 9', () => {
-      // 4/4, 1 chord → effectiveBeats=4, slot col=2, span=7 (2×4−1), close barline col=9 (2×4+1)
+    it('single bar: open barline at col 1 (gap col), cell at col 2, close barline at col 9', () => {
+      // 4/4, 1 chord → effectiveBeats=4, cell col=2, span=7 (2×4−1), close barline col=9 (2×4+1)
       const song = parseSong('---\nmeter: 4/4\n---\n| C |\n');
       const { rows } = computeGlobalLayout(song);
       const row = song.sections[0].rows[0];
@@ -112,53 +112,53 @@ describe('computeGlobalLayout', () => {
 
       expect(layout.openBarlineCol).toBe(1);
       expect(layout.bars).toHaveLength(1);
-      expect(layout.bars[0].slots[0]).toMatchObject({ col: 2, span: 7 });
+      expect(layout.bars[0].cells[0]).toMatchObject({ col: 2, span: 7 });
       expect(layout.bars[0].closeBarlineCol).toBe(9);
     });
 
     it('two bars: second bar starts after first bar closes', () => {
       // 4/4, bar1=[C Am] (effectiveBeatsPerChord=2), bar2=[F G] (effectiveBeatsPerChord=2)
-      // slot col = 2×beatOffset+2, span = 2×effectiveBeats−1
+      // cell col = 2×beatOffset+2, span = 2×effectiveBeats−1
       const song = parseSong('---\nmeter: 4/4\n---\n| C Am | F G |\n');
       const { rows } = computeGlobalLayout(song);
       const row = song.sections[0].rows[0];
       const layout = rows.get(row)!;
 
-      expect(layout.bars[0].slots[0]).toMatchObject({ col: 2, span: 3 }); // beat 0 → col 2, 2 beats → span 3
-      expect(layout.bars[0].slots[1]).toMatchObject({ col: 6, span: 3 }); // beat 2 → col 6
+      expect(layout.bars[0].cells[0]).toMatchObject({ col: 2, span: 3 }); // beat 0 → col 2, 2 beats → span 3
+      expect(layout.bars[0].cells[1]).toMatchObject({ col: 6, span: 3 }); // beat 2 → col 6
       expect(layout.bars[0].closeBarlineCol).toBe(9); // beat 4 → col 9
 
-      expect(layout.bars[1].slots[0]).toMatchObject({ col: 10, span: 3 }); // beat 4 → col 10
-      expect(layout.bars[1].slots[1]).toMatchObject({ col: 14, span: 3 }); // beat 6 → col 14
+      expect(layout.bars[1].cells[0]).toMatchObject({ col: 10, span: 3 }); // beat 4 → col 10
+      expect(layout.bars[1].cells[1]).toMatchObject({ col: 14, span: 3 }); // beat 6 → col 14
       expect(layout.bars[1].closeBarlineCol).toBe(17); // beat 8 → col 17
     });
 
-    it('3-chord bar: all slots span=1, implicit dot appended for remainder beat', () => {
+    it('3-chord bar: all cells span=1, implicit dot appended for remainder beat', () => {
       // | C Am F | in 4/4 → non-proportional (3 chords, not even div of 4)
-      // effectiveBeatsPerRawBeat=1, span=2×1−1=1; each slot at col 2×offset+2
+      // effectiveBeatsPerRawBeat=1, span=2×1−1=1; each cell at col 2×offset+2
       const song = parseSong('---\nmeter: 4/4\n---\n| C Am F |\n');
       const { rows } = computeGlobalLayout(song);
       const row = song.sections[0].rows[0];
       const bar = rows.get(row)!.bars[0];
 
-      expect(bar.slots[0]).toMatchObject({ col: 2, span: 1 }); // C at beat 0 → col 2
-      expect(bar.slots[1]).toMatchObject({ col: 4, span: 1 }); // Am at beat 1 → col 4
-      expect(bar.slots[2]).toMatchObject({ col: 6, span: 1 }); // F at beat 2 → col 6
-      expect(bar.slots[3]).toMatchObject({ col: 8, span: 1, implicit: true }); // dot at beat 3 → col 8
+      expect(bar.cells[0]).toMatchObject({ col: 2, span: 1 }); // C at beat 0 → col 2
+      expect(bar.cells[1]).toMatchObject({ col: 4, span: 1 }); // Am at beat 1 → col 4
+      expect(bar.cells[2]).toMatchObject({ col: 6, span: 1 }); // F at beat 2 → col 6
+      expect(bar.cells[3]).toMatchObject({ col: 8, span: 1, implicit: true }); // dot at beat 3 → col 8
       expect(bar.closeBarlineCol).toBe(9);
     });
 
-    it('proportional: | C . Am . | renders as C:span3, Am:span3, no dot slots', () => {
-      // Uniform dot pattern → proportional, dot slots skipped in layout
+    it('proportional: | C . Am . | renders as C:span3, Am:span3, no dot cells', () => {
+      // Uniform dot pattern → proportional, dot cells skipped in layout
       // effectiveBeatsPerChord=2, span=2×2−1=3
       const song = parseSong('---\nmeter: 4/4\n---\n| C . Am . |\n');
       const { rows } = computeGlobalLayout(song);
       const row = song.sections[0].rows[0];
       const bar = rows.get(row)!.bars[0];
 
-      expect(bar.slots).toHaveLength(2); // only chord slots emitted
-      expect(bar.slots[0]).toMatchObject({ col: 2, span: 3 }); // C at beat 0
-      expect(bar.slots[1]).toMatchObject({ col: 6, span: 3 }); // Am at beat 2
+      expect(bar.cells).toHaveLength(2); // only chord cells emitted
+      expect(bar.cells[0]).toMatchObject({ col: 2, span: 3 }); // C at beat 0
+      expect(bar.cells[1]).toMatchObject({ col: 6, span: 3 }); // Am at beat 2
       expect(bar.closeBarlineCol).toBe(9);
     });
 
@@ -167,22 +167,22 @@ describe('computeGlobalLayout', () => {
       const song = parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n');
       const bar = computeGlobalLayout(song).rows.get(song.sections[0].rows[0])!.bars[0];
 
-      expect(bar.slots).toHaveLength(4);
-      expect(bar.slots[0]).toMatchObject({ col: 2, span: 1 }); // C at beat 0
-      expect(bar.slots[1]).toMatchObject({ col: 4, span: 1 }); // . at beat 1
-      expect(bar.slots[2]).toMatchObject({ col: 6, span: 1 }); // . at beat 2
-      expect(bar.slots[3]).toMatchObject({ col: 8, span: 1 }); // Am at beat 3
+      expect(bar.cells).toHaveLength(4);
+      expect(bar.cells[0]).toMatchObject({ col: 2, span: 1 }); // C at beat 0
+      expect(bar.cells[1]).toMatchObject({ col: 4, span: 1 }); // . at beat 1
+      expect(bar.cells[2]).toMatchObject({ col: 6, span: 1 }); // . at beat 2
+      expect(bar.cells[3]).toMatchObject({ col: 8, span: 1 }); // Am at beat 3
       expect(bar.closeBarlineCol).toBe(9);
     });
 
-    it('proportional: | F . C | renders as F:span3, C:span3, no dot slots', () => {
+    it('proportional: | F . C | renders as F:span3, C:span3, no dot cells', () => {
       // Trailing pad makes | F . C . | which is uniform → proportional; span=2×2−1=3
       const song = parseSong('---\nmeter: 4/4\n---\n| F . C |\n');
       const bar = computeGlobalLayout(song).rows.get(song.sections[0].rows[0])!.bars[0];
 
-      expect(bar.slots).toHaveLength(2); // only chord slots
-      expect(bar.slots[0]).toMatchObject({ col: 2, span: 3 }); // F at beat 0
-      expect(bar.slots[1]).toMatchObject({ col: 6, span: 3 }); // C at beat 2
+      expect(bar.cells).toHaveLength(2); // only chord cells
+      expect(bar.cells[0]).toMatchObject({ col: 2, span: 3 }); // F at beat 0
+      expect(bar.cells[1]).toMatchObject({ col: 6, span: 3 }); // C at beat 2
       expect(bar.closeBarlineCol).toBe(9);
     });
 
@@ -198,7 +198,7 @@ describe('computeGlobalLayout', () => {
       // Bar 1: shows 2/4 at bar 0's close barline gap cell (= bar 1's open barline)
       expect(layout.bars[1].showTimeSig).toEqual({ numerator: 2, denominator: 4 });
       // beatUnit=4; bar 1 at beatOffset=4, 1 chord spanning 2 effective beats
-      expect(layout.bars[1].slots[0]).toMatchObject({ col: 10, span: 3 });
+      expect(layout.bars[1].cells[0]).toMatchObject({ col: 10, span: 3 });
       expect(layout.bars[1].closeBarlineCol).toBe(13);
     });
 
@@ -264,11 +264,11 @@ describe('computeGlobalLayout', () => {
       const layout68 = rows.get(row68)!;
 
       // 4/4 bar: effectiveBeats = 4 × (8÷4) = 8
-      expect(layout44.bars[0].slots[0]).toMatchObject({ col: 2, span: 15 }); // span = 2×8−1=15
+      expect(layout44.bars[0].cells[0]).toMatchObject({ col: 2, span: 15 }); // span = 2×8−1=15
       expect(layout44.bars[0].closeBarlineCol).toBe(17); // 2×8+1=17
 
       // 6/8 bar: effectiveBeats = 6 × (8÷8) = 6
-      expect(layout68.bars[0].slots[0]).toMatchObject({ col: 2, span: 11 }); // span = 2×6−1=11
+      expect(layout68.bars[0].cells[0]).toMatchObject({ col: 2, span: 11 }); // span = 2×6−1=11
       expect(layout68.bars[0].closeBarlineCol).toBe(13); // 2×6+1=13
     });
 
@@ -282,9 +282,9 @@ describe('computeGlobalLayout', () => {
       const row38 = song.sections[0].rows[1];
 
       // 3/4 bar: effectiveBeats = 3 × (8÷4) = 6; 1 chord → span = 2×6−1=11
-      expect(rows.get(row34)!.bars[0].slots[0]).toMatchObject({ col: 2, span: 11 });
+      expect(rows.get(row34)!.bars[0].cells[0]).toMatchObject({ col: 2, span: 11 });
       // 3/8 bar: effectiveBeats = 3 × (8÷8) = 3; 1 chord → span = 2×3−1=5
-      expect(rows.get(row38)!.bars[0].slots[0]).toMatchObject({ col: 2, span: 5 });
+      expect(rows.get(row38)!.bars[0].cells[0]).toMatchObject({ col: 2, span: 5 });
     });
 
     it('mixed 4/4 + 6/8 in same row: consecutive bar columns are correct', () => {
@@ -298,7 +298,7 @@ describe('computeGlobalLayout', () => {
       // 4/4 bar: 8 effective beats → closes at col 17
       expect(layout.bars[0].closeBarlineCol).toBe(17);
       // 6/8 bar starts at beat 8 → col 2×8+2=18, span 11, closes at 2×14+1=29
-      expect(layout.bars[1].slots[0]).toMatchObject({ col: 18, span: 11 });
+      expect(layout.bars[1].cells[0]).toMatchObject({ col: 18, span: 11 });
       expect(layout.bars[1].closeBarlineCol).toBe(29);
     });
   });
@@ -483,8 +483,8 @@ describe('HtmlRenderer', () => {
     });
   });
 
-  describe('dot slot', () => {
-    it('renders dot slot as <span part="dot"> containing "/"', () => {
+  describe('dot cell', () => {
+    it('renders dot cell as <span part="dot"> containing "/"', () => {
       // Use a non-proportional bar so dots are rendered
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n'));
       expect(html).toContain('part="dot"');
@@ -492,7 +492,7 @@ describe('HtmlRenderer', () => {
       expect(html).toMatch(/part="dot"[^>]*><span aria-hidden="true">\/</);
     });
 
-    it('dot slot has correct grid-column (col 4 for second slot)', () => {
+    it('dot cell has correct grid-column (col 4 for second cell)', () => {
       // | C . . Am | → C at beat 0 → col 2, first dot at beat 1 → col 4
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C . . Am |\n'));
       const dotMatches = [...html.matchAll(/part="dot" style="grid-column: (\d+)/g)];
@@ -509,11 +509,11 @@ describe('HtmlRenderer', () => {
       expect(html).toContain('part="time-sig-den"');
     });
 
-    it('time-sig is rendered inside a slot span, not inside a barline span', () => {
+    it('time-sig is rendered inside a cell span, not inside a barline span', () => {
       const html = renderer.render(parseSong('---\nmeter: 4/4\n---\n| C | (2/4) Am |\n'));
-      // The time-sig span must appear inside a slot span.
-      // Check by ensuring 'part="time-sig"' follows 'part="slot"' without an intervening 'part="barline'
-      const slotPos = html.indexOf('part="slot');
+      // The time-sig span must appear inside a cell span.
+      // Check by ensuring 'part="time-sig"' follows 'part="cell"' without an intervening 'part="barline'
+      const slotPos = html.indexOf('part="cell');
       const timeSigPos = html.indexOf('part="time-sig"');
       expect(timeSigPos).toBeGreaterThan(slotPos);
     });
@@ -552,7 +552,7 @@ describe('HtmlRenderer', () => {
                 bars: [
                   {
                     type: 'bar',
-                    slots: [{ type: 'chord', chord: { root: 'C', quality: null, bass: null } }],
+                    cells: [{ type: 'chord', chord: { root: 'C', quality: null, bass: null } }],
                     closeBarline: { kind: 'single' },
                   },
                 ],
@@ -571,8 +571,8 @@ describe('HtmlRenderer', () => {
       const r = new HtmlRenderer();
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
       expect(html).not.toContain('part="simile');
-      // Both bars should render as chord slots
-      expect(html.match(/part="slot[ "]/g)?.length).toBe(2);
+      // Both bars should render as chord cells
+      expect(html.match(/part="cell[ "]/g)?.length).toBe(2);
     });
 
     it('shorthand: renders second identical bar as simile mark (glyph)', () => {
@@ -580,8 +580,8 @@ describe('HtmlRenderer', () => {
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n'));
       expect(html).toContain('part="simile');
       expect(html).toContain(String.fromCodePoint(0xe500));
-      // Only the first bar renders as a chord slot
-      expect(html.match(/part="slot[ "]/g)?.length).toBe(1);
+      // Only the first bar renders as a chord cell
+      expect(html.match(/part="cell[ "]/g)?.length).toBe(1);
     });
 
     it('shorthand: first bar of a row is never rendered as simile', () => {
@@ -590,15 +590,15 @@ describe('HtmlRenderer', () => {
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | C |\n| C | C |\n'));
       // Each row has 2 bars; second bar of each row is simile = 2 simile marks
       expect(html.match(/part="simile[ "]/g)?.length).toBe(2);
-      // Each row's first bar is a chord slot = 2 chord slots
-      expect(html.match(/part="slot[ "]/g)?.length).toBe(2);
+      // Each row's first bar is a chord cell = 2 chord cells
+      expect(html.match(/part="cell[ "]/g)?.length).toBe(2);
     });
 
     it('shorthand: non-identical bars do not trigger simile', () => {
       const r = new HtmlRenderer({ simile: { output: 'shorthand' } });
       const html = r.render(parseSong('---\nmeter: 4/4\n---\n| C | Am |\n'));
       expect(html).not.toContain('part="simile');
-      expect(html.match(/part="slot[ "]/g)?.length).toBe(2);
+      expect(html.match(/part="cell[ "]/g)?.length).toBe(2);
     });
   });
 

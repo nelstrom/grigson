@@ -109,12 +109,12 @@ key: C
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))

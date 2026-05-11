@@ -14,57 +14,57 @@ function withoutLoc(obj: unknown): unknown {
   return obj;
 }
 
-describe('beat-slot parsing', () => {
-  it('parse | C | → one ChordSlot with chord C major (single-chord backward compatibility)', () => {
+describe('beat-cell parsing', () => {
+  it('parse | C | → one ChordCell with chord C major (single-chord backward compatibility)', () => {
     const bar = parseBar('| C |');
-    expect(bar.slots).toHaveLength(1);
-    expect(bar.slots[0]).toMatchObject({
+    expect(bar.cells).toHaveLength(1);
+    expect(bar.cells[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
   });
 
-  it('parse | C G | → two ChordSlots in order', () => {
+  it('parse | C G | → two ChordCells in order', () => {
     const bar = parseBar('| C G |');
-    expect(bar.slots).toHaveLength(2);
-    expect(bar.slots[0]).toMatchObject({
+    expect(bar.cells).toHaveLength(2);
+    expect(bar.cells[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
-    expect(bar.slots[1]).toMatchObject({
+    expect(bar.cells[1]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'G', quality: 'major' },
     });
   });
 
-  it('parse | C . . G | → ChordSlot(C), DotSlot, DotSlot, ChordSlot(G)', () => {
+  it('parse | C . . G | → ChordCell(C), DotCell, DotCell, ChordCell(G)', () => {
     const bar = parseBar('| C . . G |');
-    expect(bar.slots).toHaveLength(4);
-    expect(bar.slots[0]).toMatchObject({
+    expect(bar.cells).toHaveLength(4);
+    expect(bar.cells[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
-    expect(bar.slots[1]).toMatchObject({ type: 'dot' });
-    expect(bar.slots[2]).toMatchObject({ type: 'dot' });
-    expect(bar.slots[3]).toMatchObject({
+    expect(bar.cells[1]).toMatchObject({ type: 'dot' });
+    expect(bar.cells[2]).toMatchObject({ type: 'dot' });
+    expect(bar.cells[3]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'G', quality: 'major' },
     });
   });
 
-  it('parse | C G . . | → ChordSlot(C), ChordSlot(G), DotSlot, DotSlot', () => {
+  it('parse | C G . . | → ChordCell(C), ChordCell(G), DotCell, DotCell', () => {
     const bar = parseBar('| C G . . |');
-    expect(bar.slots).toHaveLength(4);
-    expect(bar.slots[0]).toMatchObject({
+    expect(bar.cells).toHaveLength(4);
+    expect(bar.cells[0]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'C', quality: 'major' },
     });
-    expect(bar.slots[1]).toMatchObject({
+    expect(bar.cells[1]).toMatchObject({
       type: 'chord',
       chord: { type: 'chord', root: 'G', quality: 'major' },
     });
-    expect(bar.slots[2]).toMatchObject({ type: 'dot' });
-    expect(bar.slots[3]).toMatchObject({ type: 'dot' });
+    expect(bar.cells[2]).toMatchObject({ type: 'dot' });
+    expect(bar.cells[3]).toMatchObject({ type: 'dot' });
   });
 
   it('parse | . | (dot only, no chord) → parser rejects it', () => {
@@ -96,7 +96,7 @@ describe('beat-slot parsing', () => {
     });
   });
 
-  describe('multi-slot rendering', () => {
+  describe('multi-cell rendering', () => {
     const renderer = new TextRenderer();
 
     it('renders | C . . G | as "| C . . G |"', () => {
@@ -110,12 +110,12 @@ describe('beat-slot parsing', () => {
     });
   });
 
-  describe('multi-slot in rows', () => {
-    it('parses a row where bars have different slot counts', () => {
+  describe('multi-cell in rows', () => {
+    it('parses a row where bars have different cell counts', () => {
       const row = parseRow('| C . | Am | F . G . |');
-      expect(row.bars[0].slots).toHaveLength(2);
-      expect(row.bars[1].slots).toHaveLength(1);
-      expect(row.bars[2].slots).toHaveLength(4);
+      expect(row.bars[0].cells).toHaveLength(2);
+      expect(row.bars[1].cells).toHaveLength(1);
+      expect(row.bars[2].cells).toHaveLength(4);
     });
   });
 });

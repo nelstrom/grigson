@@ -61,7 +61,7 @@ feel: "swing"
 
 ## What Grigson Does Not Support (by design)
 
-- **Rhythm notation.** There is no staff, no note durations on individual chords, no ties or triplets beyond what beat-slot notation can express.
+- **Rhythm notation.** There is no staff, no note durations on individual chords, no ties or triplets beyond what beat-cell notation can express.
 - **Navigation signs.** Coda, Segno, Da Capo, Dal Segno, and Fine are not supported in v1. Use repeat barlines and volta brackets instead, or write the song out in full.
 - **Lyrics.** Grigson is a chord chart tool, not a lead sheet tool.
 - **Auto-reflow.** Row layout is driven by the source text. The HTML renderer's `barsPerLine` and `maxBarsPerLine` options can influence wrapping, but there is no reflowing based on available width.

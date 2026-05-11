@@ -368,7 +368,7 @@ function breakDSharpEbTie(chords: Chord[]): string {
  *
  * const song = parseSong('| Am | Dm | E7 | Am |');
  * const chords = song.sections[0].rows
- *   .flatMap((r) => r.bars.flatMap((b) => b.slots))
+ *   .flatMap((r) => r.bars.flatMap((b) => b.cells))
  *   .filter((s) => s.type === 'chord')
  *   .map((s) => s.chord);
  *

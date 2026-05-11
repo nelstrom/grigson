@@ -9,8 +9,8 @@ export function detectPattern(bar: Bar, activeTSig: TimeSignature): BarPattern {
     );
   }
 
-  const chordCount = bar.slots.filter((s) => s.type === 'chord').length;
-  const hasDots = bar.slots.some((s) => s.type === 'dot');
+  const chordCount = bar.cells.filter((s) => s.type === 'chord').length;
+  const hasDots = bar.cells.some((s) => s.type === 'dot');
   const isEvenDivision = 4 % chordCount === 0;
   const rawBeatsPerChord = isEvenDivision ? 4 / chordCount : 1;
 
@@ -19,9 +19,9 @@ export function detectPattern(bar: Bar, activeTSig: TimeSignature): BarPattern {
     (!hasDots ||
       (() => {
         for (let i = 0; i < 4; i++) {
-          const slot = bar.slots[i];
+          const cell = bar.cells[i];
           const expectChord = i % rawBeatsPerChord === 0;
-          const isChord = slot !== undefined && slot.type === 'chord';
+          const isChord = cell !== undefined && cell.type === 'chord';
           if (expectChord !== isChord) return false;
         }
         return true;
@@ -37,8 +37,8 @@ export function detectPattern(bar: Bar, activeTSig: TimeSignature): BarPattern {
   // Normalize to 4 positions: 'C' for chord, '.' for dot/implicit
   const positions: string[] = [];
   for (let i = 0; i < 4; i++) {
-    const slot = bar.slots[i];
-    positions.push(slot !== undefined && slot.type === 'chord' ? 'C' : '.');
+    const cell = bar.cells[i];
+    positions.push(cell !== undefined && cell.type === 'chord' ? 'C' : '.');
   }
   const pattern = positions.join('');
 
@@ -58,6 +58,6 @@ export function detectPattern(bar: Bar, activeTSig: TimeSignature): BarPattern {
     case 'CCCC':
       return '1+1+1+1';
     default:
-      throw new Error(`Unsupported bar slot pattern: ${pattern}`);
+      throw new Error(`Unsupported bar cell pattern: ${pattern}`);
   }
 }

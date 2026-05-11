@@ -12,9 +12,9 @@ export type {
   Quality,
   FrontMatter,
   TimeSignature,
-  ChordSlot,
-  DotSlot,
-  BeatSlot,
+  ChordCell,
+  DotCell,
+  BeatCell,
   BarlineKind,
   Barline,
   CommentLine,
@@ -55,8 +55,8 @@ export { rootToPitchClass, ENHARMONIC_PAIRS } from './theory/pitchClass.js';
 export { analyseHarmony, circleOfFifthsDistance, analyseSong } from './theory/harmonicAnalysis.js';
 export type {
   AnnotatedChord,
-  AnnotatedChordSlot,
-  AnalysedBeatSlot,
+  AnnotatedChordCell,
+  AnalysedBeatCell,
   AnalysedBar,
   AnalysedRow,
   AnalysedSectionItem,

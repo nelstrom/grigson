@@ -10,7 +10,7 @@ Natural chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -27,7 +27,7 @@ Sharp chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (accidental)))
@@ -45,7 +45,7 @@ Flat chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (accidental)))
@@ -63,7 +63,7 @@ Minor chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -81,7 +81,7 @@ Dominant seventh chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -99,7 +99,7 @@ Half-diminished chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -117,7 +117,7 @@ Extended chord qualities
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -135,7 +135,7 @@ CM7 quality
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -153,7 +153,7 @@ Minor seventh chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -171,7 +171,7 @@ Diminished seventh chord
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -189,7 +189,7 @@ Slash chord with natural bass
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (slash_bass
@@ -208,7 +208,7 @@ Slash chord with minor quality and flat bass
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)
@@ -228,7 +228,7 @@ Slash chord with dash quality and flat bass
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)
@@ -249,7 +249,7 @@ Dominant seventh flat five chord (7b5)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -267,7 +267,7 @@ Dash minor seventh chord (-)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -285,7 +285,7 @@ Dominant seventh flat thirteen chord (7b13)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -303,7 +303,7 @@ Dominant seventh flat nine chord (7b9)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -321,7 +321,7 @@ Dominant seventh sharp nine chord (7#9)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -339,7 +339,7 @@ Dominant seventh sharp five chord (7#5)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -357,7 +357,7 @@ Suspended fourth chord (sus4)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -375,7 +375,7 @@ Suspended second chord (sus2)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -393,7 +393,7 @@ Thirteenth chord (13)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -411,7 +411,7 @@ Eleventh chord (11)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -429,7 +429,7 @@ Ninth chord (9)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -447,7 +447,7 @@ Sixth chord (6)
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))

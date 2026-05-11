@@ -8,7 +8,7 @@
       "required": true,
       "types": [
         {
-          "type": "beat_slot",
+          "type": "beat_cell",
           "named": true
         },
         {
@@ -27,7 +27,7 @@
     }
   },
   {
-    "type": "beat_slot",
+    "type": "beat_cell",
     "named": true,
     "fields": {},
     "children": {

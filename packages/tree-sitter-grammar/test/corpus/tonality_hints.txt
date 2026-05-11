@@ -10,10 +10,10 @@ Tonality hint: home
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (tonality_hint
           (tonality_hint_key)))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -30,10 +30,10 @@ Tonality hint: note and mode
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (tonality_hint
           (tonality_hint_key)))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -51,10 +51,10 @@ Tonality hint with accidental
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (tonality_hint
           (tonality_hint_key)))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -71,13 +71,13 @@ Tonality hint mid-bar
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
-      (beat_slot
+      (beat_cell
         (tonality_hint
           (tonality_hint_key)))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))
@@ -95,10 +95,10 @@ Tonality hint: minor mode
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (tonality_hint
           (tonality_hint_key)))
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)
           (quality)))

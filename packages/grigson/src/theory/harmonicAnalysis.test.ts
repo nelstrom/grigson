@@ -268,7 +268,7 @@ describe('circle-of-fifths fallback for isolated borrowed chords', () => {
 function makeBar(chords: Chord[], hints?: Bar['tonalityHints']): Bar {
   return {
     type: 'bar',
-    slots: chords.map((chord) => ({ type: 'chord' as const, chord })),
+    cells: chords.map((chord) => ({ type: 'chord' as const, chord })),
     closeBarline: { kind: 'single' },
     ...(hints ? { tonalityHints: hints } : {}),
   };
@@ -327,32 +327,32 @@ describe('AnnotatedChord.loc propagation', () => {
 });
 
 describe('analyseSong — tree structure', () => {
-  it('produces AnnotatedChordSlots at leaves', () => {
+  it('produces AnnotatedChordCells at leaves', () => {
     const chord = maj('C');
     const song = makeSong([makeSection([makeRow([makeBar([chord])])])], 'C major');
     const result = analyseSong(song);
 
-    const slot = result.sections[0].rows[0].bars[0].slots[0];
-    expect(slot.type).toBe('chord');
-    if (slot.type === 'chord') {
-      expect(slot.chord.chord).toBe(chord);
-      expect(slot.chord.homeKey).toBe('C major');
-      expect(slot.chord.currentKey).toBe('C major');
+    const cell = result.sections[0].rows[0].bars[0].cells[0];
+    expect(cell.type).toBe('chord');
+    if (cell.type === 'chord') {
+      expect(cell.chord.chord).toBe(chord);
+      expect(cell.chord.homeKey).toBe('C major');
+      expect(cell.chord.currentKey).toBe('C major');
     }
   });
 
-  it('preserves DotSlots unchanged', () => {
+  it('preserves DotCells unchanged', () => {
     const bar: Bar = {
       type: 'bar',
-      slots: [{ type: 'chord', chord: maj('C') }, { type: 'dot' }],
+      cells: [{ type: 'chord', chord: maj('C') }, { type: 'dot' }],
       closeBarline: { kind: 'single' },
     };
     const song = makeSong([makeSection([makeRow([bar])])], 'C major');
     const result = analyseSong(song);
 
-    const slots = result.sections[0].rows[0].bars[0].slots;
-    expect(slots[0].type).toBe('chord');
-    expect(slots[1].type).toBe('dot');
+    const cells = result.sections[0].rows[0].bars[0].cells;
+    expect(cells[0].type).toBe('chord');
+    expect(cells[1].type).toBe('dot');
   });
 
   it('song type and metadata are preserved', () => {
@@ -374,8 +374,8 @@ describe('analyseSong — per-section homeKey', () => {
     const song = makeSong([sectionC, sectionF], 'C major');
     const result = analyseSong(song);
 
-    const cSlot = result.sections[0].rows[0].bars[0].slots[0];
-    const fSlot = result.sections[1].rows[0].bars[0].slots[0];
+    const cSlot = result.sections[0].rows[0].bars[0].cells[0];
+    const fSlot = result.sections[1].rows[0].bars[0].cells[0];
     expect(cSlot.type).toBe('chord');
     expect(fSlot.type).toBe('chord');
     if (cSlot.type === 'chord') expect(cSlot.chord.homeKey).toBe('C major');
@@ -387,9 +387,9 @@ describe('analyseSong — per-section homeKey', () => {
     const song = makeSong([section], 'D major');
     const result = analyseSong(song);
 
-    const slot = result.sections[0].rows[0].bars[0].slots[0];
-    expect(slot.type).toBe('chord');
-    if (slot.type === 'chord') expect(slot.chord.homeKey).toBe('D major');
+    const cell = result.sections[0].rows[0].bars[0].cells[0];
+    expect(cell.type).toBe('chord');
+    if (cell.type === 'chord') expect(cell.chord.homeKey).toBe('D major');
   });
 
   it('falls back to C major when both section and song key are null', () => {
@@ -397,36 +397,36 @@ describe('analyseSong — per-section homeKey', () => {
     const song = makeSong([section], null);
     const result = analyseSong(song);
 
-    const slot = result.sections[0].rows[0].bars[0].slots[0];
-    expect(slot.type).toBe('chord');
-    if (slot.type === 'chord') expect(slot.chord.homeKey).toBe('C major');
+    const cell = result.sections[0].rows[0].bars[0].cells[0];
+    expect(cell.type).toBe('chord');
+    if (cell.type === 'chord') expect(cell.chord.homeKey).toBe('C major');
   });
 });
 
 describe('analyseSong — tonality hint override', () => {
   it('hint overrides currentKey for subsequent chords', () => {
-    // Bar: {Ab major} C (chord at slot 0, hint before it)
-    const bar = makeBar([maj('C')], [{ beforeSlotIndex: 0, key: 'Ab major' }]);
+    // Bar: {Ab major} C (chord at cell 0, hint before it)
+    const bar = makeBar([maj('C')], [{ beforeCellIndex: 0, key: 'Ab major' }]);
     const song = makeSong([makeSection([makeRow([bar])])], 'C major');
     const result = analyseSong(song);
 
-    const slot = result.sections[0].rows[0].bars[0].slots[0];
-    expect(slot.type).toBe('chord');
+    const cell = result.sections[0].rows[0].bars[0].cells[0];
+    expect(cell.type).toBe('chord');
     // C is analysed in context of Ab major (as a borrowed chord from Ab major's region)
-    if (slot.type === 'chord') {
-      expect(slot.chord.homeKey).toBe('Ab major');
+    if (cell.type === 'chord') {
+      expect(cell.chord.homeKey).toBe('Ab major');
     }
   });
 
   it('hint persists across bar boundaries', () => {
     // Bar 1: {Ab major} C  —  Bar 2: C (no reset, so still Ab major)
-    const bar1 = makeBar([maj('C')], [{ beforeSlotIndex: 0, key: 'Ab major' }]);
+    const bar1 = makeBar([maj('C')], [{ beforeCellIndex: 0, key: 'Ab major' }]);
     const bar2 = makeBar([maj('Eb')]);
     const song = makeSong([makeSection([makeRow([bar1, bar2])])], 'C major');
     const result = analyseSong(song);
 
-    const slot1 = result.sections[0].rows[0].bars[0].slots[0];
-    const slot2 = result.sections[0].rows[0].bars[1].slots[0];
+    const slot1 = result.sections[0].rows[0].bars[0].cells[0];
+    const slot2 = result.sections[0].rows[0].bars[1].cells[0];
     expect(slot1.type).toBe('chord');
     expect(slot2.type).toBe('chord');
     if (slot1.type === 'chord') expect(slot1.chord.homeKey).toBe('Ab major');
@@ -435,48 +435,48 @@ describe('analyseSong — tonality hint override', () => {
 
   it('{} resets to section home key', () => {
     // Bar 1: {Ab major} Ab  Bar 2: {} C (reset to home)
-    const bar1 = makeBar([maj('Ab')], [{ beforeSlotIndex: 0, key: 'Ab major' }]);
-    const bar2 = makeBar([maj('C')], [{ beforeSlotIndex: 0, key: '' }]);
+    const bar1 = makeBar([maj('Ab')], [{ beforeCellIndex: 0, key: 'Ab major' }]);
+    const bar2 = makeBar([maj('C')], [{ beforeCellIndex: 0, key: '' }]);
     const song = makeSong([makeSection([makeRow([bar1, bar2])])], 'C major');
     const result = analyseSong(song);
 
-    const slot2 = result.sections[0].rows[0].bars[1].slots[0];
+    const slot2 = result.sections[0].rows[0].bars[1].cells[0];
     expect(slot2.type).toBe('chord');
     if (slot2.type === 'chord') expect(slot2.chord.homeKey).toBe('C major');
   });
 
   it('section boundary resets key — hint from section A does not affect section B', () => {
     // Section A: {Ab major} Ab  Section B: C (should use song key)
-    const bar1 = makeBar([maj('Ab')], [{ beforeSlotIndex: 0, key: 'Ab major' }]);
+    const bar1 = makeBar([maj('Ab')], [{ beforeCellIndex: 0, key: 'Ab major' }]);
     const sectionA = makeSection([makeRow([bar1])], null);
     const bar2 = makeBar([maj('C')]);
     const sectionB = makeSection([makeRow([bar2])], null);
     const song = makeSong([sectionA, sectionB], 'C major');
     const result = analyseSong(song);
 
-    const slotB = result.sections[1].rows[0].bars[0].slots[0];
+    const slotB = result.sections[1].rows[0].bars[0].cells[0];
     expect(slotB.type).toBe('chord');
     if (slotB.type === 'chord') {
       expect(slotB.chord.homeKey).toBe('C major');
     }
   });
 
-  it('mid-bar hint applies from that slot index onward', () => {
-    // Bar: C {Ab major} Ab  — hint is beforeSlotIndex: 1
-    const bar = makeBar([maj('C'), maj('Ab')], [{ beforeSlotIndex: 1, key: 'Ab major' }]);
+  it('mid-bar hint applies from that cell index onward', () => {
+    // Bar: C {Ab major} Ab  — hint is beforeCellIndex: 1
+    const bar = makeBar([maj('C'), maj('Ab')], [{ beforeCellIndex: 1, key: 'Ab major' }]);
     const song = makeSong([makeSection([makeRow([bar])])], 'C major');
     const result = analyseSong(song);
 
-    const slots = result.sections[0].rows[0].bars[0].slots;
-    expect(slots[0].type).toBe('chord');
-    expect(slots[1].type).toBe('chord');
-    if (slots[0].type === 'chord') {
+    const cells = result.sections[0].rows[0].bars[0].cells;
+    expect(cells[0].type).toBe('chord');
+    expect(cells[1].type).toBe('chord');
+    if (cells[0].type === 'chord') {
       // First chord is in C major region
-      expect(slots[0].chord.homeKey).toBe('C major');
+      expect(cells[0].chord.homeKey).toBe('C major');
     }
-    if (slots[1].type === 'chord') {
+    if (cells[1].type === 'chord') {
       // Second chord is in Ab major region
-      expect(slots[1].chord.homeKey).toBe('Ab major');
+      expect(cells[1].chord.homeKey).toBe('Ab major');
     }
   });
 });

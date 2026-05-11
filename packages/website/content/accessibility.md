@@ -173,4 +173,4 @@ The following summarises which elements carry which ARIA attributes in the rende
 - `<span part="barline-glyph">` and `<span part="barline-repeat-count">` inside labelled repeat barlines
 - `<span part="time-sig-num">` and `<span part="time-sig-den">` — Math Bold digits whose AT announcement is inconsistent
 - The glyph span inside `<span part="simile bar-start">` — U+E500 is unpronounceable
-- `<span aria-hidden="true">/</span>` inside dot slots — the slash is visual-only
+- `<span aria-hidden="true">/</span>` inside dot cells — the slash is visual-only

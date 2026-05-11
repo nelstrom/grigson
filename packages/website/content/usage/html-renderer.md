@@ -49,7 +49,7 @@ auto repeat(var(--beat-cols), minmax(var(--min-beat-width), 1fr) auto)
 
 This creates two interleaved kinds of column:
 
-- **Beat columns** (even-indexed: 2, 4, 6, …) — hold chord slots. Sized `minmax(--min-beat-width, 1fr)`, so they share available space equally while respecting a per-song minimum width computed from the widest chord.
+- **Beat columns** (even-indexed: 2, 4, 6, …) — hold chord cells. Sized `minmax(--min-beat-width, 1fr)`, so they share available space equally while respecting a per-song minimum width computed from the widest chord.
 - **Gap columns** (odd-indexed: 1, 3, 5, …) — hold barlines and time signatures. Sized `auto`, so they collapse to zero when empty and expand to fit their content when filled.
 
 Each row uses `grid-template-columns: subgrid` so all rows share the same column grid. Barlines therefore align vertically across every section, regardless of how the bars are distributed between rows.
@@ -60,16 +60,16 @@ Given a beat offset `k` (0-indexed, measured in beat units), the CSS grid positi
 
 | Item                      | CSS column |
 | ------------------------- | ---------- |
-| Slot starting at beat `k` | `2k + 2`   |
+| Cell starting at beat `k` | `2k + 2`   |
 | Barline after beat `k`    | `2k + 1`   |
 
-The slot's `grid-column` span is `2b − 1`, where `b` is the number of beat units the slot occupies. This makes the slot cover its beat columns plus the inner gap columns between them, stopping just before the trailing gap that holds the close barline.
+The cell's `grid-column` span is `2b − 1`, where `b` is the number of beat units the cell occupies. This makes the cell cover its beat columns plus the inner gap columns between them, stopping just before the trailing gap that holds the close barline.
 
 ### Barlines and time signatures
 
 Barlines are placed in gap columns as natural-width flex containers. A simple `|` barline is roughly 1.5 px wide; complex glyphs (`:||:`, etc.) expand the gap column to their natural width.
 
-A time signature annotation, when present, is rendered as a flex sibling of the chord inside the **first beat slot** of the bar — not inside the barline gap cell. This keeps the time signature immediately adjacent to the first chord with no dead space, and prevents it from overflowing the `auto` gap column when the bar is narrower than expected.
+A time signature annotation, when present, is rendered as a flex sibling of the chord inside the **first beat cell** of the bar — not inside the barline gap column. This keeps the time signature immediately adjacent to the first chord with no dead space, and prevents it from overflowing the `auto` gap column when the bar is narrower than expected.
 
 ### Denominator-aware beat units
 
@@ -117,8 +117,8 @@ In a purely 4/4 chart nothing changes. In a chart mixing 4/4 and 6/8, the 4/4 ba
         <span part="barline barline-single" style="grid-column: 1"></span>
 
         <!-- beat col 2–8: Cm7 spanning 4 effective beats (col 2, span 7) -->
-        <!-- time-sig is a flex sibling of the chord in the first slot -->
-        <span part="slot" style="grid-column: 2 / span 7">
+        <!-- time-sig is a flex sibling of the chord in the first cell -->
+        <span part="cell" style="grid-column: 2 / span 7">
           <span part="time-sig">
             <span part="time-sig-num">𝟒</span>
             <span part="time-sig-den">𝟒</span>
@@ -133,7 +133,7 @@ In a purely 4/4 chart nothing changes. In a chart mixing 4/4 and 6/8, the 4/4 ba
         <span part="barline barline-single" style="grid-column: 9"></span>
 
         <!-- beat col 10–16: F7 -->
-        <span part="slot" style="grid-column: 10 / span 7">…</span>
+        <span part="cell" style="grid-column: 10 / span 7">…</span>
 
         <!-- gap col 17: final barline -->
         <span part="barline barline-final" style="grid-column: 17"></span>
@@ -160,7 +160,7 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 </span>
 ```
 
-### Dot slot (beat continuation)
+### Dot cell (beat continuation)
 
 ```html
 <span part="dot" style="grid-column: 4 / span 1">/</span>
@@ -201,7 +201,7 @@ A chart mixing 4/4 and 6/8 (beatUnit = 8) would show a 4/4 bar spanning 15 colum
 | `barline-glyph`                | `<span>`    | Clipping container for the barline SMuFL glyph; stretches to row height |
 | `barline-glyph-inner`          | `<span>`    | The SMuFL glyph character; shifted via `--grigson-barline-glyph-offset` |
 | `barline-repeat-count`         | `<span>`    | Repeat count label (e.g. "×3") inside an end-repeat                     |
-| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                       |
+| `cell`                         | `<span>`    | One chord cell; carries `grid-column` positioning                       |
 | `dot`                          | `<span>`    | Beat-continuation mark rendered as `/`                                  |
 | `simile`                       | `<span>`    | Single-bar repeat mark; spans the full bar width                        |
 | `time-sig`                     | `<span>`    | Stacked time signature fraction                                         |

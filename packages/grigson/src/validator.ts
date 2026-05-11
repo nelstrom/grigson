@@ -1,5 +1,5 @@
 import { parseSong } from './parser/parser.js';
-import { Song, Bar, TimeSignature, DotSlot } from './parser/types.js';
+import { Song, Bar, TimeSignature, DotCell } from './parser/types.js';
 
 /**
  * LSP-compatible source range (0-based line/character). Mirrors the `Range` type from the
@@ -77,15 +77,26 @@ function semanticChecks(song: Song): Diagnostic[] {
         if (bar.timeSignature) {
           effectiveTimeSig = bar.timeSignature;
         }
-        const hasDot = bar.slots.some((s): s is DotSlot => s.type === 'dot');
+        const hasDot = bar.cells.some((s): s is DotCell => s.type === 'dot');
         if (hasDot) {
-          const slotCount = bar.slots.length;
+          const cellCount = bar.cells.length;
           const expected = effectiveTimeSig.numerator;
-          if (slotCount !== expected) {
+          if (cellCount !== expected) {
             diagnostics.push({
               range: barRange(bar),
               severity: 'warning',
-              message: `Bar has ${slotCount} slot${slotCount === 1 ? '' : 's'} but time signature is ${effectiveTimeSig.numerator}/${effectiveTimeSig.denominator} (expected ${expected})`,
+              message: `Bar has ${cellCount} cell${cellCount === 1 ? '' : 's'} but time signature is ${effectiveTimeSig.numerator}/${effectiveTimeSig.denominator} (expected ${expected})`,
+              source: 'grigson',
+            });
+          }
+        } else {
+          const chordCount = bar.cells.length; // no dots → all cells are ChordCells
+          const beats = effectiveTimeSig.numerator;
+          if (beats % chordCount !== 0) {
+            diagnostics.push({
+              range: barRange(bar),
+              severity: 'warning',
+              message: `Bar has ${chordCount} chord${chordCount === 1 ? '' : 's'} which cannot be divided equally across ${beats} beats (${effectiveTimeSig.numerator}/${effectiveTimeSig.denominator})`,
               source: 'grigson',
             });
           }
@@ -112,9 +123,13 @@ function semanticChecks(song: Song): Diagnostic[] {
  * const errors = validate('| C | Pm | F | G |');
  * // → [{ severity: 'error', message: 'Expected ...', range: { start: { line: 0, character: 6 }, ... } }]
  *
- * // Semantic warning — beat balance mismatch (dots present, wrong slot count)
+ * // Semantic warning — beat balance mismatch (dots present, wrong cell count)
  * const warnings = validate('| (4/4) C . . G . |');
- * // → [{ severity: 'warning', message: 'Bar has 5 slots but time signature is 4/4 (expected 4)', ... }]
+ * // → [{ severity: 'warning', message: 'Bar has 5 cells but time signature is 4/4 (expected 4)', ... }]
+ *
+ * // Semantic warning — chord count doesn't divide beat count evenly (no dots)
+ * const warnings2 = validate('| (4/4) C G Am |');
+ * // → [{ severity: 'warning', message: 'Bar has 3 chords which cannot be divided equally across 4 beats (4/4)', ... }]
  *
  * // Programmatic use in a CI pipeline
  * import { readFileSync } from 'fs';

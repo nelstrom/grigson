@@ -1,4 +1,4 @@
-import type { Song, Row, Bar, Chord, Barline, BeatSlot, BarlineKind } from '../parser/types.js';
+import type { Song, Row, Bar, Chord, Barline, BeatCell, BarlineKind } from '../parser/types.js';
 import { type NotationPreset, resolvePreset } from '../notation/registry.js';
 
 export interface GrigsonRenderer {
@@ -105,10 +105,10 @@ function renderBar(bar: Bar, config: TextRendererConfig): string {
   const ts = bar.timeSignature
     ? `(${bar.timeSignature.numerator}/${bar.timeSignature.denominator}) `
     : '';
-  const slotsText = bar.slots
-    .map((slot) => (slot.type === 'chord' ? renderChord(slot.chord, config) : '.'))
+  const cellsText = bar.cells
+    .map((cell) => (cell.type === 'chord' ? renderChord(cell.chord, config) : '.'))
     .join(' ');
-  return ts + slotsText;
+  return ts + cellsText;
 }
 
 function barlineSymbol(b: Barline): string {
@@ -129,13 +129,13 @@ function barlineSymbol(b: Barline): string {
   }
 }
 
-function slotsEqual(a: BeatSlot[], b: BeatSlot[]): boolean {
+function cellsEqual(a: BeatCell[], b: BeatCell[]): boolean {
   if (a.length !== b.length) return false;
-  return a.every((slot, i) => {
+  return a.every((cell, i) => {
     const other = b[i];
-    if (slot.type !== other.type) return false;
-    if (slot.type === 'chord' && other.type === 'chord') {
-      const ca = slot.chord;
+    if (cell.type !== other.type) return false;
+    if (cell.type === 'chord' && other.type === 'chord') {
+      const ca = cell.chord;
       const cb = other.chord;
       return ca.root === cb.root && ca.quality === cb.quality && ca.bass === cb.bass;
     }
@@ -146,13 +146,13 @@ function slotsEqual(a: BeatSlot[], b: BeatSlot[]): boolean {
 function renderRow(row: Row, config: TextRendererConfig): string {
   const open = barlineSymbol(row.openBarline);
   const useShorthand = (config.simile?.output ?? 'longhand') === 'shorthand';
-  let prevSlots: BeatSlot[] | null = null;
+  let prevCells: BeatCell[] | null = null;
   const parts: string[] = [];
   for (const bar of row.bars) {
-    const isSimile = useShorthand && prevSlots !== null && slotsEqual(bar.slots, prevSlots);
+    const isSimile = useShorthand && prevCells !== null && cellsEqual(bar.cells, prevCells);
     const barText = isSimile ? '%' : renderBar(bar, config);
     parts.push(barText + ' ' + barlineSymbol(bar.closeBarline));
-    prevSlots = bar.slots;
+    prevCells = bar.cells;
   }
   return open + ' ' + parts.join(' ');
 }

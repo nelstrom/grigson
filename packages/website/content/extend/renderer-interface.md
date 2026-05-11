@@ -17,7 +17,7 @@ class MyRenderer {
     //   section.key    — key override for this section, or null
     //   section.rows   — array of Row objects (chords only, no comment lines)
     //     row.bars     — array of Bar objects
-    //       bar.slots  — array of BeatSlots (chord or dot)
+    //       bar.cells  — array of BeatCells (chord or dot)
     //       bar.closeBarline — closing barline descriptor
   }
 }
@@ -68,7 +68,7 @@ There are no required base classes or interfaces to extend. Any object that resp
 | Field           | Type                         | Description                                                 |
 | --------------- | ---------------------------- | ----------------------------------------------------------- |
 | `type`          | `'bar'`                      | Discriminant                                                |
-| `slots`         | `BeatSlot[]`                 | Beat slots — at least one chord, optionally mixed with dots |
+| `cells`         | `BeatCell[]`                 | Beat cells — at least one chord, optionally mixed with dots |
 | `timeSignature` | `TimeSignature \| undefined` | Explicit time signature annotation, if present              |
 | `closeBarline`  | `Barline`                    | The barline that closes this bar                            |
 | `loc`           | `SourceRange \| undefined`   | Source location                                             |

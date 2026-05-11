@@ -813,3 +813,14 @@ Implemented the `grigson-grille-harmonique-renderer` package end-to-end:
 - `src/cli.ts` — CLI with `--format html/standalone`, `--notation-preset`, `--bars-per-line`, `--accidentals`
 - `src/render.test.ts` — 19 tests covering all patterns, simile, error cases, accidentals, title rendering
 - Updated `README.md` packages table; added `packages/website/content/renderers/grille-harmonique.md`
+
+## slot → cell rename (semver-major breaking change)
+
+Renamed the "slot" concept to "cell" across the entire monorepo to eliminate a collision with the Web Components `slot=""` attribute concept.
+
+**Public API changes:**
+- Types: `ChordSlot`→`ChordCell`, `DotSlot`→`DotCell`, `BeatSlot`→`BeatCell`, `AnnotatedChordSlot`→`AnnotatedChordCell`, `AnalysedBeatSlot`→`AnalysedBeatCell`, `SlotLayout`→`CellLayout`
+- Properties: `Bar.slots`→`Bar.cells`, `TonalityHintItem.beforeSlotIndex`→`TonalityHintItem.beforeCellIndex`, `BarLayout.cells`, `CellLayout.sourceCellIdx`, `ZoneSpec.cellIndices`
+- CSS parts: `part="slot"`→`part="cell"`, `part="slot bar-start"`→`part="cell bar-start"`
+
+**Files changed:** types.ts, harmonicAnalysis.ts, index.ts, index.browser.ts, html.ts, renderer-css.ts, text.ts, normalise.ts, transpose.ts, keyDetector.ts, validator.ts, grammar.pegjs, grille-harmonique render.ts + patterns.ts, tree-sitter grammar.js (+ regenerated), all test files, all documentation.

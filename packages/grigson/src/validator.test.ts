@@ -5,40 +5,69 @@ import { normaliseSong } from './theory/normalise.js';
 import { TextRenderer } from './renderers/text.js';
 
 describe('validate — beat balance', () => {
-  it('returns [] for 3 slots in 3/4 (balanced)', () => {
+  it('returns [] for 3 cells in 3/4 (balanced)', () => {
     expect(validate('| (3/4) C . G |')).toEqual([]);
   });
 
-  it('returns [] for 4 slots in 4/4 (balanced)', () => {
+  it('returns [] for 4 cells in 4/4 (balanced)', () => {
     expect(validate('| (4/4) C . . G |')).toEqual([]);
   });
 
-  it('returns one warning for 4 slots in 5/4 (underfilled)', () => {
+  it('returns one warning for 4 cells in 5/4 (underfilled)', () => {
     const result = validate('| (5/4) C . . G |');
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('warning');
     expect(result[0].source).toBe('grigson');
   });
 
-  it('returns one warning for 7 slots in 4/4 (overfilled)', () => {
+  it('returns one warning for 7 cells in 4/4 (overfilled)', () => {
     const result = validate('| (4/4) C . . . . . G |');
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('warning');
   });
 
-  it('returns [] for mode-1 bar (no dots), no warning regardless of chord count', () => {
+  it('returns [] for a no-dot bar where chord count divides beat count evenly', () => {
     expect(validate('| C G |')).toEqual([]);
   });
 
-  it('returns [] when second bar is mode-2 with exactly 3 slots in 3/4', () => {
+  it('returns one warning for 5 chords in 4/4 (5 does not divide 4)', () => {
+    const result = validate('| (4/4) C G F G C |');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('warning');
+    expect(result[0].source).toBe('grigson');
+  });
+
+  it('returns one warning for 3 chords in 4/4 (3 does not divide 4)', () => {
+    const result = validate('| (4/4) C G Am |');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('warning');
+    expect(result[0].source).toBe('grigson');
+  });
+
+  it('returns [] for 4 chords in 4/4 (4 divides 4)', () => {
+    expect(validate('| (4/4) C G Am F |')).toEqual([]);
+  });
+
+  it('returns one warning for 4 chords in 6/8 (4 does not divide 6)', () => {
+    const result = validate('| (6/8) C G Am F |');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('warning');
+    expect(result[0].source).toBe('grigson');
+  });
+
+  it('returns [] for 2 chords in 6/8 (2 divides 6)', () => {
+    expect(validate('| (6/8) C G |')).toEqual([]);
+  });
+
+  it('returns [] when second bar is mode-2 with exactly 3 cells in 3/4', () => {
     expect(validate('| (4/4) C | (3/4) Am . G |')).toEqual([]);
   });
 
-  it('returns [] when second bar inherits 3/4 and has 3 slots', () => {
+  it('returns [] when second bar inherits 3/4 and has 3 cells', () => {
     expect(validate('| (3/4) C | Am . G |')).toEqual([]);
   });
 
-  it('returns [] for a chart with front-matter meter "6/8" and 6-slot bars', () => {
+  it('returns [] for a chart with front-matter meter "6/8" and 6-cell bars', () => {
     const source = '---\nmeter: 6/8\n---\n| C . . . . G |';
     expect(validate(source)).toEqual([]);
   });

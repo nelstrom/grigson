@@ -10,7 +10,7 @@ Single simile mark
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
@@ -30,7 +30,7 @@ Multiple consecutive simile marks
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))
@@ -41,7 +41,7 @@ Multiple consecutive simile marks
       (simile_mark)
       (close_barline))
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))))
@@ -58,7 +58,7 @@ Simile mark with non-single close barline
   (row
     (open_barline)
     (bar_tail
-      (beat_slot
+      (beat_cell
         (chord
           (note_letter)))
       (close_barline))

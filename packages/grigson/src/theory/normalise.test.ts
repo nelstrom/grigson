@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { normaliseSong, normaliseSection } from './normalise.js';
-import type { Song, Chord, Bar, Row, Section, ChordSlot } from '../parser/types.js';
+import type { Song, Chord, Bar, Row, Section, ChordCell } from '../parser/types.js';
 
 function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
   return { type: 'chord', root, quality };
@@ -13,7 +13,7 @@ function chSlash(root: string, bass: string, quality: Chord['quality'] = 'major'
 function bar(c: Chord, timeSignature?: { numerator: number; denominator: number }): Bar {
   const b: Bar = {
     type: 'bar',
-    slots: [{ type: 'chord', chord: c }],
+    cells: [{ type: 'chord', chord: c }],
     closeBarline: { kind: 'single' },
   };
   if (timeSignature) b.timeSignature = timeSignature;
@@ -37,8 +37,8 @@ function song(rows: Row[], key: string | null = null, title: string | null = nul
 }
 
 function chordOf(b: Bar): Chord {
-  const slot = b.slots[0] as ChordSlot;
-  return slot.chord;
+  const cell = b.cells[0] as ChordCell;
+  return cell.chord;
 }
 
 describe('normaliseSong — Category 2: enharmonic correction of diatonic chord roots', () => {

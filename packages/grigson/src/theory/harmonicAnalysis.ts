@@ -7,9 +7,9 @@ import type {
   Song,
   Section,
   Bar,
-  BeatSlot,
-  ChordSlot,
-  DotSlot,
+  BeatCell,
+  ChordCell,
+  DotCell,
   Row,
   CommentLine,
   SectionItem,
@@ -75,20 +75,20 @@ export interface AnnotatedChord {
   loc?: SourceRange;
 }
 
-/** A `ChordSlot`-equivalent carrying an `AnnotatedChord`. */
-export interface AnnotatedChordSlot {
+/** A `ChordCell`-equivalent carrying an `AnnotatedChord`. */
+export interface AnnotatedChordCell {
   type: 'chord';
   chord: AnnotatedChord;
   loc?: SourceRange;
 }
 
-/** Beat slot type used in an analysed bar — either an annotated chord or a plain dot. */
-export type AnalysedBeatSlot = AnnotatedChordSlot | DotSlot;
+/** Beat cell type used in an analysed bar — either an annotated chord or a plain dot. */
+export type AnalysedBeatCell = AnnotatedChordCell | DotCell;
 
-/** Analysed counterpart of `Bar`, with chord slots replaced by `AnnotatedChordSlot`s. */
+/** Analysed counterpart of `Bar`, with chord cells replaced by `AnnotatedChordCell`s. */
 export interface AnalysedBar {
   type: 'bar';
-  slots: AnalysedBeatSlot[];
+  cells: AnalysedBeatCell[];
   timeSignature?: TimeSignature;
   tonalityHints?: TonalityHintItem[];
   closeBarline: Barline;
@@ -293,7 +293,7 @@ function annotate(
  * `);
  *
  * const chords = song.sections[0].rows
- *   .flatMap((r) => r.bars.flatMap((b) => b.slots))
+ *   .flatMap((r) => r.bars.flatMap((b) => b.cells))
  *   .filter((s) => s.type === 'chord')
  *   .map((s) => s.chord);
  *
@@ -624,28 +624,28 @@ function analyseSection(section: Section, songKey: string): AnalysedSection {
     }
   };
 
-  // Walk all rows/bars/slots, interleaving tonality hints
+  // Walk all rows/bars/cells, interleaving tonality hints
   const rows = section.rows;
   for (const row of rows) {
     for (const bar of row.bars) {
-      // Build an ordered list of events: hints and chord slots interleaved by beforeSlotIndex
+      // Build an ordered list of events: hints and chord cells interleaved by beforeCellIndex
       const hints = bar.tonalityHints ?? [];
       let hintIdx = 0;
-      let slotIdx = 0;
+      let cellIdx = 0;
 
-      // Process hints that come before all slots (beforeSlotIndex === 0) first
-      for (const slot of bar.slots) {
-        // Emit any hints that fire before this slot index
-        while (hintIdx < hints.length && hints[hintIdx].beforeSlotIndex <= slotIdx) {
+      // Process hints that come before all cells (beforeCellIndex === 0) first
+      for (const cell of bar.cells) {
+        // Emit any hints that fire before this cell index
+        while (hintIdx < hints.length && hints[hintIdx].beforeCellIndex <= cellIdx) {
           flushRegion();
           currentRegionKey = hints[hintIdx].key || homeKey;
           hintIdx++;
         }
 
-        if (slot.type === 'chord') {
-          currentRegionChords.push(slot.chord);
+        if (cell.type === 'chord') {
+          currentRegionChords.push(cell.chord);
         }
-        slotIdx++;
+        cellIdx++;
       }
 
       // Emit remaining hints after all slots
@@ -670,23 +670,23 @@ function analyseSection(section: Section, songKey: string): AnalysedSection {
   let annotatedIdx = 0;
 
   const buildBar = (bar: Bar): AnalysedBar => {
-    const analysedSlots: AnalysedBeatSlot[] = bar.slots.map((slot) => {
-      if (slot.type === 'chord') {
+    const analysedCells: AnalysedBeatCell[] = bar.cells.map((cell) => {
+      if (cell.type === 'chord') {
         const annotatedChord = allAnnotated[annotatedIdx++];
-        const analysedSlot: AnnotatedChordSlot = {
+        const analysedCell: AnnotatedChordCell = {
           type: 'chord',
           chord: annotatedChord,
-          loc: slot.loc,
+          loc: cell.loc,
         };
-        return analysedSlot;
+        return analysedCell;
       } else {
-        return slot as DotSlot;
+        return cell as DotCell;
       }
     });
 
     return {
       type: 'bar',
-      slots: analysedSlots,
+      cells: analysedCells,
       ...(bar.timeSignature !== undefined ? { timeSignature: bar.timeSignature } : {}),
       ...(bar.tonalityHints !== undefined ? { tonalityHints: bar.tonalityHints } : {}),
       closeBarline: bar.closeBarline,

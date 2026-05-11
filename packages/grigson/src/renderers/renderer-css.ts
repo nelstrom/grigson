@@ -210,7 +210,7 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         white-space: nowrap;
       }
 
-      [part~="slot"] {
+      [part~="cell"] {
         display: flex;
         align-items: baseline;
         gap: 0.15em;

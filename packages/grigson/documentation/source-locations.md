@@ -46,7 +46,7 @@ const bar = song.sections[0].rows[0].bars[0];
 console.log(bar.loc);
 // { start: { line: 0, character: 2 }, end: { line: 0, character: 6 } }
 
-console.log(bar.slots[0].loc);
+console.log(bar.cells[0].loc);
 // { start: { line: 0, character: 2 }, end: { line: 0, character: 4 } }
 ```
 

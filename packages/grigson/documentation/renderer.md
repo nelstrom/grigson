@@ -98,7 +98,7 @@ The renderer produces a hierarchy of elements, each with a `part` attribute:
 
         <!-- bar 1: 4/4, 2 chords → 2 beats each -->
         <!-- time-sig shown because bar.timeSignature is set on this bar -->
-        <span part="slot" style="grid-column: 2 / span 2">
+        <span part="cell" style="grid-column: 2 / span 2">
           <span part="time-sig">
             <!-- Math Bold digits: U+1D7D2 = 𝟒, rendered via GrigsonTimeSig @font-face -->
             <span part="time-sig-num">𝟒</span>
@@ -106,7 +106,7 @@ The renderer produces a hierarchy of elements, each with a `part` attribute:
           </span>
           <span part="chord"><span part="chord-root">C</span></span>
         </span>
-        <span part="slot" style="grid-column: 4 / span 2">
+        <span part="cell" style="grid-column: 4 / span 2">
           <span part="chord">
             <span part="chord-root">A<span part="chord-accidental" data-glyph="unicode">♭</span></span>
             <span part="chord-quality">m</span>
@@ -140,7 +140,7 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 </span>
 ```
 
-#### Dot slot (beat continuation)
+#### Dot cell (beat continuation)
 
 ```html
 <span part="dot" style="grid-column: 5 / span 1">/</span>
@@ -175,7 +175,7 @@ The `song-grid` element defines a CSS Grid whose column count equals the longest
 | `barline-endRepeat`            | —           | End-repeat barline `:\|\|`                                                                                         |
 | `barline-endRepeatStartRepeat` | —           | Turn-around barline `:\|\|:`                                                                                       |
 | `barline-repeat-count`         | `<span>`    | Repeat count label, e.g. "×3", inside an end-repeat barline                                                        |
-| `slot`                         | `<span>`    | One chord slot; carries `grid-column` positioning                                                                  |
+| `cell`                         | `<span>`    | One chord cell; carries `grid-column` positioning                                                                  |
 | `dot`                          | `<span>`    | A beat-continuation dot rendered as `/`                                                                            |
 | `simile`                       | `<span>`    | Single-bar repeat mark (SMuFL U+E1E7 from Bravura); spans the full bar width                                       |
 | `time-sig`                     | `<span>`    | Time signature stacked fraction; uses the `GrigsonTimeSig` @font-face for digit glyphs                             |
@@ -909,7 +909,7 @@ class MyRenderer {
     //   section.label  — e.g. "Verse", or null if unlabelled
     //   section.rows   — array of Row objects
     //     row.bars     — array of Bar objects
-    //       bar.slots           — array of BeatSlot (ChordSlot | DotSlot)
+    //       bar.cells           — array of BeatCell (ChordCell | DotCell)
     //       bar.timeSignature   — { numerator, denominator } or undefined
   }
 }

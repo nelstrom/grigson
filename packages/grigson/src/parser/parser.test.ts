@@ -129,7 +129,7 @@ describe('chord parsing', () => {
     it('parses | C |', () => {
       expect(parseBar('| C |')).toMatchObject({
         type: 'bar',
-        slots: [{ type: 'chord', chord: cMajor }],
+        cells: [{ type: 'chord', chord: cMajor }],
         closeBarline: single,
       });
     });
@@ -137,7 +137,7 @@ describe('chord parsing', () => {
     it('parses | Am |', () => {
       expect(parseBar('| Am |')).toMatchObject({
         type: 'bar',
-        slots: [{ type: 'chord', chord: aMinor }],
+        cells: [{ type: 'chord', chord: aMinor }],
         closeBarline: single,
       });
     });
@@ -145,7 +145,7 @@ describe('chord parsing', () => {
     it('parses |C| with no spaces', () => {
       expect(parseBar('|C|')).toMatchObject({
         type: 'bar',
-        slots: [{ type: 'chord', chord: cMajor }],
+        cells: [{ type: 'chord', chord: cMajor }],
         closeBarline: single,
       });
     });
@@ -153,7 +153,7 @@ describe('chord parsing', () => {
     it('parses |  G7  | with extra spaces', () => {
       expect(parseBar('|  G7  |')).toMatchObject({
         type: 'bar',
-        slots: [{ type: 'chord', chord: g7 }],
+        cells: [{ type: 'chord', chord: g7 }],
         closeBarline: single,
       });
     });
@@ -162,11 +162,11 @@ describe('chord parsing', () => {
       expect(() => parseBar('| |')).toThrow();
     });
 
-    it('parses | C G | as two ChordSlots', () => {
+    it('parses | C G | as two ChordCells', () => {
       const bar = parseBar('| C G |');
-      expect(bar.slots).toHaveLength(2);
-      expect(bar.slots[0]).toMatchObject({ type: 'chord', chord: cMajor });
-      expect(bar.slots[1]).toMatchObject({
+      expect(bar.cells).toHaveLength(2);
+      expect(bar.cells[0]).toMatchObject({ type: 'chord', chord: cMajor });
+      expect(bar.cells[1]).toMatchObject({
         type: 'chord',
         chord: { type: 'chord', root: 'G', quality: 'major' },
       });
@@ -177,7 +177,7 @@ describe('chord parsing', () => {
     const chord = (root: string, quality: string) => ({ type: 'chord', root, quality });
     const bar = (root: string, quality: string) => ({
       type: 'bar',
-      slots: [{ type: 'chord', chord: chord(root, quality) }],
+      cells: [{ type: 'chord', chord: chord(root, quality) }],
       closeBarline: { kind: 'single' },
     });
     const row = (...bars: ReturnType<typeof bar>[]) => ({
@@ -353,7 +353,7 @@ describe('chord parsing', () => {
   describe('row parsing', () => {
     const bar = (root: string, quality: string) => ({
       type: 'bar',
-      slots: [{ type: 'chord', chord: { type: 'chord', root, quality } }],
+      cells: [{ type: 'chord', chord: { type: 'chord', root, quality } }],
       closeBarline: { kind: 'single' },
     });
 
@@ -526,15 +526,15 @@ describe('tonality hints', () => {
     it('parses {D minor} at bar start', () => {
       const bar = parseBar('| {D minor} C Am |');
       expect(bar.tonalityHints).toEqual([
-        { beforeSlotIndex: 0, key: 'D minor', loc: expect.any(Object) },
+        { beforeCellIndex: 0, key: 'D minor', loc: expect.any(Object) },
       ]);
-      expect(bar.slots).toHaveLength(2);
+      expect(bar.cells).toHaveLength(2);
     });
 
     it('parses {Ab major} between chords', () => {
       const bar = parseBar('| C {Ab major} Am |');
       expect(bar.tonalityHints).toEqual([
-        { beforeSlotIndex: 1, key: 'Ab major', loc: expect.any(Object) },
+        { beforeCellIndex: 1, key: 'Ab major', loc: expect.any(Object) },
       ]);
     });
 
@@ -555,12 +555,12 @@ describe('tonality hints', () => {
 
     it('parses {} as reset to home', () => {
       const bar = parseBar('| {} C |');
-      expect(bar.tonalityHints).toEqual([{ beforeSlotIndex: 0, key: '', loc: expect.any(Object) }]);
+      expect(bar.tonalityHints).toEqual([{ beforeCellIndex: 0, key: '', loc: expect.any(Object) }]);
     });
 
     it('parses {home} as reset to home', () => {
       const bar = parseBar('| {home} C |');
-      expect(bar.tonalityHints).toEqual([{ beforeSlotIndex: 0, key: '', loc: expect.any(Object) }]);
+      expect(bar.tonalityHints).toEqual([{ beforeCellIndex: 0, key: '', loc: expect.any(Object) }]);
     });
   });
 
@@ -569,9 +569,9 @@ describe('tonality hints', () => {
       const bar = parseBar('| (4/4){D minor} C Am |');
       expect(bar.timeSignature).toEqual({ numerator: 4, denominator: 4 });
       expect(bar.tonalityHints).toEqual([
-        { beforeSlotIndex: 0, key: 'D minor', loc: expect.any(Object) },
+        { beforeCellIndex: 0, key: 'D minor', loc: expect.any(Object) },
       ]);
-      expect(bar.slots).toHaveLength(2);
+      expect(bar.cells).toHaveLength(2);
     });
   });
 

@@ -14,7 +14,7 @@ Grigson source files use the `.chart` extension.
 - **Plain text that resembles output.** The pipe character `|` represents a bar line. Time signatures look like time signatures. Chord names are written as you would write them on a lead sheet.
 - **Left-aligned, ragged right.** Unlike some chord chart tools that stretch rows to fill the page width, grigson renders rows at their natural width. A bar with four beats takes up twice as much space as a bar with two beats. The space a passage occupies on the page reflects how long it lasts in time.
 - **Explicit row layout.** Each line in the source becomes a row in the output. You control the layout by how you arrange your source text.
-- **Simple rhythm.** Grigson does not use a rhythm staff or per-chord duration notation. Rhythmic information is conveyed through beat-slot notation (see below).
+- **Simple rhythm.** Grigson does not use a rhythm staff or per-chord duration notation. Rhythmic information is conveyed through beat-cell notation (see below).
 - **Key per section.** Songs that modulate between sections (e.g. verse in Eb, chorus in Ab) can specify a key for each section independently.
 
 ---
@@ -244,13 +244,13 @@ Hints are separated from the beat grid. The `Bar` type has an optional `tonality
 
 ```typescript
 interface TonalityHintItem {
-  beforeSlotIndex: number; // hint applies from this beat-slot index onward within the bar
+  beforeCellIndex: number; // hint applies from this beat-cell index onward within the bar
   key: string;             // e.g. "Ab major", "D dorian"; "" = reset to home
   loc?: SourceRange;
 }
 ```
 
-Tonality hints do not occupy a beat slot — they are a side channel on `Bar`. The `slots` array contains only `ChordSlot` and `DotSlot` entries, as before.
+Tonality hints do not occupy a beat cell — they are a side channel on `Bar`. The `cells` array contains only `ChordCell` and `DotCell` entries, as before.
 
 ---
 
@@ -357,7 +357,7 @@ To use the extension during development, open the `packages/vscode-extension` di
 
 ## What Grigson Does Not Support (by design)
 
-- **Rhythm notation.** There is no staff, no note durations on individual chords, no ties or triplets beyond what beat-slot notation can express.
+- **Rhythm notation.** There is no staff, no note durations on individual chords, no ties or triplets beyond what beat-cell notation can express.
 - **Navigation signs.** Coda, Segno, Da Capo, Dal Segno, and Fine are not supported in v1. Use repeat barlines and volta brackets instead, or write the song out in full.
 - **Lyrics.** Grigson is a chord chart tool, not a lead sheet tool.
 - **Auto-reflow.** Row layout is always controlled explicitly by the source text.
