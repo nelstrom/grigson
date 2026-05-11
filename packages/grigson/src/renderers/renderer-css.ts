@@ -350,5 +350,22 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         font-size: var(--grigson-simile-font-size);
         transform: translateY(var(--grigson-simile-offset));
       }
+
+      /* ── Print: give each section its own grid so break-inside: avoid works ── */
+      @media print {
+        [part="song-grid"] {
+          display: block;
+        }
+        [part="section"] {
+          display: grid;
+          grid-template-columns: auto repeat(var(--beat-cols), minmax(var(--min-beat-width), 1fr) auto);
+          row-gap: var(--grigson-row-gap);
+          break-inside: avoid;
+          margin-bottom: var(--grigson-section-gap);
+        }
+        [part="section-label"] {
+          margin-top: 0;
+        }
+      }
     `;
 }

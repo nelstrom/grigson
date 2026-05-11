@@ -626,10 +626,9 @@ describe('HtmlRenderer', () => {
   });
 
   describe('section structure', () => {
-    it('section element has part="section" and display:contents style', () => {
+    it('section element has part="section"', () => {
       const html = renderer.render(parseSong('[Verse]\n| C |\n'));
       expect(html).toContain('part="section"');
-      expect(html).toContain('display: contents');
     });
 
     it('section label is rendered inside section element', () => {

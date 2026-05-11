@@ -729,7 +729,7 @@ export class HtmlRenderer implements GrigsonRenderer {
     html += `<div part="song-grid">`;
 
     for (const section of source.sections) {
-      html += `<section part="section" style="display: contents">`;
+      html += `<section part="section">`;
 
       if (section.label !== null) {
         html += `<h2 part="section-label">${section.label}</h2>`;
