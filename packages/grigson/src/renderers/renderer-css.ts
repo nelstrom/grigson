@@ -165,24 +165,10 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         justify-self: center;
       }
 
-      /* Single barline: thin vertical fill */
+      /* Single barline: rendered as a Bravura glyph (U+E030) for all typefaces */
       [part~="barline-single"] {
-        width: var(--grigson-barline-width);
-        background: var(--grigson-barline-color);
-      }
-
-      [part~="barline-single"] [part="barline-glyph"] {
-        display: none;
-      }
-
-      /* Cursive: no CSS fill, glyph shown */
-      [data-typeface="cursive"] [part~="barline-single"] {
         width: auto;
         background: none;
-      }
-
-      [data-typeface="cursive"] [part~="barline-single"] [part="barline-glyph"] {
-        display: flex;
       }
 
       [part="barline-glyph"] {
@@ -259,8 +245,8 @@ export function getRendererStyles(typeface: string = 'sans'): string {
       [part="chord-fraction-line"] {
         display: block;
         width: 100%;
-        height: 1px;
-        background: var(--grigson-barline-color);
+        height: 0;
+        border-top: 1px solid var(--grigson-barline-color);
       }
 
       [part="chord-bass"] {
@@ -277,8 +263,8 @@ export function getRendererStyles(typeface: string = 'sans'): string {
       [part~="chord-slash"][data-slash-style="horizontal"] [part="chord-fraction-line"] {
         display: block;
         width: 100%;
-        height: 1px;
-        background: var(--grigson-barline-color);
+        height: 0;
+        border-top: 1px solid var(--grigson-barline-color);
       }
 
       /* ── Slash chord: diagonal (Real Book style) ─────────────────── */
@@ -298,6 +284,7 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         display: inline-block;
         width: 0.5em;
         height: 1.2em;
+        border-top: none;
         background: none;
         overflow: visible;
       }
@@ -308,8 +295,8 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         top: 0;
         bottom: 0;
         left: 50%;
-        width: 1px;
-        background: currentColor;
+        width: 0;
+        border-left: 1px solid currentColor;
         transform: rotate(var(--grigson-slash-angle));
         transform-origin: center;
       }
