@@ -5,6 +5,12 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
       : typeface === 'sans'
         ? '"GrigsonSans", sans-serif'
         : '"GrigsonSerif", serif';
+  const simileFamily =
+    typeface === 'cursive'
+      ? '"GrigsonCursive", cursive'
+      : typeface === 'sans'
+        ? '"GrigsonSans", "GrigsonTimeSig", sans-serif'
+        : '"GrigsonSerif", "GrigsonTimeSig", serif';
   return `
 /* ── Variables ── */
 [part~="chart"] {
@@ -167,9 +173,9 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: system-ui, sans-serif;
+  font-family: ${simileFamily};
   font-size: 1.4em;
-  opacity: 0.4;
+  transform: translateY(-0.3em);
 }
 
 /* Global chord label positions (W/N/S/E zones and span zones) */

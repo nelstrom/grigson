@@ -183,7 +183,7 @@ function renderBar(
   const isSimile = prevBar !== null && cellsEqual(bar, prevBar);
 
   if (isSimile) {
-    return `<div part="bar bar-simile"><span part="chord chord-simile" aria-label="repeat bar">%</span></div>`;
+    return `<div part="bar bar-simile"><span part="chord chord-simile" aria-label="repeat bar">\u{E500}</span></div>`;
   }
 
   const pattern = detectPattern(bar, activeTSig);
