@@ -8,6 +8,8 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   return `
 /* ── Variables ── */
 [part~="chart"] {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
   --cg-grid-width: 2px;
   --cg-diag-width: 0.5px;
   --cg-diag-style: solid;
