@@ -1,50 +1,45 @@
 ---
-layout: base.njk
-title: Playground
-permalink: /tooling/playground/
+layout: minimal.njk
+permalink: /sheet/
 ---
 
-<h1>Playground</h1>
-
-<p>Type or paste a chord chart below. <code>grigson</code> will live-normalise it for you.</p>
-
 <style>
-  #playground-container {
+  #sheet-main {
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  #sheet-footer {
+    border-top: 1px solid var(--color-border-subtle);
+    padding: 1rem 2rem;
+    text-align: center;
+  }
+
+  #edit-toggle {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: var(--color-fg);
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    padding: 0.2rem 0.6rem;
+  }
+  #edit-toggle:hover { opacity: 1; }
+
+  #edit-section {
+    margin-top: 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    text-align: left;
   }
-  #editor-section {
-    display: flex;
-    flex-direction: column;
-    height: 400px;
+
+  #edit-section[hidden] {
+    display: none;
   }
-  #editor-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0;
-    flex-shrink: 0;
-  }
-  #format-btn {
-    font-size: 0.85rem;
-    padding: 0.2rem 0.6rem;
-    cursor: pointer;
-  }
-  #format-error {
-    color: var(--color-error);
-    font-size: 0.85em;
-  }
-  #input-editor {
-    flex: 1;
-    border: 1px solid var(--color-border);
-    min-height: 0;
-  }
-  #output-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+
   #renderer-toolbar {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -53,181 +48,202 @@ permalink: /tooling/playground/
     row-gap: 0.35rem;
     font-size: 0.85rem;
   }
+
   #html-options, #gh-options {
     display: contents;
   }
   #html-options[hidden], #gh-options[hidden] {
     display: none !important;
   }
-  #output-container {
-    border: 1px solid var(--color-border-subtle);
-    background: var(--color-bg);
+
+  #editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
   }
-  #output-container pre {
-    margin: 0;
-    padding: 1rem;
+
+  #format-btn {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    cursor: pointer;
   }
-  .error {
+
+  #format-error {
     color: var(--color-error);
-    padding: 1rem;
-    white-space: pre-wrap;
-    background: var(--color-bg);
+    font-size: 0.85em;
   }
-  @media (min-width: 800px) {
-    #playground-container {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 1.5rem;
+
+  #input-editor {
+    height: 400px;
+    border: 1px solid var(--color-border);
+  }
+
+  #footer-nav {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  @media print {
+    #sheet-footer { display: none; }
+
+    @page {
+      size: A4;
+      margin: 1.5cm;
     }
-    #editor-section {
-      flex: 1;
-      position: sticky;
-      top: 1rem;
-      height: calc(100vh - 2rem);
+
+    grigson-html-renderer::part(section) {
+      break-inside: avoid;
     }
-    #output-section {
-      flex: 1;
-      min-width: 0;
+
+    grigson-html-renderer::part(section-label) {
+      break-after: avoid;
     }
   }
 </style>
 
-<div id="playground-container">
-  <div id="editor-section">
-    <div id="editor-toolbar">
-      <button id="format-btn" type="button">Format</button>
-      <a id="view-ast-link" href="{{ '/tooling/ast-explorer/' | url }}" style="font-size:0.85rem;">View AST</a>
-      <a id="view-sheet-link" href="{{ '/sheet/' | url }}" style="font-size:0.85rem;">View sheet</a>
-      <span id="format-error" hidden></span>
-    </div>
-    <div id="input-editor"></div>
-  </div>
+<main id="sheet-main">
+  <grigson-chart id="sheet-output" normalise></grigson-chart>
+</main>
 
-  <div id="output-section">
+<footer id="sheet-footer">
+  <button id="edit-toggle" type="button">Edit chart</button>
+
+  <div id="edit-section" hidden>
     <div id="renderer-toolbar">
-    <label for="transpose-select">Transpose:</label>
-    <select id="transpose-select">
-      <option value="11">Up 11 semitones</option>
-      <option value="10">Up 10 semitones</option>
-      <option value="9">Up 9 semitones</option>
-      <option value="8">Up 8 semitones</option>
-      <option value="7">Up 7 semitones</option>
-      <option value="6">Up 6 semitones</option>
-      <option value="5">Up 5 semitones</option>
-      <option value="4">Up 4 semitones</option>
-      <option value="3">Up 3 semitones</option>
-      <option value="2">Up 2 semitones</option>
-      <option value="1">Up 1 semitone</option>
-      <option value="0" selected>None (default)</option>
-      <option value="-1">Down 1 semitone</option>
-      <option value="-2">Down 2 semitones</option>
-      <option value="-3">Down 3 semitones</option>
-      <option value="-4">Down 4 semitones</option>
-      <option value="-5">Down 5 semitones</option>
-      <option value="-6">Down 6 semitones</option>
-      <option value="-7">Down 7 semitones</option>
-      <option value="-8">Down 8 semitones</option>
-      <option value="-9">Down 9 semitones</option>
-      <option value="-10">Down 10 semitones</option>
-      <option value="-11">Down 11 semitones</option>
-    </select>
-    <label for="renderer-select">Renderer:</label>
-    <select id="renderer-select">
-      <option value="html">HTML</option>
-      <option value="text">Text</option>
-      <option value="grille-harmonique">Grille Harmonique</option>
-    </select>
-    <span id="html-options">
-      <label for="line-length-select">Line length:</label>
-      <select id="line-length-select">
-        <option value="">Auto (default)</option>
-        <optgroup label="Max bars per line">
-          <option value="max:2">Max 2</option>
-          <option value="max:3">Max 3</option>
-          <option value="max:4">Max 4</option>
-          <option value="max:5">Max 5</option>
-          <option value="max:6">Max 6</option>
-          <option value="max:7">Max 7</option>
-          <option value="max:8">Max 8</option>
-          <option value="max:9">Max 9</option>
-          <option value="max:10">Max 10</option>
-          <option value="max:11">Max 11</option>
-          <option value="max:12">Max 12</option>
-        </optgroup>
-        <optgroup label="Fixed bars per line">
-          <option value="fixed:2">Fixed 2</option>
-          <option value="fixed:3">Fixed 3</option>
-          <option value="fixed:4">Fixed 4</option>
-          <option value="fixed:5">Fixed 5</option>
-          <option value="fixed:6">Fixed 6</option>
-          <option value="fixed:7">Fixed 7</option>
-          <option value="fixed:8">Fixed 8</option>
-          <option value="fixed:9">Fixed 9</option>
-          <option value="fixed:10">Fixed 10</option>
-          <option value="fixed:11">Fixed 11</option>
-          <option value="fixed:12">Fixed 12</option>
-        </optgroup>
+      <label for="transpose-select">Transpose:</label>
+      <select id="transpose-select">
+        <option value="11">Up 11 semitones</option>
+        <option value="10">Up 10 semitones</option>
+        <option value="9">Up 9 semitones</option>
+        <option value="8">Up 8 semitones</option>
+        <option value="7">Up 7 semitones</option>
+        <option value="6">Up 6 semitones</option>
+        <option value="5">Up 5 semitones</option>
+        <option value="4">Up 4 semitones</option>
+        <option value="3">Up 3 semitones</option>
+        <option value="2">Up 2 semitones</option>
+        <option value="1">Up 1 semitone</option>
+        <option value="0" selected>None (default)</option>
+        <option value="-1">Down 1 semitone</option>
+        <option value="-2">Down 2 semitones</option>
+        <option value="-3">Down 3 semitones</option>
+        <option value="-4">Down 4 semitones</option>
+        <option value="-5">Down 5 semitones</option>
+        <option value="-6">Down 6 semitones</option>
+        <option value="-7">Down 7 semitones</option>
+        <option value="-8">Down 8 semitones</option>
+        <option value="-9">Down 9 semitones</option>
+        <option value="-10">Down 10 semitones</option>
+        <option value="-11">Down 11 semitones</option>
       </select>
-      <label for="typeface-select">Typeface:</label>
-      <select id="typeface-select">
-        <option value="sans">Sans-serif (default)</option>
-        <option value="serif">Serif</option>
-        <option value="cursive">Cursive (Petaluma)</option>
+      <label for="renderer-select">Renderer:</label>
+      <select id="renderer-select">
+        <option value="html">HTML</option>
+        <option value="text">Text</option>
+        <option value="grille-harmonique">Grille Harmonique</option>
       </select>
-      <label for="notation-preset-select">Notation preset:</label>
-      <select id="notation-preset-select">
-        <option value="">Default</option>
-        <option value="realbook">Real Book</option>
-      </select>
-      <label for="simile-output-select">Simile:</label>
-      <select id="simile-output-select">
-        <option value="">Longhand (default)</option>
-        <option value="shorthand">Shorthand</option>
-      </select>
-      <label for="accidentals-select">Accidentals:</label>
-      <select id="accidentals-select">
-        <option value="">Unicode ♭♯ (default)</option>
-        <option value="ascii">ASCII b#</option>
-      </select>
-      <label for="slash-style-select">Slash chords:</label>
-      <select id="slash-style-select">
-        <option value="">Diagonal (default)</option>
-        <option value="horizontal">Horizontal</option>
-        <option value="ascii">ASCII /</option>
-      </select>
-    </span>
-    <span id="gh-options" hidden>
-      <label for="gh-line-length-select">Line length:</label>
-      <select id="gh-line-length-select">
-        <option value="">Default (4 bars)</option>
-        <option value="2">Fixed 2</option>
-        <option value="4">Fixed 4</option>
-        <option value="8">Fixed 8</option>
-      </select>
-      <label for="gh-typeface-select">Typeface:</label>
-      <select id="gh-typeface-select">
-        <option value="sans">Sans-serif (default)</option>
-        <option value="serif">Serif</option>
-        <option value="cursive">Cursive (Petaluma)</option>
-      </select>
-      <label for="gh-notation-preset-select">Notation preset:</label>
-      <select id="gh-notation-preset-select">
-        <option value="">Default</option>
-        <option value="realbook">Real Book</option>
-      </select>
-      <label for="gh-accidentals-select">Accidentals:</label>
-      <select id="gh-accidentals-select">
-        <option value="">Unicode ♭♯ (default)</option>
-        <option value="ascii">ASCII b#</option>
-      </select>
-    </span>
+      <span id="html-options">
+        <label for="line-length-select">Line length:</label>
+        <select id="line-length-select">
+          <option value="">Auto (default)</option>
+          <optgroup label="Max bars per line">
+            <option value="max:2">Max 2</option>
+            <option value="max:3">Max 3</option>
+            <option value="max:4">Max 4</option>
+            <option value="max:5">Max 5</option>
+            <option value="max:6">Max 6</option>
+            <option value="max:7">Max 7</option>
+            <option value="max:8">Max 8</option>
+            <option value="max:9">Max 9</option>
+            <option value="max:10">Max 10</option>
+            <option value="max:11">Max 11</option>
+            <option value="max:12">Max 12</option>
+          </optgroup>
+          <optgroup label="Fixed bars per line">
+            <option value="fixed:2">Fixed 2</option>
+            <option value="fixed:3">Fixed 3</option>
+            <option value="fixed:4">Fixed 4</option>
+            <option value="fixed:5">Fixed 5</option>
+            <option value="fixed:6">Fixed 6</option>
+            <option value="fixed:7">Fixed 7</option>
+            <option value="fixed:8">Fixed 8</option>
+            <option value="fixed:9">Fixed 9</option>
+            <option value="fixed:10">Fixed 10</option>
+            <option value="fixed:11">Fixed 11</option>
+            <option value="fixed:12">Fixed 12</option>
+          </optgroup>
+        </select>
+        <label for="typeface-select">Typeface:</label>
+        <select id="typeface-select">
+          <option value="sans">Sans-serif (default)</option>
+          <option value="serif">Serif</option>
+          <option value="cursive">Cursive (Petaluma)</option>
+        </select>
+        <label for="notation-preset-select">Notation preset:</label>
+        <select id="notation-preset-select">
+          <option value="">Default</option>
+          <option value="realbook">Real Book</option>
+        </select>
+        <label for="simile-output-select">Simile:</label>
+        <select id="simile-output-select">
+          <option value="">Longhand (default)</option>
+          <option value="shorthand">Shorthand</option>
+        </select>
+        <label for="accidentals-select">Accidentals:</label>
+        <select id="accidentals-select">
+          <option value="">Unicode ♭♯ (default)</option>
+          <option value="ascii">ASCII b#</option>
+        </select>
+        <label for="slash-style-select">Slash chords:</label>
+        <select id="slash-style-select">
+          <option value="">Diagonal (default)</option>
+          <option value="horizontal">Horizontal</option>
+          <option value="ascii">ASCII /</option>
+        </select>
+      </span>
+      <span id="gh-options" hidden>
+        <label for="gh-line-length-select">Line length:</label>
+        <select id="gh-line-length-select">
+          <option value="">Default (4 bars)</option>
+          <option value="2">Fixed 2</option>
+          <option value="4">Fixed 4</option>
+          <option value="8">Fixed 8</option>
+        </select>
+        <label for="gh-typeface-select">Typeface:</label>
+        <select id="gh-typeface-select">
+          <option value="sans">Sans-serif (default)</option>
+          <option value="serif">Serif</option>
+          <option value="cursive">Cursive (Petaluma)</option>
+        </select>
+        <label for="gh-notation-preset-select">Notation preset:</label>
+        <select id="gh-notation-preset-select">
+          <option value="">Default</option>
+          <option value="realbook">Real Book</option>
+        </select>
+        <label for="gh-accidentals-select">Accidentals:</label>
+        <select id="gh-accidentals-select">
+          <option value="">Unicode ♭♯ (default)</option>
+          <option value="ascii">ASCII b#</option>
+        </select>
+      </span>
     </div>
 
-    <div id="output-container">
-      <grigson-chart id="playground-output" normalise></grigson-chart>
+    <div>
+      <div id="editor-toolbar">
+        <button id="format-btn" type="button">Format</button>
+        <span id="format-error" hidden></span>
+      </div>
+      <div id="input-editor"></div>
     </div>
+
+    <nav id="footer-nav">
+      <a id="open-in-playground-link" href="{{ '/tooling/playground/' | url }}">Open in Playground</a>
+      <a href="{{ '/' | url }}">grigson</a>
+    </nav>
   </div>
-</div>
+</footer>
 
 <script src="{{ '/js/grigson-text-renderer-register.iife.js' | url }}"></script>
 <script src="{{ '/js/grigson-grille-harmonique-renderer-register.iife.js' | url }}"></script>
@@ -263,27 +279,18 @@ permalink: /tooling/playground/
     }),
   ]);
 
-  // lz-string.min.js is loaded as a plain script before Monaco's AMD loader,
-  // so it initialises as window.LZString without AMD interference.
   const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = LZString;
 
   require.config({ paths: { 'vs': '{{ '/js/monaco/vs' | url }}' } });
 
   require(['vs/editor/editor.main'], function () {
     const DEFAULT_VALUE = `---
-title: "Demo chart"
-key: F# major
-meter: 4/4
+title: "Bebop Blues"
 ---
 
-# This is a comment line
-| F# | B | C#7 | D#m |
-| G#m | C#7 | F# | Bm7b5 |
-| A Bb | C7 Dm | Em7b5 F | G Am G7 . |
-| Cmaj7  | Bdim7 Am7 | Fmaj7 | Cmaj7 |
-| G7b5 | F#7b5 | Cm7 | Bbm7 |
-||: C | F :||: G | C :||
-| F/C | Am/E | Cm7/Bb | G/B ||.
+| (4/4) Fmaj7 F7 | Bb7 Bdim7 | Fmaj7 | Cm7 F7 |
+| Bbmaj7 | Bbdim7 | Fmaj7 | Am7 D7 |
+| Gm7 | C7 | Fmaj7 Dm7 | Gm7 C7 ||.
 `;
 
     function readHash() {
@@ -306,7 +313,12 @@ meter: 4/4
       }
     }
 
-    const outputElement = document.getElementById('playground-output');
+    // If no #code/ hash, set one immediately so the URL is always shareable
+    if (!location.hash.startsWith('#code/')) {
+      history.replaceState(null, '', location.search + '#code/' + compressToEncodedURIComponent(DEFAULT_VALUE));
+    }
+
+    const outputElement = document.getElementById('sheet-output');
     const rendererSelect = document.getElementById('renderer-select');
     const transposeSelect = document.getElementById('transpose-select');
     const typefaceSelect = document.getElementById('typeface-select');
@@ -321,6 +333,9 @@ meter: 4/4
     const ghTypefaceSelect = document.getElementById('gh-typeface-select');
     const ghNotationPresetSelect = document.getElementById('gh-notation-preset-select');
     const ghAccidentalsSelect = document.getElementById('gh-accidentals-select');
+    const editToggle = document.getElementById('edit-toggle');
+    const editSection = document.getElementById('edit-section');
+    const openInPlaygroundLink = document.getElementById('open-in-playground-link');
 
     function applyLineLength(renderer) {
       const val = lineLengthSelect.value;
@@ -375,13 +390,9 @@ meter: 4/4
       outputElement.insertBefore(currentRenderer, template ?? null);
     }
 
-    // Register language and define Monarch tokenizer.
-    // (Monaco's Monarch is built into the AMD bundle — no external oniguruma needed.)
     monaco.languages.register({ id: 'grigson' });
-
     monaco.languages.setMonarchTokensProvider('grigson', window.grigsonMonarchTokens);
 
-    // Define light and dark themes
     monaco.editor.defineTheme('grigson-light', {
       base: 'vs',
       inherit: true,
@@ -433,8 +444,21 @@ meter: 4/4
       monaco.editor.setTheme(getTheme());
     });
 
-    const viewAstLink = document.getElementById('view-ast-link');
-    const viewSheetLink = document.getElementById('view-sheet-link');
+    function updatePageTitle(source) {
+      try {
+        const song = grigson.parseSong(source);
+        document.title = song.title ? `${song.title} — grigson` : 'grigson';
+      } catch {
+        document.title = 'grigson';
+      }
+    }
+
+    function updateOpenInPlaygroundLink() {
+      const playgroundURL = new URL('{{ '/tooling/playground/' | url }}', location.origin);
+      playgroundURL.search = location.search;
+      playgroundURL.hash = location.hash;
+      openInPlaygroundLink.href = playgroundURL.toString();
+    }
 
     let urlTimer;
     function updateURL() {
@@ -469,13 +493,11 @@ meter: 4/4
         const compressed = compressToEncodedURIComponent(editor.getValue());
         const query = params.toString() ? '?' + params.toString() : '';
         history.replaceState(null, '', query + '#code/' + compressed);
-        viewAstLink.href = '{{ '/tooling/ast-explorer/' | url }}' + '#code/' + compressed;
-        viewSheetLink.href = '{{ '/sheet/' | url }}' + query + '#code/' + compressed;
+        updateOpenInPlaygroundLink();
       }, 500);
     }
 
     function update() {
-      updateURL();
       const value = editor.getValue();
       let template = outputElement.querySelector('template');
       if (!template) {
@@ -484,6 +506,8 @@ meter: 4/4
       }
       template.innerHTML = value;
       outputElement.update();
+      updatePageTitle(value);
+      updateURL();
 
       const diagnostics = grigson.validate(value);
       monaco.editor.setModelMarkers(editor.getModel(), 'grigson', diagnostics.map(d => ({
@@ -523,6 +547,12 @@ meter: 4/4
 
     editor.onDidChangeModelContent(update);
     update();
+
+    editToggle.addEventListener('click', () => {
+      const hidden = editSection.hasAttribute('hidden');
+      editSection.toggleAttribute('hidden', !hidden);
+      editToggle.textContent = hidden ? 'Hide editor' : 'Edit chart';
+    });
 
     rendererSelect.addEventListener('change', () => {
       applyRenderer();

@@ -824,3 +824,21 @@ Renamed the "slot" concept to "cell" across the entire monorepo to eliminate a c
 - CSS parts: `part="slot"`→`part="cell"`, `part="slot bar-start"`→`part="cell bar-start"`
 
 **Files changed:** types.ts, harmonicAnalysis.ts, index.ts, index.browser.ts, html.ts, renderer-css.ts, text.ts, normalise.ts, transpose.ts, keyDetector.ts, validator.ts, grammar.pegjs, grille-harmonique render.ts + patterns.ts, tree-sitter grammar.js (+ regenerated), all test files, all documentation.
+
+## Add /sheet/ page
+
+Created a companion "sheet view" page at `/sheet/` optimised for chart consumption rather than authoring.
+
+**Files created:**
+- `packages/website/_includes/minimal.njk` — bare HTML layout with CSS custom properties and body reset, no nav or sidebar
+- `packages/website/content/sheet.njk` — the sheet page itself
+
+**Features:**
+- Chart rendered full-width via `<grigson-chart>` with `padding: 2rem` and `max-width: 960px`
+- Footer with a subtle "Edit" toggle that reveals a Monaco editor + full renderer toolbar
+- "Open in Playground" link kept in sync with current URL state
+- Dynamic page title from front matter (`parseSong().frontMatter.title`)
+- URL encoding identical to playground (`#code/<lz-base64>`, `?renderer-config=<json>`)
+- No `#code/` hash → redirect to URL with default chart encoded (always shareable)
+- Print stylesheet: footer hidden, `@page { size: A4; margin: 1.5cm; }`, `break-inside: avoid` via `::part()` for sections/rows
+- Dark mode via CSS custom properties (no hard-coded colours)

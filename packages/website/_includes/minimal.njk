@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{{ title or 'grigson' }}</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --color-bg: #ffffff;
+        --color-fg: #1a1a1a;
+        --color-border: #cccccc;
+        --color-border-subtle: #dddddd;
+        --color-error: #cc0000;
+        --color-editor-bg: #fafafa;
+        --color-link: #0062cc;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg: #1e1e1e;
+          --color-fg: #d4d4d4;
+          --color-border: #444444;
+          --color-border-subtle: #333333;
+          --color-error: #f47272;
+          --color-editor-bg: #1e1e1e;
+          --color-link: #6ab0f5;
+        }
+      }
+
+      body {
+        background-color: var(--color-bg);
+        color: var(--color-fg);
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, sans-serif;
+        line-height: 1.6;
+      }
+
+      a {
+        color: var(--color-link);
+      }
+    </style>
+    <script defer src="{{ '/js/grigson.iife.js' | url }}"></script>
+    <script defer src="{{ '/js/grigson-register.iife.js' | url }}"></script>
+    {% block scripts %}{% endblock %}
+  </head>
+  <body>
+    {{ content | safe }}
+  </body>
+</html>
