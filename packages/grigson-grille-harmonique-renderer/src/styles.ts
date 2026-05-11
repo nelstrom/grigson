@@ -29,8 +29,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   --cg-slash-bass-offset: 0.35em;
   font-family: ${fontFamily};
   font-size: 0.9rem;
-  display: flex;
-  flex-direction: column;
+  display: block;
   width: fit-content;
 }
 
@@ -200,6 +199,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  break-inside: avoid;
 }
 [part~="section"] + [part~="section"] {
   margin-top: calc(-1 * var(--cg-grid-width));
@@ -282,5 +282,6 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   align-self: flex-end;
   transform: translateY(var(--cg-slash-bass-offset));
 }
+
 `;
 }
