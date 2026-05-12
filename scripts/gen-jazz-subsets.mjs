@@ -73,13 +73,17 @@ const FONTS = [
     // Preprocessing steps:
     //   1. Add Math Bold cmap aliases U+1D7CE–1D7D7 → E080–E089 (time-sig digits).
     //   2. Re-encode the triangle glyph at U+E0BD to also sit at U+25B3 (△ maj7 symbol).
+    //   2a. Scale the triangle up to match NotoSansSymbols2's height (Petaluma's is too small).
     //   3. Copy the oslash glyph from PetalumaScript.otf and map it at U+00F8 (ø quality symbol).
     preprocessPy: `\
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
 from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.t2CharStringPen import T2CharStringPen
+from fontTools.pens.boundsPen import BoundsPen
+from fontTools.pens.transformPen import TransformPen
 from fontTools.cffLib import CharStrings
+import os
 
 font = TTFont(__INPUT__)
 target_top = font['CFF '].cff.topDictIndex[0]
@@ -102,6 +106,37 @@ for table in font['cmap'].tables:
         triangle_glyph = gname
         break
 print(f'Triangle glyph for U+25B3: {triangle_glyph}')
+
+# ── 2a. Scale triangle to match NotoSansSymbols2 height ───────────────────────
+scaled_triangle_name = None
+scaled_triangle_cs = None
+scaled_triangle_width = None
+noto_path = ${JSON.stringify(join(FONTS_DIR, 'NotoSansSymbols2-Regular.ttf'))}
+if triangle_glyph and os.path.exists(noto_path):
+    glyph_set = font.getGlyphSet()
+    pbp = BoundsPen(None)
+    glyph_set[triangle_glyph].draw(pbp)
+    noto = TTFont(noto_path)
+    noto_tri_name = noto.getBestCmap().get(0x25B3)
+    nbp = BoundsPen(None)
+    noto.getGlyphSet()[noto_tri_name].draw(nbp)
+    pet_height = pbp.bounds[3] - pbp.bounds[1]
+    noto_height = nbp.bounds[3] - nbp.bounds[1]
+    scale = noto_height / pet_height
+    xMin, yMin, xMax, yMax = pbp.bounds
+    cx, cy = (xMin + xMax) / 2, (yMin + yMax) / 2
+    tx, ty = cx * (1 - scale), cy * (1 - scale)
+    rec_tri = RecordingPen()
+    glyph_set[triangle_glyph].draw(rec_tri)
+    scaled_triangle_width = int(glyph_set[triangle_glyph].width * scale)
+    t2_tri = T2CharStringPen(scaled_triangle_width, old_cs_obj)
+    rec_tri.replay(TransformPen(t2_tri, (scale, 0, 0, scale, tx, ty)))
+    scaled_triangle_cs = t2_tri.getCharString()
+    scaled_triangle_cs.private = target_top.Private
+    scaled_triangle_name = 'uni25B3scaled'
+    print(f'Triangle scaled {scale:.3f}x  ({pet_height:.0f} → {noto_height:.0f} units, adv {glyph_set[triangle_glyph].width} → {scaled_triangle_width})')
+elif triangle_glyph:
+    print('NotoSansSymbols2 not found — triangle not scaled (run gen-noto-subsets.mjs first)')
 
 # ── 2b. Repeat barline aliases U+E040/E041 → uniE04C/uniE04D ─────────────────
 # U+E04C and U+E04D are compact repeat barlines that suit the cursive aesthetic
@@ -134,6 +169,8 @@ rec.replay(pen)
 oslash_cs = pen.getCharString()
 oslash_cs.private = target_top.Private
 decompiled[oslash_name] = oslash_cs
+if scaled_triangle_name:
+    decompiled[scaled_triangle_name] = scaled_triangle_cs
 
 new_cs_obj = CharStrings(None, None, old_cs_obj.globalSubrs, target_top.Private, None, None)
 new_cs_obj.charStrings = decompiled
@@ -148,9 +185,18 @@ if oslash_name not in existing_go:
 font['hmtx'].metrics[oslash_name] = (oslash_width, 0)
 print(f'Copied oslash glyph from PetalumaScript (width={oslash_width})')
 
+if scaled_triangle_name:
+    current_go = list(font.getGlyphOrder())
+    if scaled_triangle_name not in current_go:
+        target_top.charset.append(scaled_triangle_name)
+        font.setGlyphOrder(current_go + [scaled_triangle_name])
+    font['hmtx'].metrics[scaled_triangle_name] = (scaled_triangle_width, 0)
+
 # ── 4. Update cmap tables ──────────────────────────────────────────────────────
 bmp_aliases = {}
-if triangle_glyph:
+if scaled_triangle_name:
+    bmp_aliases[0x25B3] = scaled_triangle_name
+elif triangle_glyph:
     bmp_aliases[0x25B3] = triangle_glyph
 if repeat_start_glyph:
     bmp_aliases[0xE040] = repeat_start_glyph
