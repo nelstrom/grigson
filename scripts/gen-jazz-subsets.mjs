@@ -164,6 +164,62 @@ decompiled = {}
 for name in old_cs_obj.charStrings:
     decompiled[name] = old_cs_obj[name]
 
+# ── 2c. Compress thick stroke of barlineFinal (U+E032) ───────────────────────
+# Petaluma's thick:thin stroke ratio (~5:1) is much wider than Bravura's (~3.5:1),
+# making the glyph look unbalanced. Scale the thick contour's x range to ~3.75:1.
+final_glyph_name = None
+for table in font['cmap'].tables:
+    g = table.cmap.get(0xE032)
+    if g:
+        final_glyph_name = g
+        break
+print(f'barlineFinal glyph: {final_glyph_name}')
+
+if final_glyph_name and final_glyph_name in decompiled:
+    gs_f = font.getGlyphSet()
+    rec_f = RecordingPen()
+    gs_f[final_glyph_name].draw(rec_f)
+
+    contours_f, cur_f = [], []
+    for op, args in rec_f.value:
+        cur_f.append((op, args))
+        if op in ('closePath', 'endPath'):
+            contours_f.append(cur_f)
+            cur_f = []
+
+    def _xrange(ops):
+        xs = [c[0] for o, a in ops for c in a if isinstance(c, tuple)]
+        return (min(xs), max(xs)) if xs else (0, 0)
+
+    ranges_f = [_xrange(c) for c in contours_f]
+    thick_i = max(range(len(ranges_f)), key=lambda i: ranges_f[i][1] - ranges_f[i][0])
+    x_lo_f, x_hi_f = ranges_f[thick_i]
+    thick_w_f = x_hi_f - x_lo_f
+    thin_ws_f = [ranges_f[i][1] - ranges_f[i][0] for i in range(len(ranges_f)) if i != thick_i]
+    thin_w_f = min(thin_ws_f) if thin_ws_f else 52.0
+    xscale_f = (thin_w_f * 3.75) / thick_w_f
+    new_width_f = int(round(x_lo_f + thick_w_f * xscale_f))
+
+    print(f'barlineFinal: thin={thin_w_f:.0f}, thick={thick_w_f:.0f}, ratio={thick_w_f/thin_w_f:.2f} -> xscale={xscale_f:.3f} (new ratio 3.75)')
+
+    t2_f = T2CharStringPen(new_width_f, old_cs_obj)
+    for ci, contour in enumerate(contours_f):
+        for op, args in contour:
+            if ci == thick_i and op not in ('closePath', 'endPath') and args:
+                new_args = tuple(
+                    (x_lo_f + (a[0] - x_lo_f) * xscale_f, a[1]) if isinstance(a, tuple) else a
+                    for a in args
+                )
+                getattr(t2_f, op)(*new_args)
+            else:
+                getattr(t2_f, op)(*args)
+
+    final_cs = t2_f.getCharString()
+    final_cs.private = target_top.Private
+    decompiled[final_glyph_name] = final_cs
+    font['hmtx'].metrics[final_glyph_name] = (new_width_f, 0)
+    print(f'barlineFinal: width {gs_f[final_glyph_name].width} -> {new_width_f}')
+
 pen = T2CharStringPen(oslash_width, old_cs_obj)
 rec.replay(pen)
 oslash_cs = pen.getCharString()
