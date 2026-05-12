@@ -126,7 +126,7 @@ describe('GrigsonChart', () => {
     expect(shadowRoot.querySelector('[part~="barline"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="chord"]')).not.toBeNull();
     expect(shadowRoot.querySelector('[part="chord-root"]')).not.toBeNull();
-    expect(shadowRoot.querySelector('[part="chord-quality"]')).not.toBeNull();
+    expect(shadowRoot.querySelector('[part~="chord-quality"]')).not.toBeNull();
   });
 
   it('renders front matter with part attributes', async () => {
@@ -543,7 +543,7 @@ describe('GrigsonHtmlRenderer', () => {
     expect(result.querySelector('[part~="barline"]')).not.toBeNull();
     expect(result.querySelector('[part="chord"]')).not.toBeNull();
     expect(result.querySelector('[part="chord-root"]')).not.toBeNull();
-    expect(result.querySelector('[part="chord-quality"]')).not.toBeNull();
+    expect(result.querySelector('[part~="chord-quality"]')).not.toBeNull();
   });
 
   it('renderChart() includes frontmatter parts when the song has front matter', () => {

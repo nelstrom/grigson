@@ -448,7 +448,7 @@ function renderChordInner(
   const rawQuality = preset[chord.quality as keyof NotationPreset] ?? '';
   const qualitySymbol = rawQuality ? wrapQualityAccidentals(rawQuality, mode) : '';
   const qualityHtml = qualitySymbol
-    ? `<span part="chord-quality" aria-hidden="true">${qualitySymbol}</span>`
+    ? `<span part="chord-quality ${chord.quality}" aria-hidden="true">${qualitySymbol}</span>`
     : '';
   return rootHtml + qualityHtml;
 }

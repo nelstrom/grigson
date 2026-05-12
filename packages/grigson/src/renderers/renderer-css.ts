@@ -73,6 +73,8 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         --grigson-barline-font-size: 2em;
         --grigson-barline-glyph-offset: 0.23em;
         --grigson-chord-offset: 0.1em;
+        --grigson-maj7-triangle-valign: 0.7em;
+        --grigson-maj7-triangle-margin: 0.15em;
       }
 
       [data-typeface="serif"] {
@@ -219,6 +221,15 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         line-height: 0;
         margin-left: 0.05em;
         margin-right: 0.05em;
+      }
+
+      [part~="maj7"] sup {
+        vertical-align: var(--grigson-maj7-triangle-valign, super);
+        line-height: 0;
+      }
+
+      [part~="maj7"] {
+        margin-left: var(--grigson-maj7-triangle-margin, 0em);
       }
 
       [part="quality-accidental"][data-glyph="unicode"] {
