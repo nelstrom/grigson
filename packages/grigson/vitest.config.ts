@@ -7,7 +7,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/**/*-cdn.ts',
+        'src/**/*-subset.ts',
+        'src/html-renderer-cli.ts',
+        'src/run-renderer.ts',
+      ],
     },
   },
 });
