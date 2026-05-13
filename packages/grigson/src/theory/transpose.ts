@@ -82,7 +82,7 @@ export function transposeSection(chords: Chord[], semitones: number): Chord[] {
  *
  * const song = parseSong(`
  * ---
- * key: C
+ * key: C major
  * ---
  * | C | F | G | Am |
  * `);
@@ -90,7 +90,7 @@ export function transposeSection(chords: Chord[], semitones: number): Chord[] {
  * const inG = transposeSong(song, 7); // up a perfect fifth → G major
  * console.log(new TextRenderer().render(inG));
  * // ---
- * // key: G
+ * // key: G major
  * // ---
  * // | G | C | D | Em |
  * ```
@@ -137,8 +137,9 @@ export function transposeSong(song: Song, semitones: number): Song {
 }
 
 /**
- * Compute the semitone interval from the detected home key to `targetKey`, then call
- * `transposeSong`. Equivalent to computing the interval yourself and calling
+ * Compute the semitone interval from the detected home tonic to `targetKey` (a tonic note name,
+ * e.g. `'G'`, `'Bb'`), then call `transposeSong`. The mode of the song is preserved — only the
+ * tonic shifts. Equivalent to computing the interval yourself and calling
  * `transposeSong(song, semitones)`.
  *
  * @example
@@ -147,7 +148,7 @@ export function transposeSong(song: Song, semitones: number): Song {
  *
  * const song = parseSong('| C | F | G | Am |');
  *
- * // Transpose from C major to G major
+ * // Shift tonic to G (major mode preserved)
  * const inG = transposeSongToKey(song, 'G');
  * console.log(new TextRenderer().render(inG));
  * // | G | C | D | Em |

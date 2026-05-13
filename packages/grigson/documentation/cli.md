@@ -160,11 +160,11 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option        | Description                                                         |
-| ------------- | ------------------------------------------------------------------- |
-| `--raise <n>` | Transpose up by `n` semitones (positive integer)                    |
-| `--lower <n>` | Transpose down by `n` semitones (positive integer)                  |
-| `--to <key>`  | Transpose to a target key (e.g. `--to "G major"`, `--to "D minor"`) |
+| Option        | Description                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| `--raise <n>` | Transpose up by `n` semitones (positive integer)                                                 |
+| `--lower <n>` | Transpose down by `n` semitones (positive integer)                                               |
+| `--to <note>` | Transpose to the given tonic note (e.g. `--to G`, `--to D`); the mode is preserved from the song |
 
 Exactly one of `--raise`, `--lower`, or `--to` is required.
 
@@ -173,8 +173,8 @@ Exactly one of `--raise`, `--lower`, or `--to` is required.
 ```sh
 grigson transpose --raise 2 song.chart    # up a whole step
 grigson transpose --lower 3 song.chart   # down a minor third
-grigson transpose --to "G major" song.chart      # to G major
-cat song.chart | grigson transpose --to "D minor"    # from stdin
+grigson transpose --to G song.chart       # to G (same mode as the original)
+cat song.chart | grigson transpose --to D    # from stdin
 ```
 
 ---

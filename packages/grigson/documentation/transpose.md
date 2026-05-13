@@ -25,7 +25,7 @@ import { parseSong, transposeSong, TextRenderer } from 'grigson';
 
 const song = parseSong(`
 ---
-key: C
+key: C major
 ---
 | C | F | G | Am |
 `);
@@ -33,20 +33,20 @@ key: C
 const transposed = transposeSong(song, 7); // up a perfect fifth → G major
 console.log(new TextRenderer().render(transposed));
 // ---
-// key: G
+// key: G major
 // ---
 // | G | C | D | Em |
 ```
 
 ### `transposeSongToKey(song: Song, targetKey: string): Song`
 
-Computes the semitone interval from the detected home key of the first section to `targetKey`, then calls `transposeSong`. Equivalent to computing the interval yourself and calling `transposeSong`.
+Computes the semitone interval from the detected home tonic of the first section to `targetKey` (a tonic note name, e.g. `'G'`, `'Bb'`), then calls `transposeSong`. The mode of the song is preserved — only the tonic shifts. Equivalent to computing the interval yourself and calling `transposeSong`.
 
 ```ts
 import { parseSong, transposeSongToKey, TextRenderer } from 'grigson';
 
 const song = parseSong('| C | F | G | Am |');
-const inG = transposeSongToKey(song, 'G');
+const inG = transposeSongToKey(song, 'G'); // shift tonic to G; mode stays major
 // same result as transposeSong(song, 7)
 ```
 
@@ -54,10 +54,10 @@ const inG = transposeSongToKey(song, 'G');
 
 The `<grigson-chart>` custom element supports two transposition attributes:
 
-| Attribute             | Effect                                                 |
-| --------------------- | ------------------------------------------------------ |
-| `transpose-key`       | Transposes to the named key (e.g. `transpose-key="G"`) |
-| `transpose-semitones` | Transposes by the given number of semitones (integer)  |
+| Attribute             | Effect                                                                           |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `transpose-key`       | Transposes to the given tonic note (e.g. `transpose-key="G"`); mode is preserved |
+| `transpose-semitones` | Transposes by the given number of semitones (integer)                            |
 
 ```html
 <grigson-chart transpose-key="Bb">
