@@ -133,6 +133,45 @@ describe('transpose-rewrite', () => {
     });
   });
 
+  describe('shiftKeyString fallback (key when chord detection cannot determine a home key)', () => {
+    // A song with no chords guarantees key detection returns null, exercising the fallback.
+    function keySong(key: string | null): Song {
+      return { type: 'song', title: null, key, meter: null, sections: [] };
+    }
+
+    it('K1: C major +1 → Db major', () => {
+      expect(transposeSong(keySong('C major'), 1).key).toBe('Db major');
+    });
+
+    it('K2: C major +6 → Gb major — flat preferred over F# when both are canonical', () => {
+      expect(transposeSong(keySong('C major'), 6).key).toBe('Gb major');
+    });
+
+    it('K3: C major +7 → G major', () => {
+      expect(transposeSong(keySong('C major'), 7).key).toBe('G major');
+    });
+
+    it('K4: C major +8 → Ab major', () => {
+      expect(transposeSong(keySong('C major'), 8).key).toBe('Ab major');
+    });
+
+    it('K5: C minor +2 → D minor — mode suffix preserved', () => {
+      expect(transposeSong(keySong('C minor'), 2).key).toBe('D minor');
+    });
+
+    it('K6: F# major +1 → G major', () => {
+      expect(transposeSong(keySong('F# major'), 1).key).toBe('G major');
+    });
+
+    it('K7: Gb major -1 → F major', () => {
+      expect(transposeSong(keySong('Gb major'), -1).key).toBe('F major');
+    });
+
+    it('K8: null key stays null', () => {
+      expect(transposeSong(keySong(null), 5).key).toBeNull();
+    });
+  });
+
   describe('transposeSongToKey', () => {
     it('T6: transposeSongToKey(C, "G") === transposeSong(C, +7)', () => {
       const s = song([row(ch('C'), ch('F'), ch('G'), ch('A', 'minor'))]);

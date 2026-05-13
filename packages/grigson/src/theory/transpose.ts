@@ -2,7 +2,7 @@ import type { Song, Section, Row, Bar, Chord, ChordCell } from '../parser/types.
 import { rootToPitchClass } from './pitchClass.js';
 import { normaliseSection, toCanonicalKey } from './normalise.js';
 import { detectKey } from './keyDetector.js';
-import { KEYS, getKeyRoot, resolveKey } from './keys.js';
+import { KEYS, getKeyMode, getKeyRoot, resolveKey } from './keys.js';
 
 // Flat-side chromatic scale used as a neutral intermediate spelling before normalisation
 const PC_TO_FLAT: readonly string[] = [
@@ -39,6 +39,41 @@ function shiftChord(chord: Chord, semitones: number): Chord {
     }
   }
   return shifted;
+}
+
+// Shift a key string (e.g. "C major", "F# minor") by semitones, preserving the mode suffix and
+// choosing the enharmonic spelling that matches how chord normalisation spells notes when key
+// detection fails: flat-side first, falling back to the KEYS table for sharp-canonical keys.
+function shiftKeyString(key: string, semitones: number): string {
+  const tonic = getKeyRoot(key);
+  const modeSuffix = key.slice(tonic.length); // e.g. ' major', ' minor', ' dorian'
+  const mode = getKeyMode(key);
+  try {
+    const pc = rootToPitchClass(tonic);
+    const targetPC = (((pc + semitones) % 12) + 12) % 12;
+    // Prefer the flat-side spelling when it is a valid canonical key — this matches the default
+    // chord spelling used by normaliseSection when key detection fails, keeping the key
+    // declaration consistent with the chart (e.g. both "Gb major" rather than "F# major" / Gb).
+    const flatTonic = PC_TO_FLAT[targetPC];
+    if (KEYS[resolveKey(flatTonic + modeSuffix)]) {
+      return flatTonic + modeSuffix;
+    }
+    // Flat side is not canonical for this mode/PC (e.g. Ab minor vs G# minor) — find the
+    // sharp-side entry in KEYS.
+    for (const [shortKey, info] of Object.entries(KEYS)) {
+      if (getKeyMode(shortKey) !== mode) continue;
+      try {
+        if (rootToPitchClass(info.notes[0]) === targetPC) {
+          return info.notes[0] + modeSuffix;
+        }
+      } catch {
+        continue;
+      }
+    }
+    return flatTonic + modeSuffix;
+  } catch {
+    return key;
+  }
 }
 
 function transposeSectionInternal(
@@ -133,7 +168,14 @@ export function transposeSong(song: Song, semitones: number): Song {
     return { ...sec, rows: newRows, content: newContent };
   });
 
-  return { ...song, key: toCanonicalKey(firstSectionKey), sections: newSections };
+  const detectedKey = toCanonicalKey(firstSectionKey);
+  const transposedKey =
+    detectedKey !== null
+      ? detectedKey
+      : song.key !== null
+        ? shiftKeyString(song.key, semitones)
+        : null;
+  return { ...song, key: transposedKey, sections: newSections };
 }
 
 /**
