@@ -677,7 +677,9 @@ function renderRow(
 // ---------------------------------------------------------------------------
 
 function normalizeKey(key: string): string {
-  return normalizeAccidentals(key);
+  return key
+    .replace(/b/g, '<span part="key-accidental" data-glyph="unicode">♭</span>')
+    .replace(/#/g, '<span part="key-accidental" data-glyph="unicode">♯</span>');
 }
 
 function renderFrontMatter(song: Song): string {

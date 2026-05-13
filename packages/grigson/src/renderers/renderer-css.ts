@@ -223,6 +223,12 @@ export function getRendererStyles(typeface: string = 'sans'): string {
         margin-right: 0.05em;
       }
 
+      [part="key-accidental"][data-glyph="unicode"] {
+        vertical-align: 0.4em;
+        margin-left: 0.1em;
+        line-height: 0;
+      }
+
       [part~="maj7"] sup {
         vertical-align: var(--grigson-maj7-triangle-valign, super);
         line-height: 0;
