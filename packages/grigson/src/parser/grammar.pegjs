@@ -11,7 +11,7 @@
   }
 
   const VALID_NOTES = ["C#","Db","D#","Eb","F#","Gb","G#","Ab","A#","Bb","C","D","E","F","G","A","B"];
-  const VALID_SUFFIXES = ["m"," dorian"," aeolian"," mixolydian"," major"," minor"," ionian",""];
+  const VALID_SUFFIXES = [" dorian"," aeolian"," mixolydian"," major"," minor"," ionian"];
 
   function isValidKey(k) {
     return VALID_NOTES.some(n => VALID_SUFFIXES.some(s => k === n + s));
@@ -19,9 +19,7 @@
 
   function normalizeKey(k) {
     if (k.endsWith(' ionian')) return k.slice(0, -7) + ' major';
-    if (k.includes(' ')) return k;
-    if (k.endsWith('m')) return k.slice(0, -1) + ' minor';
-    return k + ' major';
+    return k;
   }
 }}
 
@@ -110,7 +108,7 @@ SectionLabel
       if (key !== null && !isValidKey(key)) {
         error(`Invalid key: "${key}".`);
       }
-      return { type: "sectionLabel", label: label.trim(), key: key ?? null, loc: makeLoc(location()) };
+      return { type: "sectionLabel", label: label.trim(), key: key !== null ? normalizeKey(key) : null, loc: makeLoc(location()) };
     }
 
 FrontMatter
@@ -118,7 +116,7 @@ FrontMatter
       const meta = Object.fromEntries(fields.map(f => [f.key, f.value]));
 
       if (meta.key !== undefined && !isValidKey(meta.key)) {
-        error(`Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian, C major, A minor).`);
+        error(`Invalid key: "${meta.key}". Must be a note name followed by a mode (e.g. C major, A minor, F# dorian, E aeolian, D mixolydian).`);
       }
 
       const isValidMeter = (m) => m === 'mixed' || /^[0-9]+\/[0-9]+$/.test(m);

@@ -87,14 +87,22 @@ describe('section parsing', () => {
 });
 
 describe('section key annotation', () => {
-  it('[Verse] key: E → section.key === "E"', () => {
-    const song = parseSong('[Verse] key: E\n| E | A |\n');
-    expect(song.sections[0].key).toBe('E');
+  it('[Verse] key: E → throws (shorthand rejected)', () => {
+    expect(() => parseSong('[Verse] key: E\n| E | A |\n')).toThrow();
   });
 
-  it('[Chorus] key: Am → section.key === "Am"', () => {
-    const song = parseSong('[Chorus] key: Am\n| Am | F |\n');
-    expect(song.sections[0].key).toBe('Am');
+  it('[Verse] key: E major → section.key === "E major"', () => {
+    const song = parseSong('[Verse] key: E major\n| E | A |\n');
+    expect(song.sections[0].key).toBe('E major');
+  });
+
+  it('[Chorus] key: Am → throws (shorthand rejected)', () => {
+    expect(() => parseSong('[Chorus] key: Am\n| Am | F |\n')).toThrow();
+  });
+
+  it('[Chorus] key: A minor → section.key === "A minor"', () => {
+    const song = parseSong('[Chorus] key: A minor\n| Am | F |\n');
+    expect(song.sections[0].key).toBe('A minor');
   });
 
   it('[Bridge] key: F# dorian → section.key === "F# dorian"', () => {
@@ -111,24 +119,25 @@ describe('section key annotation', () => {
     expect(() => parseSong('[Section] key: H\n| C | G |\n')).toThrow();
   });
 
-  it('TextRenderer emits "[Chorus] key: Am" when key is present', () => {
-    const song = parseSong('[Chorus] key: Am\n| Am | F | C | G |\n');
+  it('TextRenderer emits "[Chorus] key: A minor" when key is present', () => {
+    const song = parseSong('[Chorus] key: A minor\n| Am | F | C | G |\n');
     const output = renderer.render(song);
     const lines = output.trim().split('\n');
-    expect(lines[0]).toBe('[Chorus] key: Am');
+    expect(lines[0]).toBe('[Chorus] key: A minor');
   });
 
   it('round-trip with key annotation: parse → render → parse produces equal AST', () => {
-    const source = '[Verse] key: E\n| E | A | B | E |\n[Chorus] key: Am\n| Am | F | C | G |\n';
+    const source =
+      '[Verse] key: E major\n| E | A | B | E |\n[Chorus] key: A minor\n| Am | F | C | G |\n';
     const ast1 = parseSong(source);
     const rendered = renderer.render(ast1);
     const ast2 = parseSong(rendered);
     expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));
   });
 
-  it('normaliser uses declared key: [Chorus] key: Db with C#m7 → root normalised to Db', () => {
+  it('normaliser uses declared key: [Chorus] key: Db major with C#m7 → root normalised to Db', () => {
     // C# and Db are enharmonic; Db major's note set uses Db not C#
-    const source = '[Chorus] key: Db\n| C#m7 | Ab7 | Db |\n';
+    const source = '[Chorus] key: Db major\n| C#m7 | Ab7 | Db |\n';
     const song = parseSong(source);
     const normalised = normaliseSong(song);
     const cell = normalised.sections[0].rows[0].bars[0].cells[0];

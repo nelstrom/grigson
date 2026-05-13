@@ -63,7 +63,7 @@ describe('transpose-rewrite', () => {
       const result = transposeSong(s, 7);
       expect(getRoots(result)).toEqual(['G', 'C', 'D', 'E']);
       expect(getQualities(result)).toEqual(['major', 'major', 'major', 'minor']);
-      expect(result.key).toBe('G');
+      expect(result.key).toBe('G major');
     });
 
     it('T2: [Bb, Eb, F, Gm] +2 → [C, F, G, Am] with homeKey C', () => {
@@ -71,7 +71,7 @@ describe('transpose-rewrite', () => {
       const result = transposeSong(s, 2);
       expect(getRoots(result)).toEqual(['C', 'F', 'G', 'A']);
       expect(getQualities(result)).toEqual(['major', 'major', 'major', 'minor']);
-      expect(result.key).toBe('C');
+      expect(result.key).toBe('C major');
     });
 
     it('T3: [C, Bb, F, G] +7 → [G, F, C, D] — borrowed bVII stays F not E#', () => {

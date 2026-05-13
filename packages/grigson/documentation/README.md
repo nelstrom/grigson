@@ -30,7 +30,7 @@ A `.chart` file consists of two parts:
 ---
 title: "All the Things You Are"
 artist: "Jerome Kern"
-key: Ab
+key: Ab major
 ---
 
 [A]
@@ -64,7 +64,7 @@ A section is declared by a name in square brackets, optionally followed by a `ke
 
 ```
 [Verse]
-[Chorus] key: Ab
+[Chorus] key: Ab major
 [Bridge] key: F# dorian
 ```
 
@@ -76,15 +76,15 @@ Section names can be anything: `[A]`, `[Verse]`, `[Chorus]`, `[Intro]`, `[Bridge
 
 ## Key Notation
 
-A key is a root note followed by an optional mode name:
+A key is a root note followed by a mode name:
 
-| Example        | Meaning                 |
-| -------------- | ----------------------- |
-| `F`            | F major                 |
-| `Em`           | E minor (lowercase `m`) |
-| `Bb`           | Bb major                |
-| `F# dorian`    | F# Dorian               |
-| `G mixolydian` | G Mixolydian            |
+| Example        | Meaning      |
+| -------------- | ------------ |
+| `F major`      | F major      |
+| `E minor`      | E minor      |
+| `Bb major`     | Bb major     |
+| `F# dorian`    | F# Dorian    |
+| `G mixolydian` | G Mixolydian |
 
 Supported modes: `major`, `minor`, `dorian`, `phrygian`, `lydian`, `mixolydian`, `aeolian`, `locrian`.
 
@@ -108,7 +108,7 @@ For songs with a single uniform meter, declare it once in front matter rather th
 ```
 ---
 title: "Tennessee Whiskey"
-key: A
+key: A major
 meter: 2/4
 ---
 | A | E | A | A |

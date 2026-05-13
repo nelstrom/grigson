@@ -136,7 +136,7 @@ describe('validate', () => {
   });
 
   it('returns [] for a valid chart with front matter', () => {
-    const source = '---\ntitle: My Song\nkey: C\n---\n| C | Am | F | G |';
+    const source = '---\ntitle: My Song\nkey: C major\n---\n| C | Am | F | G |';
     expect(validate(source)).toEqual([]);
   });
 

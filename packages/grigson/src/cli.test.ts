@@ -184,7 +184,7 @@ describe('CLI transpose subcommand', () => {
     runCli(['transpose', '--to', 'G', tmpFile]);
 
     const output = stdoutSpy.mock.calls[0][0] as string;
-    expect(output).toContain('key: G');
+    expect(output).toContain('key: G major');
     fs.unlinkSync(tmpFile);
   });
 

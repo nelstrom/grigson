@@ -691,7 +691,7 @@ describe('HtmlRenderer', () => {
     });
 
     it('renders song title and key in header when present', () => {
-      const html = renderer.render(parseSong('---\ntitle: My Song\nkey: C\n---\n| C |\n'));
+      const html = renderer.render(parseSong('---\ntitle: My Song\nkey: C major\n---\n| C |\n'));
       expect(html).toContain('part="song-header"');
       expect(html).toContain('part="song-title"');
       expect(html).toContain('My Song');

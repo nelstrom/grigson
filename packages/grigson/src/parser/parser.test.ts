@@ -204,7 +204,7 @@ describe('chord parsing', () => {
         [
           '---',
           'title: "My Song"',
-          'key: G',
+          'key: G major',
           '---',
           '| G | Am | C | D |',
           '| Em | C | G | D |',
@@ -231,7 +231,7 @@ describe('chord parsing', () => {
 
   describe('front matter parsing', () => {
     it('parses title and key', () => {
-      const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G\n---\n');
+      const fm = parseFrontMatter('---\ntitle: "Autumn Leaves"\nkey: G major\n---\n');
       expect(fm).toMatchObject({
         type: 'frontMatter',
         title: 'Autumn Leaves',
@@ -246,7 +246,7 @@ describe('chord parsing', () => {
     });
 
     it('parses key without title', () => {
-      const fm = parseFrontMatter('---\nkey: Bb\n---\n');
+      const fm = parseFrontMatter('---\nkey: Bb major\n---\n');
       expect(fm).toMatchObject({ type: 'frontMatter', title: null, key: 'Bb major', meter: null });
     });
 
@@ -255,8 +255,8 @@ describe('chord parsing', () => {
       expect(fm).toMatchObject({ type: 'frontMatter', title: null, key: null, meter: null });
     });
 
-    it('accepts all 17 valid key spellings and normalizes to canonical form', () => {
-      const validKeys = [
+    it('rejects all 17 bare note names (shorthand is no longer valid)', () => {
+      const bareNotes = [
         'C',
         'C#',
         'Db',
@@ -275,9 +275,34 @@ describe('chord parsing', () => {
         'Bb',
         'B',
       ];
-      for (const key of validKeys) {
-        const fm = parseFrontMatter(`---\nkey: ${key}\n---\n`);
-        expect(fm.key).toBe(key + ' major');
+      for (const key of bareNotes) {
+        expect(() => parseFrontMatter(`---\nkey: ${key}\n---\n`)).toThrow();
+      }
+    });
+
+    it('accepts all 17 notes with major suffix', () => {
+      const notes = [
+        'C',
+        'C#',
+        'Db',
+        'D',
+        'D#',
+        'Eb',
+        'E',
+        'F',
+        'F#',
+        'Gb',
+        'G',
+        'G#',
+        'Ab',
+        'A',
+        'A#',
+        'Bb',
+        'B',
+      ];
+      for (const note of notes) {
+        const fm = parseFrontMatter(`---\nkey: ${note} major\n---\n`);
+        expect(fm.key).toBe(note + ' major');
       }
     });
 
@@ -285,8 +310,12 @@ describe('chord parsing', () => {
       expect(() => parseFrontMatter('---\nkey: H\n---\n')).toThrow();
     });
 
-    it('accepts a minor key (Am) and normalizes to "A minor"', () => {
-      const result = parseFrontMatter('---\nkey: Am\n---\n');
+    it('rejects shorthand minor key (Am)', () => {
+      expect(() => parseFrontMatter('---\nkey: Am\n---\n')).toThrow();
+    });
+
+    it('accepts longhand minor key (A minor)', () => {
+      const result = parseFrontMatter('---\nkey: A minor\n---\n');
       expect(result.key).toBe('A minor');
     });
 

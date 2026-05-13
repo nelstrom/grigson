@@ -20,10 +20,10 @@ function withoutLoc(obj: unknown): unknown {
 describe('text renderer', () => {
   describe('front matter', () => {
     it('renders title and key in a --- block', () => {
-      const out = render('---\ntitle: "My Song"\nkey: G\n---\n');
+      const out = render('---\ntitle: "My Song"\nkey: G major\n---\n');
       expect(out).toContain('---');
       expect(out).toContain('title: "My Song"');
-      expect(out).toContain('key: G');
+      expect(out).toContain('key: G major');
     });
 
     it('omits front matter block when title and key are both absent', () => {
@@ -186,7 +186,7 @@ describe('text renderer', () => {
   describe('round-trip', () => {
     it('parse → render → parse produces an equal AST', () => {
       const source =
-        '---\ntitle: "Autumn Leaves"\nkey: G\n---\n| G7 | C | Am | F |\n| Dm | G7 | C | C |\n';
+        '---\ntitle: "Autumn Leaves"\nkey: G major\n---\n| G7 | C | Am | F |\n| Dm | G7 | C | C |\n';
       const ast1 = parseSong(source);
       const ast2 = parseSong(render(source));
       expect(withoutLoc(ast2)).toEqual(withoutLoc(ast1));

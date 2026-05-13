@@ -1,6 +1,6 @@
 import type { Song, Section, Row, Bar, Chord, ChordCell } from '../parser/types.js';
 import { rootToPitchClass } from './pitchClass.js';
-import { normaliseSection } from './normalise.js';
+import { normaliseSection, toCanonicalKey } from './normalise.js';
 import { detectKey } from './keyDetector.js';
 import { KEYS, getKeyRoot, resolveKey } from './keys.js';
 
@@ -133,7 +133,7 @@ export function transposeSong(song: Song, semitones: number): Song {
     return { ...sec, rows: newRows, content: newContent };
   });
 
-  return { ...song, key: firstSectionKey, sections: newSections };
+  return { ...song, key: toCanonicalKey(firstSectionKey), sections: newSections };
 }
 
 /**

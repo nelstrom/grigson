@@ -28,16 +28,7 @@ const VALID_NOTES = [
   'A',
   'B',
 ];
-const VALID_SUFFIXES = [
-  'm',
-  ' dorian',
-  ' aeolian',
-  ' mixolydian',
-  ' major',
-  ' minor',
-  ' ionian',
-  '',
-];
+const VALID_SUFFIXES = [' dorian', ' aeolian', ' mixolydian', ' major', ' minor', ' ionian'];
 
 function isValidKey(k) {
   return VALID_NOTES.some((n) => VALID_SUFFIXES.some((s) => k === n + s));
@@ -45,9 +36,7 @@ function isValidKey(k) {
 
 function normalizeKey(k) {
   if (k.endsWith(' ionian')) return k.slice(0, -7) + ' major';
-  if (k.includes(' ')) return k;
-  if (k.endsWith('m')) return k.slice(0, -1) + ' minor';
-  return k + ' major';
+  return k;
 }
 
 class peg$SyntaxError extends SyntaxError {
@@ -463,7 +452,7 @@ function peg$parse(input, options) {
     return {
       type: 'sectionLabel',
       label: label.trim(),
-      key: key ?? null,
+      key: key !== null ? normalizeKey(key) : null,
       loc: makeLoc(location()),
     };
   }
@@ -472,7 +461,7 @@ function peg$parse(input, options) {
 
     if (meta.key !== undefined && !isValidKey(meta.key)) {
       error(
-        `Invalid key: "${meta.key}". Must be a note name with optional suffix (e.g. C, F#m, Bb, A dorian, E aeolian, D mixolydian, C major, A minor).`,
+        `Invalid key: "${meta.key}". Must be a note name followed by a mode (e.g. C major, A minor, F# dorian, E aeolian, D mixolydian).`,
       );
     }
 

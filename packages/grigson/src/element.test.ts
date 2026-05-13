@@ -134,7 +134,7 @@ describe('GrigsonChart', () => {
       <grigson-chart>
         <template>---
 title: "Test Song"
-key: C
+key: C major
 ---
 | C |</template>
       </grigson-chart>
@@ -547,7 +547,7 @@ describe('GrigsonHtmlRenderer', () => {
   });
 
   it('renderChart() includes frontmatter parts when the song has front matter', () => {
-    const song = parseSong('---\ntitle: Test\nkey: C\n---\n| C |');
+    const song = parseSong('---\ntitle: Test\nkey: C major\n---\n| C |');
     const renderer = new GrigsonHtmlRenderer();
     const result = renderer.renderChart(song);
 

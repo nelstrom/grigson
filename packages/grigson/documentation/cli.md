@@ -142,7 +142,7 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 grigson normalise song.chart               # write to stdout
 grigson normalise -i song.chart            # edit in place
 grigson normalise -i *.chart               # bulk normalise
-grigson normalise --key Am song.chart      # override key detection
+grigson normalise --key "A minor" song.chart      # override key detection
 cat song.chart | grigson normalise         # read from stdin
 ```
 
@@ -160,11 +160,11 @@ Reads from `file` if given, otherwise from stdin. Writes to stdout.
 
 **Options**
 
-| Option        | Description                                          |
-| ------------- | ---------------------------------------------------- |
-| `--raise <n>` | Transpose up by `n` semitones (positive integer)     |
-| `--lower <n>` | Transpose down by `n` semitones (positive integer)   |
-| `--to <key>`  | Transpose to a target key (e.g. `--to G`, `--to Dm`) |
+| Option        | Description                                                         |
+| ------------- | ------------------------------------------------------------------- |
+| `--raise <n>` | Transpose up by `n` semitones (positive integer)                    |
+| `--lower <n>` | Transpose down by `n` semitones (positive integer)                  |
+| `--to <key>`  | Transpose to a target key (e.g. `--to "G major"`, `--to "D minor"`) |
 
 Exactly one of `--raise`, `--lower`, or `--to` is required.
 
@@ -173,8 +173,8 @@ Exactly one of `--raise`, `--lower`, or `--to` is required.
 ```sh
 grigson transpose --raise 2 song.chart    # up a whole step
 grigson transpose --lower 3 song.chart   # down a minor third
-grigson transpose --to G song.chart      # to G major
-cat song.chart | grigson transpose --to Dm    # from stdin
+grigson transpose --to "G major" song.chart      # to G major
+cat song.chart | grigson transpose --to "D minor"    # from stdin
 ```
 
 ---

@@ -4,7 +4,7 @@ import { KEYS, resolveKey } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import { analyseHarmony } from './harmonicAnalysis.js';
 
-function toCanonicalKey(key: string | null): string | null {
+export function toCanonicalKey(key: string | null): string | null {
   if (key === null) return null;
   if (key.includes(' ')) return key; // already has a mode suffix (dorian/aeolian/mixolydian/major/minor)
   if (key.endsWith('m')) return key.slice(0, -1) + ' minor';
