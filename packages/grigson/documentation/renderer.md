@@ -207,7 +207,26 @@ Minor chords use `m` by default; passing `{ minor: '-' }` as an inline preset ch
 
 ### Handling narrow containers
 
-The renderer does not auto-scale. If the chart overflows its container, reduce the font size:
+#### Automatic sizing (`auto-size`)
+
+Add the `auto-size` attribute to `<grigson-html-renderer>` to let the element find the largest font size that fits without horizontal clipping:
+
+```html
+<grigson-chart>
+  <grigson-html-renderer auto-size></grigson-html-renderer>
+  | C△ | Am7(♭5) | Dm7sus4 | G7 |
+</grigson-chart>
+```
+
+The algorithm binary-searches between a floor of **0.6 rem** and a ceiling of **1.5 rem** (precision 0.02 rem, ~6 iterations). It detects overflow by reading `scrollWidth > clientWidth` on chord cell elements. Re-runs automatically after every re-render (chart edit, transposition, or attribute change) and whenever the container width changes (via `ResizeObserver`).
+
+**Print:** When printing, browsers apply a different layout that JavaScript cannot measure. `auto-size` compensates by scaling the screen font size by the ratio of the estimated A4 print width (~680 CSS px for A4 with 1.5 cm margins) to the screen container width. This keeps chord names from clipping in the printed output.
+
+**When to use:** opt-in rather than default, because some use cases — book-of-charts layouts, static exports, pages that tile multiple charts — rely on consistent font sizing across all charts on the page. For those, set `--grigson-font-size` explicitly instead (see below).
+
+#### Manual sizing
+
+If you need a fixed font size — for example to keep all charts on a printed page visually consistent — set `--grigson-font-size` directly rather than using `auto-size`:
 
 ```css
 grigson-chart {
@@ -221,26 +240,26 @@ Decreasing `--grigson-font-size` shrinks the rendered output proportionally sinc
 
 These properties can be set on the `<grigson-chart>` element (or any ancestor) to control the appearance:
 
-| Property                              | Default                        | Description                                                                    |
-| ------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font; bypasses the embedded Noto fonts              |
-| `--grigson-title-font-family`         | inherits chart font            | Font family for the song title; inherits from `--grigson-font-family` if unset |
-| `--grigson-section-label-font-family` | inherits chart font            | Font family for section labels; inherits from `--grigson-font-family` if unset |
-| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers                                |
-| `--grigson-color`                     | `inherit`                      | Text and barline colour                                                        |
-| `--grigson-background`                | `transparent`                  | Background of the host element                                                 |
-| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows within a section                                     |
-| `--grigson-section-gap`               | `2em`                          | Top margin before each section label                                           |
-| `--grigson-barline-width`             | `1.5px`                        | Stroke width of barlines                                                       |
-| `--grigson-barline-color`             | `currentColor`                 | Colour of barlines                                                             |
-| `--grigson-repeat-dot-size`           | `0.3em`                        | Size of repeat dots                                                            |
-| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                                                    |
-| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                                                  |
-| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                                        |
-| `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator digits                           |
-| `--grigson-time-sig-top`              | `37%`                          | Vertical position: `50%` = centred, lower values shift up                      |
-| `--grigson-simile-font-size`          | `1.2em`                        | Font size of the simile glyph (U+E1E7) inside `[part="simile"]`                |
-| `--grigson-barline-font-size`         | `2em`                          | Font size of barline glyphs (SMuFL U+E030–E042) inside `[part^="barline"]`     |
+| Property                              | Default                        | Description                                                                                                                                           |
+| ------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font; bypasses the embedded Noto fonts                                                                                     |
+| `--grigson-title-font-family`         | inherits chart font            | Font family for the song title; inherits from `--grigson-font-family` if unset                                                                        |
+| `--grigson-section-label-font-family` | inherits chart font            | Font family for section labels; inherits from `--grigson-font-family` if unset                                                                        |
+| `--grigson-font-size`                 | `1rem`                         | Base font size. Set manually to fix all charts to a specific size, or add `auto-size` to `<grigson-html-renderer>` to have it computed automatically. |
+| `--grigson-color`                     | `inherit`                      | Text and barline colour                                                                                                                               |
+| `--grigson-background`                | `transparent`                  | Background of the host element                                                                                                                        |
+| `--grigson-row-gap`                   | `1.2em`                        | Vertical gap between rows within a section                                                                                                            |
+| `--grigson-section-gap`               | `2em`                          | Top margin before each section label                                                                                                                  |
+| `--grigson-barline-width`             | `1.5px`                        | Stroke width of barlines                                                                                                                              |
+| `--grigson-barline-color`             | `currentColor`                 | Colour of barlines                                                                                                                                    |
+| `--grigson-repeat-dot-size`           | `0.3em`                        | Size of repeat dots                                                                                                                                   |
+| `--grigson-title-font-size`           | `1.4em`                        | Font size of the song title                                                                                                                           |
+| `--grigson-section-label-font-size`   | `0.9em`                        | Font size of section headings                                                                                                                         |
+| `--grigson-time-sig-font-size`        | `1.1em`                        | Font size of time signature annotations                                                                                                               |
+| `--grigson-time-sig-line-height`      | `0.55`                         | Line height between numerator and denominator digits                                                                                                  |
+| `--grigson-time-sig-top`              | `37%`                          | Vertical position: `50%` = centred, lower values shift up                                                                                             |
+| `--grigson-simile-font-size`          | `1.2em`                        | Font size of the simile glyph (U+E1E7) inside `[part="simile"]`                                                                                       |
+| `--grigson-barline-font-size`         | `2em`                          | Font size of barline glyphs (SMuFL U+E030–E042) inside `[part^="barline"]`                                                                            |
 
 The time-sig variables have typeface-specific defaults: cursive uses `0.6em` / `1.1` / `40%`. They can be overridden on `grigson-html-renderer` for custom fonts:
 
@@ -742,6 +761,54 @@ const html = new HtmlRenderer({ maxBarsPerLine: 2 }).render(song);
   | C | Am | F | G | C |
 </grigson-chart>
 ```
+
+---
+
+### `auto-size` (HTML renderer only)
+
+A boolean attribute. When present on `<grigson-html-renderer>`, the `<grigson-chart>` host element automatically finds the largest font size that produces no horizontal clipping in any chord cell.
+
+```html
+<grigson-chart>
+  <grigson-html-renderer auto-size></grigson-html-renderer>
+  | C△ | Am7(♭5) | Dm7sus4 | G7 |
+</grigson-chart>
+```
+
+#### How it works
+
+1. The font size is set to the ceiling (1.5 rem) and cells are measured for overflow.
+2. If no overflow is found, that size is used as-is.
+3. Otherwise a binary search narrows the range toward the largest no-overflow size, stopping when the interval is ≤ 0.02 rem (~6 iterations).
+4. The result is written as `--grigson-font-size` on the `<grigson-chart>` host, which cascades into the renderer's shadow DOM.
+5. The floor is **0.6 rem** — the element clips at that size rather than shrinking further.
+
+#### Triggers
+
+The search re-runs after:
+
+- Every re-render (chart source edit, transposition, attribute change on the renderer).
+- Any change to the `<grigson-chart>` container width (via `ResizeObserver`).
+
+#### Print
+
+JavaScript DOM measurements reflect screen layout, not print layout. When printing, `auto-size` injects a `@media print` CSS rule that scales the computed screen font size by `min(1, 680 / containerWidth)`, where 680 is the approximate content width of an A4 page with 1.5 cm margins in CSS pixels. This prevents chord names from clipping in print output. For significantly different paper sizes or margin settings, override the result manually in your own `@media print` stylesheet:
+
+```css
+@media print {
+  grigson-chart {
+    --grigson-font-size: 0.75rem;
+  }
+}
+```
+
+#### When not to use it
+
+Leave `auto-size` off when:
+
+- You are rendering a fixed book-of-charts layout where all charts must share the same font size for visual consistency.
+- You are generating static HTML (SSR / Eleventy plugin) — `auto-size` requires a live DOM.
+- You want full manual control via `--grigson-font-size`.
 
 ---
 

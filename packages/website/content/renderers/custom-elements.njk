@@ -264,11 +264,25 @@ grigson-chart {
 <h2>Responsive layout</h2>
 <p>
   <code>&lt;grigson-chart&gt;</code> sets <code>container-type: inline-size</code> on itself
-  by default, so <code>@container</code> rules targeting its children work without any extra
-  CSS. Place multiple renderers inside one chart and use container queries to show the
-  appropriate one. Here two HTML renderers are used — 4 bars per line on wide layouts and
-  2 bars per line on narrow ones:
+  by default. There are two complementary tools for adapting to narrow containers:
 </p>
+<ul>
+  <li>
+    <strong>Auto-size font</strong> — add <code>auto-size</code> to <code>&lt;grigson-html-renderer&gt;</code>
+    and the element will binary-search for the largest font size that fits all chord cells without clipping.
+    Re-runs on every re-render and on container width changes. See
+    <a href="{{ '/usage/html-renderer/' | url }}#auto-size">HTML renderer — auto-size</a>.
+  </li>
+  <li>
+    <strong>Reflow bars</strong> — use <code>@container</code> queries with multiple renderers to switch
+    between different <code>bars-per-line</code> values at different widths (shown below).
+  </li>
+</ul>
+<p>
+  The two approaches compose: <code>auto-size</code> handles font fitting within a given bar layout,
+  and container queries handle switching between bar layouts.
+</p>
+<p>Here two HTML renderers are used — 4 bars per line on wide layouts and 2 bars per line on narrow ones:</p>
 {% highlight "html" %}
 <grigson-chart normalise>
   <style>

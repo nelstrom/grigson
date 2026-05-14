@@ -203,6 +203,8 @@ permalink: /sheet/
           <option value="horizontal">Horizontal</option>
           <option value="ascii">ASCII /</option>
         </select>
+        <label for="auto-size-checkbox">Auto-size font:</label>
+        <input type="checkbox" id="auto-size-checkbox" checked>
       </span>
       <span id="gh-options" hidden>
         <label for="gh-line-length-select">Line length:</label>
@@ -264,6 +266,7 @@ permalink: /sheet/
       slashStyle: z.enum(['horizontal', 'diagonal', 'ascii']).optional(),
       barsPerLine: z.number().int().min(1).optional(),
       maxBarsPerLine: z.number().int().min(1).optional(),
+      autoSize: z.boolean().optional(),
       transposeSemitones: z.number().int().min(-11).max(11).optional(),
     }),
     z.object({
@@ -327,6 +330,7 @@ title: "Bebop Blues"
     const simileOutputSelect = document.getElementById('simile-output-select');
     const accidentalsSelect = document.getElementById('accidentals-select');
     const slashStyleSelect = document.getElementById('slash-style-select');
+    const autoSizeCheckbox = document.getElementById('auto-size-checkbox');
     const lineLengthSelect = document.getElementById('line-length-select');
     const htmlOptions = document.getElementById('html-options');
     const ghOptions = document.getElementById('gh-options');
@@ -382,6 +386,7 @@ title: "Bebop Blues"
         if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
         const slashStyle = slashStyleSelect.value;
         if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
+        if (autoSizeCheckbox.checked) currentRenderer.setAttribute('auto-size', '');
         applyLineLength(currentRenderer);
         htmlOptions.hidden = false;
         ghOptions.hidden = true;
@@ -472,6 +477,7 @@ title: "Bebop Blues"
           if (simileOutputSelect.value) config.simileOutput = simileOutputSelect.value;
           if (accidentalsSelect.value) config.accidentals = accidentalsSelect.value;
           if (slashStyleSelect.value) config.slashStyle = slashStyleSelect.value;
+          if (!autoSizeCheckbox.checked) config.autoSize = false;
           const llVal = lineLengthSelect.value;
           if (llVal) {
             const [mode, n] = llVal.split(':');
@@ -487,7 +493,7 @@ title: "Bebop Blues"
         const semitones = parseInt(transposeSelect.value, 10);
         if (semitones !== 0) config.transposeSemitones = semitones;
         const params = new URLSearchParams();
-        const isDefault = config.name === 'html' && !config.typeface && !config.preset && !config.simileOutput && !config.accidentals && !config.slashStyle && !config.barsPerLine && !config.maxBarsPerLine && !config.transposeSemitones;
+        const isDefault = config.name === 'html' && !config.typeface && !config.preset && !config.simileOutput && !config.accidentals && !config.slashStyle && !config.barsPerLine && !config.maxBarsPerLine && config.autoSize !== false && !config.transposeSemitones;
         if (!isDefault) {
           params.set('renderer-config', JSON.stringify(config));
         }
@@ -538,6 +544,7 @@ title: "Bebop Blues"
       simileOutputSelect.value = initialConfig.simileOutput ?? '';
       accidentalsSelect.value = initialConfig.accidentals ?? '';
       slashStyleSelect.value = initialConfig.slashStyle ?? '';
+      autoSizeCheckbox.checked = initialConfig.autoSize !== false;
       if (initialConfig.barsPerLine) lineLengthSelect.value = `fixed:${initialConfig.barsPerLine}`;
       else if (initialConfig.maxBarsPerLine) lineLengthSelect.value = `max:${initialConfig.maxBarsPerLine}`;
       else lineLengthSelect.value = '';
@@ -612,6 +619,15 @@ title: "Bebop Blues"
         const slashStyle = slashStyleSelect.value;
         if (slashStyle) currentRenderer.setAttribute('slash-style', slashStyle);
         else currentRenderer.removeAttribute('slash-style');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    autoSizeCheckbox.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'html') {
+        if (autoSizeCheckbox.checked) currentRenderer.setAttribute('auto-size', '');
+        else currentRenderer.removeAttribute('auto-size');
         outputElement.update();
       }
       updateURL();

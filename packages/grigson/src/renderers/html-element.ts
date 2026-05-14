@@ -17,6 +17,7 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
       'slash-style',
       'bars-per-line',
       'max-bars-per-line',
+      'auto-size',
     ];
   }
 

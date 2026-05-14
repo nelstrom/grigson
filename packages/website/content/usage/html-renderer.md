@@ -328,6 +328,37 @@ Set the `typeface` attribute on `<grigson-html-renderer>` to choose the embedded
 
 Setting `--grigson-font-family` overrides the font entirely and ignores `typeface`. See [Typefaces](/customize/typefaces/) for more.
 
+### `auto-size`
+
+A boolean attribute. When present on `<grigson-html-renderer>`, the element automatically finds the largest font size that fits all chord cells without horizontal clipping.
+
+```html
+<grigson-chart>
+  <grigson-html-renderer auto-size></grigson-html-renderer>
+  <template>
+---
+title: "What's New?"
+key: C
+---
+| (4/4) C | AMI7(b5) | DMI7(b5) G7 | CMI |
+  </template>
+</grigson-chart>
+```
+
+**How it works.** The algorithm sets the font to the ceiling (1.5 rem), reads `scrollWidth > clientWidth` on each chord cell, then binary-searches down to the largest no-overflow size. Precision is 0.02 rem (~6 iterations). The floor is **0.6 rem** — the element clips at that size rather than shrinking further.
+
+**When it re-runs.** After every re-render (source edit, transposition, attribute change) and whenever the container width changes (via `ResizeObserver`). This means it naturally adapts when the user resizes the window or when a chord becomes wider after transposition.
+
+**Print.** JavaScript measurements don't reflect print layout. `auto-size` compensates by injecting a `@media print` rule that scales the computed font size proportionally to the estimated A4 print width (~680 CSS px for A4 with 1.5 cm margins). To override for a different paper size, add your own print rule after the element:
+
+```css
+@media print {
+  grigson-chart { --grigson-font-size: 0.75rem; }
+}
+```
+
+**When not to use it.** Leave `auto-size` off when you need all charts on a page to share a consistent font size — for example a printed book of charts where visual uniformity matters more than fitting individual charts to their container. For those cases, set `--grigson-font-size` directly instead (see [CSS Custom Properties](/customize/css/)).
+
 ---
 
 ## Embedded fonts

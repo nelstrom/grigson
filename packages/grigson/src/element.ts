@@ -20,6 +20,9 @@ export class GrigsonChart extends HTMLElement {
   private _isInitialized = false;
   private _childObserver: MutationObserver | null = null;
   private _templateObserver: MutationObserver | null = null;
+  private _resizeObserver: ResizeObserver | null = null;
+  private _lastContainerWidth = 0;
+  private _printAutoSizeRule = '';
   private _rendererUpdateListener = () => this.update();
 
   constructor() {
@@ -55,6 +58,17 @@ export class GrigsonChart extends HTMLElement {
 
     this.addEventListener(GrigsonRendererUpdateEvent.type, this._rendererUpdateListener);
 
+    this._resizeObserver = new ResizeObserver((entries) => {
+      const width = entries[0].contentRect.width;
+      if (width !== this._lastContainerWidth) {
+        this._lastContainerWidth = width;
+        if (this._activeRendererHasAutoSize()) {
+          this._runAutoSize();
+        }
+      }
+    });
+    this._resizeObserver.observe(this);
+
     if (this._hasDSDContent) {
       this._adoptDSD();
     } else {
@@ -81,7 +95,57 @@ export class GrigsonChart extends HTMLElement {
     this._templateObserver?.disconnect();
     this._templateObserver = null;
 
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
+
     this.removeEventListener(GrigsonRendererUpdateEvent.type, this._rendererUpdateListener);
+  }
+
+  private _activeRendererHasAutoSize(): boolean {
+    return this._findRenderers().some((r) => (r as unknown as Element).hasAttribute?.('auto-size'));
+  }
+
+  private _runAutoSize() {
+    const MIN = 0.6,
+      MAX = 1.5,
+      PRECISION = 0.02;
+    this.style.setProperty('--grigson-font-size', `${MAX}rem`);
+    if (!this._hasOverflow()) {
+      this._setPrintAutoSize(MAX);
+      return;
+    }
+    let lo = MIN,
+      hi = MAX;
+    while (hi - lo > PRECISION) {
+      const mid = (lo + hi) / 2;
+      this.style.setProperty('--grigson-font-size', `${mid}rem`);
+      if (this._hasOverflow()) hi = mid;
+      else lo = mid;
+    }
+    this.style.setProperty('--grigson-font-size', `${lo}rem`);
+    this._setPrintAutoSize(lo);
+  }
+
+  private _setPrintAutoSize(screenSize: number) {
+    const containerWidth = this.clientWidth;
+    if (containerWidth <= 0) return;
+    // A4 minus 3cm margins = ~680 CSS px; ratio scales the font proportionally for print columns.
+    const PRINT_WIDTH_PX = 680;
+    const printSize = Math.max(0.6, screenSize * Math.min(1, PRINT_WIDTH_PX / containerWidth));
+    this._printAutoSizeRule = `@media print{:host{--grigson-font-size:${printSize.toFixed(3)}rem!important}}`;
+    this._updateHostStyle();
+  }
+
+  private _updateHostStyle() {
+    this._style.textContent =
+      ':host { display: block; container-type: inline-size; }' + this._printAutoSizeRule;
+  }
+
+  private _hasOverflow(): boolean {
+    for (const cell of this._root.querySelectorAll('[part~="cell"]')) {
+      if ((cell as Element).scrollWidth > (cell as Element).clientWidth) return true;
+    }
+    return false;
   }
 
   private _findRenderers(): GrigsonRendererElement[] {
@@ -177,6 +241,15 @@ export class GrigsonChart extends HTMLElement {
       }
 
       this._root.replaceChildren(this._style, ...userStyles, ...rendered);
+      if (this._activeRendererHasAutoSize()) {
+        this._runAutoSize();
+      } else {
+        this.style.removeProperty('--grigson-font-size');
+        if (this._printAutoSizeRule) {
+          this._printAutoSizeRule = '';
+          this._updateHostStyle();
+        }
+      }
     } catch (parseError) {
       const div = document.createElement('div');
       div.textContent = parseError instanceof Error ? parseError.message : String(parseError);

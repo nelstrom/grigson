@@ -14,14 +14,14 @@ For information about the HTML structure these properties target, see the [HTML 
 
 ## Typography and colour
 
-| Property                              | Default                        | Description                                     |
-| ------------------------------------- | ------------------------------ | ----------------------------------------------- |
-| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font                 |
-| `--grigson-title-font-family`         | inherits                       | Font for the song title                         |
-| `--grigson-section-label-font-family` | inherits                       | Font for section labels                         |
-| `--grigson-font-size`                 | `1rem`                         | Base font size; reduce to fit narrow containers |
-| `--grigson-color`                     | `inherit`                      | Text and barline colour                         |
-| `--grigson-background`                | `transparent`                  | Background of the host element                  |
+| Property                              | Default                        | Description                                                                                                                           |
+| ------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `--grigson-font-family`               | embedded Noto (see `typeface`) | Overrides the entire chart font                                                                                                       |
+| `--grigson-title-font-family`         | inherits                       | Font for the song title                                                                                                               |
+| `--grigson-section-label-font-family` | inherits                       | Font for section labels                                                                                                               |
+| `--grigson-font-size`                 | `1rem`                         | Base font size. Set this for a fixed size, or use the `auto-size` attribute on `<grigson-html-renderer>` to compute it automatically. |
+| `--grigson-color`                     | `inherit`                      | Text and barline colour                                                                                                               |
+| `--grigson-background`                | `transparent`                  | Background of the host element                                                                                                        |
 
 ## Layout
 
@@ -65,7 +65,22 @@ Two additional variables are set by the renderer on `part="song"` and control th
 
 ## Handling narrow containers
 
-The renderer does not auto-scale. If the chart overflows its container, reduce the font size:
+### Automatic sizing
+
+Add the `auto-size` attribute to `<grigson-html-renderer>` to have the element find the largest font size that fits without clipping. It re-runs automatically after every re-render and whenever the container width changes.
+
+```html
+<grigson-chart>
+  <grigson-html-renderer auto-size></grigson-html-renderer>
+  <template>| C△ | Am7(♭5) | Dm7sus4 | G7 |</template>
+</grigson-chart>
+```
+
+See [HTML renderer — `auto-size`](/usage/html-renderer/#auto-size) for the full reference, including print behaviour and when to opt out.
+
+### Manual sizing
+
+For fixed layouts where all charts should share a consistent font size — for example a book of charts — set `--grigson-font-size` directly:
 
 ```css
 grigson-chart {
