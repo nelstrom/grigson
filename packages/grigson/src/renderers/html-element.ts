@@ -21,6 +21,9 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     ];
   }
 
+  private _lastOutputStyle: HTMLStyleElement | null = null;
+  private _printAutoSizeRule = '';
+
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
     if (oldValue === newValue) return;
     this.dispatchEvent(new GrigsonRendererUpdateEvent());
@@ -81,6 +84,63 @@ export class GrigsonHtmlRenderer extends HTMLElement implements GrigsonRendererE
     } else {
       wrapper.innerHTML = `<style>${this._getStyles()}</style>${html}`;
     }
+    this._lastOutputStyle = wrapper.querySelector('style');
     return wrapper;
+  }
+
+  runAutoSize(): void {
+    const parent = this.parentElement as HTMLElement | null;
+    if (!this.hasAttribute('auto-size')) {
+      parent?.style.removeProperty('--grigson-font-size');
+      if (this._printAutoSizeRule) {
+        this._printAutoSizeRule = '';
+        this._updateOutputStyle();
+      }
+      return;
+    }
+    if (!parent) return;
+    const MIN = 0.6,
+      MAX = 1.5,
+      PRECISION = 0.02;
+    parent.style.setProperty('--grigson-font-size', `${MAX}rem`);
+    if (!this._hasOverflow(parent)) {
+      this._setPrintAutoSize(MAX, parent);
+      return;
+    }
+    let lo = MIN,
+      hi = MAX;
+    while (hi - lo > PRECISION) {
+      const mid = (lo + hi) / 2;
+      parent.style.setProperty('--grigson-font-size', `${mid}rem`);
+      if (this._hasOverflow(parent)) hi = mid;
+      else lo = mid;
+    }
+    parent.style.setProperty('--grigson-font-size', `${lo}rem`);
+    this._setPrintAutoSize(lo, parent);
+  }
+
+  private _hasOverflow(parent: HTMLElement): boolean {
+    const shadowRoot = parent.shadowRoot;
+    if (!shadowRoot) return false;
+    for (const cell of shadowRoot.querySelectorAll('[part~="cell"]')) {
+      if ((cell as Element).scrollWidth > (cell as Element).clientWidth) return true;
+    }
+    return false;
+  }
+
+  private _setPrintAutoSize(screenSize: number, parent: HTMLElement): void {
+    const containerWidth = parent.clientWidth;
+    if (containerWidth <= 0) return;
+    // A4 minus 3cm margins = ~680 CSS px; ratio scales font proportionally for print columns.
+    const PRINT_WIDTH_PX = 680;
+    const printSize = Math.max(0.6, screenSize * Math.min(1, PRINT_WIDTH_PX / containerWidth));
+    this._printAutoSizeRule = `@media print{:host{--grigson-font-size:${printSize.toFixed(3)}rem!important}}`;
+    this._updateOutputStyle();
+  }
+
+  private _updateOutputStyle(): void {
+    if (this._lastOutputStyle) {
+      this._lastOutputStyle.textContent = this._getStyles() + this._printAutoSizeRule;
+    }
   }
 }

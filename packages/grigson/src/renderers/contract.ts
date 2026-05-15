@@ -10,4 +10,9 @@ export interface GrigsonRendererElement extends HTMLElement {
    * The returned element will be placed into GrigsonChart's shadow root.
    */
   renderChart(song: Song): Element;
+  /**
+   * Called by GrigsonChart after rendering and on container resize.
+   * Implement to perform font auto-sizing or other post-render adjustments.
+   */
+  runAutoSize?(): void;
 }
