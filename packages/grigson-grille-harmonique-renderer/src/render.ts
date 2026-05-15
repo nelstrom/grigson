@@ -109,52 +109,91 @@ function rowsOfSection(section: Section): Row[] {
 // Zone + chord label HTML per pattern
 // ---------------------------------------------------------------------------
 
+interface ChordZone {
+  zone: string;
+  diagonal?: string;
+}
+
 interface ZoneSpec {
   lineParts: string[];
   chordParts: string[];
   // Maps each chordParts entry to a chord cell index. Defaults to [0,1,2,...].
   // Allows a cell to be rendered in multiple positions (e.g. 1+2+1 duplicates the middle chord into N and S).
   cellIndices?: number[];
+  // Geometric zone for each chord, used by runAutoSize() overflow detection.
+  chordZones: ChordZone[];
 }
 
 const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
-  '1': { lineParts: [], chordParts: ['chord'] },
+  '1': {
+    lineParts: [],
+    chordParts: ['chord'],
+    chordZones: [{ zone: 'full' }],
+  },
   '2+2': {
     lineParts: ['line line-diag'],
     chordParts: ['chord chord-tl', 'chord chord-br'],
+    chordZones: [
+      { zone: 'top-left', diagonal: 'anti' },
+      { zone: 'bottom-right', diagonal: 'anti' },
+    ],
   },
   '3+1': {
     // Beat order: W+N+S (main) | E (corner).
     // E-triangle boundaries: "/" from center→top-right + "\" from center→bottom-right.
     lineParts: ['line line-diag-tr', 'line line-anti-br'],
     chordParts: ['chord chord-main', 'chord chord-corner'],
+    chordZones: [{ zone: 'full' }, { zone: 'full' }],
   },
   '1+3': {
     // Beat order: W (corner) | N+S+E (main).
     // W-triangle boundaries: "\" from top-left→center + "/" from bottom-left→center.
     lineParts: ['line line-anti-tl', 'line line-diag-bl'],
     chordParts: ['chord chord-corner', 'chord chord-main'],
+    chordZones: [{ zone: 'full' }, { zone: 'full' }],
   },
   '2+1+1': {
     // Beat order: W+N (tl) | S (bottom) | E (right). "/" splits left from right; "\" half splits S from E.
     lineParts: ['line line-diag', 'line line-anti-br'],
     chordParts: ['chord chord-tl', 'chord chord-bottom', 'chord chord-right'],
+    chordZones: [
+      { zone: 'top-left', diagonal: 'anti' },
+      { zone: 'bottom-right', diagonal: 'anti' },
+      { zone: 'full' },
+    ],
   },
   '1+2+1': {
     // Beat order: W | N+S | E. Rendered as four quadrants with the spanning chord duplicated into N and S.
     lineParts: ['line line-diag', 'line line-anti'],
     chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-bottom', 'chord chord-right'],
     cellIndices: [0, 1, 1, 2],
+    chordZones: [
+      { zone: 'left', diagonal: 'anti' },
+      { zone: 'top', diagonal: 'main' },
+      { zone: 'bottom', diagonal: 'main' },
+      { zone: 'right', diagonal: 'anti' },
+    ],
   },
   '1+1+2': {
     // Beat order: W (left) | N (top) | S+E (br). "/" splits W+N from S+E; "\" half splits W from N.
     lineParts: ['line line-diag', 'line line-anti-tl'],
     chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-br'],
+    chordZones: [
+      { zone: 'left', diagonal: 'anti' },
+      { zone: 'top', diagonal: 'main' },
+      { zone: 'bottom-right', diagonal: 'anti' },
+    ],
   },
   '1+1+1+1': {
     // Beat order: W (left) | N (top) | S (bottom) | E (right).
     lineParts: ['line line-diag', 'line line-anti'],
     chordParts: ['chord chord-left', 'chord chord-top', 'chord chord-bottom', 'chord chord-right'],
+    chordZones: [
+      { zone: 'left', diagonal: 'anti' },
+      { zone: 'top', diagonal: 'main' },
+      { zone: 'bottom', diagonal: 'main' },
+      { zone: 'right', diagonal: 'anti' },
+    ],
   },
 };
 
@@ -204,7 +243,11 @@ function renderBar(
       const html = renderChordHtml(cell.chord, preset, mode);
       const hasBass = cell.chord.bass != null;
       const partStr = hasBass ? `${chordPart} chord-slash` : chordPart;
-      return `<span part="${partStr}" aria-label="${label}">${html}</span>`;
+      const zoneSpec = spec.chordZones[i];
+      const zoneAttr = zoneSpec
+        ? ` data-zone="${zoneSpec.zone}"${zoneSpec.diagonal ? ` data-diagonal="${zoneSpec.diagonal}"` : ''}`
+        : '';
+      return `<span part="${partStr}" aria-label="${label}"${zoneAttr}>${html}</span>`;
     })
     .join('');
 

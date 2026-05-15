@@ -26,7 +26,7 @@ grigson-grille-harmonique-renderer --help
 </grigson-chart>
 ```
 
-Observed attributes: `notation-preset`, `bars-per-line`, `accidentals`.
+Observed attributes: `notation-preset`, `bars-per-line`, `accidentals`, `no-auto-size`.
 
 ## JavaScript API
 
@@ -42,15 +42,26 @@ const html = render(song, {
 
 ## CSS custom properties
 
-| Property          | Default  | Description                                   |
-| ----------------- | -------- | --------------------------------------------- |
-| `--cg-grid-width` | `2px`    | Outer border and gap between bars             |
-| `--cg-diag-width` | `2px`    | Thickness of diagonal dividing lines          |
-| `--cg-diag-style` | `solid`  | Border style for diagonals (`dashed`, etc.)   |
-| `--cg-bar-w`      | `6.5rem` | Bar width                                     |
-| `--cg-bar-h`      | `6.5rem` | Bar height (set independently for rectangles) |
+| Property            | Default | Description                                           |
+| ------------------- | ------- | ----------------------------------------------------- |
+| `--cg-grid-width`   | `2px`   | Outer border and gap between bars                     |
+| `--cg-diag-width`   | `0.5px` | Thickness of diagonal dividing lines                  |
+| `--cg-diag-style`   | `solid` | Border style for diagonals (`dashed`, etc.)           |
+| `--cg-chart-width`  | `100%`  | Fraction of its container the grid occupies           |
+| `--cg-aspect-ratio` | `1`     | Bar height ÷ bar width (1 = square, 0.75 = landscape) |
+| `--cg-font-size`    | `1rem`  | Base chord font size; overridden by auto-size         |
 
 `--cg-diag-style` requires border-based rendering to take effect; with the default `background`-based lines only `solid` renders correctly.
+
+Bars fill available width proportionally based on `bars-per-line`. The chart occupies `--cg-chart-width` of its container (default 100%). Set `--cg-aspect-ratio` to values other than 1 for non-square bars.
+
+## Auto-size
+
+The renderer runs a binary search to fit chord labels within their triangular zones on every render and container resize. To disable this, add the `no-auto-size` attribute:
+
+```html
+<grigson-grille-harmonique-renderer no-auto-size></grigson-grille-harmonique-renderer>
+```
 
 See the [full documentation](/renderers/grille-harmonique/) on the website.
 

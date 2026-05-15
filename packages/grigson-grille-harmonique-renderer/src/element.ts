@@ -5,7 +5,7 @@ import render, { type GrilleConfig } from './render.js';
 
 export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements GrigsonRendererElement {
   static get observedAttributes() {
-    return ['notation-preset', 'bars-per-line', 'accidentals', 'typeface'];
+    return ['notation-preset', 'bars-per-line', 'accidentals', 'typeface', 'no-auto-size'];
   }
 
   attributeChangedCallback(_name: string, oldValue: string, newValue: string) {
@@ -21,6 +21,70 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
       style.textContent = getRendererFontFaceCSS();
       document.head.appendChild(style);
     }
+  }
+
+  runAutoSize(): void {
+    const parent = this.parentElement as HTMLElement | null;
+    if (this.hasAttribute('no-auto-size')) {
+      parent?.style.removeProperty('--cg-font-size');
+      return;
+    }
+    if (!parent) return;
+    const MIN = 0.6,
+      MAX = 1.5,
+      PRECISION = 0.02;
+    parent.style.setProperty('--cg-font-size', `${MAX}rem`);
+    if (!this._measureOverflow()) return;
+    let lo = MIN,
+      hi = MAX;
+    while (hi - lo > PRECISION) {
+      const mid = (lo + hi) / 2;
+      parent.style.setProperty('--cg-font-size', `${mid}rem`);
+      if (this._measureOverflow()) hi = mid;
+      else lo = mid;
+    }
+    parent.style.setProperty('--cg-font-size', `${lo}rem`);
+  }
+
+  private _measureOverflow(): boolean {
+    const shadowRoot = (this.parentElement as HTMLElement)?.shadowRoot;
+    if (!shadowRoot) return false;
+    for (const chord of shadowRoot.querySelectorAll('[part~="chord"]')) {
+      const chordEl = chord as HTMLElement;
+      const barEl = chordEl.closest('[part~="bar"]') as HTMLElement | null;
+      if (!barEl) continue;
+      const zone = chordEl.dataset.zone ?? 'full';
+      const diagonal = chordEl.dataset.diagonal;
+      const chordRect = chordEl.getBoundingClientRect();
+      const barRect = barEl.getBoundingClientRect();
+      if (barRect.width <= 0 || barRect.height <= 0) continue;
+      const x1 = chordRect.left - barRect.left;
+      const y1 = chordRect.top - barRect.top;
+      const x2 = chordRect.right - barRect.left;
+      const y2 = chordRect.bottom - barRect.top;
+      const W = barRect.width;
+      const H = barRect.height;
+      if (diagonal === 'anti') {
+        // "/" line: H·x + W·y = H·W; top-left zone is where H·x + W·y < H·W
+        if (zone === 'top-left' || zone === 'left') {
+          if (H * x2 + W * y2 > H * W) return true;
+        } else if (zone === 'bottom-right' || zone === 'right') {
+          if (H * x1 + W * y1 < H * W) return true;
+        }
+      } else if (diagonal === 'main') {
+        // "\" line: H·x - W·y = 0; top-right zone is where H·x - W·y > 0
+        if (zone === 'top-right' || zone === 'top') {
+          if (H * x1 - W * y2 < 0) return true;
+        } else if (zone === 'bottom-left' || zone === 'bottom') {
+          if (H * x2 - W * y1 > 0) return true;
+        }
+      } else {
+        // Full zone: bounding box check with 10% padding
+        const PAD = 0.1;
+        if (x1 < -W * PAD || y1 < -H * PAD || x2 > W * (1 + PAD) || y2 > H * (1 + PAD)) return true;
+      }
+    }
+    return false;
   }
 
   renderChart(song: Song): Element {

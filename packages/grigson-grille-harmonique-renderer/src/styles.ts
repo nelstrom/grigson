@@ -19,18 +19,19 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   --cg-grid-width: 2px;
   --cg-diag-width: 0.5px;
   --cg-diag-style: solid;
-  --cg-bar-w: 6.5rem;
-  --cg-bar-h: 6.5rem;
+  --cg-chart-width: 100%;
+  --cg-aspect-ratio: 1;
+  --cg-font-size: 1rem;
   /* Negative angle → "/" direction (bottom-left to top-right) */
-  --cg-diag-angle: calc(-1 * atan2(var(--cg-bar-h), var(--cg-bar-w)));
-  --cg-diag-len:   hypot(var(--cg-bar-w), var(--cg-bar-h));
+  --cg-diag-angle: calc(-1 * atan2(var(--cg-aspect-ratio, 1), 1));
+  /* 100% resolves to bar pixel width on position:absolute children */
+  --cg-diag-len: calc(100% * hypot(1, var(--cg-aspect-ratio, 1)));
   --cg-slash-angle: 45deg;
   --cg-slash-chord-offset: -0.35em;
   --cg-slash-bass-offset: 0.35em;
   font-family: ${fontFamily};
-  font-size: 0.9rem;
+  font-size: var(--cg-font-size, 1rem);
   display: block;
-  width: fit-content;
 }
 
 /* ── Section rows ── */
@@ -40,6 +41,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   background: currentColor;
   padding: var(--cg-grid-width);
   gap: var(--cg-grid-width);
+  flex: 1;
 }
 
 /* ── Row ── */
@@ -52,10 +54,10 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 [part~="bar"] {
   background: Canvas;
   color: CanvasText;
-  width: var(--cg-bar-w);
-  height: var(--cg-bar-h);
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: var(--cg-aspect-ratio, 1);
   position: relative;
-  flex-shrink: 0;
   overflow: hidden;
 }
 
@@ -200,6 +202,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   align-items: center;
   gap: 0.75rem;
   break-inside: avoid;
+  width: var(--cg-chart-width);
 }
 [part~="section"] + [part~="section"] {
   margin-top: calc(-1 * var(--cg-grid-width));
