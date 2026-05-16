@@ -48,12 +48,21 @@ export default tseslint.config(
     },
   },
   {
+    files: ['packages/*/.eleventy.js', 'packages/website/content/_data/**/*.js'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['packages/website/assets/js/**/*.js'],
+    languageOptions: { globals: globals.browser },
+  },
+  {
     ignores: [
       '**/generated.js',
       '**/generated.d.ts',
       '**/dist/**',
       '**/_site/**',
       '**/node_modules/**',
+      'packages/tree-sitter-grammar/grammar.js',
     ],
   },
 );

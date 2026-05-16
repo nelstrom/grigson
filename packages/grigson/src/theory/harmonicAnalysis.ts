@@ -7,8 +7,6 @@ import type {
   Song,
   Section,
   Bar,
-  BeatCell,
-  ChordCell,
   DotCell,
   Row,
   CommentLine,

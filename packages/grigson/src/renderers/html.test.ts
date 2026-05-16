@@ -1048,10 +1048,6 @@ describe('getRendererFontFaceCSS', () => {
 // reflowSong and splitRows
 // ---------------------------------------------------------------------------
 
-function countRows(song: ReturnType<typeof parseSong>): number {
-  return song.sections.reduce((sum, s) => sum + s.rows.length, 0);
-}
-
 describe('reflowSong', () => {
   it('no-op when rows already have N bars each', () => {
     // 2 rows × 4 bars = 8 bars total → barsPerLine=4 gives same 2 rows

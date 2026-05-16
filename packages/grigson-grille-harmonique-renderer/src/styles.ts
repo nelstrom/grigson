@@ -93,7 +93,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
 }
 
-/* Full "\" anti-diagonal: top-left to bottom-right */
+/* Full "\\" anti-diagonal: top-left to bottom-right */
 [part~="line-anti"] {
   width: var(--cg-diag-len);
   transform: translate(-50%, -50%) rotate(calc(-1 * var(--cg-diag-angle)));
@@ -128,7 +128,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   transform: translate(-50%, -50%) rotate(var(--cg-diag-angle));
 }
 
-/* Half-length "\" lines — centered in their quadrant */
+/* Half-length "\\" lines — centered in their quadrant */
 [part~="line-anti-tl"] {
   width: calc(var(--cg-diag-len) / 2);
   top: 25%;

@@ -1,4 +1,4 @@
-export default function (eleventyConfig) {
+export default function (_eleventyConfig) {
   return {
     dir: {
       input: 'content',

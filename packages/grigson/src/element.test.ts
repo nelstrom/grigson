@@ -485,12 +485,12 @@ describe('GrigsonChart DSD adoption', () => {
   // parser does). Instead we add content to the existing shadow root and force
   // _hasDSDContent = true before connecting to simulate DSD adoption.
   const makeElementWithDSD = () => {
-    const el = document.createElement('grigson-chart') as any;
+    const el = document.createElement('grigson-chart');
     const sentinel = document.createElement('div');
     sentinel.setAttribute('data-dsd', 'true');
-    el.shadowRoot.appendChild(sentinel);
-    el._hasDSDContent = true;
-    return el as GrigsonChart;
+    el.shadowRoot!.appendChild(sentinel);
+    Object.assign(el, { _hasDSDContent: true });
+    return el as unknown as GrigsonChart;
   };
 
   it('adopts a DSD shadow root without re-rendering', async () => {

@@ -332,10 +332,6 @@ export function computeGlobalLayout(song: Song): GlobalLayout {
 // Chord rendering
 // ---------------------------------------------------------------------------
 
-function normalizeAccidentals(text: string): string {
-  return text.replace(/b/g, '♭').replace(/#/g, '♯');
-}
-
 type AccidentalsMode = 'unicode' | 'ascii';
 type SlashStyle = 'horizontal' | 'diagonal' | 'ascii';
 
