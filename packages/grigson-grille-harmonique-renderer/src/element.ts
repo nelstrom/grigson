@@ -25,25 +25,29 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
 
   runAutoSize(): void {
     const parent = this.parentElement as HTMLElement | null;
+    const shadowRoot = parent?.shadowRoot ?? null;
+    const chartEl = shadowRoot?.querySelector('[part~="chart"]') as HTMLElement | null;
     if (this.hasAttribute('no-auto-size')) {
-      parent?.style.removeProperty('--cg-font-size');
+      chartEl?.style.removeProperty('--cg-font-size');
       return;
     }
-    if (!parent) return;
+    if (!chartEl) return;
+    const firstBar = shadowRoot!.querySelector('[part~="bar"]') as HTMLElement | null;
+    const barPx = firstBar?.getBoundingClientRect().width ?? 0;
     const MIN = 0.6,
-      MAX = 1.5,
       PRECISION = 0.02;
-    parent.style.setProperty('--cg-font-size', `${MAX}rem`);
+    const MAX = barPx > 0 ? Math.max(1.5, barPx / 40) : 1.5;
+    chartEl.style.setProperty('--cg-font-size', `${MAX}rem`);
     if (!this._measureOverflow()) return;
     let lo = MIN,
       hi = MAX;
     while (hi - lo > PRECISION) {
       const mid = (lo + hi) / 2;
-      parent.style.setProperty('--cg-font-size', `${mid}rem`);
+      chartEl.style.setProperty('--cg-font-size', `${mid}rem`);
       if (this._measureOverflow()) hi = mid;
       else lo = mid;
     }
-    parent.style.setProperty('--cg-font-size', `${lo}rem`);
+    chartEl.style.setProperty('--cg-font-size', `${lo}rem`);
   }
 
   private _measureOverflow(): boolean {
