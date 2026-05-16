@@ -22,6 +22,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   --cg-chart-width: 100%;
   --cg-aspect-ratio: 1;
   --cg-font-size: 1rem;
+  --cg-section-gap: 1rem;
   /* Negative angle → "/" direction (bottom-left to top-right) */
   /* aspect-ratio = W/H, so H/W = 1/r; atan2(H,W) = atan2(1, r) */
   --cg-diag-angle: calc(-1 * atan2(1, var(--cg-aspect-ratio, 1)));
@@ -220,7 +221,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   width: var(--cg-chart-width);
 }
 [part~="section"] + [part~="section"] {
-  margin-top: calc(-1 * var(--cg-grid-width));
+  margin-top: calc(var(--cg-section-gap) - var(--cg-grid-width));
 }
 [part~="section-label"] {
   font-family: system-ui, sans-serif;
