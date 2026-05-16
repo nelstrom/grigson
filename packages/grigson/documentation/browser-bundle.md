@@ -140,6 +140,30 @@ This makes it possible to place multiple renderer configurations inside one char
 
 Authors can opt out of containment with `container-type: normal` on the element if needed.
 
+### Renderer contract
+
+All renderer elements implement the `GrigsonRendererElement` interface (exported from `grigson`):
+
+```ts
+interface GrigsonRendererElement extends HTMLElement {
+  renderChart(song: Song): Element;
+  runAutoSize?(): void;
+}
+```
+
+`<grigson-chart>` discovers renderers purely by duck-typing — it checks `typeof el.renderChart === 'function'` on each child element. It never checks tag names, class names, or imports from specific renderer packages. **This boundary must be maintained:** `packages/grigson` must not gain any knowledge of `grigson-grille-harmonique-renderer` or any other third-party renderer. Coupling in that direction would prevent renderers from living in separate packages and would break the open-ended extension model.
+
+Responsibilities on each side of the boundary:
+
+| `<grigson-chart>`                                                  | Renderer element                                                          |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Parses and transforms the song (transpose, normalise)              | Renders the song to DOM via `renderChart(song)`                           |
+| Places renderer output into its own shadow root                    | Owns all CSS for its output                                               |
+| Calls `runAutoSize()` after render and on container resize         | Reads its own shadow root to measure and adjust font size                 |
+| Sets `--cg-font-size` (or equivalent) on its own internal elements | Exposes CSS custom properties and `::part()` targets for external styling |
+
+When adding behaviour that spans `<grigson-chart>` and a renderer, put the logic in the renderer and communicate via the existing contract methods — do not reach across the boundary.
+
 ### `<grigson-html-renderer>`
 
 The built-in renderer element. Accepts:

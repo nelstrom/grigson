@@ -48,6 +48,10 @@ Call this after implementing and testing a task.
 ./project/gemini-afk.sh <n>    # n tasks via Gemini, unattended
 ```
 
+## Architecture constraints
+
+- **`GrigsonChart` must have no knowledge of specific renderer implementations.** It discovers renderers by duck-typing (`typeof el.renderChart === 'function'`), never by checking class names, tag names, or imports. Do not add `instanceof` checks, tag-name guards, or imports of renderer packages (`grigson-grille-harmonique-renderer`, etc.) to `packages/grigson/src/element.ts` or any other file in `packages/grigson/`. See [`documentation/browser-bundle.md`](packages/grigson/documentation/browser-bundle.md) for the renderer contract.
+
 ## General conventions
 
 - Build all packages with `pnpm build` from the repo root (uses Turborepo — builds in dependency order, caches unchanged packages).
