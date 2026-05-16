@@ -46,19 +46,20 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 
 /* ── Row ── */
 /* Each row owns its grid background and shrinks to fit its actual bars,
-   so the page background shows through where bars are absent. */
+   so the page background shows through where bars are absent. Every row
+   carries its own bottom border (padding-bottom); adjacent rows collapse
+   the shared border via a negative margin so it stays single-width. */
 [part~="row"] {
   display: flex;
   gap: var(--cg-grid-width);
   background: currentColor;
-  /* Top/left/right border — no bottom, so the next row's top border
-     provides the single-width separator between rows. */
-  padding: var(--cg-grid-width) var(--cg-grid-width) 0;
+  padding: var(--cg-grid-width);
   width: fit-content;
+  margin-bottom: calc(-1 * var(--cg-grid-width));
 }
 
 [part~="section-rows"] [part~="row"]:last-child {
-  padding-bottom: var(--cg-grid-width);
+  margin-bottom: 0;
 }
 
 /* ── Bar ── */
