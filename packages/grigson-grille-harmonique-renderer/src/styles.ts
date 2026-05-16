@@ -35,26 +35,39 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 }
 
 /* ── Section rows ── */
+/* No background here — the row carries its own background so incomplete
+   rows don't extend the coloured area into the empty trailing space. */
 [part~="section-rows"] {
   display: flex;
   flex-direction: column;
-  background: currentColor;
-  padding: var(--cg-grid-width);
-  gap: var(--cg-grid-width);
+  container-type: inline-size;
   flex: 1;
 }
 
 /* ── Row ── */
+/* Each row owns its grid background and shrinks to fit its actual bars,
+   so the page background shows through where bars are absent. */
 [part~="row"] {
   display: flex;
   gap: var(--cg-grid-width);
+  background: currentColor;
+  /* Top/left/right border — no bottom, so the next row's top border
+     provides the single-width separator between rows. */
+  padding: var(--cg-grid-width) var(--cg-grid-width) 0;
+  width: fit-content;
+}
+
+[part~="section-rows"] [part~="row"]:last-child {
+  padding-bottom: var(--cg-grid-width);
 }
 
 /* ── Bar ── */
+/* Fixed width based on --cg-bars-per-line so all bars are the same size
+   regardless of how many are in the row. 100cqi = section-rows width. */
 [part~="bar"] {
   background: Canvas;
   color: CanvasText;
-  flex: 1;
+  flex: 0 0 calc((100cqi - (var(--cg-bars-per-line, 4) + 1) * var(--cg-grid-width)) / var(--cg-bars-per-line, 4));
   min-width: 0;
   aspect-ratio: var(--cg-aspect-ratio, 1);
   position: relative;

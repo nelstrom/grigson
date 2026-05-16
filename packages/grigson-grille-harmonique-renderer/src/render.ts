@@ -287,7 +287,7 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
     parts.push(`<header part="song-header">${titleHtml}${keyHtml}</header>`);
   }
 
-  parts.push(`<div part="chart">`);
+  parts.push(`<div part="chart" style="--cg-bars-per-line: ${barsPerLine}">`);
 
   let prevBar: Bar | null = null;
   let activeTSig: TimeSignature = { ...defaultTSig };
@@ -310,10 +310,6 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
         }
         parts.push(renderBar(bar, activeTSig, preset, mode, prevBar));
         prevBar = bar;
-      }
-      const ghostCount = Math.max(0, barsPerLine - row.bars.length);
-      for (let i = 0; i < ghostCount; i++) {
-        parts.push(`<div part="bar bar-ghost"></div>`);
       }
       parts.push(`</div>`);
     }
