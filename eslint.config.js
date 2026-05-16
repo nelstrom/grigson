@@ -24,6 +24,30 @@ export default tseslint.config(
     },
   },
   {
+    files: ['packages/grigson/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'grigson-grille-harmonique-renderer',
+              message: 'packages/grigson must not import renderer implementations.',
+            },
+            {
+              name: 'grigson-svg-renderer',
+              message: 'packages/grigson must not import renderer implementations.',
+            },
+            {
+              name: 'grigson-text-renderer',
+              message: 'packages/grigson must not import renderer implementations.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       '**/generated.js',
       '**/generated.d.ts',
