@@ -23,9 +23,10 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   --cg-aspect-ratio: 1;
   --cg-font-size: 1rem;
   /* Negative angle → "/" direction (bottom-left to top-right) */
-  --cg-diag-angle: calc(-1 * atan2(var(--cg-aspect-ratio, 1), 1));
-  /* 100% resolves to bar pixel width on position:absolute children */
-  --cg-diag-len: calc(100% * hypot(1, var(--cg-aspect-ratio, 1)));
+  /* aspect-ratio = W/H, so H/W = 1/r; atan2(H,W) = atan2(1, r) */
+  --cg-diag-angle: calc(-1 * atan2(1, var(--cg-aspect-ratio, 1)));
+  /* diagonal = sqrt(W²+H²) = W·hypot(1, H/W) = W·hypot(1, 1/r) */
+  --cg-diag-len: calc(100% * hypot(1, 1 / var(--cg-aspect-ratio, 1)));
   --cg-slash-angle: 45deg;
   --cg-slash-chord-offset: -0.35em;
   --cg-slash-bass-offset: 0.35em;
