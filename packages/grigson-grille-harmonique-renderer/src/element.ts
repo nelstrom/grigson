@@ -30,7 +30,7 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
     const shadowRoot = parent?.shadowRoot ?? null;
     const chartEl = shadowRoot?.querySelector('[part~="chart"]') as HTMLElement | null;
     if (this.hasAttribute('no-auto-size')) {
-      chartEl?.style.removeProperty('--cg-font-size');
+      parent?.style.removeProperty('--cg-font-size');
       if (this._printStyleEl) this._printStyleEl.textContent = '';
       return;
     }
@@ -40,7 +40,7 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
     const MIN = 0.6,
       PRECISION = 0.02;
     const MAX = barPx > 0 ? Math.max(1.5, barPx / 40) : 1.5;
-    chartEl.style.setProperty('--cg-font-size', `${MAX}rem`);
+    parent.style.setProperty('--cg-font-size', `${MAX}rem`);
     if (!this._measureOverflow()) {
       this._setPrintRule(MAX, parent);
       return;
@@ -49,11 +49,11 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
       hi = MAX;
     while (hi - lo > PRECISION) {
       const mid = (lo + hi) / 2;
-      chartEl.style.setProperty('--cg-font-size', `${mid}rem`);
+      parent.style.setProperty('--cg-font-size', `${mid}rem`);
       if (this._measureOverflow()) hi = mid;
       else lo = mid;
     }
-    chartEl.style.setProperty('--cg-font-size', `${lo}rem`);
+    parent.style.setProperty('--cg-font-size', `${lo}rem`);
     this._setPrintRule(lo, parent);
   }
 
@@ -64,7 +64,7 @@ export class GrigsonGrilleHarmoniqueRenderer extends HTMLElement implements Grig
     // A4 minus 3cm margins ≈ 680 CSS px; scale font proportionally for print columns.
     const PRINT_WIDTH_PX = 680;
     const printSize = Math.max(0.6, screenSize * Math.min(1, PRINT_WIDTH_PX / containerWidth));
-    this._printStyleEl.textContent = `@media print{[part~="chart"]{--cg-font-size:${printSize.toFixed(3)}rem!important}}`;
+    this._printStyleEl.textContent = `@media print{:host{--cg-font-size:${printSize.toFixed(3)}rem!important}}`;
   }
 
   private _measureOverflow(): boolean {
