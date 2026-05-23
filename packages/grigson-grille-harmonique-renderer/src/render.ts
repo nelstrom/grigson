@@ -287,7 +287,7 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
     parts.push(`<header part="song-header">${titleHtml}${keyHtml}</header>`);
   }
 
-  parts.push(`<div part="chart" style="--cg-bars-per-line: ${barsPerLine}">`);
+  parts.push(`<div part="chart">`);
 
   let prevBar: Bar | null = null;
   let activeTSig: TimeSignature = { ...defaultTSig };
@@ -300,7 +300,7 @@ export default function render(song: Song, config: GrilleConfig = {}): string {
     if (section.label) {
       parts.push(`<span part="section-label">${escapeHtml(section.label)}</span>`);
     }
-    parts.push(`<div part="section-rows">`);
+    parts.push(`<div part="section-rows" style="--cg-bars-per-line: ${barsPerLine}">`);
 
     for (const row of rows) {
       parts.push(`<div part="row">`);
