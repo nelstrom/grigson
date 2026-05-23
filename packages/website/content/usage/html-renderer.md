@@ -15,7 +15,7 @@ import { HtmlRenderer } from 'grigson/renderers/html';
 const song = parseSong(`
 ---
 title: "Autumn Leaves"
-key: G
+key: G minor
 ---
 
 [A]
@@ -338,7 +338,7 @@ A boolean attribute. When present on `<grigson-html-renderer>`, the element auto
   <template>
 ---
 title: "What's New?"
-key: C
+key: C major
 ---
 | (4/4) C | AMI7(b5) | DMI7(b5) G7 | CMI |
   </template>

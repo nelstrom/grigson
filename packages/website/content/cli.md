@@ -303,7 +303,7 @@ key: F# major
 ```sh
 $ grigson transpose --to G song.chart
 ---
-key: G
+key: G major
 ---
 
 | G | Bm | C | D7 |
@@ -314,7 +314,7 @@ key: G
 ```sh
 $ grigson transpose --to Ab song.chart
 ---
-key: Ab
+key: Ab major
 ---
 
 | Ab | Cm | Db | Eb7 |
@@ -325,7 +325,7 @@ key: Ab
 ```sh
 $ grigson transpose --to Bb song.chart
 ---
-key: Bb
+key: Bb major
 ---
 
 | Bb | Dm | Eb | F7 |
@@ -336,7 +336,7 @@ key: Bb
 ```sh
 $ grigson transpose --lower 3 song.chart
 ---
-key: Eb
+key: Eb major
 ---
 
 | Eb | Gm | Ab | Bb7 |

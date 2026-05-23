@@ -12,7 +12,7 @@ A section is declared by a name in square brackets, optionally followed by a `ke
 
 ```grigson
 [Verse]
-[Chorus] key: Ab
+[Chorus] key: Ab major
 [Bridge] key: F# dorian
 ```
 

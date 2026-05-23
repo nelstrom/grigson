@@ -17,7 +17,7 @@ import { TextRenderer } from 'grigson/renderers/text';
 const source = `
 ---
 title: "Autumn Leaves"
-key: G
+key: G major
 ---
 
 [A]

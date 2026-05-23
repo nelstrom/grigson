@@ -19,7 +19,7 @@ A `.chart` file consists of two parts:
 ---
 title: "All the Things You Are"
 artist: "Jerome Kern"
-key: Ab
+key: Ab major
 ---
 
 [A]

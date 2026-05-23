@@ -15,7 +15,7 @@ import { SvgRenderer } from 'grigson/renderers/svg';
 const source = `
 ---
 title: "Autumn Leaves"
-key: G
+key: G major
 ---
 
 [A]

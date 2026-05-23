@@ -47,7 +47,7 @@ Here is a short jazz-style chart demonstrating several features:
 ```grigson
 ---
 title: "Blues in F"
-key: F
+key: F major
 feel: "swing"
 ---
 
