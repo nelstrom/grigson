@@ -143,14 +143,14 @@ const PATTERN_ZONES: Record<BarPattern, ZoneSpec> = {
     // E-triangle boundaries: "/" from center→top-right + "\" from center→bottom-right.
     lineParts: ['line line-diag-tr', 'line line-anti-br'],
     chordParts: ['chord chord-main', 'chord chord-corner'],
-    chordZones: [{ zone: 'full' }, { zone: 'full' }],
+    chordZones: [{ zone: 'top-left', diagonal: 'anti' }, { zone: 'full' }],
   },
   '1+3': {
     // Beat order: W (corner) | N+S+E (main).
     // W-triangle boundaries: "\" from top-left→center + "/" from bottom-left→center.
     lineParts: ['line line-anti-tl', 'line line-diag-bl'],
     chordParts: ['chord chord-corner', 'chord chord-main'],
-    chordZones: [{ zone: 'full' }, { zone: 'full' }],
+    chordZones: [{ zone: 'full' }, { zone: 'bottom-right', diagonal: 'anti' }],
   },
   '2+1+1': {
     // Beat order: W+N (tl) | S (bottom) | E (right). "/" splits left from right; "\" half splits S from E.

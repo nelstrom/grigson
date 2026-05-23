@@ -205,12 +205,12 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 [part~="chord-mid"]    { top: 50%;    left: 50%;  transform: translate(-50%, -50%); }
 
 /* 3+1: main = W+N+S area; corner = E (right-center) */
-[part~="bar-3-1"] [part~="chord-main"]   { top: 40%; left: 35%; transform: translate(-50%, -50%); }
+[part~="bar-3-1"] [part~="chord-main"]   { top: 33%;    left: 33%;  transform: translate(-50%, -50%); }
 [part~="bar-3-1"] [part~="chord-corner"] { top: 50%; right: 20%; transform: translate(50%, -50%); }
 
 /* 1+3: corner = W (left-center); main = N+S+E area */
 [part~="bar-1-3"] [part~="chord-corner"] { top: 50%; left: 15%; transform: translate(-50%, -50%); }
-[part~="bar-1-3"] [part~="chord-main"]   { bottom: 40%; right: 35%; transform: translate(50%, 50%); }
+[part~="bar-1-3"] [part~="chord-main"]   { bottom: 33%; right: 33%; transform: translate(50%, 50%); }
 
 /* ── Section ── */
 [part~="section"] {
