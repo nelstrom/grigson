@@ -230,6 +230,8 @@ permalink: /sheet/
           <option value="">Unicode ♭♯ (default)</option>
           <option value="ascii">ASCII b#</option>
         </select>
+        <label for="gh-auto-size-checkbox">Auto-size font:</label>
+        <input type="checkbox" id="gh-auto-size-checkbox" checked>
       </span>
     </div>
 
@@ -279,6 +281,7 @@ permalink: /sheet/
       preset: z.string().optional(),
       accidentals: z.enum(['ascii', 'unicode']).optional(),
       barsPerLine: z.number().int().min(1).optional(),
+      autoSize: z.boolean().optional(),
       transposeSemitones: z.number().int().min(-11).max(11).optional(),
     }),
   ]);
@@ -331,6 +334,7 @@ title: "Bebop Blues"
     const accidentalsSelect = document.getElementById('accidentals-select');
     const slashStyleSelect = document.getElementById('slash-style-select');
     const autoSizeCheckbox = document.getElementById('auto-size-checkbox');
+    const ghAutoSizeCheckbox = document.getElementById('gh-auto-size-checkbox');
     const lineLengthSelect = document.getElementById('line-length-select');
     const htmlOptions = document.getElementById('html-options');
     const ghOptions = document.getElementById('gh-options');
@@ -373,6 +377,7 @@ title: "Bebop Blues"
         if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
         const barsPerLine = ghLineLengthSelect.value;
         if (barsPerLine) currentRenderer.setAttribute('bars-per-line', barsPerLine);
+        if (!ghAutoSizeCheckbox.checked) currentRenderer.setAttribute('no-auto-size', '');
         htmlOptions.hidden = true;
         ghOptions.hidden = false;
       } else {
@@ -489,6 +494,7 @@ title: "Bebop Blues"
           if (ghNotationPresetSelect.value) config.preset = ghNotationPresetSelect.value;
           if (ghAccidentalsSelect.value) config.accidentals = ghAccidentalsSelect.value;
           if (ghLineLengthSelect.value) config.barsPerLine = parseInt(ghLineLengthSelect.value, 10);
+          if (!ghAutoSizeCheckbox.checked) config.autoSize = false;
         }
         const semitones = parseInt(transposeSelect.value, 10);
         if (semitones !== 0) config.transposeSemitones = semitones;
@@ -538,6 +544,7 @@ title: "Bebop Blues"
       ghNotationPresetSelect.value = initialConfig.preset ?? '';
       ghAccidentalsSelect.value = initialConfig.accidentals ?? '';
       ghLineLengthSelect.value = initialConfig.barsPerLine ? String(initialConfig.barsPerLine) : '';
+      ghAutoSizeCheckbox.checked = initialConfig.autoSize !== false;
     } else {
       typefaceSelect.value = initialConfig.typeface ?? 'sans';
       notationPresetSelect.value = initialConfig.preset ?? '';
@@ -674,6 +681,15 @@ title: "Bebop Blues"
         const accidentals = ghAccidentalsSelect.value;
         if (accidentals) currentRenderer.setAttribute('accidentals', accidentals);
         else currentRenderer.removeAttribute('accidentals');
+        outputElement.update();
+      }
+      updateURL();
+    });
+
+    ghAutoSizeCheckbox.addEventListener('change', () => {
+      if (currentRenderer && rendererSelect.value === 'grille-harmonique') {
+        if (ghAutoSizeCheckbox.checked) currentRenderer.removeAttribute('no-auto-size');
+        else currentRenderer.setAttribute('no-auto-size', '');
         outputElement.update();
       }
       updateURL();
