@@ -54,7 +54,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 [part~="row"] {
   display: flex;
   gap: var(--cg-grid-width);
-  background: currentColor;
+  background: CanvasText;
   padding: var(--cg-grid-width);
   width: fit-content;
   margin-bottom: calc(-1 * var(--cg-grid-width));
