@@ -46,34 +46,34 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
 }
 
 /* ── Row ── */
-/* Each row owns its grid background and shrinks to fit its actual bars,
-   so the page background shows through where bars are absent. Every row
-   carries its own bottom border (padding-bottom); adjacent rows collapse
-   the shared border via a negative margin so it stays single-width. */
 [part~="row"] {
   display: flex;
-  gap: var(--cg-grid-width);
-  background: CanvasText;
-  padding: var(--cg-grid-width);
-  width: fit-content;
-  margin-bottom: calc(-1 * var(--cg-grid-width));
-}
-
-[part~="section-rows"] [part~="row"]:last-child {
-  margin-bottom: 0;
 }
 
 /* ── Bar ── */
-/* Fixed width based on --cg-bars-per-line so all bars are the same size
-   regardless of how many are in the row. 100cqi = section-rows width. */
+/* Borders on each bar create the grid lines. Adjacent bars share a border:
+   the right border of bar N is the left visual separator before bar N+1,
+   so bar N+1 has no left border. Rows likewise: only the first row's bars
+   carry a top border. Using 100% (of the row) instead of cqi avoids a
+   Safari bug where fit-content rows miscalculate cqi-sized children. */
 [part~="bar"] {
   background: Canvas;
   color: CanvasText;
-  flex: 0 0 calc((100cqi - (var(--cg-bars-per-line, 4) + 1) * var(--cg-grid-width)) / var(--cg-bars-per-line, 4));
+  box-sizing: border-box;
+  border: var(--cg-grid-width) solid CanvasText;
+  flex: 0 0 calc(100% / var(--cg-bars-per-line, 4));
   min-width: 0;
   aspect-ratio: var(--cg-aspect-ratio, 1);
   position: relative;
   overflow: hidden;
+}
+
+[part~="bar"] + [part~="bar"] {
+  border-left: none;
+}
+
+[part~="row"] + [part~="row"] > [part~="bar"] {
+  border-top: none;
 }
 
 /* ── Lines ── */
@@ -220,7 +220,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   width: var(--cg-chart-width);
 }
 [part~="section"] + [part~="section"] {
-  margin-top: calc(var(--cg-section-gap) - var(--cg-grid-width));
+  margin-top: var(--cg-section-gap);
 }
 [part~="section-label"] {
   font-family: system-ui, sans-serif;
