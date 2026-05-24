@@ -18,7 +18,7 @@ export function getGrilleStyles(typeface: string = 'sans'): string {
   --cg-diag-width: 0.5px;
   --cg-diag-style: solid;
   --cg-chart-width: 100%;
-  --cg-aspect-ratio: 1;
+  --cg-aspect-ratio: 1.5;
   --cg-section-gap: 1rem;
   /* Negative angle → "/" direction (bottom-left to top-right) */
   /* aspect-ratio = W/H, so H/W = 1/r; atan2(H,W) = atan2(1, r) */
