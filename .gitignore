@@ -14,6 +14,7 @@ packages/grigson-text-renderer/dist/
 packages/grigson-svg-renderer/dist/
 packages/language-server/dist/
 packages/vscode-extension/dist/
+packages/vscode-extension/*.vsix
 packages/website/_site/
 packages/font-explorer/_data/fonts/
 packages/font-explorer/_site/

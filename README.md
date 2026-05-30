@@ -95,19 +95,13 @@ To rebuild after making changes: stop the host (`Shift+F5`), run `pnpm build` fr
 
 Package the extension into a `.vsix` file and install it permanently into your VS Code.
 
-**Prerequisites:** `@vscode/vsce` — install it once with `npm install -g @vscode/vsce`.
-
 ```sh
-# Build all packages (grigson → language-server → extension, in order)
-pnpm build
-
-# Package into a .vsix
-cd packages/vscode-extension
-vsce package
-# → produces vscode-grigson-0.1.0.vsix
+# Build all packages and produce the .vsix
+pnpm package-vsix
+# → produces packages/vscode-extension/vscode-grigson-0.1.0.vsix
 
 # Install into VS Code
-code --install-extension vscode-grigson-0.1.0.vsix
+code --install-extension packages/vscode-extension/vscode-grigson-0.1.0.vsix
 ```
 
 After installing, reload VS Code (`Cmd+Shift+P` → **Developer: Reload Window**). The extension activates automatically when you open a `.chart` file.

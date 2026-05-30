@@ -6,9 +6,14 @@
   "categories": [
     "Programming Languages"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nelstrom/grigson.git"
+  },
   "main": "./dist/extension.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "package": "vsce package --no-dependencies"
   },
   "dependencies": {
     "grigson-language-server": "workspace:*",
@@ -16,6 +21,7 @@
   },
   "devDependencies": {
     "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.0.0",
     "typescript": "^5.0.0"
   },
   "contributes": {
