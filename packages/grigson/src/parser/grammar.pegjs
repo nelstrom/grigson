@@ -25,7 +25,7 @@
 
 Song
   = frontMatter:FrontMatter? _ sections:SongBody {
-      return {
+      const song = {
         type: "song",
         title: frontMatter?.title ?? null,
         key: frontMatter?.key ?? null,
@@ -33,6 +33,8 @@ Song
         sections,
         loc: makeLoc(location()),
       };
+      if (frontMatter?.keyLoc) song.keyLoc = frontMatter.keyLoc;
+      return song;
     }
 
 SongBody
@@ -40,6 +42,7 @@ SongBody
       const sections = [];
       let pendingLabel = null;
       let pendingKey = null;
+      let pendingKeyLoc = null;
       let pendingPreamble = [];  // comments before the current label
       let currentRows = [];
       let currentContent = [];
@@ -57,11 +60,13 @@ SongBody
               : undefined;
             const sec = { type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent };
             if (loc) sec.loc = loc;
+            if (pendingKeyLoc) sec.keyLoc = pendingKeyLoc;
             sections.push(sec);
             currentRows = [];
             currentContent = [];
             pendingPreamble = [];
             pendingKey = null;
+            pendingKeyLoc = null;
             labelSeen = false;
             sectionStartLoc = item.loc ?? null;
             lastItemLoc = item.loc ?? null;
@@ -71,6 +76,7 @@ SongBody
           }
           pendingLabel = item.label;
           pendingKey = item.key;
+          pendingKeyLoc = item.keyLoc ?? null;
           labelSeen = true;
         } else if (item.type === "row") {
           if (item.loc) {
@@ -99,16 +105,24 @@ SongBody
         : undefined;
       const finalSec = { type: "section", label: pendingLabel, key: pendingKey, preamble: pendingPreamble, rows: currentRows, content: currentContent };
       if (finalLoc) finalSec.loc = finalLoc;
+      if (pendingKeyLoc) finalSec.keyLoc = pendingKeyLoc;
       sections.push(finalSec);
       return sections;
     }
 
 SectionLabel
-  = "[" label:$[^\]\r\n]+ "]" _ key:("key" _ ":" _ value:FrontMatterValue { return value; })? _ Newline? {
-      if (key !== null && !isValidKey(key)) {
-        error(`Invalid key: "${key}".`);
+  = "[" label:$[^\]\r\n]+ "]" _ key:("key" _ ":" _ value:FrontMatterValue { return { value, loc: makeLoc(location()) }; })? _ Newline? {
+      if (key !== null && !isValidKey(key.value)) {
+        error(`Invalid key: "${key.value}".`);
       }
-      return { type: "sectionLabel", label: label.trim(), key: key !== null ? normalizeKey(key) : null, loc: makeLoc(location()) };
+      const node = {
+        type: "sectionLabel",
+        label: label.trim(),
+        key: key !== null ? normalizeKey(key.value) : null,
+        loc: makeLoc(location()),
+      };
+      if (key !== null) node.keyLoc = key.loc;
+      return node;
     }
 
 FrontMatter
@@ -124,18 +138,22 @@ FrontMatter
         error(`Invalid meter: "${meta.meter}". Must be a time signature like 2/4, 4/4, 3/4, 6/8, or "mixed".`);
       }
 
-      return {
+      const keyField = fields.find(f => f.key === "key");
+
+      const fm = {
         type: "frontMatter",
         title: meta.title ?? null,
         key: meta.key !== undefined ? normalizeKey(meta.key) : null,
         meter: meta.meter ?? null,
         loc: makeLoc(location()),
       };
+      if (keyField && keyField.loc) fm.keyLoc = keyField.loc;
+      return fm;
     }
 
 FrontMatterField
   = key:$[a-zA-Z]+ ":" _ value:FrontMatterValue Newline {
-      return { key, value };
+      return { key, value, loc: makeLoc(location()) };
     }
 
 FrontMatterValue

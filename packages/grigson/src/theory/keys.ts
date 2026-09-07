@@ -32,6 +32,18 @@ export function getKeyRoot(key: string): string {
 }
 
 /**
+ * Converts a key string to canonical form (e.g. 'C' → 'C major', 'Am' → 'A minor').
+ * Leaves keys that already carry a mode suffix (dorian/aeolian/mixolydian/major/minor)
+ * untouched. Returns `null` for `null` input. Pure string transform — no validation.
+ */
+export function toCanonicalKey(key: string | null): string | null {
+  if (key === null) return null;
+  if (key.includes(' ')) return key; // already has a mode suffix
+  if (key.endsWith('m')) return key.slice(0, -1) + ' minor';
+  return key + ' major';
+}
+
+/**
  * Converts a canonical key string (e.g. 'C major', 'A minor') to the
  * short KEYS-object key (e.g. 'C', 'Am'). Leaves modal keys unchanged.
  * Safe to call with already-short keys.

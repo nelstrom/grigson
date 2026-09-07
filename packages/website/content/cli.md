@@ -77,7 +77,9 @@ grigson generate-renderer my-renderer --output ~/projects
 
 ### `grigson normalise`
 
-Detects the key of a chart and rewrites chord roots to their canonical enharmonic spelling for that key (e.g. `A#` → `Bb` in F major). Updates the `key` field in front matter to match.
+Rewrites chord roots to their canonical enharmonic spelling for the governing key (e.g. `A#` → `Bb` in F major), and tidies front matter.
+
+A `key:` declared in front matter is **preserved verbatim** — `normalise` never corrects it (use `grigson validate` to check the fit). A key is detected and inserted only when front matter has none. A section with no `key:` inherits the previous section's declared key for spelling but gains no `key:` token of its own; if every section declares the same key, it is hoisted to front matter. `--key` still forces one key across the whole chart.
 
 ```
 grigson normalise [options] [file]
@@ -138,7 +140,7 @@ cat song.chart | grigson transpose --to Dm    # from stdin
 
 ### `grigson validate`
 
-Validates one or more `.chart` files and reports parse errors and semantic warnings. Suitable for CI pipelines and pre-commit hooks.
+Validates one or more `.chart` files and reports parse errors, semantic warnings (beat balance), and key-fit diagnostics — a declared key (front matter or section header) that doesn't match its chords is reported as a warning, or an error when it fits very poorly. Relative, parallel, and modal key ambiguities are never flagged. Suitable for CI pipelines and pre-commit hooks.
 
 ```
 grigson validate [options] [file...]

@@ -101,6 +101,81 @@ describe('validate — beat balance', () => {
   });
 });
 
+describe('validate — declared key fit', () => {
+  it('error tier: a declared key with (almost) no diatonic overlap', () => {
+    const result = validate('---\nkey: F# major\n---\n| C | F | G | C |\n| Am | Dm | G | C |\n');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('error');
+    expect(result[0].message).toContain('F# major');
+    expect(result[0].message).toContain('C major');
+    expect(result[0].source).toBe('grigson');
+  });
+
+  it('warning tier: a declared key that fits, but a clearly better key exists', () => {
+    const result = validate('---\nkey: C major\n---\n| D | A | Bm | G |\n| D | A | G | D |\n');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('warning');
+    expect(result[0].message).toContain('D major');
+  });
+
+  it('silent when the ratio is ≥ 0.85 even though another key scores higher', () => {
+    // C major declared; the passage scores best as G major but C major still fits at ratio ~0.87.
+    expect(validate('---\nkey: C major\n---\n| D | G | A | D | Em | Am | C | G |\n')).toEqual([]);
+  });
+
+  it('relative major/minor pair is exempt', () => {
+    expect(validate('---\nkey: A minor\n---\n| C | F | G | C |\n| Am | F | C | G |\n')).toEqual([]);
+  });
+
+  it('parallel major/minor pair is exempt', () => {
+    expect(validate('---\nkey: C minor\n---\n| C | F | G | C |\n')).toEqual([]);
+  });
+
+  it('natural-minor declared for a dorian tune is exempt (modal reading)', () => {
+    // Em G D A — the A major (major IV) reads as E dorian ≡ D major; "E minor" is not an error.
+    expect(validate('---\nkey: E minor\n---\n| Em | G | D | A |\n| Em | D | Em | G |\n')).toEqual(
+      [],
+    );
+  });
+
+  it('a section-header key is flagged on its own line', () => {
+    const result = validate('[A] key: F# major\n| C | F | G | C |\n');
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('error');
+    expect(result[0].range.start.line).toBe(0);
+    expect(result[0].range.start.character).toBeGreaterThan(0);
+  });
+
+  it('an inherited (keyless) section produces no diagnostic of its own', () => {
+    // [B] has no key: header. Only [A]'s declared C major is checked (over the bars it
+    // governs); [B] is never independently flagged even though its chords lean elsewhere.
+    const result = validate('[A] key: C major\n| C | F | G | C |\n\n[B]\n| C | Am | F | G |\n');
+    expect(result).toEqual([]);
+    // sanity: exactly one governed region exists (the section-header key), not two
+    const flagged = validate('[A] key: F# major\n| C | F | G | C |\n\n[B]\n| C | F | G | C |\n');
+    expect(flagged).toHaveLength(1);
+  });
+
+  it('the front-matter region stops at the first section that declares its own key', () => {
+    // song key F# major governs only section [A]; section [B] declares its own good key.
+    const result = validate(
+      '---\nkey: F# major\n---\n\n[A]\n| C | F | G | C |\n\n[B] key: C major\n| C | F | G | C |\n',
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('error');
+    expect(result[0].range.start.line).toBe(1); // the front-matter key: line
+  });
+
+  it('diagnostic range has the LSP shape (0-based start/end line & character)', () => {
+    const [d] = validate('---\nkey: F# major\n---\n| C | F | G | C |\n');
+    expect(d.range).toMatchObject({
+      start: { line: expect.any(Number), character: expect.any(Number) },
+      end: { line: expect.any(Number), character: expect.any(Number) },
+    });
+    expect(d.range.start.line).toBeGreaterThanOrEqual(0);
+  });
+});
+
 describe('validate', () => {
   it('returns [] for an empty file', () => {
     expect(validate('')).toEqual([]);

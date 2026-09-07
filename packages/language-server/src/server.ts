@@ -7,6 +7,8 @@ import {
   DiagnosticSeverity,
   TextEdit,
   Range,
+  CompletionItem,
+  CompletionItemKind,
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import type {
@@ -14,11 +16,13 @@ import type {
   validate as ValidateFn,
   parseSong as ParseSongFn,
   normaliseSong as NormaliseSongFn,
+  keyCompletions as KeyCompletionsFn,
 } from 'grigson';
 
 let validate: typeof ValidateFn;
 let parseSong: typeof ParseSongFn;
 let normaliseSong: typeof NormaliseSongFn;
+let keyCompletions: typeof KeyCompletionsFn;
 let TextRenderer: new () => { render(song: ReturnType<typeof parseSong>): string };
 
 async function loadGrigson() {
@@ -26,6 +30,7 @@ async function loadGrigson() {
   validate = grigson.validate;
   parseSong = grigson.parseSong;
   normaliseSong = grigson.normaliseSong;
+  keyCompletions = grigson.keyCompletions;
   TextRenderer = grigson.TextRenderer;
 }
 
@@ -37,9 +42,27 @@ connection.onInitialize(
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       documentFormattingProvider: true,
+      completionProvider: { triggerCharacters: [':', ' '], resolveProvider: false },
     },
   }),
 );
+
+connection.onCompletion((params): CompletionItem[] => {
+  if (!keyCompletions) return [];
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return [];
+  const { candidates } = keyCompletions(
+    document.getText(),
+    params.position.line,
+    params.position.character,
+  );
+  return candidates.map((c, i) => ({
+    label: c.key,
+    kind: CompletionItemKind.Value,
+    detail: `fit ${(c.ratio * 100).toFixed(0)}%`,
+    sortText: String(i).padStart(3, '0'),
+  }));
+});
 
 connection.onDocumentFormatting((params) => {
   if (!parseSong || !normaliseSong || !TextRenderer) return [];

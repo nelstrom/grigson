@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { analyseHarmony, circleOfFifthsDistance, analyseSong } from './harmonicAnalysis.js';
+import {
+  analyseHarmony,
+  circleOfFifthsDistance,
+  analyseSong,
+  resolveSectionKeys,
+} from './harmonicAnalysis.js';
 import type { Chord, Song, Bar, Row, Section, SourceRange } from '../parser/types.js';
 
 function maj(root: string): Chord {
@@ -364,6 +369,50 @@ describe('analyseSong — tree structure', () => {
     expect(result.title).toBe('Test Song');
     expect(result.key).toBe('G major');
     expect(result.meter).toBe('4/4');
+  });
+});
+
+describe('resolveSectionKeys — sticky inheritance', () => {
+  it('a keyless section inherits the previous section’s declared key', () => {
+    const song = makeSong([
+      makeSection([makeRow([makeBar([maj('C')])])], 'Eb major'),
+      makeSection([makeRow([makeBar([maj('C')])])], null),
+      makeSection([makeRow([makeBar([maj('C')])])], 'A minor'),
+      makeSection([makeRow([makeBar([maj('C')])])], null),
+    ]);
+    expect(resolveSectionKeys(song)).toEqual(['Eb major', 'Eb major', 'A minor', 'A minor']);
+  });
+
+  it('the first section falls back to song.key, then null', () => {
+    expect(
+      resolveSectionKeys(
+        makeSong([makeSection([makeRow([makeBar([maj('C')])])], null)], 'D major'),
+      ),
+    ).toEqual(['D major']);
+    expect(
+      resolveSectionKeys(makeSong([makeSection([makeRow([makeBar([maj('C')])])], null)], null)),
+    ).toEqual([null]);
+  });
+
+  it('tonality hints are not consulted — only section headers propagate', () => {
+    const hinted = makeSection(
+      [makeRow([makeBar([maj('C')], [{ beforeCellIndex: 0, key: 'Ab major' }])])],
+      null,
+    );
+    const next = makeSection([makeRow([makeBar([maj('C')])])], null);
+    expect(resolveSectionKeys(makeSong([hinted, next], 'C major'))).toEqual(['C major', 'C major']);
+  });
+});
+
+describe('analyseSong — keyless section inherits the prior declared key', () => {
+  it('homeKey of a keyless section after a keyed section is the keyed section’s key', () => {
+    const keyed = makeSection([makeRow([makeBar([maj('Eb')])])], 'Eb major', 'A');
+    const keyless = makeSection([makeRow([makeBar([maj('Eb')])])], null, 'B');
+    const song = makeSong([keyed, keyless], 'C major');
+    const result = analyseSong(song);
+    const cell = result.sections[1].rows[0].bars[0].cells[0];
+    expect(cell.type).toBe('chord');
+    if (cell.type === 'chord') expect(cell.chord.homeKey).toBe('Eb major');
   });
 });
 

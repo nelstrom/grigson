@@ -5,8 +5,28 @@ import {
   getKeyRoot,
   getRelativeMajor,
   getSiblingModes,
+  toCanonicalKey,
   KEYS,
 } from './keys.js';
+
+describe('toCanonicalKey', () => {
+  it('expands a bare major root', () => {
+    expect(toCanonicalKey('Eb')).toBe('Eb major');
+  });
+
+  it('expands a minor shorthand', () => {
+    expect(toCanonicalKey('Cm')).toBe('C minor');
+  });
+
+  it('leaves an already-canonical key untouched', () => {
+    expect(toCanonicalKey('A minor')).toBe('A minor');
+    expect(toCanonicalKey('F# dorian')).toBe('F# dorian');
+  });
+
+  it('returns null for null', () => {
+    expect(toCanonicalKey(null)).toBeNull();
+  });
+});
 
 describe('diatonicNotes', () => {
   it('returns the correct set for C major', () => {

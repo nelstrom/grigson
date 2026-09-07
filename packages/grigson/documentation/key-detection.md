@@ -57,6 +57,29 @@ Modes are distinguished from their parent major key by degree-specific quality s
 detectKey(chords: Chord[], declaredKey?: string | null, config?: DetectKeyConfig): string | null
 ```
 
-- **`declaredKey`**: if provided and scores > 0 against the chord sequence, it is returned unchanged (the declared key is preserved unless it has zero diatonic overlap).
+- **`declaredKey`**: if provided and it has **any** diatonic overlap with the chords (score > 0), it is returned **verbatim** — canonical in (`'Eb major'`) → canonical out (`'Eb major'`), short in (`'A'`) → short out (`'A'`). Only a zero-overlap declared key is discarded and re-detected. This check runs **before** the confidence guards, so a declared or inherited key still governs spelling for a sparse section that bare detection would reject (`detectKey([], declared)` still returns `null` — an empty sequence has score 0).
 - **`config.fSharpOrGFlat`**: `'f-sharp'` (default) or `'g-flat'` — controls the F♯/G♭ tie.
 - **`config.forceKey`**: bypasses detection entirely and returns the given key (used by `normaliseSong --key`).
+
+## `scoreAllKeys(chords)`
+
+Returns a `Map<string, number>` from every in-scope key (short `KEYS` form) to its raw diatonic + quality score — the scoring loop above, exposed without any tiebreaking or thresholds. Used by the harmonic analyser, the validator's key-fit check, and `rankKeys`.
+
+## `rankKeys(chords, limit = 3)`
+
+Returns up to `limit` `RankedKey` candidates, best first, for `key:` autocomplete:
+
+```typescript
+interface RankedKey {
+  key: string; // canonical, e.g. 'Eb major', 'C minor', 'D dorian'
+  score: number; // raw scoreAllKeys score
+  ratio: number; // score / bestScore — 1 for the top candidate
+}
+```
+
+The `detectKey` winner (with its tiebreak resolution) is forced to the front; the remaining slots are filled by descending score. Returns `[]` when no key scores above zero.
+
+## Related
+
+- [keys.md](keys.md) — the full key model: front matter vs section `key:` vs tonality hints, sticky inheritance, `normalise` behaviour, validator key-fit tiers.
+- [harmonic-analysis.md](harmonic-analysis.md) — how the per-section home key is resolved.

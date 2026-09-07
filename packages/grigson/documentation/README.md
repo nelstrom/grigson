@@ -68,7 +68,7 @@ A section is declared by a name in square brackets, optionally followed by a `ke
 [Bridge] key: F# dorian
 ```
 
-If a `key:` is given, it applies to that section only, overriding the global key. If no key is given, the section inherits the global key from the front matter.
+If a `key:` is given, it applies from that section onward, overriding the global key. If no key is given, the section inherits the **previous section's declared key** (then the front-matter key, then nothing). See [keys.md](keys.md) for the full model, including how `normalise` and `validate` treat declared keys.
 
 Section names can be anything: `[A]`, `[Verse]`, `[Chorus]`, `[Intro]`, `[Bridge]`, `[Verse/Chorus]`, etc.
 

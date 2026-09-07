@@ -1,15 +1,10 @@
 import type { Song, Section, Row, Bar, Chord, ChordCell, Quality } from '../parser/types.js';
 import { detectKey, type DetectKeyConfig } from './keyDetector.js';
-import { KEYS, resolveKey } from './keys.js';
+import { KEYS, resolveKey, toCanonicalKey } from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
-import { analyseHarmony } from './harmonicAnalysis.js';
+import { analyseHarmony, resolveSectionKeys } from './harmonicAnalysis.js';
 
-export function toCanonicalKey(key: string | null): string | null {
-  if (key === null) return null;
-  if (key.includes(' ')) return key; // already has a mode suffix (dorian/aeolian/mixolydian/major/minor)
-  if (key.endsWith('m')) return key.slice(0, -1) + ' minor';
-  return key + ' major';
-}
+export { toCanonicalKey } from './keys.js';
 
 function buildPCToNote(key: string): Map<number, string> {
   const map = new Map<number, string>();
@@ -105,14 +100,19 @@ export function normaliseSection(
  * section. Returns a new `Song`; does not mutate.
  */
 export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
+  const resolvedKeys = resolveSectionKeys(song);
   const sectionResults: { homeKey: string | null; section: Section }[] = song.sections.map(
-    (sec) => {
+    (sec, i) => {
       const chords = sec.rows.flatMap((row) =>
         row.bars.flatMap((bar) =>
           bar.cells.filter((s): s is ChordCell => s.type === 'chord').map((s) => s.chord),
         ),
       );
-      const { homeKey, chords: normalisedChords } = normaliseSection(chords, config, sec.key);
+      const { homeKey, chords: normalisedChords } = normaliseSection(
+        chords,
+        config,
+        resolvedKeys[i],
+      );
 
       let chordIndex = 0;
       const newRows: Row[] = sec.rows.map((row) => ({
@@ -138,15 +138,48 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     },
   );
 
-  const firstSectionKey = sectionResults[0]?.homeKey ?? song.key;
   const newSections = sectionResults.map((r) => r.section);
 
+  // ── Front-matter key + redundant section-key hoisting ──────────────────────
+  // Decision B: never override a declared key. Detect one only when `song.key` is
+  // absent. Hoist per-section keys to front matter (and strip them) only when every
+  // section carries an explicit key, they are all equal, and they don't conflict
+  // with an existing front-matter key.
+  const sectionKeys = song.sections.map((s) => s.key);
+  const everySectionKeyed = sectionKeys.length > 0 && sectionKeys.every((k) => k != null);
+  const allSectionKeysEqual = everySectionKeyed && new Set(sectionKeys).size === 1;
+  const section0Detected = toCanonicalKey(sectionResults[0]?.homeKey ?? null);
+
+  let finalKey: string | null;
+  let stripSectionKeys = false;
+
+  if (config?.forceKey) {
+    // `--key X` forces X everywhere; bypasses hoist/strip.
+    finalKey = section0Detected;
+  } else if (song.key != null) {
+    finalKey = toCanonicalKey(song.key);
+    if (allSectionKeysEqual && sectionKeys[0] === song.key) {
+      stripSectionKeys = true;
+    }
+  } else if (allSectionKeysEqual) {
+    // No front-matter key, every section agrees → promote to front matter.
+    finalKey = toCanonicalKey(sectionKeys[0]!);
+    stripSectionKeys = true;
+  } else {
+    finalKey = section0Detected;
+  }
+
+  // Compose the section-key strip with the meter block below.
+  const workingSections = stripSectionKeys
+    ? newSections.map((s) => ({ ...s, key: null }))
+    : newSections;
+
   // Collect all bars that carry an explicit time signature
-  const allBars = newSections.flatMap((s) => s.rows.flatMap((r) => r.bars));
+  const allBars = workingSections.flatMap((s) => s.rows.flatMap((r) => r.bars));
   const barsWithTS = allBars.filter((b) => b.timeSignature !== undefined);
 
   let newMeter: string | null = song.meter;
-  let finalSections = newSections;
+  let finalSections = workingSections;
 
   if (barsWithTS.length > 0) {
     const uniqueMeters = new Set(
@@ -156,7 +189,7 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
     if (uniqueMeters.size === 1) {
       // Uniform — hoist to front-matter, strip inline tokens from all bars
       newMeter = [...uniqueMeters][0];
-      finalSections = newSections.map((sec) => {
+      finalSections = workingSections.map((sec) => {
         const strippedRows = sec.rows.map((row) => ({
           ...row,
           bars: row.bars.map(({ timeSignature: _, ...rest }) => rest as Bar),
@@ -180,7 +213,7 @@ export function normaliseSong(song: Song, config?: DetectKeyConfig): Song {
 
   return {
     ...song,
-    key: toCanonicalKey(firstSectionKey),
+    key: finalKey,
     meter: newMeter,
     sections: finalSections,
   };

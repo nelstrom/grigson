@@ -266,6 +266,26 @@ describe('CLI validate subcommand', () => {
     expect(exitSpy).not.toHaveBeenCalled();
   });
 
+  it('exits with code 1 and prints a key-fit message for a wrong declared key', () => {
+    const tmpFile = path.join(os.tmpdir(), 'test-validate-wrongkey.chart');
+    fs.writeFileSync(
+      tmpFile,
+      '---\nkey: F# major\n---\n| C | F | G | C |\n| Am | Dm | G | C |\n',
+      'utf8',
+    );
+
+    const exitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    runCli(['validate', tmpFile]);
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    const output = logSpy.mock.calls.map((c) => c[0]).join('\n');
+    expect(output).toContain('F# major');
+    expect(output).toMatch(/does not fit|did you mean/);
+    fs.unlinkSync(tmpFile);
+  });
+
   it('exits with code 0 and prints [] for a valid file with --format json', () => {
     const tmpFile = path.join(os.tmpdir(), 'test-validate-json-valid.chart');
     fs.writeFileSync(tmpFile, '| C | F | G |\n', 'utf8');

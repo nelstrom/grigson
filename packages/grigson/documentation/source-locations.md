@@ -35,6 +35,10 @@ All node types carry `loc?: SourceRange`:
 
 The `Barline` and `TimeSignature` types do not carry a location — they are value objects embedded inside `Bar` and `Row`.
 
+### `keyLoc`
+
+`FrontMatter`, `Song`, and `Section` additionally carry an optional `keyLoc?: SourceRange` that points at the `key:` declaration itself (the whole `key: G major` line in front matter, or the `key: A minor` fragment of a `[Chorus] key: A minor` header). It is present only when a key was declared in the source, and is used by the validator to underline the exact line in a key-fit diagnostic. `Song.keyLoc` is copied from `FrontMatter.keyLoc`.
+
 ## Example
 
 ```ts

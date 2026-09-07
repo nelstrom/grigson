@@ -351,7 +351,7 @@ function peg$parse(input, options) {
   const peg$e57 = peg$classExpectation([' ', '\t'], false, false, false);
 
   function peg$f0(frontMatter, sections) {
-    return {
+    const song = {
       type: 'song',
       title: frontMatter?.title ?? null,
       key: frontMatter?.key ?? null,
@@ -359,11 +359,14 @@ function peg$parse(input, options) {
       sections,
       loc: makeLoc(location()),
     };
+    if (frontMatter?.keyLoc) song.keyLoc = frontMatter.keyLoc;
+    return song;
   }
   function peg$f1(items) {
     const sections = [];
     let pendingLabel = null;
     let pendingKey = null;
+    let pendingKeyLoc = null;
     let pendingPreamble = []; // comments before the current label
     let currentRows = [];
     let currentContent = [];
@@ -389,11 +392,13 @@ function peg$parse(input, options) {
             content: currentContent,
           };
           if (loc) sec.loc = loc;
+          if (pendingKeyLoc) sec.keyLoc = pendingKeyLoc;
           sections.push(sec);
           currentRows = [];
           currentContent = [];
           pendingPreamble = [];
           pendingKey = null;
+          pendingKeyLoc = null;
           labelSeen = false;
           sectionStartLoc = item.loc ?? null;
           lastItemLoc = item.loc ?? null;
@@ -403,6 +408,7 @@ function peg$parse(input, options) {
         }
         pendingLabel = item.label;
         pendingKey = item.key;
+        pendingKeyLoc = item.keyLoc ?? null;
         labelSeen = true;
       } else if (item.type === 'row') {
         if (item.loc) {
@@ -439,22 +445,25 @@ function peg$parse(input, options) {
       content: currentContent,
     };
     if (finalLoc) finalSec.loc = finalLoc;
+    if (pendingKeyLoc) finalSec.keyLoc = pendingKeyLoc;
     sections.push(finalSec);
     return sections;
   }
   function peg$f2(label, value) {
-    return value;
+    return { value, loc: makeLoc(location()) };
   }
   function peg$f3(label, key) {
-    if (key !== null && !isValidKey(key)) {
-      error(`Invalid key: "${key}".`);
+    if (key !== null && !isValidKey(key.value)) {
+      error(`Invalid key: "${key.value}".`);
     }
-    return {
+    const node = {
       type: 'sectionLabel',
       label: label.trim(),
-      key: key !== null ? normalizeKey(key) : null,
+      key: key !== null ? normalizeKey(key.value) : null,
       loc: makeLoc(location()),
     };
+    if (key !== null) node.keyLoc = key.loc;
+    return node;
   }
   function peg$f4(fields) {
     const meta = Object.fromEntries(fields.map((f) => [f.key, f.value]));
@@ -472,16 +481,20 @@ function peg$parse(input, options) {
       );
     }
 
-    return {
+    const keyField = fields.find((f) => f.key === 'key');
+
+    const fm = {
       type: 'frontMatter',
       title: meta.title ?? null,
       key: meta.key !== undefined ? normalizeKey(meta.key) : null,
       meter: meta.meter ?? null,
       loc: makeLoc(location()),
     };
+    if (keyField && keyField.loc) fm.keyLoc = keyField.loc;
+    return fm;
   }
   function peg$f5(key, value) {
-    return { key, value };
+    return { key, value, loc: makeLoc(location()) };
   }
   function peg$f6(value) {
     return value;

@@ -255,6 +255,24 @@ describe('chord parsing', () => {
       expect(fm).toMatchObject({ type: 'frontMatter', title: null, key: null, meter: null });
     });
 
+    it('records keyLoc on the front-matter `key:` line', () => {
+      const fm = parseFrontMatter('---\ntitle: "X"\nkey: G major\n---\n');
+      expect(fm.keyLoc).toBeDefined();
+      expect(fm.keyLoc!.start.line).toBe(2); // 0-based: `key:` is the third line
+      expect(fm.keyLoc!.start.character).toBe(0);
+    });
+
+    it('omits keyLoc when no key is declared', () => {
+      expect(parseFrontMatter('---\ntitle: "X"\n---\n').keyLoc).toBeUndefined();
+    });
+
+    it('threads front-matter keyLoc onto the Song node', () => {
+      const song = parseSong('---\nkey: G major\n---\n| G | C | D | G |\n');
+      expect(song.keyLoc).toBeDefined();
+      expect(song.keyLoc!.start.line).toBe(1);
+      expect(parseSong('| C | G |\n').keyLoc).toBeUndefined();
+    });
+
     it('rejects all 17 bare note names (shorthand is no longer valid)', () => {
       const bareNotes = [
         'C',

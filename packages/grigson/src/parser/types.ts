@@ -15,6 +15,8 @@ export interface FrontMatter {
   /** Raw meter string from front matter (e.g. `'4/4'`, `'mixed'`, or `null`). */
   meter: string | null;
   loc?: SourceRange;
+  /** Source range of the `key:` line, when a key was declared. Useful for diagnostics. */
+  keyLoc?: SourceRange;
 }
 
 /**
@@ -162,6 +164,8 @@ export interface Section {
   /** Rows and inline comments in document order (more useful for display than `rows` alone). */
   content?: SectionItem[];
   loc?: SourceRange;
+  /** Source range of the section header's `key:` annotation, when one was declared. */
+  keyLoc?: SourceRange;
 }
 
 /**
@@ -177,4 +181,6 @@ export interface Song {
   meter: string | null;
   sections: Section[];
   loc?: SourceRange;
+  /** Source range of the front-matter `key:` line, copied from `FrontMatter.keyLoc`. */
+  keyLoc?: SourceRange;
 }

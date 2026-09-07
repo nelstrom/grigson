@@ -842,3 +842,21 @@ Created a companion "sheet view" page at `/sheet/` optimised for chart consumpti
 - No `#code/` hash → redirect to URL with default chart encoded (always shareable)
 - Print stylesheet: footer hidden, `@page { size: A4; margin: 1.5cm; }`, `break-inside: avoid` via `::part()` for sections/rows
 - Dark mode via CSS custom properties (no hard-coded colours)
+
+## Declared-key handling: bugfix + sticky inheritance + validator + LSP autocomplete (2026-09-07)
+
+Fixed a bug where `normaliseSong` silently rewrote a correct front-matter key (e.g. "Only You" `key: Eb major` → `Ab major`). Two causes: `detectKey`'s declared-key branch did `scores.get(declaredKey)` with a canonical key against a short-key-keyed map (always undefined → discarded), and `normaliseSong` never passed `song.key` into detection.
+
+- **keyDetector.ts**: declared-key branch now `scores.get(resolveKey(declaredKey)) ?? 0`, returned verbatim (canonical in → canonical out); moved above the confidence guards so a declared/inherited key governs spelling for sparse sections (`detectKey([], declared)` still null). Added `rankKeys(chords, limit=3): RankedKey[]` for autocomplete. Exported `scoreAllKeys`.
+- **keys.ts**: `toCanonicalKey` moved here from normalise.ts (re-exported there).
+- **harmonicAnalysis.ts**: new `resolveSectionKeys(song)` — sticky inheritance (keyless section inherits previous section's *declared* header key; hints never propagate). `analyseSong`/`analyseSection` use it.
+- **normalise.ts**: `normaliseSong` uses `resolveSectionKeys` for per-section spelling; never overrides a declared `song.key`; detects only when absent; hoists redundant per-section keys to front matter (mirrors meter hoist); never invents a section `key:`.
+- **validator.ts**: new `keyFitChecks` — governed-region key-fit diagnostics. ratio `<0.5` error, `0.5–0.85` warning, `≥0.85` silent. Relative / parallel / same-tonic-modal pairs exempt. Underlines the `key:` line via new `keyLoc`.
+- **parser** (types.ts + grammar.pegjs + regenerated generated.js): additive optional `keyLoc?: SourceRange` on `FrontMatter`, `Song`, `Section`.
+- **completion.ts** (new): `keyCompletions(source, line, character)` — pure cursor-context + candidate logic for `key:` autocomplete.
+- **language-server**: `completionProvider` capability + `onCompletion` wired to `keyCompletions`.
+- Docs: new `documentation/keys.md`; updated key-detection.md, harmonic-analysis.md, validator.md, cli.md, source-locations.md, README files, website sections.md / front-matter.md / cli.md.
+
+Behaviour changes: `detectKey(chords, 'Eb major')` → `'Eb major'` (was `'Eb'`); a keyless section after a keyed section inherits the prior declared key for `homeKey`; `normalise` no longer corrects a wrong declared key (validator flags it); redundant per-section `key:` tokens are hoisted/stripped. Tests updated: normalise T5-b/T5-d.
+
+`pnpm build` / `pnpm test` (734 grigson) / `pnpm lint` / `pnpm format` all green. `grigson validate` over the example charts: only `syntax-test.chart` flags (a deliberately-chromatic highlighting fixture — true positive).

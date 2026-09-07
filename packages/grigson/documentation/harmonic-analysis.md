@@ -220,7 +220,10 @@ interface AnalysedSong {
 
 ### Key resolution in `analyseSong`
 
-- Each section uses `section.key ?? song.key ?? 'C major'` as its `homeKey`.
+> The full key model — front matter vs section `key:` vs tonality hints, `normalise` behaviour, and validator key-fit — lives in [keys.md](keys.md).
+
+- Each section's `homeKey` is its own `key:` header when present, otherwise the **sticky-inherited** key from `resolveSectionKeys(song)` — the previous section's declared header key, falling back to `song.key`, then `'C major'`. A keyless section after `[Chorus] key: Eb major` is analysed in Eb major, not in `song.key`.
+- `resolveSectionKeys(song): (string | null)[]` is exported for reuse. Tonality hints are **not** consulted by it — they are section-local and never propagate.
 - Inline tonality hints (`bar.tonalityHints`) split the chord stream into key regions. Each region is analysed independently with `analyseHarmony`.
 - A hint with `key: ''` (produced by `{}` or `{home}` in the source) resets the region key to the section home key.
 - Section boundaries are always an implicit reset — a tonality hint from one section never affects the next.
