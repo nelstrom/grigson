@@ -1,4 +1,11 @@
-import { KEYS, getKeyMode, getKeyRoot, getRelativeMajor } from './keys.js';
+import {
+  KEYS,
+  getKeyMode,
+  getKeyRoot,
+  getRelativeMajor,
+  resolveKey,
+  toCanonicalKey,
+} from './keys.js';
 import { rootToPitchClass } from './pitchClass.js';
 import type { Chord, Quality } from '../parser/types.js';
 
@@ -372,8 +379,9 @@ function breakDSharpEbTie(chords: Chord[]): string {
  *   .filter((s) => s.type === 'chord')
  *   .map((s) => s.chord);
  *
- * detectKey(chords);           // → 'Am'
- * detectKey(chords, 'A');      // → 'Am'  (declared key preserved when it scores above zero)
+ * detectKey(chords);              // → 'Am'
+ * detectKey(chords, 'A');         // → 'A'        (declared key preserved when it scores above zero)
+ * detectKey(chords, 'A minor');   // → 'A minor'  (canonical in → canonical out)
  * detectKey(chords, null, { fSharpOrGFlat: 'g-flat' }); // → 'Am'
  *
  * // When the progression is too sparse to identify a key:
@@ -407,19 +415,22 @@ export function detectKey(
     }
   }
 
+  // Preserve declaredKey if it has any diatonic overlap with the chords — returned verbatim
+  // (canonical in → canonical out). Only a zero-overlap declared key is discarded and falls
+  // through to detection. This runs before the confidence guards below so a declared or
+  // inherited key still governs spelling for a sparse section.
+  if (declaredKey != null) {
+    const declaredScore = scores.get(resolveKey(declaredKey)) ?? 0;
+    if (declaredScore > 0) {
+      return declaredKey;
+    }
+  }
+
   if (maxScore === 0 || bestKey === null) return null;
 
   // Require the best score to average at least 1.5 points per chord (diatonic + quality match).
   // A fully chromatic progression will not reach this bar even if 3/4 roots happen to be diatonic.
   if (maxScore < 1.5 * chords.length) return null;
-
-  // Preserve declaredKey if it has any diatonic overlap; only override if it scores zero
-  if (declaredKey != null) {
-    const declaredScore = scores.get(declaredKey) ?? 0;
-    if (declaredScore > 0) {
-      return declaredKey;
-    }
-  }
 
   // If the relative major/minor is within 1 point, apply explicit tiebreaking.
   // Only apply the harmonic-minor/relative-major tiebreaker for major and minor keys;
@@ -588,4 +599,51 @@ export function detectKey(
   }
 
   return bestKey;
+}
+
+/** A ranked key candidate produced by {@link rankKeys}. */
+export interface RankedKey {
+  /** Canonical key string, e.g. `'Eb major'`, `'C minor'`, `'D dorian'`. */
+  key: string;
+  /** Raw diatonic + quality score from {@link scoreAllKeys}. */
+  score: number;
+  /** `score / bestScore` — `1` for the top candidate, lower for the rest. */
+  ratio: number;
+}
+
+/**
+ * Rank the most plausible keys for a chord sequence, best first. The {@link detectKey}
+ * winner (with its tiebreak resolution) is forced to the front; remaining slots are filled
+ * by descending {@link scoreAllKeys} score. Returns `[]` when no key scores above zero.
+ *
+ * Intended for `key:` autocomplete — the `ratio` gives a cheap "fit" indicator.
+ */
+export function rankKeys(chords: Chord[], limit = 3): RankedKey[] {
+  const scores = scoreAllKeys(chords);
+  let bestScore = 0;
+  for (const s of scores.values()) if (s > bestScore) bestScore = s;
+  if (bestScore === 0) return [];
+
+  const winner = detectKey(chords);
+  const seen = new Set<string>();
+  const result: RankedKey[] = [];
+
+  const push = (shortKey: string): void => {
+    const canonical = toCanonicalKey(shortKey)!;
+    if (seen.has(canonical)) return;
+    seen.add(canonical);
+    const score = scores.get(shortKey) ?? 0;
+    result.push({ key: canonical, score, ratio: score / bestScore });
+  };
+
+  if (winner != null) push(resolveKey(winner));
+
+  for (const [key] of Array.from(scores.entries())
+    .filter(([, s]) => s > 0)
+    .sort((a, b) => b[1] - a[1])) {
+    if (result.length >= limit) break;
+    push(key);
+  }
+
+  return result.slice(0, limit);
 }

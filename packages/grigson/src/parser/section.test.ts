@@ -10,7 +10,7 @@ function withoutLoc(obj: unknown): unknown {
   if (obj && typeof obj === 'object') {
     const result: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj as object)) {
-      if (k !== 'loc') result[k] = withoutLoc(v);
+      if (k !== 'loc' && k !== 'keyLoc') result[k] = withoutLoc(v);
     }
     return result;
   }
@@ -113,6 +113,13 @@ describe('section key annotation', () => {
   it('label with no annotation → section.key === null', () => {
     const song = parseSong('[Verse]\n| C | G |\n');
     expect(song.sections[0].key).toBeNull();
+  });
+
+  it('records keyLoc on a section header that declares a key', () => {
+    const song = parseSong('[Verse]\n| C | G |\n[Chorus] key: A minor\n| Am | F |\n');
+    expect(song.sections[0].keyLoc).toBeUndefined();
+    expect(song.sections[1].keyLoc).toBeDefined();
+    expect(song.sections[1].keyLoc!.start.line).toBe(2); // 0-based line of the [Chorus] header
   });
 
   it('[Section] key: H → throws a parse error', () => {

@@ -37,11 +37,11 @@ key: Ab major
 
 Front matter is written in YAML. All fields are optional.
 
-| Field    | Type    | Description                                                                 |
-| -------- | ------- | --------------------------------------------------------------------------- |
-| `title`  | string  | Title of the song                                                           |
-| `artist` | string  | Composer or artist name                                                     |
-| `key`    | string  | Global key (see [Key Notation](/language/syntax/sections/))                 |
-| `meter`  | string  | Time signature; default 4/4 (see [Time Signatures](/language/syntax/bars/)) |
-| `tempo`  | integer | Tempo in BPM                                                                |
-| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"`                                        |
+| Field    | Type    | Description                                                                                                     |
+| -------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `title`  | string  | Title of the song                                                                                               |
+| `artist` | string  | Composer or artist name                                                                                         |
+| `key`    | string  | Global key; inherited by sections that don't declare their own (see [Key Notation](/language/syntax/sections/)) |
+| `meter`  | string  | Time signature; default 4/4 (see [Time Signatures](/language/syntax/bars/))                                     |
+| `tempo`  | integer | Tempo in BPM                                                                                                    |
+| `feel`   | string  | e.g. `"swing"`, `"latin"`, `"waltz"`                                                                            |

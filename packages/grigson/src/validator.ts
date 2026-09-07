@@ -1,5 +1,8 @@
 import { parseSong } from './parser/parser.js';
-import { Song, Bar, TimeSignature, DotCell } from './parser/types.js';
+import { Song, Section, Bar, Chord, ChordCell, TimeSignature, DotCell } from './parser/types.js';
+import { scoreAllKeys } from './theory/keyDetector.js';
+import { resolveKey, toCanonicalKey, getKeyRoot, getRelativeMajor } from './theory/keys.js';
+import { rootToPitchClass } from './theory/pitchClass.js';
 
 /**
  * LSP-compatible source range (0-based line/character). Mirrors the `Range` type from the
@@ -108,6 +111,130 @@ function semanticChecks(song: Song): Diagnostic[] {
   return diagnostics;
 }
 
+function collectSectionChords(section: Section): Chord[] {
+  return section.rows.flatMap((row) =>
+    row.bars.flatMap((bar) =>
+      bar.cells.filter((c): c is ChordCell => c.type === 'chord').map((c) => c.chord),
+    ),
+  );
+}
+
+const MODES = ['major', 'minor', 'dorian', 'aeolian', 'mixolydian'] as const;
+
+function keyInMode(tonic: string, mode: (typeof MODES)[number]): string {
+  if (mode === 'major') return tonic;
+  if (mode === 'minor') return tonic + 'm';
+  return `${tonic} ${mode}`;
+}
+
+/**
+ * `true` when a key-fit mismatch between `declared` and `best` is an unbreakable ambiguity
+ * that must never be flagged:
+ *
+ * - **Parallel** — same tonic pitch class, any mode (`C major` vs `C minor`).
+ * - **Relative / modal** — the declared *tonic*, read in any mode, shares an ionian parent
+ *   with `best`. This covers `A minor` vs `C major` (relative) and also `E minor` declared
+ *   for an E-dorian tune whose chords score best as `D major` — natural-minor vs dorian is
+ *   a reading choice, not a spelling error.
+ */
+function isRelativeOrParallel(declared: string, best: string): boolean {
+  try {
+    if (rootToPitchClass(getKeyRoot(declared)) === rootToPitchClass(getKeyRoot(best))) {
+      return true;
+    }
+  } catch {
+    /* unrecognised root — fall through to the relative check */
+  }
+
+  const bestParent = getRelativeMajor(best);
+  if (bestParent === undefined) return false;
+
+  const tonic = getKeyRoot(declared);
+  return MODES.some((mode) => getRelativeMajor(keyInMode(tonic, mode)) === bestParent);
+}
+
+interface GovernedRegion {
+  declared: string;
+  range: DiagnosticRange;
+  /** Inclusive section-index span this declared key governs. */
+  from: number;
+  to: number;
+}
+
+/**
+ * Check every *explicitly declared* key (front matter + section headers) against the chords
+ * it governs. Blank/inherited sections are never independently flagged.
+ *
+ * `ratio = declaredScore / bestScore` over the governed chords: `< 0.5` → error,
+ * `0.5–0.85` → warning, `≥ 0.85` → silent. Relative / parallel major-minor pairs are exempt.
+ */
+function keyFitChecks(song: Song): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const sections = song.sections;
+  const regions: GovernedRegion[] = [];
+
+  const spanEnd = (start: number): number => {
+    let end = start;
+    while (end + 1 < sections.length && sections[end + 1].key == null) end++;
+    return end;
+  };
+
+  // Front-matter region: only when the song declares a key and section 0 does not.
+  if (song.key != null && sections.length > 0 && sections[0].key == null) {
+    regions.push({
+      declared: song.key,
+      range: song.keyLoc ?? zeroRange(),
+      from: 0,
+      to: spanEnd(0),
+    });
+  }
+
+  // Section-header regions: each section that declares its own key.
+  for (let i = 0; i < sections.length; i++) {
+    if (sections[i].key == null) continue;
+    regions.push({
+      declared: sections[i].key!,
+      range: sections[i].keyLoc ?? zeroRange(),
+      from: i,
+      to: spanEnd(i),
+    });
+  }
+
+  for (const region of regions) {
+    const chords: Chord[] = [];
+    for (let i = region.from; i <= region.to; i++) {
+      chords.push(...collectSectionChords(sections[i]));
+    }
+    if (chords.length === 0) continue;
+
+    const scores = scoreAllKeys(chords);
+    let bestShort = '';
+    let bestScore = 0;
+    for (const [key, score] of scores) {
+      if (score > bestScore) {
+        bestScore = score;
+        bestShort = key;
+      }
+    }
+    if (bestScore === 0) continue;
+
+    const declaredScore = scores.get(resolveKey(region.declared)) ?? 0;
+    const ratio = declaredScore / bestScore;
+    if (ratio >= 0.85) continue;
+    if (isRelativeOrParallel(region.declared, bestShort)) continue;
+
+    const betterKey = toCanonicalKey(bestShort);
+    diagnostics.push({
+      range: region.range,
+      severity: ratio < 0.5 ? 'error' : 'warning',
+      message: `Declared key ${region.declared} does not fit the chords it governs; did you mean ${betterKey}?`,
+      source: 'grigson',
+    });
+  }
+
+  return diagnostics;
+}
+
 /**
  * Map a `.chart` source string to a list of structured diagnostics. Returns `[]` for valid
  * input. Does not depend on the LSP — usable in CLI tools, pre-commit hooks, and CI pipelines.
@@ -147,7 +274,7 @@ function semanticChecks(song: Song): Diagnostic[] {
 export function validate(source: string): Diagnostic[] {
   try {
     const song = parseSong(source);
-    return semanticChecks(song);
+    return [...semanticChecks(song), ...keyFitChecks(song)];
   } catch (e: unknown) {
     if (isPeggyError(e)) {
       const { start, end } = e.location;

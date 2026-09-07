@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { normaliseSong, normaliseSection } from './normalise.js';
+import { parseSong } from '../parser/parser.js';
+import { TextRenderer } from '../renderers/text.js';
 import type { Song, Chord, Bar, Row, Section, ChordCell } from '../parser/types.js';
 
 function ch(root: string, quality: Chord['quality'] = 'major'): Chord {
@@ -196,6 +198,9 @@ describe('normaliseSong — Category 8: borrowed chords and secondary dominants'
 });
 
 describe('normaliseSong — Category 5: front matter key field read and write', () => {
+  // Decision B: a declared `song.key` is never overridden by normalise — it is preserved
+  // verbatim and the validator flags a poor fit instead. Detection only fills in an
+  // *absent* key. (T5-b / T5-d assert the declared key survives an apparent mismatch.)
   it('T5-a: correct key: F preserved; no chord changes', () => {
     const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'F');
     const result = normaliseSong(s);
@@ -204,22 +209,22 @@ describe('normaliseSong — Category 5: front matter key field read and write', 
     expect(chordOf(result.sections[0].rows[0].bars[1]).root).toBe('Bb');
   });
 
-  it('T5-b: wrong key: G corrected to F', () => {
+  it('T5-b: declared key: G preserved even though the chords fit F major', () => {
     const s = song([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'G');
-    const result = normaliseSong(s);
-    expect(result.key).toBe('F major');
-  });
-
-  it('T5-c: no key in front matter; key: G added', () => {
-    const s = song([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))]);
     const result = normaliseSong(s);
     expect(result.key).toBe('G major');
   });
 
-  it('T5-d: wrong key: C corrected to F (Bb and Gm not diatonic to C)', () => {
+  it('T5-c: no key in front matter; key: G added', () => {
+    const s = song([row(ch('G'), ch('D'), ch('E', 'minor'), ch('C'))]);
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G major');
+  });
+
+  it('T5-d: declared key: C preserved (not corrected to F)', () => {
     const s = song([row(ch('Bb'), ch('F'), ch('C'), ch('Gm', 'minor'))], 'C');
     const result = normaliseSong(s);
-    expect(result.key).toBe('F major');
+    expect(result.key).toBe('C major');
   });
 });
 
@@ -367,7 +372,7 @@ describe('normaliseSong — per-section key detection', () => {
   });
 
   it('front-matter key is set to home key of first section', () => {
-    const verse = section([row(ch('G'), ch('D'), ch('Em', 'minor'), ch('C'))], 'Verse');
+    const verse = section([row(ch('G'), ch('D'), ch('E', 'minor'), ch('C'))], 'Verse');
     const chorus = section([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'Chorus');
     const s: Song = {
       type: 'song',
@@ -507,6 +512,85 @@ describe('normaliseSong — bar timeSignature stripping', () => {
       numerator: 4,
       denominator: 4,
     });
+  });
+});
+
+describe('normaliseSong — sticky key inheritance and redundant-key hoisting', () => {
+  function keyedSection(rows: Row[], key: string, label: string): Section {
+    return { type: 'section', label, key, rows };
+  }
+
+  it('a keyless section inherits the previous section’s declared key for spelling', () => {
+    // [A] key: Eb major → Eb chords; [B] (no key) has D#/A# which must be respelled Eb/Bb
+    const a = keyedSection(
+      [row(ch('Eb'), ch('Ab'), ch('Bb', 'dominant7'), ch('Eb'))],
+      'Eb major',
+      'A',
+    );
+    const b = section([row(ch('D#'), ch('A#'), ch('F'), ch('D#'))], 'B');
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [a, b] };
+    const result = normaliseSong(s);
+    const bBars = result.sections[1].rows[0].bars;
+    expect(chordOf(bBars[0]).root).toBe('Eb'); // D# → Eb (inherited Eb major)
+    expect(chordOf(bBars[1]).root).toBe('Bb'); // A# → Bb
+    // The inherited section gains no key: of its own
+    expect(result.sections[1].key ?? null).toBeNull();
+  });
+
+  it('hoists a per-section key to front matter when every section agrees', () => {
+    const a = keyedSection([row(ch('G'), ch('C'), ch('D'), ch('G'))], 'G major', 'A');
+    const b = keyedSection([row(ch('E', 'minor'), ch('C'), ch('G'), ch('D'))], 'G major', 'B');
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [a, b] };
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G major');
+    expect(result.sections[0].key ?? null).toBeNull();
+    expect(result.sections[1].key ?? null).toBeNull();
+  });
+
+  it('does not hoist when the section keys conflict', () => {
+    const a = keyedSection([row(ch('G'), ch('C'), ch('D'), ch('G'))], 'G major', 'A');
+    const b = keyedSection([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'F major', 'B');
+    const s: Song = { type: 'song', title: null, key: null, meter: null, sections: [a, b] };
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G major'); // section-0 detection
+    expect(result.sections[0].key).toBe('G major');
+    expect(result.sections[1].key).toBe('F major');
+  });
+
+  it('strips section keys that are redundant with the front-matter key', () => {
+    const a = keyedSection([row(ch('C'), ch('F'), ch('G'), ch('C'))], 'C major', 'A');
+    const b = keyedSection([row(ch('A', 'minor'), ch('F'), ch('C'), ch('G'))], 'C major', 'B');
+    const s: Song = { type: 'song', title: null, key: 'C major', meter: null, sections: [a, b] };
+    const result = normaliseSong(s);
+    expect(result.key).toBe('C major');
+    expect(result.sections[0].key ?? null).toBeNull();
+    expect(result.sections[1].key ?? null).toBeNull();
+  });
+
+  it('keeps section keys that disagree with the front-matter key', () => {
+    const a = keyedSection([row(ch('C'), ch('F'), ch('G'), ch('C'))], 'C major', 'A');
+    const b = keyedSection([row(ch('C'), ch('F'), ch('G'), ch('C'))], 'C major', 'B');
+    const s: Song = { type: 'song', title: null, key: 'G major', meter: null, sections: [a, b] };
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G major');
+    expect(result.sections[0].key).toBe('C major');
+    expect(result.sections[1].key).toBe('C major');
+  });
+
+  it('first section keyless with a front-matter key: front matter is preserved', () => {
+    const a = section([row(ch('F'), ch('Bb'), ch('C'), ch('F'))], 'A');
+    const s: Song = { type: 'song', title: null, key: 'G major', meter: null, sections: [a] };
+    const result = normaliseSong(s);
+    expect(result.key).toBe('G major');
+  });
+
+  it('round-trips through the parser without inventing a section key:', () => {
+    const source =
+      '---\nkey: C major\n---\n\n[Verse]\n| C | Am | Dm | G7 |\n\n[Chorus] key: Eb major\n| Eb | Cm | Ab | Bb7 |\n\n[Outro]\n| Ab | Bb7 | Eb | Eb |\n';
+    const rendered = new TextRenderer().render(normaliseSong(parseSong(source)));
+    expect(rendered).toContain('key: C major');
+    expect(rendered).toContain('[Chorus] key: Eb major');
+    expect(rendered).toMatch(/\[Outro\]\n/); // no key: on the inherited section
   });
 });
 

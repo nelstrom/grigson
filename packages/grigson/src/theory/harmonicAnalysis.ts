@@ -601,8 +601,35 @@ export function analyseHarmony(chords: Chord[], homeKey: string): AnnotatedChord
   return result;
 }
 
-function analyseSection(section: Section, songKey: string): AnalysedSection {
-  const homeKey = section.key ?? songKey;
+/**
+ * Resolve the effective declared key for every section, applying **sticky inheritance**:
+ * a section with no `key:` header inherits the previous section's *declared* header key
+ * (`section.key`). The first section falls back to `song.key`, then `null`.
+ *
+ * Tonality hints (`{A major}`, `{home}`) are deliberately ignored here — they are
+ * section-local and never propagate. This is a shared helper rather than a parse-time
+ * mutation so downstream code can still tell "declared in source" from "inherited".
+ *
+ * Returns an array parallel to `song.sections`; each entry is a canonical key string
+ * or `null`.
+ */
+export function resolveSectionKeys(song: Song): (string | null)[] {
+  const resolved: (string | null)[] = [];
+  for (let i = 0; i < song.sections.length; i++) {
+    const declared = song.sections[i].key;
+    if (declared != null) {
+      resolved.push(declared);
+    } else if (i === 0) {
+      resolved.push(song.key ?? null);
+    } else {
+      resolved.push(resolved[i - 1]);
+    }
+  }
+  return resolved;
+}
+
+function analyseSection(section: Section, resolvedKey: string): AnalysedSection {
+  const homeKey = section.key ?? resolvedKey;
 
   // Collect all chords and tonality hints from the section in order,
   // split into key regions by tonality hints.
@@ -724,12 +751,14 @@ function analyseSection(section: Section, songKey: string): AnalysedSection {
 }
 
 /**
- * Apply `analyseHarmony` to every section of a song, using each section's own key as the home
- * key. Returns a new `AnalysedSong`; does not mutate.
+ * Apply `analyseHarmony` to every section of a song. Each section's home key is its own
+ * `key:` header when present, otherwise the sticky-inherited key from `resolveSectionKeys`
+ * (previous section's declared key, then `song.key`, then `C major`). Returns a new
+ * `AnalysedSong`; does not mutate.
  */
 export function analyseSong(song: Song): AnalysedSong {
-  const songKey = song.key ?? 'C major';
-  const sections = song.sections.map((sec) => analyseSection(sec, songKey));
+  const resolved = resolveSectionKeys(song);
+  const sections = song.sections.map((sec, i) => analyseSection(sec, resolved[i] ?? 'C major'));
   return {
     type: 'song',
     title: song.title,

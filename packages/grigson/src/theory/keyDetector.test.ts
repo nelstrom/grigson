@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectKey, type DetectKeyConfig } from './keyDetector.js';
+import { detectKey, rankKeys, type DetectKeyConfig } from './keyDetector.js';
 import type { Chord } from '../parser/types.js';
 
 function maj(root: string): Chord {
@@ -287,6 +287,60 @@ describe('detectKey — mixolydian mode', () => {
   it('A-G-D → A mixolydian (first chord major tonic A)', () => {
     // A mixolydian: I=A, bVII=G, IV=D — all match; D major also scores well but first chord A wins
     expect(detectKey([maj('A'), maj('G'), maj('D')])).toBe('A mixolydian');
+  });
+});
+
+describe('detectKey — canonical declared-key preservation (regression)', () => {
+  it("'Eb major' declared over an Eb-major progression → returned verbatim (was silently re-detected)", () => {
+    // Regression: `scores` is keyed by the short KEYS form ('Eb'); a canonical declared key
+    // must be resolved before the lookup or it reads as zero-overlap and gets discarded.
+    expect(detectKey([maj('Eb'), maj('Ab'), dom7('Bb'), maj('Eb')], 'Eb major')).toBe('Eb major');
+  });
+
+  it("'A minor' declared is preserved (canonical in → canonical out)", () => {
+    expect(detectKey([min('A'), maj('F'), maj('C'), min('A')], 'A minor')).toBe('A minor');
+  });
+
+  it('a zero-overlap declared key is still overridden', () => {
+    // F# major shares no pitch class with G D Em C — declared key scores 0 and is discarded.
+    const result = detectKey([maj('G'), maj('D'), min('E'), maj('C')], 'F# major');
+    expect(result).not.toBe('F# major');
+    expect(result).toBe('G');
+  });
+
+  it('a sparse section is governed by the declared key even below the confidence threshold', () => {
+    // Two chords, one non-diatonic: max score never clears 1.5×n, so bare detection returns
+    // null — but the declared key scores > 0, so it wins (block reordered above the guards).
+    expect(detectKey([maj('C'), maj('Eb')], 'C major')).toBe('C major');
+    // ...and detectKey([], declared) still returns null (declaredScore is 0).
+    expect(detectKey([], 'C major')).toBeNull();
+  });
+});
+
+describe('rankKeys', () => {
+  it('returns [] for an empty chord list', () => {
+    expect(rankKeys([])).toEqual([]);
+  });
+
+  it('produces canonical keys, best first, with the detectKey winner at the front', () => {
+    const ranked = rankKeys([maj('C'), maj('F'), maj('G'), maj('C')]);
+    expect(ranked.length).toBeGreaterThan(0);
+    expect(ranked.length).toBeLessThanOrEqual(3);
+    expect(ranked[0].key).toBe('C major');
+    expect(ranked[0].ratio).toBe(1);
+    for (const r of ranked) {
+      expect(r.key).toContain(' '); // canonical form
+      expect(r.ratio).toBeLessThanOrEqual(1);
+      expect(r.ratio).toBeGreaterThan(0);
+    }
+    // scores are non-increasing
+    for (let i = 1; i < ranked.length; i++) {
+      expect(ranked[i].score).toBeLessThanOrEqual(ranked[i - 1].score);
+    }
+  });
+
+  it('honours the limit argument', () => {
+    expect(rankKeys([maj('C'), maj('F'), maj('G'), maj('C')], 1)).toHaveLength(1);
   });
 });
 

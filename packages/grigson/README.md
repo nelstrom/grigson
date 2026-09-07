@@ -54,7 +54,8 @@ const diagnostics = validate(source);
 - [Format reference](documentation/README.md) — the `.chart` file format
 - [CLI reference](documentation/cli.md) — subcommands and options
 - [Renderer](documentation/renderer.md) — TextRenderer, HtmlRenderer, configuration
-- [Key detection](documentation/key-detection.md) — how `detectKey` works
+- [Keys](documentation/keys.md) — the key model: front matter, section `key:`, tonality hints, inheritance, normalise & validator behaviour
+- [Key detection](documentation/key-detection.md) — how `detectKey`, `scoreAllKeys`, and `rankKeys` work
 - [Harmonic analysis](documentation/harmonic-analysis.md) — 2-5-1 and borrowed chord detection
 - [Transposition](documentation/transpose.md) — `transposeSong`, `transposeSongToKey`
 - [Source locations](documentation/source-locations.md) — `SourceRange` and `loc` on AST nodes

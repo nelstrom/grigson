@@ -41,7 +41,8 @@ export type { DetectKeyConfig } from './theory/keyDetector.js';
 export { transposeSong, transposeSongToKey, transposeSection } from './theory/transpose.js';
 
 // Theory utilities
-export { detectKey } from './theory/keyDetector.js';
+export { detectKey, scoreAllKeys, rankKeys } from './theory/keyDetector.js';
+export type { RankedKey } from './theory/keyDetector.js';
 export {
   diatonicNotes,
   getKeyMode,
@@ -49,10 +50,20 @@ export {
   getSiblingModes,
   getRelativeMajor,
   resolveKey,
+  toCanonicalKey,
 } from './theory/keys.js';
 export type { KeyMode, ScaleFamily } from './theory/keys.js';
 export { rootToPitchClass, ENHARMONIC_PAIRS } from './theory/pitchClass.js';
-export { analyseHarmony, circleOfFifthsDistance, analyseSong } from './theory/harmonicAnalysis.js';
+export {
+  analyseHarmony,
+  circleOfFifthsDistance,
+  analyseSong,
+  resolveSectionKeys,
+} from './theory/harmonicAnalysis.js';
+
+// Key-completion helper (LSP autocomplete)
+export { keyCompletions } from './completion.js';
+export type { KeyCompletionResult } from './completion.js';
 export type {
   AnnotatedChord,
   AnnotatedChordCell,

@@ -33,6 +33,10 @@ Diagnostics include:
 
 The server advertises `documentFormattingProvider` and handles `textDocument/formatting` requests. On a format request it runs `parseSong` → `normaliseSong` → `TextRenderer.render` and returns a single `TextEdit` replacing the entire document with the normalised output. If the file cannot be parsed, or if the normalised output is identical to the current content, the server returns an empty edit list (no change).
 
+### Completion
+
+The server advertises `completionProvider` (trigger characters `:` and space). When the cursor is on a `key:` line — either the front-matter `key:` or a `[Section] key:` header — it calls `keyCompletions()` from the `grigson` package and offers the top ~3 keys detected from the chords that key would govern, best first. Each item's `detail` shows the fit as a percentage; `sortText` preserves the ranked order. Completion is resolve-free (`resolveProvider: false`). Elsewhere in the document it returns nothing.
+
 ## Editor setup
 
 ### VS Code

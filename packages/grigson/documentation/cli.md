@@ -120,13 +120,21 @@ grigson generate-renderer my-renderer --output ~/projects
 
 ### `grigson normalise`
 
-Detects the key of a chart and rewrites chord roots to their canonical enharmonic spelling for that key (e.g. `A#` → `Bb` in F major). Updates the `key` field in front matter to match.
+Rewrites chord roots to their canonical enharmonic spelling for the governing key (e.g. `A#` → `Bb` in F major), regularises whitespace, and tidies front matter.
 
 ```
 grigson normalise [options] [file]
 ```
 
 Reads from `file` if given, otherwise from stdin. Writes to stdout.
+
+**Key handling**
+
+- A key declared in front matter (`key: Eb major`) is **preserved verbatim** — `normalise` never "corrects" it. If the chords don't fit, `grigson validate` flags it instead. See [keys.md](keys.md).
+- When front matter has **no** `key:`, one is detected from the first section's chords and inserted.
+- A section with no `key:` header inherits the previous section's declared key for the purpose of chord spelling, but no `key:` token is written to it.
+- **Redundant section keys are hoisted**: if every section declares an explicit `key:` and they are all equal (and don't conflict with a front-matter key), the value is promoted to front matter and the per-section tokens are removed — mirroring the uniform-meter hoist.
+- `--key <key>` still forces one key across the whole chart, bypassing all of the above.
 
 **Options**
 
